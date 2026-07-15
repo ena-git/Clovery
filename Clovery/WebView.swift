@@ -1,10 +1,11 @@
 import SwiftUI
 import WebKit
 import UIKit
+import Combine
 import UserNotifications
 import StoreKit
-import Photos
 import WidgetKit
+import OSLog
 
 struct WebView: UIViewRepresentable {
 
@@ -13,6 +14,31 @@ struct WebView: UIViewRepresentable {
 
         // Weak ref so we can push iCloud data into the running WebView
         weak var webView: WKWebView?
+        private var boardEntitlementCancellable: AnyCancellable?
+        private lazy var boardEntitlementReporter = BoardEntitlementReporter(
+            currentEntitlement: { BoardStore.shared.isUnlocked },
+            reportUnlock: { [weak self] unlocked in
+                self?.webView?.evaluateJavaScript(
+                    BridgeJavaScript.boardUnlockStatus(unlocked),
+                    completionHandler: nil
+                )
+            }
+        )
+        private let photoLogger = Logger(
+            subsystem: Bundle.main.bundleIdentifier ?? "com.clovery.app",
+            category: "Photos"
+        )
+        private let photoStore: PhotoStoring
+        private let imageExporter: ImageExporting
+
+        init(
+            photoStore: PhotoStoring = PhotoStore(),
+            imageExporter: ImageExporting = ImageExportService()
+        ) {
+            self.photoStore = photoStore
+            self.imageExporter = imageExporter
+            super.init()
+        }
 
         // MARK: Screenshot protection (UITextField isSecureTextEntry trick)
         private var screenshotProtectionField: UITextField?
@@ -78,48 +104,73 @@ struct WebView: UIViewRepresentable {
                 guard let body = message.body as? [String: Any],
                       let action = body["action"] as? String,
                       let dataURL = body["dataURL"] as? String else { return }
-                DispatchQueue.main.async { self.handleShareImage(action: action, dataURL: dataURL) }
+                imageExporter.handle(action: action, dataURL: dataURL) { [weak self] outcome in
+                    self?.reportPhotoSave(outcome)
+                }
+            } else if message.name == "openAppSettings" {
+                handleOpenAppSettings()
             } else if message.name == "checkBoardUnlocked" {
                 Task { @MainActor in
                     await BoardStore.shared.refresh()
-                    let unlocked = BoardStore.shared.isUnlocked
-                    self.webView?.evaluateJavaScript(
-                        "window._boardUnlockStatus?.(\\(unlocked ? \"true\" : \"false\"))",
-                        completionHandler: nil
+                    self.boardEntitlementReporter.reportObservedEntitlement(
+                        BoardStore.shared.isUnlocked
                     )
                 }
             } else if message.name == "purchaseBoard" {
                 Task { @MainActor in
                     let outcome = await BoardStore.shared.purchase()
-                    self.webView?.evaluateJavaScript(
-                        "window._boardPurchaseResult?.('\\(outcome.rawValue)')",
-                        completionHandler: nil
+                    _ = try? await self.webView?.evaluateJavaScript(
+                        BridgeJavaScript.boardPurchaseResult(outcome)
                     )
                 }
             } else if message.name == "fetchBoardPrice" {
                 Task { @MainActor in
                     let price = await BoardStore.shared.fetchDisplayPrice() ?? ""
-                    let escaped = price.replacingOccurrences(of: "'", with: "\\'")
-                    self.webView?.evaluateJavaScript(
-                        "window._boardPriceResult?.('\\(escaped)')",
-                        completionHandler: nil
+                    _ = try? await self.webView?.evaluateJavaScript(
+                        BridgeJavaScript.boardPriceResult(price)
                     )
                 }
             } else if message.name == "restorePurchases" {
                 Task { @MainActor in
-                    await BoardStore.shared.restore()
-                    let unlocked = BoardStore.shared.isUnlocked
-                    self.webView?.evaluateJavaScript(
-                        "window._boardUnlockStatus?.(\\(unlocked ? \"true\" : \"false\"))",
-                        completionHandler: nil
+                    await self.boardEntitlementReporter.reportRestore(
+                        performRestore: { await BoardStore.shared.restore() },
+                        reportOutcome: { outcome in
+                            _ = try await self.webView?.evaluateJavaScript(
+                                BridgeJavaScript.boardRestoreResult(outcome)
+                            )
+                        }
                     )
                 }
+            } else if message.name == "photoSave" {
+                guard let body = message.body as? [String: Any],
+                      let filename = body["filename"] as? String,
+                      let dataURL = body["dataURL"] as? String else { return }
+                savePhoto(filename: filename, dataURL: dataURL)
+            } else if message.name == "photoLoad" {
+                guard let body = message.body as? [String: Any],
+                      let reqId = body["reqId"] as? String,
+                      let filename = body["filename"] as? String else { return }
+                loadPhoto(reqId: reqId, filename: filename)
             } else if message.name == "photoGC" {
                 guard let body = message.body as? [String: Any],
                       let keep = body["keep"] as? [String] else { return }
                 DispatchQueue.global(qos: .background).async {
-                    self.garbageCollectPhotos(keep: Set(keep))
+                    do {
+                        try self.photoStore.garbageCollect(keeping: Set(keep))
+                    } catch {
+                        self.photoLogger.error(
+                            "Photo garbage collection failed: \(error.localizedDescription, privacy: .public)"
+                        )
+                    }
                 }
+            } else if message.name == "migrationExport" {
+                guard let body = message.body as? [String: Any],
+                      let entriesJSON = body["entries"] as? String else { return }
+                let deletedIDsJSON = body["deletedIDs"] as? String ?? "[]"
+                handleMigrationExport(
+                    entriesJSON: entriesJSON,
+                    deletedIDsJSON: deletedIDsJSON
+                )
             } else if message.name == "boardProtect" {
                 let protect = message.body as? Bool ?? false
                 DispatchQueue.main.async {
@@ -265,45 +316,28 @@ struct WebView: UIViewRepresentable {
             }
         }
 
-        // MARK: Share Image
-        private func handleShareImage(action: String, dataURL: String) {
-            let prefix = "data:image/png;base64,"
-            guard dataURL.hasPrefix(prefix),
-                  let imageData = Data(base64Encoded: String(dataURL.dropFirst(prefix.count))),
-                  let image = UIImage(data: imageData) else { return }
-
-            switch action {
-            case "save":
-                PHPhotoLibrary.requestAuthorization(for: .addOnly) { status in
-                    guard status == .authorized || status == .limited else { return }
-                    DispatchQueue.main.async {
-                        UIImageWriteToSavedPhotosAlbum(image, nil, nil, nil)
-                        // Notify JS so UI can show confirmation
-                        self.webView?.evaluateJavaScript(
-                            "if(window.__clovery_imageSaved)window.__clovery_imageSaved();",
-                            completionHandler: nil
-                        )
-                    }
-                }
-            case "share":
-                // Write to a temp PNG file so WeChat (and other apps) can receive it correctly.
-                // Passing UIImage directly causes "发送异常" in WeChat's share extension.
-                let tempURL: URL = {
-                    let name = "clovery_\\(Int(Date().timeIntervalSince1970)).png"
-                    let url = FileManager.default.temporaryDirectory.appendingPathComponent(name)
-                    try? image.pngData()?.write(to: url)
-                    return url
-                }()
-                let vc = UIActivityViewController(activityItems: [tempURL], applicationActivities: nil)
-                if let rootVC = UIApplication.shared.connectedScenes
-                    .compactMap({ $0 as? UIWindowScene })
-                    .flatMap({ $0.windows })
-                    .first(where: { $0.isKeyWindow })?.rootViewController {
-                    vc.popoverPresentationController?.sourceView = rootVC.view
-                    rootVC.present(vc, animated: true)
-                }
-            default: break
+        private func reportPhotoSave(_ outcome: PhotoSaveOutcome) {
+            DispatchQueue.main.async { [weak self] in
+                self?.webView?.evaluateJavaScript(
+                    BridgeJavaScript.photoSaveResult(outcome),
+                    completionHandler: nil
+                )
             }
+        }
+
+        func handleOpenAppSettings() {
+            imageExporter.openSettings()
+        }
+
+        @MainActor
+        func startObservingBoardStore() {
+            guard boardEntitlementCancellable == nil else { return }
+            boardEntitlementCancellable = BoardStore.shared.$isUnlocked
+                .removeDuplicates()
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] unlocked in
+                    self?.boardEntitlementReporter.reportObservedEntitlement(unlocked)
+                }
         }
 
         // MARK: iCloud Key-Value Sync
@@ -352,31 +386,123 @@ struct WebView: UIViewRepresentable {
             return photosDir
         }
 
-        private func stripDataURLPrefix(_ dataURL: String) -> String {
-            guard let commaIdx = dataURL.firstIndex(of: ",") else { return dataURL }
-            return String(dataURL[dataURL.index(after: commaIdx)...])
+        private func savePhoto(filename: String, dataURL: String) {
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                guard let self else { return }
+                do {
+                    try photoStore.save(filename: filename, dataURL: dataURL)
+                    evaluatePhotoJavaScript(BridgeJavaScript.photoSaved(filename: filename))
+                } catch {
+                    let code = (error as? PhotoStoreError)?.code ?? "ioError"
+                    photoLogger.error(
+                        "Photo save failed for \(filename, privacy: .public): \(error.localizedDescription, privacy: .public)"
+                    )
+                    evaluatePhotoJavaScript(
+                        BridgeJavaScript.photoSaveFailed(filename: filename, code: code)
+                    )
+                }
+            }
         }
 
-        private func savePhotoFile(filename: String, dataURL: String) {
-            guard let photosDir = photosDirectory() else { return }
-            let base64 = stripDataURLPrefix(dataURL)
-            guard let data = Data(base64Encoded: base64) else { return }
-            let fileURL = photosDir.appendingPathComponent(filename)
-            try? data.write(to: fileURL, options: .atomic)
+        private func loadPhoto(reqId: String, filename: String) {
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                guard let self else { return }
+                let base64: String?
+                do {
+                    base64 = try photoStore.load(filename: filename)
+                } catch {
+                    base64 = nil
+                    photoLogger.error(
+                        "Photo load failed for \(filename, privacy: .public): \(error.localizedDescription, privacy: .public)"
+                    )
+                }
+
+                evaluatePhotoJavaScript(
+                    BridgeJavaScript.photoLoaded(reqId: reqId, base64: base64)
+                )
+            }
         }
 
-        private func loadPhotoFile(filename: String) -> String? {
-            guard let photosDir = photosDirectory() else { return nil }
-            let fileURL = photosDir.appendingPathComponent(filename)
-            guard let data = try? Data(contentsOf: fileURL) else { return nil }
-            return data.base64EncodedString()
+        private func evaluatePhotoJavaScript(_ script: String) {
+            DispatchQueue.main.async { [weak self] in
+                self?.webView?.evaluateJavaScript(script, completionHandler: nil)
+            }
         }
 
-        private func garbageCollectPhotos(keep: Set<String>) {
-            guard let photosDir = photosDirectory() else { return }
-            guard let files = try? FileManager.default.contentsOfDirectory(atPath: photosDir.path) else { return }
-            for file in files where !keep.contains(file) {
-                try? FileManager.default.removeItem(at: photosDir.appendingPathComponent(file))
+        private func handleMigrationExport(entriesJSON: String, deletedIDsJSON: String) {
+            DispatchQueue.global(qos: .userInitiated).async { [weak self] in
+                guard let self else { return }
+                do {
+                    let result = try MigrationBundleExporter().export(
+                        entriesJSON: entriesJSON,
+                        deletedIDsJSON: deletedIDsJSON
+                    )
+                    DispatchQueue.main.async {
+                        self.webView?.evaluateJavaScript(
+                            BridgeJavaScript.migrationExportResult(
+                                status: "success",
+                                entryCount: result.entryCount,
+                                photoCount: result.photoCount
+                            ),
+                            completionHandler: nil
+                        )
+                        self.presentMigrationArchive(result.archiveURL)
+                    }
+                } catch {
+                    let errorCode = self.migrationExportErrorCode(error)
+                    DispatchQueue.main.async {
+                        self.webView?.evaluateJavaScript(
+                            BridgeJavaScript.migrationExportResult(
+                                status: "failed",
+                                errorCode: errorCode
+                            ),
+                            completionHandler: nil
+                        )
+                    }
+                }
+            }
+        }
+
+        @MainActor
+        private func presentMigrationArchive(_ archiveURL: URL) {
+            guard let rootViewController = UIApplication.shared.connectedScenes
+                .compactMap({ $0 as? UIWindowScene })
+                .flatMap({ $0.windows })
+                .first(where: { $0.isKeyWindow })?
+                .rootViewController else {
+                webView?.evaluateJavaScript(
+                    BridgeJavaScript.migrationExportResult(
+                        status: "failed",
+                        errorCode: "shareUnavailable"
+                    ),
+                    completionHandler: nil
+                )
+                return
+            }
+
+            let activityController = UIActivityViewController(
+                activityItems: [archiveURL],
+                applicationActivities: nil
+            )
+            activityController.popoverPresentationController?.sourceView = rootViewController.view
+            rootViewController.present(activityController, animated: true)
+        }
+
+        private func migrationExportErrorCode(_ error: Error) -> String {
+            switch error {
+            case MigrationBundleError.invalidEntriesJSON:
+                "invalidEntries"
+            case MigrationBundleError.invalidDeletedIDsJSON:
+                "invalidDeletedIDs"
+            case MigrationBundleError.invalidPhotoFilename:
+                "invalidPhotoFilename"
+            case MigrationBundleError.missingPhoto:
+                "missingPhoto"
+            case MigrationBundleError.photoHashMismatch,
+                 MigrationBundleError.photoSizeMismatch:
+                "photoVerificationFailed"
+            default:
+                "exportFailed"
             }
         }
 
@@ -543,21 +669,8 @@ struct WebView: UIViewRepresentable {
                 dataObj["clovery_name"] = name
             }
 
-            guard let jsonData = try? JSONSerialization.data(withJSONObject: dataObj),
-                  let jsonStr = String(data: jsonData, encoding: .utf8) else { return }
-
-            let js = """
-            (function(){
-              try {
-                var d = \(jsonStr);
-                if (window.__clovery_applyICloud) {
-                  window.__clovery_applyICloud(d);
-                } else {
-                  localStorage.setItem('clovery_icloud_pending', JSON.stringify(d));
-                }
-              } catch(e) { console.warn('iCloud inject:', e); }
-            })();
-            """
+            let js = BridgeJavaScript.iCloudData(dataObj)
+            guard !js.isEmpty else { return }
             DispatchQueue.main.async {
                 webView.evaluateJavaScript(js, completionHandler: nil)
             }
@@ -574,20 +687,8 @@ struct WebView: UIViewRepresentable {
                       let entriesData = try? JSONSerialization.data(withJSONObject: entries),
                       let entriesStr = String(data: entriesData, encoding: .utf8) else { return }
                 let dataObj: [String: Any] = ["entries": entriesStr]
-                guard let jsonData = try? JSONSerialization.data(withJSONObject: dataObj),
-                      let jsonStr = String(data: jsonData, encoding: .utf8) else { return }
-                let js = """
-                (function(){
-                  try {
-                    var d = \(jsonStr);
-                    if (window.__clovery_applyICloud) {
-                      window.__clovery_applyICloud(d);
-                    } else {
-                      localStorage.setItem('clovery_icloud_pending', JSON.stringify(d));
-                    }
-                  } catch(e) { console.warn('CloudKit inject:', e); }
-                })();
-                """
+                let js = BridgeJavaScript.iCloudData(dataObj)
+                guard !js.isEmpty else { return }
                 webView.evaluateJavaScript(js, completionHandler: nil)
             }
         }
@@ -682,11 +783,15 @@ struct WebView: UIViewRepresentable {
         config.userContentController.add(context.coordinator, name: "review")
         config.userContentController.add(context.coordinator, name: "icloud")
         config.userContentController.add(context.coordinator, name: "shareImage")
+        config.userContentController.add(context.coordinator, name: "openAppSettings")
         config.userContentController.add(context.coordinator, name: "checkBoardUnlocked")
         config.userContentController.add(context.coordinator, name: "purchaseBoard")
         config.userContentController.add(context.coordinator, name: "fetchBoardPrice")
         config.userContentController.add(context.coordinator, name: "restorePurchases")
+        config.userContentController.add(context.coordinator, name: "photoSave")
+        config.userContentController.add(context.coordinator, name: "photoLoad")
         config.userContentController.add(context.coordinator, name: "photoGC")
+        config.userContentController.add(context.coordinator, name: "migrationExport")
         config.userContentController.add(context.coordinator, name: "cloudkit")
         config.userContentController.add(context.coordinator, name: "boardProtect")
 
@@ -709,6 +814,7 @@ struct WebView: UIViewRepresentable {
 
         // Wire up iCloud sync
         context.coordinator.webView = webView
+        context.coordinator.startObservingBoardStore()
         context.coordinator.startObservingICloud()
         WebViewCoordinatorBridge.shared.coordinator = context.coordinator
 
@@ -734,6 +840,12 @@ struct WebView: UIViewRepresentable {
 class WebViewCoordinatorBridge {
     static let shared = WebViewCoordinatorBridge()
     weak var coordinator: WebView.Coordinator?
+
+    func refreshBoardEntitlement() {
+        Task { @MainActor in
+            await BoardStore.shared.refresh()
+        }
+    }
 
     func handleRemoteCloudKitNotification(completion: @escaping () -> Void) {
         guard let coordinator = coordinator, let webView = coordinator.webView else {

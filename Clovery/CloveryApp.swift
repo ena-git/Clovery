@@ -4,11 +4,17 @@ import UIKit
 @main
 struct CloveryApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .ignoresSafeArea()
+        }
+        .onChange(of: scenePhase) { phase in
+            if phase == .active {
+                WebViewCoordinatorBridge.shared.refreshBoardEntitlement()
+            }
         }
     }
 }
@@ -21,6 +27,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
+        guard ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil else {
+            return true
+        }
         application.registerForRemoteNotifications()
         CloudKitSync.shared.setupSubscriptionIfNeeded()
         return true

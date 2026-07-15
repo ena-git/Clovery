@@ -19,5 +19,13 @@ xcuserdata/
 # CocoaPods
 Pods/
 
+# Local environment and build output
+.env
+.env.*
+!.env.example
+coverage.out
+/build/
+.worktrees/
+
 # Claude
 .claude/
