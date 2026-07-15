@@ -17,8 +17,12 @@ final class BoardStore: ObservableObject {
     ) {
         self.client = client
         if observesUpdates {
-            updatesTask = Task { [weak self] in
-                await self?.observeTransactionUpdates()
+            updatesTask = Task { [weak self, client] in
+                for await transaction in client.updates() {
+                    guard !Task.isCancelled else { return }
+                    guard let self else { return }
+                    await self.handleTransactionUpdate(transaction)
+                }
             }
         }
         if refreshesOnInit {
@@ -66,15 +70,12 @@ final class BoardStore: ObservableObject {
         }
     }
 
-    private func observeTransactionUpdates() async {
-        for await transaction in client.updates() {
-            guard !Task.isCancelled else { return }
-            if transaction.productID == Self.productID && transaction.revocationDate == nil {
-                isUnlocked = true
-                await transaction.finish()
-            } else {
-                await refresh()
-            }
+    private func handleTransactionUpdate(_ transaction: BoardTransaction) async {
+        if transaction.productID == Self.productID && transaction.revocationDate == nil {
+            isUnlocked = true
+            await transaction.finish()
+        } else {
+            await refresh()
         }
     }
 

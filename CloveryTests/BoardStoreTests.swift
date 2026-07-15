@@ -107,6 +107,33 @@ final class BoardStoreTests: XCTestCase {
         XCTAssertTrue(store.isUnlocked)
         continuation.finish()
     }
+
+    func testDeinitCancelsTransactionUpdates() async {
+        let terminated = expectation(description: "updates terminated")
+        var continuation: AsyncStream<BoardTransaction>.Continuation!
+        let updates = AsyncStream<BoardTransaction> { streamContinuation in
+            continuation = streamContinuation
+            streamContinuation.onTermination = { _ in terminated.fulfill() }
+        }
+        var store: BoardStore? = BoardStore(
+            client: .stub(updates: updates),
+            observesUpdates: true,
+            refreshesOnInit: false
+        )
+        weak var weakStore = store
+
+        for _ in 0..<3 {
+            await Task.yield()
+        }
+        store = nil
+
+        for _ in 0..<20 where weakStore != nil {
+            try? await Task.sleep(nanoseconds: 10_000_000)
+        }
+        XCTAssertNil(weakStore)
+        await fulfillment(of: [terminated], timeout: 0.5)
+        withExtendedLifetime(continuation) {}
+    }
 }
 
 private enum StoreClientTestError: Error {
