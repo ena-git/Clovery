@@ -15,7 +15,15 @@ struct WebView: UIViewRepresentable {
         // Weak ref so we can push iCloud data into the running WebView
         weak var webView: WKWebView?
         private var boardEntitlementCancellable: AnyCancellable?
-        private var isReportingBoardRestore = false
+        private lazy var boardEntitlementReporter = BoardEntitlementReporter(
+            currentEntitlement: { BoardStore.shared.isUnlocked },
+            reportUnlock: { [weak self] unlocked in
+                self?.webView?.evaluateJavaScript(
+                    BridgeJavaScript.boardUnlockStatus(unlocked),
+                    completionHandler: nil
+                )
+            }
+        )
         private let photoLogger = Logger(
             subsystem: Bundle.main.bundleIdentifier ?? "com.clovery.app",
             category: "Photos"
@@ -125,16 +133,12 @@ struct WebView: UIViewRepresentable {
                 }
             } else if message.name == "restorePurchases" {
                 Task { @MainActor in
-                    self.isReportingBoardRestore = true
                     let outcome = await BoardStore.shared.restore()
-                    _ = try? await self.webView?.evaluateJavaScript(
-                        BridgeJavaScript.boardRestoreResult(outcome)
-                    )
-                    let unlocked = BoardStore.shared.isUnlocked
-                    _ = try? await self.webView?.evaluateJavaScript(
-                        BridgeJavaScript.boardUnlockStatus(unlocked)
-                    )
-                    self.isReportingBoardRestore = false
+                    await self.boardEntitlementReporter.reportRestoreOutcome {
+                        _ = try await self.webView?.evaluateJavaScript(
+                            BridgeJavaScript.boardRestoreResult(outcome)
+                        )
+                    }
                 }
             } else if message.name == "photoSave" {
                 guard let body = message.body as? [String: Any],
@@ -331,11 +335,7 @@ struct WebView: UIViewRepresentable {
                 .removeDuplicates()
                 .receive(on: DispatchQueue.main)
                 .sink { [weak self] unlocked in
-                    guard let self, !self.isReportingBoardRestore else { return }
-                    self.webView?.evaluateJavaScript(
-                        BridgeJavaScript.boardUnlockStatus(unlocked),
-                        completionHandler: nil
-                    )
+                    self?.boardEntitlementReporter.reportObservedEntitlement(unlocked)
                 }
         }
 

@@ -4,6 +4,7 @@ set -eu
 
 repository_root=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
 web_view="$repository_root/Clovery/WebView.swift"
+board_entitlement_reporter="$repository_root/Clovery/BoardEntitlementReporter.swift"
 bridge_javascript="$repository_root/Clovery/BridgeJavaScript.swift"
 app_source="$repository_root/Clovery/CloveryApp.swift"
 photo_library_saver="$repository_root/Clovery/PhotoLibrarySaver.swift"
@@ -15,6 +16,10 @@ app_info_plist="$repository_root/Clovery/Info.plist"
 app_entitlements="$repository_root/Clovery/Clovery.entitlements"
 widget_entitlements="$repository_root/CloveryWidgetExtension.entitlements"
 v2_entitlements="$repository_root/v2/apps/mobile/ios/Runner/Runner.entitlements"
+reporter_test="$repository_root/Tests/BoardEntitlementReporterRegressionTests.swift"
+reporter_test_binary="${TMPDIR:-/private/tmp}/clovery-board-entitlement-reporter-$$"
+reporter_module_cache="${TMPDIR:-/private/tmp}/clovery-board-entitlement-module-cache-$$"
+trap 'rm -f "$reporter_test_binary"; rm -rf "$reporter_module_cache"' EXIT
 
 require_text() {
   file_path=$1
@@ -44,6 +49,7 @@ require_text "$web_view" 'message.name == "openAppSettings"'
 require_text "$web_view" "handleOpenAppSettings()"
 require_text "$web_view" "BridgeJavaScript.photoSaveResult(outcome)"
 require_text "$web_view" "private var boardEntitlementCancellable: AnyCancellable?"
+require_text "$web_view" "BoardEntitlementReporter("
 require_text "$web_view" "startObservingBoardStore()"
 require_text "$web_view" ".removeDuplicates()"
 require_text "$web_view" ".receive(on: DispatchQueue.main)"
@@ -64,7 +70,7 @@ require_text "$html" "window.__clovery_imageSaveResult = (outcome) =>"
 require_text "$html" "saveError==='permissionDenied'"
 require_text "$html" "messageHandlers?.openAppSettings?.postMessage"
 require_text "$html" "minHeight:44"
-require_text "$html" "const [purchaseNotice, setPurchaseNotice]"
+require_text "$html" "purchaseNoticeKind"
 require_text "$html" "window._boardRestoreResult = (outcome) =>"
 require_text "$html" "购买请求正在等待批准，批准后会自动解锁"
 require_text "$html" "没有找到可恢复的购买记录"
@@ -85,17 +91,12 @@ const restoreHandlerStart = webViewSource.indexOf('message.name == "restorePurch
 const restoreHandlerEnd = webViewSource.indexOf('message.name == "photoSave"', restoreHandlerStart);
 const restoreHandler = webViewSource.slice(restoreHandlerStart, restoreHandlerEnd);
 const restoreCall = restoreHandler.indexOf('let outcome = await BoardStore.shared.restore()');
+const reporterCall = restoreHandler.indexOf('boardEntitlementReporter.reportRestoreOutcome');
 const restoreCallback = restoreHandler.indexOf('BridgeJavaScript.boardRestoreResult(outcome)');
-const unlockCallback = restoreHandler.indexOf('BridgeJavaScript.boardUnlockStatus(unlocked)');
-const restoreReportingStart = restoreHandler.indexOf('isReportingBoardRestore = true');
-const restoreReportingEnd = restoreHandler.indexOf('isReportingBoardRestore = false');
 assert(restoreCall >= 0, 'restore outcome is awaited');
-assert(restoreCall < restoreCallback && restoreCallback < unlockCallback, 'restore result precedes final unlock status');
-assert(restoreReportingStart >= 0 && restoreReportingStart < restoreCall, 'restore reporting suppresses early entitlement publications');
-assert(unlockCallback < restoreReportingEnd, 'restore reporting resumes after the final unlock status');
+assert(restoreCall < reporterCall && reporterCall < restoreCallback, 'restore result is reported through the entitlement reporter');
+assert(!restoreHandler.includes('let unlocked = BoardStore.shared.isUnlocked'), 'restore does not snapshot entitlement before an awaited JavaScript callback');
 
-const observerOccurrences = webViewSource.match(/startObservingBoardStore\(\)/g) || [];
-assert(observerOccurrences.length === 2, 'board store observer is defined and started exactly once');
 const webViewBinding = webViewSource.indexOf('context.coordinator.webView = webView');
 const observerStart = webViewSource.indexOf(
   'context.coordinator.startObservingBoardStore()',
@@ -103,10 +104,11 @@ const observerStart = webViewSource.indexOf(
 );
 assert(webViewBinding >= 0 && webViewBinding < observerStart, 'board store observation starts after WebView binding');
 assert(webViewSource.includes('guard boardEntitlementCancellable == nil else { return }'), 'board store observation rejects duplicate subscriptions');
-assert(webViewSource.includes('@MainActor\n        func startObservingBoardStore()'), 'board store observation starts on the main actor');
+assert(/@MainActor\s+func startObservingBoardStore\(\)/.test(webViewSource), 'board store observation starts on the main actor');
 assert(webViewSource.includes('[weak self] unlocked in'), 'board entitlement subscription weakly captures the coordinator');
-assert(webViewSource.includes('!self.isReportingBoardRestore else { return }'), 'board entitlement publications cannot overtake restore outcomes');
-assert(webViewSource.includes('Task { @MainActor in\n            await BoardStore.shared.refresh()'), 'entitlement refresh awaits BoardStore on the main actor');
+assert(webViewSource.includes('boardEntitlementReporter.reportObservedEntitlement(unlocked)'), 'board entitlement publications flow through the replaying reporter');
+assert(!webViewSource.includes('!self.isReportingBoardRestore else { return }'), 'restore no longer permanently drops entitlement publications in the Combine sink');
+assert(/Task\s*\{\s*@MainActor in\s*await BoardStore\.shared\.refresh\(\)/s.test(webViewSource), 'entitlement refresh awaits BoardStore on the main actor');
 
 const sceneActive = appSource => appSource.includes('if phase == .active {')
   && appSource.includes('WebViewCoordinatorBridge.shared.refreshBoardEntitlement()');
@@ -142,57 +144,100 @@ function extractArrowBody(source, marker) {
   throw new Error(`missing P0 behavior: unterminated ${marker}`);
 }
 
-function runCallback(body, outcome, lang = 'zh') {
-  const state = {
+function createState() {
+  return {
     boardUnlocked: false,
     paywallOpen: true,
     purchaseError: false,
     purchasing: true,
     restoring: true,
-    purchaseNotice: '',
+    purchaseNoticeKind: null,
   };
-  const setter = key => value => { state[key] = value; };
-  const pendingNotice = lang === 'zh'
-    ? '购买请求正在等待批准，批准后会自动解锁'
-    : 'Your purchase is awaiting approval and will unlock automatically once approved';
+}
+
+function setter(state, key) {
+  return value => {
+    state[key] = typeof value === 'function' ? value(state[key]) : value;
+  };
+}
+
+function runCallback(body, value, state = createState(), parameterName = 'outcome') {
   const callback = new Function(
     'setBoardUnlocked', 'setPaywallOpen', 'setPurchaseError', 'setPurchasing',
-    'setRestoring', 'setPurchaseNotice', 'lang', 'pendingNotice',
-    `return (outcome) => {${body}};`
+    'setRestoring', 'setPurchaseNoticeKind',
+    `return (${parameterName}) => {${body}};`
   )(
-    setter('boardUnlocked'), setter('paywallOpen'), setter('purchaseError'),
-    setter('purchasing'), setter('restoring'), setter('purchaseNotice'), lang, pendingNotice
+    setter(state, 'boardUnlocked'), setter(state, 'paywallOpen'), setter(state, 'purchaseError'),
+    setter(state, 'purchasing'), setter(state, 'restoring'), setter(state, 'purchaseNoticeKind')
   );
-  callback(outcome);
+  callback(value);
   return state;
+}
+
+function purchaseNotice(kind, lang) {
+  const notices = {
+    pending: lang === 'zh'
+      ? '购买请求正在等待批准，批准后会自动解锁'
+      : 'Your purchase is awaiting approval and will unlock automatically once approved',
+    restored: lang === 'zh' ? '购买已恢复' : 'Purchase restored',
+    notFound: lang === 'zh' ? '没有找到可恢复的购买记录' : 'No restorable purchases were found',
+  };
+  return notices[kind] || '';
 }
 
 const purchaseBody = extractArrowBody(html, 'window._boardPurchaseResult = (outcome) =>');
 const pending = runCallback(purchaseBody, 'pending');
 assert(!pending.boardUnlocked, 'pending purchases stay locked');
 assert(!pending.purchaseError, 'pending purchases are not errors');
-assert(pending.purchaseNotice === '购买请求正在等待批准，批准后会自动解锁', 'pending purchases explain approval');
-const pendingEnglish = runCallback(purchaseBody, 'pending', 'en');
-assert(pendingEnglish.purchaseNotice === 'Your purchase is awaiting approval and will unlock automatically once approved', 'pending purchases explain approval in English');
+assert(purchaseNotice(pending.purchaseNoticeKind, 'zh') === '购买请求正在等待批准，批准后会自动解锁', 'pending purchases explain approval');
+assert(purchaseNotice(pending.purchaseNoticeKind, 'en') === 'Your purchase is awaiting approval and will unlock automatically once approved', 'pending purchases explain approval after a language change');
+
+const unlockBody = extractArrowBody(html, 'window._boardUnlockStatus = (unlocked) =>');
+runCallback(unlockBody, true, pending, 'unlocked');
+assert(pending.purchaseNoticeKind === null, 'unlock clears a pending notice regardless of the language that created it');
 
 const cancelled = runCallback(purchaseBody, 'cancelled');
-assert(!cancelled.purchaseError && cancelled.purchaseNotice === '', 'cancelled purchases do not show errors or notices');
+assert(!cancelled.purchaseError && cancelled.purchaseNoticeKind === null, 'cancelled purchases do not show errors or notices');
 
 const restoreBody = extractArrowBody(html, 'window._boardRestoreResult = (outcome) =>');
 const restored = runCallback(restoreBody, 'restored');
-assert(!restored.purchaseError && restored.purchaseNotice === '购买已恢复', 'restored purchases show success');
-const restoredEnglish = runCallback(restoreBody, 'restored', 'en');
-assert(!restoredEnglish.purchaseError && restoredEnglish.purchaseNotice === 'Purchase restored', 'restored purchases show success in English');
+assert(!restored.purchaseError && purchaseNotice(restored.purchaseNoticeKind, 'zh') === '购买已恢复', 'restored purchases show success');
+assert(purchaseNotice(restored.purchaseNoticeKind, 'en') === 'Purchase restored', 'restored purchases show success in English');
 
 const notFound = runCallback(restoreBody, 'notFound');
-assert(!notFound.purchaseError && notFound.purchaseNotice === '没有找到可恢复的购买记录', 'missing restores show a non-error notice');
-const notFoundEnglish = runCallback(restoreBody, 'notFound', 'en');
-assert(!notFoundEnglish.purchaseError && notFoundEnglish.purchaseNotice === 'No restorable purchases were found', 'missing restores show a non-error notice in English');
+assert(!notFound.purchaseError && purchaseNotice(notFound.purchaseNoticeKind, 'zh') === '没有找到可恢复的购买记录', 'missing restores show a non-error notice');
+assert(purchaseNotice(notFound.purchaseNoticeKind, 'en') === 'No restorable purchases were found', 'missing restores show a non-error notice in English');
 
 const failed = runCallback(restoreBody, 'failed');
-assert(failed.purchaseError && failed.purchaseNotice === '', 'failed restores clear notices and show retryable errors');
-assert(!failed.restoring && failed.paywallOpen, 'failed restores leave the retry control available');
+assert(failed.purchaseError && failed.purchaseNoticeKind === null, 'failed restores clear notices and show retryable errors');
+assert(!failed.restoring, 'failed restores stop the restore progress state');
+
+const paywallStart = html.indexOf('function BoardPaywall(');
+const paywallEnd = html.indexOf('function ShareCardSheet(', paywallStart);
+const paywallBody = html.slice(paywallStart, paywallEnd);
+assert(/<SpringTap\s+onClick=\{restoring\s*\?\s*undefined\s*:\s*onRestore\}/s.test(paywallBody), 'the visible restore control remains wired to onRestore after failures');
+
+const retryBody = extractArrowBody(html, 'onRestore={() =>');
+let restoreMessages = 0;
+const retryWindow = {
+  webkit: { messageHandlers: { restorePurchases: { postMessage: () => { restoreMessages += 1; } } } },
+};
+new Function(
+  'setPurchaseError', 'setPurchaseNoticeKind', 'setRestoring', 'window',
+  retryBody
+)(
+  setter(failed, 'purchaseError'), setter(failed, 'purchaseNoticeKind'),
+  setter(failed, 'restoring'), retryWindow
+);
+assert(failed.restoring && restoreMessages === 1, 'failed restore can invoke the real restore handler again');
 NODE
+
+swiftc \
+  -module-cache-path "$reporter_module_cache" \
+  "$board_entitlement_reporter" \
+  "$reporter_test" \
+  -o "$reporter_test_binary"
+"$reporter_test_binary"
 
 require_text "$project" "INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription"
 require_text "$project" "INFOPLIST_FILE = Clovery/Info.plist;"

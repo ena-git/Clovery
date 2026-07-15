@@ -28,6 +28,7 @@
 		AABB00000000000000000070 /* ImageExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000006F /* ImageExportService.swift */; };
 		AABB00000000000000000071 /* BoardStoreClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000072 /* BoardStoreClient.swift */; };
 		AABB00000000000000000073 /* Clovery.storekit in Resources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000074 /* Clovery.storekit */; };
+		AABB00000000000000000075 /* BoardEntitlementReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000076 /* BoardEntitlementReporter.swift */; };
 		FCECDFE02FE92C7C0067AF51 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFDF2FE92C7C0067AF51 /* WidgetKit.framework */; };
 		FCECDFE22FE92C7C0067AF51 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFE12FE92C7C0067AF51 /* SwiftUI.framework */; };
 		FCECDFEF2FE92C7D0067AF51 /* CloveryWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -88,6 +89,7 @@
 		AABB0000000000000000006F /* ImageExportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageExportService.swift; sourceTree = "<group>"; };
 		AABB00000000000000000072 /* BoardStoreClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardStoreClient.swift; sourceTree = "<group>"; };
 		AABB00000000000000000074 /* Clovery.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Clovery.storekit; sourceTree = "<group>"; };
+		AABB00000000000000000076 /* BoardEntitlementReporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardEntitlementReporter.swift; sourceTree = "<group>"; };
 		AACC00000000000000000001 /* CloveryTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CloveryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC889A182FD464C9002510AD /* Clovery.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Clovery.entitlements; sourceTree = "<group>"; };
 		FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CloveryWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -158,6 +160,7 @@
 				AABB00000000000000000007 /* CloveryApp.swift */,
 				AABB00000000000000000008 /* ContentView.swift */,
 				AABB00000000000000000009 /* WebView.swift */,
+				AABB00000000000000000076 /* BoardEntitlementReporter.swift */,
 				AABB00000000000000000020 /* BoardStore.swift */,
 				AABB00000000000000000072 /* BoardStoreClient.swift */,
 				AABB00000000000000000074 /* Clovery.storekit */,
@@ -354,6 +357,7 @@
 				AABB00000000000000000011 /* CloveryApp.swift in Sources */,
 				AABB00000000000000000012 /* ContentView.swift in Sources */,
 				AABB00000000000000000013 /* WebView.swift in Sources */,
+				AABB00000000000000000075 /* BoardEntitlementReporter.swift in Sources */,
 				AABB0000000000000000001F /* BoardStore.swift in Sources */,
 				AABB00000000000000000071 /* BoardStoreClient.swift in Sources */,
 				AABB00000000000000000060 /* CloudKitSync.swift in Sources */,

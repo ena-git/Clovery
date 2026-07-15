@@ -7851,43 +7851,50 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
   const [purchasing, setPurchasing]         = React.useState(false);
   const [restoring, setRestoring]           = React.useState(false);
   const [purchaseError, setPurchaseError]   = React.useState(false);
-  const [purchaseNotice, setPurchaseNotice] = React.useState('');
+  const [purchaseNoticeKind, setPurchaseNoticeKind] = React.useState(null);
   const [boardPrice, setBoardPrice]         = React.useState('');
+  const purchaseNotices = {
+    pending: lang === 'zh'
+      ? '购买请求正在等待批准，批准后会自动解锁'
+      : 'Your purchase is awaiting approval and will unlock automatically once approved',
+    restored: lang === 'zh' ? '购买已恢复' : 'Purchase restored',
+    notFound: lang === 'zh'
+      ? '没有找到可恢复的购买记录'
+      : 'No restorable purchases were found',
+  };
+  const purchaseNotice = purchaseNotices[purchaseNoticeKind] || '';
 
   React.useEffect(() => {
-    const pendingNotice = lang === 'zh'
-      ? '购买请求正在等待批准，批准后会自动解锁'
-      : 'Your purchase is awaiting approval and will unlock automatically once approved';
     window._boardUnlockStatus = (unlocked) => {
       setBoardUnlocked(!!unlocked);
       setRestoring(false);
       if (unlocked) {
         setPurchasing(false); setPaywallOpen(false); setPurchaseError(false);
-        setPurchaseNotice(notice => notice === pendingNotice ? '' : notice);
+        setPurchaseNoticeKind(kind => kind === 'pending' ? null : kind);
       }
     };
     window._boardPurchaseResult = (outcome) => {
       // outcome: 'success' | 'cancelled' | 'pending' | 'failed'
       if (outcome === 'success') {
-        setBoardUnlocked(true); setPaywallOpen(false); setPurchaseError(false); setPurchasing(false); setPurchaseNotice('');
+        setBoardUnlocked(true); setPaywallOpen(false); setPurchaseError(false); setPurchasing(false); setPurchaseNoticeKind(null);
       } else if (outcome === 'cancelled') {
-        setPurchasing(false); setPurchaseError(false); setPurchaseNotice('');
+        setPurchasing(false); setPurchaseError(false); setPurchaseNoticeKind(null);
       } else if (outcome === 'pending') {
-        setPurchasing(false); setPurchaseError(false); setPurchaseNotice(pendingNotice);
+        setPurchasing(false); setPurchaseError(false); setPurchaseNoticeKind('pending');
       } else {
-        setPurchasing(false); setPurchaseNotice(''); setPurchaseError(true);
+        setPurchasing(false); setPurchaseNoticeKind(null); setPurchaseError(true);
       }
     };
     window._boardRestoreResult = (outcome) => {
       setRestoring(false);
       if (outcome === 'restored') {
         setPurchaseError(false);
-        setPurchaseNotice(lang === 'zh' ? '购买已恢复' : 'Purchase restored');
+        setPurchaseNoticeKind('restored');
       } else if (outcome === 'notFound') {
         setPurchaseError(false);
-        setPurchaseNotice(lang === 'zh' ? '没有找到可恢复的购买记录' : 'No restorable purchases were found');
+        setPurchaseNoticeKind('notFound');
       } else {
-        setPurchaseNotice('');
+        setPurchaseNoticeKind(null);
         setPurchaseError(true);
       }
     };
@@ -7902,7 +7909,7 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
       window._boardRestoreResult = null;
       window._boardPriceResult = null;
     };
-  }, [lang]);
+  }, []);
 
   // ── Screenshot protection: notify Swift when board is open/closed ──
   React.useEffect(() => {
@@ -7913,8 +7920,8 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
   }, []);
 
   // ── Actual save/share (called after confirmation) ──
-  const _execSave  = () => { Haptic.impact('medium'); setPurchaseNotice(''); setSaved(false); setSaveError(null); window.webkit?.messageHandlers?.shareImage?.postMessage({action:'save',  dataURL:previewURL}); };
-  const _execShare = () => { Haptic.impact('medium'); setPurchaseNotice(''); window.webkit?.messageHandlers?.shareImage?.postMessage({action:'share', dataURL:previewURL}); };
+  const _execSave  = () => { Haptic.impact('medium'); setPurchaseNoticeKind(null); setSaved(false); setSaveError(null); window.webkit?.messageHandlers?.shareImage?.postMessage({action:'save',  dataURL:previewURL}); };
+  const _execShare = () => { Haptic.impact('medium'); setPurchaseNoticeKind(null); window.webkit?.messageHandlers?.shareImage?.postMessage({action:'share', dataURL:previewURL}); };
 
   // ── Confirm trial use → increment count → execute pending action ──
   const confirmTrial = () => {
@@ -8615,9 +8622,9 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
       <BoardPaywall theme={theme} lang={lang}
         trialMax={BOARD_TRIAL_MAX}
         boardPrice={boardPrice}
-        onClose={() => { setPaywallOpen(false); setPurchaseError(false); setPurchaseNotice(''); }}
-        onPurchase={() => { setPurchaseError(false); setPurchaseNotice(''); setPurchasing(true); window.webkit?.messageHandlers?.purchaseBoard?.postMessage({}); }}
-        onRestore={() => { setPurchaseError(false); setPurchaseNotice(''); setRestoring(true); window.webkit?.messageHandlers?.restorePurchases?.postMessage({}); }}
+        onClose={() => { setPaywallOpen(false); setPurchaseError(false); setPurchaseNoticeKind(null); }}
+        onPurchase={() => { setPurchaseError(false); setPurchaseNoticeKind(null); setPurchasing(true); window.webkit?.messageHandlers?.purchaseBoard?.postMessage({}); }}
+        onRestore={() => { setPurchaseError(false); setPurchaseNoticeKind(null); setRestoring(true); window.webkit?.messageHandlers?.restorePurchases?.postMessage({}); }}
         purchasing={purchasing} restoring={restoring} purchaseError={purchaseError}
         purchaseNotice={purchaseNotice}/>
     )}
