@@ -6,7 +6,7 @@ FLUTTER_BIN := $(shell command -v $(FLUTTER))
 DART ?= $(dir $(FLUTTER_BIN))cache/dart-sdk/bin/dart
 DATABASE_URL ?= postgres://clovery:clovery_dev_only@localhost:5432/clovery?sslmode=disable
 
-.PHONY: generate verify verify-api verify-contract verify-generated verify-infra verify-migrations verify-mobile verify-release
+.PHONY: generate verify verify-api verify-contract verify-generated verify-infra verify-migrations verify-mobile verify-release verify-staging
 
 generate:
 	cd apps/mobile && $(DART) run pigeon --input pigeons/clovery_platform.dart
@@ -18,8 +18,14 @@ verify-api:
 verify-contract:
 	cd services/api && $(GO) test ./internal/contract
 
-verify-infra:
+verify-infra: verify-staging
 	docker compose -f infra/compose.yaml config --quiet
+
+verify-staging:
+	sh -n scripts/staging-*.sh scripts/lib/staging-*.sh scripts/test-staging-*.sh scripts/testlib/staging-fixture.sh
+	./scripts/test-staging-configuration.sh
+	./scripts/test-staging-data-safety.sh
+	./scripts/test-staging-smoke-evidence.sh
 
 verify-migrations:
 	cd services/api && DATABASE_URL='$(DATABASE_URL)' $(GO) test -count=1 ./internal/database

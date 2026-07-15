@@ -1,0 +1,42 @@
+write_staging_environment_fixture() {
+  destination=$1
+  cat >"$destination" <<EOF
+CLOVERY_API_IMAGE=registry.clovery.cn/clovery/api@sha256:aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa
+CLOVERY_RELEASE_SHA=5265c62b03b8e53fbe6ebb10c50d5d5d402cef42
+CLOVERY_ENV_FILE=$destination
+CLOVERY_API_BIND_PORT=18080
+DEPLOYMENT_ENVIRONMENT=staging
+DATABASE_URL=postgres://clovery:strong-password@postgres.staging.clovery.cn:5432/clovery?sslmode=verify-full
+S3_ENDPOINT=https://objects.staging.clovery.cn
+S3_BUCKET=clovery-staging-vaults
+S3_ACCESS_KEY=staging-access-key
+S3_SECRET_KEY=staging-secret-key-at-least-32-bytes
+S3_ALLOW_INSECURE=false
+JWT_ISSUER=https://api.staging.clovery.cn
+JWT_SIGNING_KEY=staging-jwt-signing-key-at-least-32-bytes
+WEBAUTHN_RP_ID=staging.clovery.cn
+WEBAUTHN_RP_DISPLAY_NAME=Clovery Staging
+WEBAUTHN_RP_ORIGINS=https://staging.clovery.cn
+PASSKEY_CREDENTIAL_ENCRYPTION_KEY=c3RhZ2luZy1wYXNza2V5LWVuY3J5cHRpb24ta2V5ISE=
+APPLE_OIDC_CLIENT_ID=
+APPLE_OIDC_CLIENT_SECRET=
+APPLE_OIDC_REDIRECT_URL=
+GOOGLE_OIDC_CLIENT_ID=
+GOOGLE_OIDC_CLIENT_SECRET=
+GOOGLE_OIDC_REDIRECT_URL=
+HUAWEI_OIDC_CLIENT_ID=
+HUAWEI_OIDC_CLIENT_SECRET=
+HUAWEI_OIDC_REDIRECT_URL=
+APPLE_IAP_ISSUER_ID=
+APPLE_IAP_KEY_ID=
+APPLE_IAP_PRIVATE_KEY_BASE64=
+APPLE_IAP_BUNDLE_ID=
+APPLE_IAP_APP_APPLE_ID=
+APPLE_IAP_ROOT_CA_BASE64=
+APPLE_IAP_PRODUCT_IDS=
+APPLE_IAP_ALLOW_SANDBOX=true
+MIGRATION_WRITES_ENABLED=false
+METRICS_BEARER_TOKEN=staging-metrics-token-at-least-32-bytes
+PORT=8080
+EOF
+}

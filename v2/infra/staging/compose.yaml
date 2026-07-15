@@ -1,0 +1,39 @@
+name: clovery-staging
+
+x-clovery-service: &clovery-service
+  image: ${CLOVERY_API_IMAGE:?CLOVERY_API_IMAGE must be an immutable image digest}
+  env_file:
+    - ${CLOVERY_ENV_FILE:?CLOVERY_ENV_FILE must reference the staging environment file}
+  init: true
+  read_only: true
+  security_opt:
+    - no-new-privileges:true
+  tmpfs:
+    - /tmp:size=64m,mode=1777
+  labels:
+    com.clovery.release-sha: ${CLOVERY_RELEASE_SHA:?CLOVERY_RELEASE_SHA is required}
+  logging:
+    driver: json-file
+    options:
+      max-file: "5"
+      max-size: 10m
+
+services:
+  migrate:
+    <<: *clovery-service
+    profiles: [migration]
+    entrypoint: ["/app/clovery-migrate", "up"]
+    restart: "no"
+
+  api:
+    <<: *clovery-service
+    ports:
+      - "127.0.0.1:${CLOVERY_API_BIND_PORT:-18080}:8080"
+    restart: unless-stopped
+    stop_grace_period: 30s
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O - http://127.0.0.1:8080/v1/health >/dev/null"]
+      interval: 10s
+      timeout: 5s
+      retries: 12
+      start_period: 15s
