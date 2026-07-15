@@ -39,6 +39,12 @@ migration ZIPs or manifests, content SHA-256 hashes, device UDIDs, or other
 stable device identifiers.
 
 For each checklist item, Git records only the aggregate `PASS`, test time, device
-model, OS version, and non-sensitive evidence filename. Raw counts, hashes,
+model, OS version, and non-sensitive evidence filename. Evidence filenames must
+be safe relative paths containing only letters, numbers, dots, underscores,
+hyphens, and slashes; absolute paths and `..` are forbidden. Raw counts, hashes,
 screenshots, logs, and archives must remain outside Git and be stored only under
 the gitignored `build/release-evidence/ios-1.0.3/` directory.
+
+The release checker trusts only the committed
+`HEAD:docs/release/ios-1.0.3-acceptance.md`. Uncommitted working-tree edits are
+never release evidence.
