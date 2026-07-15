@@ -4,7 +4,7 @@
 **代码状态：** 自动化与签名 Archive 通过，等待真机与 App Store Sandbox/TestFlight 验收
 **测试设备：** Ao-iPhone，iPhone 12，iOS 17.4.1，已配对并启用开发者模式
 
-**阶段排期：** W1 当前先完成自动化、迁移包和签名收口；真机与 Sandbox/TestFlight 验收集中安排在 W3/W4 的 Flutter iOS 版本完成后、W5 Android/鸿蒙多端接入开始前，作为 iOS 阶段发布门禁。
+原生 iOS 1.0.3 (14) 的自动化、升级数据、相册、迁移、StoreKit、TestFlight 和 App Store 发布门禁必须在 Flutter W3 开始前完成。旧文档中 W3/W4 后再完成 W1 真机验收的排期由 2026-07-15 已批准方案 A 替代。
 
 ## 自动化验收
 

@@ -13,7 +13,7 @@
 - 自动化已完成：`PhotoStore`、照片保存/读取/GC 桥接、结构化 JavaScript 回调、CloudKit 日志、版本化迁移 ZIP、SHA-256 校验、设置页导出入口与 XCTest target。
 - 已通过：16 项 XCTest、Babel 校验、P0 合同测试、外部系统 `unzip -t`、Debug 模拟器构建、签名 Release/iPhoneOS Archive，以及主 App/Widget 的 App Group 签名校验。
 - 发布门禁仍需人工完成：真机照片重启回归、真机导出并随机打开三张照片、Sandbox/TestFlight 内购矩阵、App Store Connect 首个内购商品审核配置。
-- 排期确定为：W1 当前完成自动化、迁移包和签名收口；真机照片、迁移抽检与 Sandbox/TestFlight 验收集中安排在 W3/W4 的 Flutter iOS 版本完成后、W5 Android/鸿蒙接入前。门禁通过前不进入 W5，也不把对应 iOS 版本标记为可上线。
+- 原生 iOS 1.0.3 (14) 的自动化、升级数据、相册、迁移、StoreKit、TestFlight 和 App Store 发布门禁必须在 Flutter W3 开始前完成。旧文档中 W3/W4 后再完成 W1 真机验收的排期由 2026-07-15 已批准方案 A 替代。
 
 ---
 
