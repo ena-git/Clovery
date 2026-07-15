@@ -31,7 +31,14 @@
 
 ## Privacy
 
-Git must never contain Apple Account or Sandbox Account credentials, receipts,
-tokens, transaction payloads, diary text, photos, or device identifiers.
-Restricted screenshots and raw logs must remain outside Git and be stored only
-under the gitignored `build/release-evidence/ios-1.0.3/` directory.
+Git must never contain email addresses or other stable account identifiers for
+Apple, Sandbox, or Clovery accounts; passwords, verification codes, or recovery
+codes; receipts, tokens, transaction payloads, transaction IDs, or original
+transaction IDs; diary content, photos, tombstones, raw entitlement state,
+migration ZIPs or manifests, content SHA-256 hashes, device UDIDs, or other
+stable device identifiers.
+
+For each checklist item, Git records only the aggregate `PASS`, test time, device
+model, OS version, and non-sensitive evidence filename. Raw counts, hashes,
+screenshots, logs, and archives must remain outside Git and be stored only under
+the gitignored `build/release-evidence/ios-1.0.3/` directory.
