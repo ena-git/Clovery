@@ -105,7 +105,7 @@ func TestPostgresTransactionRefreshDoesNotEndActiveGracePeriod(t *testing.T) {
 	databaseHandle := openBillingIntegrationDatabase(t)
 	seedBillingAccounts(t, databaseHandle)
 	repository := NewPostgresRepository(databaseHandle)
-	now := time.Now().UTC()
+	now := time.Now().UTC().Truncate(time.Microsecond)
 	grace := verifiedTransactionFixture()
 	grace.AppAccountToken = billingAccountID
 	grace.Status = StateActive
