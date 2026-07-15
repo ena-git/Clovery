@@ -198,6 +198,45 @@ final class BoardStoreTests: XCTestCase {
 
         XCTAssertTrue(store.isUnlocked)
     }
+
+    func testRestoreUsesSupersedingRefreshResult() async {
+        let entitlementGate = SequencedEntitlementGate()
+        let transaction = BoardTransaction.stub(productID: BoardStore.productID)
+        let store = BoardStore(
+            client: .stub(
+                currentEntitlementsOperation: { productID in
+                    await entitlementGate.currentEntitlements(for: productID)
+                },
+                purchaseResult: .success(transaction)
+            ),
+            observesUpdates: false,
+            refreshesOnInit: false
+        )
+
+        let purchaseOutcome = await store.purchase()
+        XCTAssertEqual(purchaseOutcome, .success)
+        XCTAssertTrue(store.isUnlocked)
+
+        let restoreTask = Task { await store.restore() }
+        await entitlementGate.waitForRequestCount(1)
+
+        let refreshTask = Task { await store.refresh() }
+        await entitlementGate.waitForRequestCount(2)
+
+        await entitlementGate.resumeRequest(1, returning: .verified([transaction]))
+        for _ in 0..<3 {
+            await Task.yield()
+        }
+
+        await entitlementGate.resumeRequest(2, returning: .verified([]))
+        await refreshTask.value
+        let restoreOutcome = await restoreTask.value
+        let requestCount = await entitlementGate.totalRequestCount()
+
+        XCTAssertEqual(restoreOutcome, .notFound)
+        XCTAssertFalse(store.isUnlocked)
+        XCTAssertEqual(requestCount, 2)
+    }
 }
 
 private actor EntitlementGate {
@@ -229,6 +268,59 @@ private actor EntitlementGate {
         }
         resultContinuation = nil
         continuation.resume(returning: result)
+    }
+}
+
+private actor SequencedEntitlementGate {
+    private struct RequestWaiter {
+        let minimumCount: Int
+        let continuation: CheckedContinuation<Void, Never>
+    }
+
+    private var requestCount = 0
+    private var requestWaiters: [RequestWaiter] = []
+    private var resultContinuations: [
+        Int: CheckedContinuation<BoardEntitlementResult, Never>
+    ] = [:]
+
+    func currentEntitlements(for _: String) async -> BoardEntitlementResult {
+        requestCount += 1
+        let requestID = requestCount
+
+        var pendingWaiters: [RequestWaiter] = []
+        for waiter in requestWaiters {
+            if requestCount >= waiter.minimumCount {
+                waiter.continuation.resume()
+            } else {
+                pendingWaiters.append(waiter)
+            }
+        }
+        requestWaiters = pendingWaiters
+
+        return await withCheckedContinuation { continuation in
+            resultContinuations[requestID] = continuation
+        }
+    }
+
+    func waitForRequestCount(_ minimumCount: Int) async {
+        guard requestCount < minimumCount else { return }
+        await withCheckedContinuation { continuation in
+            requestWaiters.append(RequestWaiter(
+                minimumCount: minimumCount,
+                continuation: continuation
+            ))
+        }
+    }
+
+    func resumeRequest(_ requestID: Int, returning result: BoardEntitlementResult) {
+        guard let continuation = resultContinuations.removeValue(forKey: requestID) else {
+            preconditionFailure("Entitlement request \(requestID) has not started")
+        }
+        continuation.resume(returning: result)
+    }
+
+    func totalRequestCount() -> Int {
+        requestCount
     }
 }
 
