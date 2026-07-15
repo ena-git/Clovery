@@ -12,9 +12,16 @@ for executable in "$checker" "$selector"; do
   fi
 done
 
+"$repository_root/Tests/IOSReleaseIdentityNegativeTests.sh"
 "$checker"
 destination=$("$selector")
 case "$destination" in
-  id=*|platform=*) ;;
+  id=?*) ;;
   *) echo "invalid simulator destination: $destination" >&2; exit 1 ;;
 esac
+
+validated_destination=$(CLOVERY_IOS_DESTINATION="$destination" "$selector")
+if [ "$validated_destination" != "$destination" ]; then
+  echo "simulator override validation changed destination: $validated_destination" >&2
+  exit 1
+fi
