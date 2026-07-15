@@ -44,8 +44,10 @@ jobs:
       - name: Reject beta Xcode
         run: |
           xcode_version=$(xcodebuild -version)
+          selected_developer_dir=$(xcode-select -p)
           printf '%s\n' "$xcode_version"
-          if printf '%s\n' "$xcode_version" | grep -qi beta; then
+          printf 'Selected developer directory: %s\n' "$selected_developer_dir"
+          if printf '%s\n%s\n' "$xcode_version" "$selected_developer_dir" | grep -qi beta; then
             echo "Beta Xcode is not allowed for native iOS verification." >&2
             exit 1
           fi

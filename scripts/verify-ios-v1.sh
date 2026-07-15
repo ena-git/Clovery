@@ -10,6 +10,7 @@ node scripts/validate-v1-html.cjs
 scripts/test-v1-p0-contract.sh
 scripts/test-v1-bridge.sh
 scripts/test-migration-zip.sh
+Tests/IOSReleaseIdentityTests.sh
 scripts/verify-ios-release-config.sh
 
 xcodebuild \

@@ -58,6 +58,7 @@ CloverDiary-iOS/
 
 ## Verification
 
+- Local prerequisites: Node.js 22 and an available iPhone Simulator.
 - Native App Store iOS V1: `scripts/verify-ios-v1.sh`
 - Go/Flutter V2 platform: `cd v2 && make verify`
 
