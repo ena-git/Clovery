@@ -3,36 +3,40 @@ import XCTest
 
 @MainActor
 final class BoardEntitlementReporterTests: XCTestCase {
-    func testRestoreOutcomeCompletesBeforeLatestEntitlementIsReplayed() async {
+    func testRestoreSuppressesUpdatesUntilOutcomeCompletesThenReplaysLatestEntitlement() async {
         var currentEntitlement = false
         var reportedEvents: [String] = []
-        var resumeOutcome: CheckedContinuation<Void, Never>?
-        let outcomeStarted = expectation(description: "restore outcome reporting started")
+        var resumeRestore: CheckedContinuation<Void, Never>?
+        let restoreStarted = expectation(description: "restore started")
         let reporter = BoardEntitlementReporter(
             currentEntitlement: { currentEntitlement },
             reportUnlock: { reportedEvents.append("unlock:\($0)") }
         )
 
         let restoreTask = Task { @MainActor in
-            await reporter.reportRestoreOutcome {
-                reportedEvents.append("outcome")
-                outcomeStarted.fulfill()
-                await withCheckedContinuation { continuation in
-                    resumeOutcome = continuation
+            await reporter.reportRestore(
+                performRestore: {
+                    restoreStarted.fulfill()
+                    await withCheckedContinuation { continuation in
+                        resumeRestore = continuation
+                    }
+                    return "notFound"
+                },
+                reportOutcome: { outcome in
+                    reportedEvents.append("outcome:\(outcome)")
                 }
-                reportedEvents.append("outcome-complete")
-            }
+            )
         }
 
-        await fulfillment(of: [outcomeStarted], timeout: 0.5)
+        await fulfillment(of: [restoreStarted], timeout: 0.5)
         currentEntitlement = true
         reporter.reportObservedEntitlement(true)
-        XCTAssertEqual(reportedEvents, ["outcome"])
+        XCTAssertEqual(reportedEvents, [])
 
-        resumeOutcome?.resume()
+        resumeRestore?.resume()
         await restoreTask.value
 
-        XCTAssertEqual(reportedEvents, ["outcome", "outcome-complete", "unlock:true"])
+        XCTAssertEqual(reportedEvents, ["outcome:notFound", "unlock:true"])
         XCTAssertFalse(reporter.isSuppressingObservedEntitlements)
     }
 
@@ -44,9 +48,10 @@ final class BoardEntitlementReporterTests: XCTestCase {
             reportUnlock: { reportedEntitlements.append($0) }
         )
 
-        await reporter.reportRestoreOutcome {
-            throw ReporterTestError.javascriptFailed
-        }
+        await reporter.reportRestore(
+            performRestore: { "restored" },
+            reportOutcome: { _ in throw ReporterTestError.javascriptFailed }
+        )
 
         XCTAssertEqual(reportedEntitlements, [true])
         XCTAssertFalse(reporter.isSuppressingObservedEntitlements)
@@ -59,23 +64,26 @@ final class BoardEntitlementReporterTests: XCTestCase {
     func testRestoreOutcomeCancellationRestoresObservationAndReplaysLatestEntitlement() async {
         var currentEntitlement = true
         var reportedEntitlements: [Bool] = []
-        let outcomeStarted = expectation(description: "restore outcome reporting started")
+        let restoreStarted = expectation(description: "restore started")
         let reporter = BoardEntitlementReporter(
             currentEntitlement: { currentEntitlement },
             reportUnlock: { reportedEntitlements.append($0) }
         )
 
         let restoreTask = Task { @MainActor in
-            await reporter.reportRestoreOutcome {
-                outcomeStarted.fulfill()
-                while !Task.isCancelled {
-                    await Task.yield()
-                }
-                throw CancellationError()
-            }
+            await reporter.reportRestore(
+                performRestore: { () async throws -> String in
+                    restoreStarted.fulfill()
+                    while !Task.isCancelled {
+                        await Task.yield()
+                    }
+                    throw CancellationError()
+                },
+                reportOutcome: { _ in XCTFail("cancelled restore must not report an outcome") }
+            )
         }
 
-        await fulfillment(of: [outcomeStarted], timeout: 0.5)
+        await fulfillment(of: [restoreStarted], timeout: 0.5)
         restoreTask.cancel()
         await restoreTask.value
 

@@ -7868,9 +7868,12 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
     window._boardUnlockStatus = (unlocked) => {
       setBoardUnlocked(!!unlocked);
       setRestoring(false);
+      setPurchaseNoticeKind(kind => {
+        if (unlocked) return kind === 'restored' ? kind : null;
+        return kind === 'restored' ? null : kind;
+      });
       if (unlocked) {
         setPurchasing(false); setPaywallOpen(false); setPurchaseError(false);
-        setPurchaseNoticeKind(kind => kind === 'pending' ? null : kind);
       }
     };
     window._boardPurchaseResult = (outcome) => {

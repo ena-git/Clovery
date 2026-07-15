@@ -90,11 +90,11 @@ function assert(condition, message) {
 const restoreHandlerStart = webViewSource.indexOf('message.name == "restorePurchases"');
 const restoreHandlerEnd = webViewSource.indexOf('message.name == "photoSave"', restoreHandlerStart);
 const restoreHandler = webViewSource.slice(restoreHandlerStart, restoreHandlerEnd);
-const restoreCall = restoreHandler.indexOf('let outcome = await BoardStore.shared.restore()');
-const reporterCall = restoreHandler.indexOf('boardEntitlementReporter.reportRestoreOutcome');
+const reporterCall = restoreHandler.indexOf('boardEntitlementReporter.reportRestore(');
+const restoreCall = restoreHandler.indexOf('performRestore: { await BoardStore.shared.restore() }');
 const restoreCallback = restoreHandler.indexOf('BridgeJavaScript.boardRestoreResult(outcome)');
-assert(restoreCall >= 0, 'restore outcome is awaited');
-assert(restoreCall < reporterCall && reporterCall < restoreCallback, 'restore result is reported through the entitlement reporter');
+assert(reporterCall >= 0, 'the entitlement reporter owns the complete restore lifecycle');
+assert(reporterCall < restoreCall && restoreCall < restoreCallback, 'restore and outcome reporting both run inside the entitlement reporter');
 assert(!restoreHandler.includes('let unlocked = BoardStore.shared.isUnlocked'), 'restore does not snapshot entitlement before an awaited JavaScript callback');
 
 const webViewBinding = webViewSource.indexOf('context.coordinator.webView = webView');
@@ -207,6 +207,12 @@ assert(purchaseNotice(restored.purchaseNoticeKind, 'en') === 'Purchase restored'
 const notFound = runCallback(restoreBody, 'notFound');
 assert(!notFound.purchaseError && purchaseNotice(notFound.purchaseNoticeKind, 'zh') === '没有找到可恢复的购买记录', 'missing restores show a non-error notice');
 assert(purchaseNotice(notFound.purchaseNoticeKind, 'en') === 'No restorable purchases were found', 'missing restores show a non-error notice in English');
+runCallback(unlockBody, true, notFound, 'unlocked');
+assert(notFound.purchaseNoticeKind === null, 'a newly active entitlement clears a stale not-found restore notice');
+
+const restoredThenLocked = runCallback(restoreBody, 'restored');
+runCallback(unlockBody, false, restoredThenLocked, 'unlocked');
+assert(restoredThenLocked.purchaseNoticeKind === null, 'a missing final entitlement clears a stale restored notice');
 
 const failed = runCallback(restoreBody, 'failed');
 assert(failed.purchaseError && failed.purchaseNoticeKind === null, 'failed restores clear notices and show retryable errors');

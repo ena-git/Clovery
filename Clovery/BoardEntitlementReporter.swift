@@ -18,21 +18,27 @@ final class BoardEntitlementReporter {
         reportUnlock(isUnlocked)
     }
 
-    func reportRestoreOutcome(
-        _ operation: () async throws -> Void
+    func reportRestore<Outcome>(
+        performRestore: () async throws -> Outcome,
+        reportOutcome: (Outcome) async throws -> Void
     ) async {
-        await reportRestoreOutcomeWhileSuppressingObservation(operation)
+        await performRestoreWhileSuppressingObservation(
+            performRestore: performRestore,
+            reportOutcome: reportOutcome
+        )
         reportUnlock(currentEntitlement())
     }
 
-    private func reportRestoreOutcomeWhileSuppressingObservation(
-        _ operation: () async throws -> Void
+    private func performRestoreWhileSuppressingObservation<Outcome>(
+        performRestore: () async throws -> Outcome,
+        reportOutcome: (Outcome) async throws -> Void
     ) async {
         isSuppressingObservedEntitlements = true
         defer { isSuppressingObservedEntitlements = false }
 
         do {
-            try await operation()
+            let outcome = try await performRestore()
+            try await reportOutcome(outcome)
         } catch {
         }
     }

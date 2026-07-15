@@ -133,12 +133,14 @@ struct WebView: UIViewRepresentable {
                 }
             } else if message.name == "restorePurchases" {
                 Task { @MainActor in
-                    let outcome = await BoardStore.shared.restore()
-                    await self.boardEntitlementReporter.reportRestoreOutcome {
-                        _ = try await self.webView?.evaluateJavaScript(
-                            BridgeJavaScript.boardRestoreResult(outcome)
-                        )
-                    }
+                    await self.boardEntitlementReporter.reportRestore(
+                        performRestore: { await BoardStore.shared.restore() },
+                        reportOutcome: { outcome in
+                            _ = try await self.webView?.evaluateJavaScript(
+                                BridgeJavaScript.boardRestoreResult(outcome)
+                            )
+                        }
+                    )
                 }
             } else if message.name == "photoSave" {
                 guard let body = message.body as? [String: Any],
