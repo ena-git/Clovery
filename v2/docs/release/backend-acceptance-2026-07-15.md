@@ -15,6 +15,7 @@
 - `go vet ./...`
 - API and Apple notification replay binaries built successfully.
 - Isolated PostgreSQL 16 acceptance passed for repeatable migrations, one-step rollback/reapply, concurrent sync, active and deleted V1 imports, manifest mismatch rejection, purchase-chain ownership, stale notification ordering, legacy purchase records, and billing grace periods.
+- Isolated PostgreSQL 16 sync acceptance passed for two-page cursor traversal with interleaved Vault changes, persisted stale-edit conflicts, Vault isolation, deletion tombstones, and rejection of post-delete resurrection.
 - iOS Simulator tests passed for the existing app bridge, photo store, migration ZIP export, exact manifest hashes, duplicate/overlap rejection, and tampered-entry rejection.
 - Staging configuration, backup/restore safety, API smoke, and release-evidence scripts pass local contract tests through `make verify-staging`.
 

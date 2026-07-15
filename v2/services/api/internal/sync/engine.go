@@ -19,7 +19,8 @@ func DecideOperation(current *Entry, operation Operation, now time.Time) (Decisi
 	if current == nil && operation.BaseRevision != 0 {
 		return Decision{OperationID: operation.OperationID, Status: StatusConflict}, nil
 	}
-	if current != nil && current.Revision != operation.BaseRevision {
+	if current != nil && (current.Revision != operation.BaseRevision ||
+		(current.DeletedAt != nil && !operation.Deleted)) {
 		snapshot := cloneEntry(*current)
 		return Decision{
 			OperationID:    operation.OperationID,

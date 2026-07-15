@@ -63,6 +63,27 @@ func TestDecideOperationCreatesFirstRevisionTombstoneWithPayload(t *testing.T) {
 	}
 }
 
+func TestDecideOperationDoesNotResurrectCurrentTombstone(t *testing.T) {
+	deletedAt := time.Date(2026, time.July, 15, 7, 0, 0, 0, time.UTC)
+	current := &Entry{
+		ID: "entry", Revision: 4, Payload: json.RawMessage(`{"text":"deleted"}`),
+		DeletedAt: &deletedAt,
+	}
+	operation := Operation{
+		OperationID: "edit-after-delete", EntryID: "entry", BaseRevision: 4,
+		Payload: json.RawMessage(`{"text":"resurrected"}`),
+	}
+
+	decision, err := DecideOperation(current, operation, deletedAt.Add(time.Second))
+	if err != nil {
+		t.Fatalf("DecideOperation() error = %v", err)
+	}
+	if decision.Status != StatusConflict || decision.ServerSnapshot == nil ||
+		decision.ServerSnapshot.DeletedAt == nil || decision.Entry != nil {
+		t.Fatalf("edit after tombstone decision = %#v", decision)
+	}
+}
+
 func TestOperationFingerprintDetectsChangedReplay(t *testing.T) {
 	first := Operation{
 		OperationID:  "operation",

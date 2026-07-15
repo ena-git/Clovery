@@ -11,6 +11,7 @@ This checklist separates repository-complete work from cloud and provider accept
 - [x] Restore drill verifies the checksum, rejects the source database, requires a guarded `_restore` target, applies forward migrations, and records integrity counts.
 - [x] Smoke test verifies health plus protected metrics and stores the release SHA, immutable image digest, and payload hashes instead of URLs, tokens, or private data.
 - [x] Evidence manifest binds backup, restore, and smoke records to one release SHA and image digest.
+- [x] PostgreSQL integration tests prove paginated Vault-scoped change pulls, persisted conflicts, tombstones, and rejection of post-delete resurrection.
 - [x] `make verify-staging` runs all staging contracts and is included by `make verify-infra` in CI.
 
 ## Infrastructure required

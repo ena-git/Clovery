@@ -49,9 +49,11 @@ GET  /v1/vault/assets/{assetId}/download
 
 `push` 请求必须携带 `operation_id`、`base_revision`、实体 payload 和删除标记。服务端从 session 推导 Vault，不接受客户端提供的可任意替换 Vault ID。
 
-- [ ] **Step 4: 验证分页与冲突**
+- [x] **Step 4: 验证分页与冲突**
 
 使用两个测试账户设备并发创建、编辑和删除；确认分页完整、冲突表有记录、被删除条目不会在另一设备复活。
+
+验收证据：`pagination_conflict_integration_test.go` 在隔离 PostgreSQL 16 中验证跨 Vault cursor 间隔下的两页完整拉取、陈旧 revision 冲突落库、墓碑后普通编辑继续返回冲突，以及另一 Vault 的变更不可见。
 
 ### Task 2: 实现 Dart SyncEngine 与冲突 UI
 
