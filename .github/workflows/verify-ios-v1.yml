@@ -2,29 +2,9 @@ name: Verify Clovery Native iOS
 
 "on":
   pull_request:
-    paths:
-      - ".github/workflows/verify-ios-v1.yml"
-      - "Clovery/**"
-      - "CloveryTests/**"
-      - "CloveryWidget/**"
-      - "Clovery.xcodeproj/**"
-      - "CloveryWidgetExtension.entitlements"
-      - "Tests/**"
-      - "scripts/**"
-      - "docs/release/**"
   push:
     branches:
       - main
-    paths:
-      - ".github/workflows/verify-ios-v1.yml"
-      - "Clovery/**"
-      - "CloveryTests/**"
-      - "CloveryWidget/**"
-      - "Clovery.xcodeproj/**"
-      - "CloveryWidgetExtension.entitlements"
-      - "Tests/**"
-      - "scripts/**"
-      - "docs/release/**"
 
 permissions:
   contents: read

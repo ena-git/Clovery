@@ -19,6 +19,10 @@ if ! grep -Fq \
   echo "native iOS CI must pin Xcode 26.0.1" >&2
   exit 1
 fi
+if grep -Eq '^[[:space:]]+paths:' "$workflow"; then
+  echo "native iOS CI must validate every pull request head" >&2
+  exit 1
+fi
 
 "$repository_root/Tests/IOSReleaseIdentityNegativeTests.sh"
 "$checker"
