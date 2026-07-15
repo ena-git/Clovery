@@ -237,6 +237,48 @@ final class BoardStoreTests: XCTestCase {
         XCTAssertFalse(store.isUnlocked)
         XCTAssertEqual(requestCount, 2)
     }
+
+    func testRestoreDoesNotWaitForNonCooperativeSupersededQuery() async {
+        let entitlementGate = SequencedEntitlementGate()
+        let transaction = BoardTransaction.stub(productID: BoardStore.productID)
+        let store = BoardStore(
+            client: .stub(
+                currentEntitlementsOperation: { productID in
+                    await entitlementGate.currentEntitlements(for: productID)
+                },
+                purchaseResult: .success(transaction)
+            ),
+            observesUpdates: false,
+            refreshesOnInit: false
+        )
+
+        let purchaseOutcome = await store.purchase()
+        XCTAssertEqual(purchaseOutcome, .success)
+        XCTAssertTrue(store.isUnlocked)
+
+        let restoreCompleted = expectation(description: "restore completed without stale query")
+        var restoreOutcome: BoardRestoreOutcome?
+        let restoreTask = Task {
+            restoreOutcome = await store.restore()
+            restoreCompleted.fulfill()
+        }
+        await entitlementGate.waitForRequestCount(1)
+
+        let refreshTask = Task { await store.refresh() }
+        await entitlementGate.waitForRequestCount(2)
+
+        await entitlementGate.resumeRequest(2, returning: .verified([]))
+        await refreshTask.value
+
+        XCTAssertFalse(store.isUnlocked)
+        await fulfillment(of: [restoreCompleted], timeout: 0.5)
+        XCTAssertEqual(restoreOutcome, .notFound)
+        let requestCount = await entitlementGate.totalRequestCount()
+        XCTAssertEqual(requestCount, 2)
+
+        await entitlementGate.resumeRequestIfPending(1, returning: .verified([transaction]))
+        await restoreTask.value
+    }
 }
 
 private actor EntitlementGate {
@@ -317,6 +359,10 @@ private actor SequencedEntitlementGate {
             preconditionFailure("Entitlement request \(requestID) has not started")
         }
         continuation.resume(returning: result)
+    }
+
+    func resumeRequestIfPending(_ requestID: Int, returning result: BoardEntitlementResult) {
+        resultContinuations.removeValue(forKey: requestID)?.resume(returning: result)
     }
 
     func totalRequestCount() -> Int {

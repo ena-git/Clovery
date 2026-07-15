@@ -13,9 +13,33 @@ final class BoardStore: ObservableObject {
         case superseded
     }
 
+    @MainActor
+    private final class EntitlementRefreshSignal {
+        private var result: EntitlementRefreshResult?
+        private var continuations: [CheckedContinuation<EntitlementRefreshResult, Never>] = []
+
+        func value() async -> EntitlementRefreshResult {
+            if let result {
+                return result
+            }
+
+            return await withCheckedContinuation { continuation in
+                continuations.append(continuation)
+            }
+        }
+
+        func resolve(_ result: EntitlementRefreshResult) {
+            guard self.result == nil else { return }
+            self.result = result
+            let continuations = continuations
+            self.continuations.removeAll()
+            continuations.forEach { $0.resume(returning: result) }
+        }
+    }
+
     private struct EntitlementRefreshRequest {
         let generation: UInt64
-        let task: Task<EntitlementRefreshResult, Never>
+        let signal: EntitlementRefreshSignal
     }
 
     static let productID = "com.clovery.app.board.lifetime"
@@ -27,6 +51,7 @@ final class BoardStore: ObservableObject {
     private var updatesTask: Task<Void, Never>?
     private var stateGeneration: UInt64 = 0
     private var latestEntitlementRefreshRequest: EntitlementRefreshRequest?
+    private var entitlementRefreshWorkers: [UInt64: Task<Void, Never>] = [:]
     private var lastResolvedEntitlementState: ResolvedEntitlementState = .notFound
 
     init(
@@ -104,18 +129,22 @@ final class BoardStore: ObservableObject {
     }
 
     private func startEntitlementRefresh() -> EntitlementRefreshRequest {
+        supersedeLatestEntitlementRefreshRequest()
         let generation = advanceStateGeneration()
-        latestEntitlementRefreshRequest?.task.cancel()
+        let signal = EntitlementRefreshSignal()
+        let request = EntitlementRefreshRequest(generation: generation, signal: signal)
+        latestEntitlementRefreshRequest = request
         let client = client
         let productID = Self.productID
-        let task = Task<EntitlementRefreshResult, Never> { [weak self, client] in
+        entitlementRefreshWorkers[generation] = Task { [weak self, client] in
             let result = await client.currentEntitlements(productID)
-            guard !Task.isCancelled else { return .superseded }
-            guard let self else { return .superseded }
-            return self.applyEntitlementResult(result, generation: generation)
+            let wasCancelled = Task.isCancelled
+            self?.completeEntitlementRefresh(
+                result,
+                generation: generation,
+                wasCancelled: wasCancelled
+            )
         }
-        let request = EntitlementRefreshRequest(generation: generation, task: task)
-        latestEntitlementRefreshRequest = request
         return request
     }
 
@@ -124,7 +153,7 @@ final class BoardStore: ObservableObject {
     ) async -> ResolvedEntitlementState {
         var request = initialRequest
         while true {
-            switch await request.task.value {
+            switch await request.signal.value() {
             case .resolved(let state):
                 return state
             case .superseded:
@@ -135,6 +164,22 @@ final class BoardStore: ObservableObject {
                 request = latestRequest
             }
         }
+    }
+
+    private func completeEntitlementRefresh(
+        _ result: BoardEntitlementResult,
+        generation: UInt64,
+        wasCancelled: Bool
+    ) {
+        entitlementRefreshWorkers[generation] = nil
+        guard !wasCancelled,
+              generation == stateGeneration,
+              let request = latestEntitlementRefreshRequest,
+              request.generation == generation else {
+            return
+        }
+
+        request.signal.resolve(applyEntitlementResult(result, generation: generation))
     }
 
     private func applyEntitlementResult(
@@ -160,8 +205,7 @@ final class BoardStore: ObservableObject {
 
     private func recordResolvedEntitlementEvent(_ state: ResolvedEntitlementState) {
         advanceStateGeneration()
-        latestEntitlementRefreshRequest?.task.cancel()
-        latestEntitlementRefreshRequest = nil
+        supersedeLatestEntitlementRefreshRequest()
         lastResolvedEntitlementState = state
         switch state {
         case .active:
@@ -175,7 +219,13 @@ final class BoardStore: ObservableObject {
 
     private func supersedeEntitlementRefreshRequests() {
         advanceStateGeneration()
-        latestEntitlementRefreshRequest?.task.cancel()
+        supersedeLatestEntitlementRefreshRequest()
+    }
+
+    private func supersedeLatestEntitlementRefreshRequest() {
+        guard let request = latestEntitlementRefreshRequest else { return }
+        request.signal.resolve(.superseded)
+        entitlementRefreshWorkers.removeValue(forKey: request.generation)?.cancel()
         latestEntitlementRefreshRequest = nil
     }
 
@@ -187,6 +237,6 @@ final class BoardStore: ObservableObject {
 
     deinit {
         updatesTask?.cancel()
-        latestEntitlementRefreshRequest?.task.cancel()
+        entitlementRefreshWorkers.values.forEach { $0.cancel() }
     }
 }
