@@ -24,16 +24,15 @@ type appleCertificateFixture struct {
 
 func newAppleCertificateFixture(t *testing.T) appleCertificateFixture {
 	t.Helper()
-	now := time.Now().UTC()
 	rootKey := newCertificateKey(t)
-	rootTemplate := certificateTemplate(1, "Apple Test Root", now)
+	rootTemplate := certificateTemplate(1, "Apple Test Root")
 	rootTemplate.IsCA = true
 	rootTemplate.KeyUsage = x509.KeyUsageCertSign | x509.KeyUsageCRLSign
 	rootDER := createCertificate(t, rootTemplate, rootTemplate, &rootKey.PublicKey, rootKey)
 	rootCertificate := parseCertificate(t, rootDER)
 
 	intermediateKey := newCertificateKey(t)
-	intermediateTemplate := certificateTemplate(2, "Apple Test Intermediate", now)
+	intermediateTemplate := certificateTemplate(2, "Apple Test Intermediate")
 	intermediateTemplate.IsCA = true
 	intermediateTemplate.KeyUsage = x509.KeyUsageCertSign | x509.KeyUsageCRLSign
 	intermediateTemplate.ExtraExtensions = []pkix.Extension{appleOIDExtension(
@@ -45,7 +44,7 @@ func newAppleCertificateFixture(t *testing.T) appleCertificateFixture {
 	intermediateCertificate := parseCertificate(t, intermediateDER)
 
 	leafKey := newCertificateKey(t)
-	leafTemplate := certificateTemplate(3, "Apple Test Signing", now)
+	leafTemplate := certificateTemplate(3, "Apple Test Signing")
 	leafTemplate.KeyUsage = x509.KeyUsageDigitalSignature
 	leafTemplate.ExtraExtensions = []pkix.Extension{appleOIDExtension(
 		asn1.ObjectIdentifier{1, 2, 840, 113635, 100, 6, 11, 1},
@@ -99,10 +98,11 @@ func signedTransactionDoer(t *testing.T, signed string) HTTPDoer {
 	})
 }
 
-func certificateTemplate(serial int64, commonName string, now time.Time) *x509.Certificate {
+func certificateTemplate(serial int64, commonName string) *x509.Certificate {
 	return &x509.Certificate{
 		SerialNumber: big.NewInt(serial), Subject: pkix.Name{CommonName: commonName},
-		NotBefore: now.Add(-24 * time.Hour), NotAfter: now.Add(24 * time.Hour),
+		NotBefore:             time.Date(2000, time.January, 1, 0, 0, 0, 0, time.UTC),
+		NotAfter:              time.Date(2100, time.January, 1, 0, 0, 0, 0, time.UTC),
 		BasicConstraintsValid: true,
 	}
 }
