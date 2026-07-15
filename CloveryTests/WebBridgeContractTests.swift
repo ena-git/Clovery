@@ -12,7 +12,8 @@ final class WebBridgeContractTests: XCTestCase {
         let webViewSource = try source("Clovery/WebView.swift")
 
         for handler in [
-            "photoSave", "photoLoad", "photoGC", "icloud", "cloudkit", "migrationExport"
+            "photoSave", "photoLoad", "photoGC", "icloud", "cloudkit", "migrationExport",
+            "openAppSettings"
         ] {
             XCTAssertTrue(
                 webViewSource.contains("config.userContentController.add(context.coordinator, name: \"\(handler)\")"),
@@ -39,6 +40,14 @@ final class WebBridgeContractTests: XCTestCase {
         XCTAssertTrue(html.contains("clovery-photo-save-failed"))
         XCTAssertTrue(html.contains("照片未保存，请重试"))
         XCTAssertTrue(html.contains("retryPhotoLoad"))
+    }
+
+    func testPhotoPermissionRecoveryOpensSettingsWithoutDirectPhotoWrites() throws {
+        let webViewSource = try source("Clovery/WebView.swift")
+        let html = try source("Clovery/Clover Diary.html")
+
+        XCTAssertTrue(html.contains("messageHandlers?.openAppSettings?.postMessage"))
+        XCTAssertFalse(webViewSource.contains("PHPhotoLibrary.shared().performChanges"))
     }
 
     func testMigrationExportIsUserTriggeredAndReportsCounts() throws {

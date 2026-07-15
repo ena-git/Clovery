@@ -4,6 +4,7 @@ set -eu
 
 repository_root=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
 web_view="$repository_root/Clovery/WebView.swift"
+photo_library_saver="$repository_root/Clovery/PhotoLibrarySaver.swift"
 board_store="$repository_root/Clovery/BoardStore.swift"
 html="$repository_root/Clovery/Clover Diary.html"
 project="$repository_root/Clovery.xcodeproj/project.pbxproj"
@@ -34,8 +35,10 @@ reject_text() {
 
 reject_text "$web_view" '\\('
 reject_text "$web_view" "UIImageWriteToSavedPhotosAlbum"
-require_text "$web_view" "PHAssetCreationRequest.forAsset()"
+reject_text "$web_view" "PHPhotoLibrary.shared().performChanges"
+require_text "$web_view" 'config.userContentController.add(context.coordinator, name: "openAppSettings")'
 require_text "$web_view" "BridgeJavaScript.photoSaveResult(outcome)"
+require_text "$photo_library_saver" "PHAssetCreationRequest.forAsset()"
 
 require_text "$board_store" "func purchase() async -> BoardPurchaseOutcome"
 require_text "$board_store" "com.clovery.app.board.lifetime"
@@ -46,6 +49,7 @@ reject_text "$board_store" "isTestFlight"
 
 require_text "$html" "window.__clovery_imageSaveResult = (outcome) =>"
 require_text "$html" "saveError==='permissionDenied'"
+require_text "$html" "messageHandlers?.openAppSettings?.postMessage"
 reject_text "$html" "window.__clovery_imageSaved"
 
 require_text "$project" "INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription"

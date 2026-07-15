@@ -25,6 +25,7 @@
 		AABB0000000000000000006B /* MigrationBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000069 /* MigrationBundle.swift */; };
 		AABB0000000000000000006C /* MigrationBundleExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000006A /* MigrationBundleExporter.swift */; };
 		AABB0000000000000000006E /* PhotoLibrarySaver.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000006D /* PhotoLibrarySaver.swift */; };
+		AABB00000000000000000070 /* ImageExportService.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000006F /* ImageExportService.swift */; };
 		FCECDFE02FE92C7C0067AF51 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFDF2FE92C7C0067AF51 /* WidgetKit.framework */; };
 		FCECDFE22FE92C7C0067AF51 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFE12FE92C7C0067AF51 /* SwiftUI.framework */; };
 		FCECDFEF2FE92C7D0067AF51 /* CloveryWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -82,6 +83,7 @@
 		AABB00000000000000000069 /* MigrationBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationBundle.swift; sourceTree = "<group>"; };
 		AABB0000000000000000006A /* MigrationBundleExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationBundleExporter.swift; sourceTree = "<group>"; };
 		AABB0000000000000000006D /* PhotoLibrarySaver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoLibrarySaver.swift; sourceTree = "<group>"; };
+		AABB0000000000000000006F /* ImageExportService.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ImageExportService.swift; sourceTree = "<group>"; };
 		AACC00000000000000000001 /* CloveryTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CloveryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC889A182FD464C9002510AD /* Clovery.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Clovery.entitlements; sourceTree = "<group>"; };
 		FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CloveryWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -160,6 +162,7 @@
 				AABB00000000000000000069 /* MigrationBundle.swift */,
 				AABB0000000000000000006A /* MigrationBundleExporter.swift */,
 				AABB0000000000000000006D /* PhotoLibrarySaver.swift */,
+				AABB0000000000000000006F /* ImageExportService.swift */,
 				AABB0000000000000000000B /* Assets.xcassets */,
 				AABB0000000000000000000C /* Clover Diary.html */,
 				AABB0000000000000000001D /* app.compiled.js */,
@@ -352,6 +355,7 @@
 				AABB0000000000000000006B /* MigrationBundle.swift in Sources */,
 				AABB0000000000000000006C /* MigrationBundleExporter.swift in Sources */,
 				AABB0000000000000000006E /* PhotoLibrarySaver.swift in Sources */,
+				AABB00000000000000000070 /* ImageExportService.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

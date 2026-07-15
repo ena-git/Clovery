@@ -8541,9 +8541,21 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
         <div style={{flex:'0 0 auto', padding:'10px 28px calc(var(--sab) + 14px)',
           borderTop:`1px solid ${isDark?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)'}`,
           position:'relative'}}>
-          {(saved || saveError) && <div style={{position:'absolute', top:-22, left:0, right:0,
+          {(saved || saveError) && <div style={{position:'absolute',
+            top:saveError==='permissionDenied'?-54:-22, left:0, right:0,
+            display:'flex', flexDirection:'column', alignItems:'center',
             textAlign:'center', fontSize:13, color:saved?theme.accent:'#D45A4E', fontWeight:600}}>
             {saved ? T.saved : (saveError==='permissionDenied' ? T.savePermission : T.saveFailed)}
+            {saveError === 'permissionDenied' && (
+              <button type="button" onClick={() => {
+                window.webkit?.messageHandlers?.openAppSettings?.postMessage({});
+              }} style={{
+                marginTop:6, border:0, background:'transparent', color:theme.accentDark,
+                textDecoration:'underline', fontSize:13, fontWeight:600
+              }}>
+                {lang==='zh' ? '前往系统设置' : lang==='ja' ? '設定を開く' : lang==='ko' ? '설정 열기' : 'Open Settings'}
+              </button>
+            )}
           </div>}
           <div style={{display:'flex', gap:10}}>
             <SpringTap onClick={doSave} sfx="tap" style={{

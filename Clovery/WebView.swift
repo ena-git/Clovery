@@ -3,7 +3,6 @@ import WebKit
 import UIKit
 import UserNotifications
 import StoreKit
-import Photos
 import WidgetKit
 import OSLog
 
@@ -19,9 +18,14 @@ struct WebView: UIViewRepresentable {
             category: "Photos"
         )
         private let photoStore: PhotoStoring
+        private let imageExporter: ImageExporting
 
-        init(photoStore: PhotoStoring = PhotoStore()) {
+        init(
+            photoStore: PhotoStoring = PhotoStore(),
+            imageExporter: ImageExporting = ImageExportService()
+        ) {
             self.photoStore = photoStore
+            self.imageExporter = imageExporter
             super.init()
         }
 
@@ -89,7 +93,11 @@ struct WebView: UIViewRepresentable {
                 guard let body = message.body as? [String: Any],
                       let action = body["action"] as? String,
                       let dataURL = body["dataURL"] as? String else { return }
-                DispatchQueue.main.async { self.handleShareImage(action: action, dataURL: dataURL) }
+                imageExporter.handle(action: action, dataURL: dataURL) { [weak self] outcome in
+                    self?.reportPhotoSave(outcome)
+                }
+            } else if message.name == "openAppSettings" {
+                imageExporter.openSettings()
             } else if message.name == "checkBoardUnlocked" {
                 Task { @MainActor in
                     await BoardStore.shared.refresh()
@@ -292,74 +300,6 @@ struct WebView: UIViewRepresentable {
             if let scene = UIApplication.shared.connectedScenes
                 .first(where: { $0.activationState == .foregroundActive }) as? UIWindowScene {
                 SKStoreReviewController.requestReview(in: scene)
-            }
-        }
-
-        // MARK: Share Image
-        private func handleShareImage(action: String, dataURL: String) {
-            let prefix = "data:image/png;base64,"
-            guard dataURL.hasPrefix(prefix),
-                  let imageData = Data(base64Encoded: String(dataURL.dropFirst(prefix.count))),
-                  let image = UIImage(data: imageData) else {
-                if action == "save" {
-                    reportPhotoSave(.invalidImage)
-                }
-                return
-            }
-
-            switch action {
-            case "save":
-                saveImageDataToPhotos(imageData)
-            case "share":
-                // Write to a temp PNG file so WeChat (and other apps) can receive it correctly.
-                // Passing UIImage directly causes "发送异常" in WeChat's share extension.
-                let tempURL: URL = {
-                    let name = "clovery_\(Int(Date().timeIntervalSince1970)).png"
-                    let url = FileManager.default.temporaryDirectory.appendingPathComponent(name)
-                    try? image.pngData()?.write(to: url)
-                    return url
-                }()
-                let vc = UIActivityViewController(activityItems: [tempURL], applicationActivities: nil)
-                if let rootVC = UIApplication.shared.connectedScenes
-                    .compactMap({ $0 as? UIWindowScene })
-                    .flatMap({ $0.windows })
-                    .first(where: { $0.isKeyWindow })?.rootViewController {
-                    vc.popoverPresentationController?.sourceView = rootVC.view
-                    rootVC.present(vc, animated: true)
-                }
-            default: break
-            }
-        }
-
-        private func saveImageDataToPhotos(_ imageData: Data) {
-            PHPhotoLibrary.requestAuthorization(for: .addOnly) { [weak self] status in
-                guard let self else { return }
-
-                switch status {
-                case .authorized, .limited:
-                    PHPhotoLibrary.shared().performChanges {
-                        let request = PHAssetCreationRequest.forAsset()
-                        request.addResource(with: .photo, data: imageData, options: nil)
-                    } completionHandler: { success, error in
-                        if success {
-                            self.reportPhotoSave(.success)
-                        } else {
-                            self.photoLogger.error(
-                                "Photo save failed: \(error?.localizedDescription ?? "unknown error", privacy: .public)"
-                            )
-                            self.reportPhotoSave(.failed)
-                        }
-                    }
-                case .denied, .restricted:
-                    self.photoLogger.error("Photo add permission denied")
-                    self.reportPhotoSave(.permissionDenied)
-                case .notDetermined:
-                    self.photoLogger.error("Photo add permission remained undetermined")
-                    self.reportPhotoSave(.failed)
-                @unknown default:
-                    self.photoLogger.error("Unknown photo authorization status")
-                    self.reportPhotoSave(.failed)
-                }
             }
         }
 
@@ -815,6 +755,7 @@ struct WebView: UIViewRepresentable {
         config.userContentController.add(context.coordinator, name: "review")
         config.userContentController.add(context.coordinator, name: "icloud")
         config.userContentController.add(context.coordinator, name: "shareImage")
+        config.userContentController.add(context.coordinator, name: "openAppSettings")
         config.userContentController.add(context.coordinator, name: "checkBoardUnlocked")
         config.userContentController.add(context.coordinator, name: "purchaseBoard")
         config.userContentController.add(context.coordinator, name: "fetchBoardPrice")
