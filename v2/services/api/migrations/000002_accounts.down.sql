@@ -1,0 +1,9 @@
+DROP TABLE audit_events;
+DROP TABLE recovery_codes;
+DROP TABLE passkeys;
+DROP TABLE sessions;
+DROP TABLE devices;
+DROP TABLE external_identities;
+DROP TABLE vaults;
+DROP TABLE account_login_ids;
+DROP TABLE clovery_accounts;

@@ -21,6 +21,9 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
     ) -> Bool {
+        guard ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil else {
+            return true
+        }
         application.registerForRemoteNotifications()
         CloudKitSync.shared.setupSubscriptionIfNeeded()
         return true

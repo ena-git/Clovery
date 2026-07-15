@@ -1,0 +1,4 @@
+storeFile=/secure/path/clovery-android-release.jks
+storePassword=replace-outside-git
+keyAlias=clovery-release
+keyPassword=replace-outside-git

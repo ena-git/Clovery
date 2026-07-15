@@ -1,0 +1,173 @@
+{
+  "annotations": {
+    "list": []
+  },
+  "editable": false,
+  "panels": [
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "fieldConfig": {
+        "defaults": {
+          "unit": "ops"
+        },
+        "overrides": []
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 0,
+        "y": 0
+      },
+      "id": 1,
+      "targets": [
+        {
+          "expr": "sum(rate(clovery_migration_started_total[5m]))",
+          "legendFormat": "started",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(clovery_migration_completed_total[5m]))",
+          "legendFormat": "completed",
+          "refId": "B"
+        },
+        {
+          "expr": "sum(rate(clovery_migration_failed_total[5m]))",
+          "legendFormat": "failed",
+          "refId": "C"
+        }
+      ],
+      "title": "Migration Throughput",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 12,
+        "x": 12,
+        "y": 0
+      },
+      "id": 2,
+      "targets": [
+        {
+          "expr": "sum(increase(clovery_migration_validation_mismatch_total[1h]))",
+          "legendFormat": "validation mismatches",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(increase(clovery_sync_conflicts_total[1h]))",
+          "legendFormat": "sync conflicts",
+          "refId": "B"
+        }
+      ],
+      "title": "Integrity Signals",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 0,
+        "y": 8
+      },
+      "id": 3,
+      "targets": [
+        {
+          "expr": "sum(clovery_sync_backlog_operations)",
+          "legendFormat": "pending operations",
+          "refId": "A"
+        }
+      ],
+      "title": "Sync Backlog",
+      "type": "stat"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 8,
+        "y": 8
+      },
+      "id": 4,
+      "targets": [
+        {
+          "expr": "sum(rate(clovery_authentication_failures_total[5m]))",
+          "legendFormat": "authentication",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(rate(clovery_binding_failures_total[5m]))",
+          "legendFormat": "binding",
+          "refId": "B"
+        }
+      ],
+      "title": "Identity Failures",
+      "type": "timeseries"
+    },
+    {
+      "datasource": {
+        "type": "prometheus",
+        "uid": "${DS_PROMETHEUS}"
+      },
+      "gridPos": {
+        "h": 8,
+        "w": 8,
+        "x": 16,
+        "y": 8
+      },
+      "id": 5,
+      "targets": [
+        {
+          "expr": "sum(increase(clovery_device_revocations_total[1h]))",
+          "legendFormat": "device revocations",
+          "refId": "A"
+        },
+        {
+          "expr": "sum(increase(clovery_billing_restores_total[1h]))",
+          "legendFormat": "billing restores",
+          "refId": "B"
+        }
+      ],
+      "title": "Recovery Operations",
+      "type": "timeseries"
+    }
+  ],
+  "schemaVersion": 41,
+  "tags": [
+    "clovery",
+    "beta",
+    "migration"
+  ],
+  "templating": {
+    "list": [
+      {
+        "current": {},
+        "label": "Prometheus",
+        "name": "DS_PROMETHEUS",
+        "query": "prometheus",
+        "type": "datasource"
+      }
+    ]
+  },
+  "time": {
+    "from": "now-6h",
+    "to": "now"
+  },
+  "title": "Clovery Beta Migration",
+  "uid": "clovery-beta-migration",
+  "version": 1
+}

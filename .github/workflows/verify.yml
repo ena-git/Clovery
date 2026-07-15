@@ -1,0 +1,76 @@
+name: Verify Clovery V2
+
+on:
+  pull_request:
+    paths:
+      - ".github/workflows/verify.yml"
+      - "docs/release/**"
+      - "v2/**"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/verify.yml"
+      - "docs/release/**"
+      - "v2/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-v2-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Go, OpenAPI, and migrations
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: clovery
+          POSTGRES_USER: clovery
+          POSTGRES_PASSWORD: clovery_dev_only
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U clovery -d clovery"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: v2/services/api/go.mod
+          cache-dependency-path: v2/services/api/go.sum
+      - name: Download Go modules
+        working-directory: v2/services/api
+        run: go mod download
+      - name: Verify backend
+        working-directory: v2
+        run: make verify-api verify-contract verify-migrations
+
+  mobile:
+    name: Flutter tests and analysis
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: subosito/flutter-action@v2
+        with:
+          flutter-version: "3.41.4"
+          channel: stable
+          cache: true
+      - name: Verify Flutter client
+        working-directory: v2
+        run: make verify-mobile
+
+  release-identity:
+    name: Store identity and infrastructure
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Verify release identities
+        working-directory: v2
+        run: make verify-release verify-infra

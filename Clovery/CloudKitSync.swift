@@ -28,8 +28,7 @@ class CloudKitSync {
     /// Registers a CKQuerySubscription (once) so other devices' writes trigger
     /// a silent push to this device instead of only syncing on next launch.
     func setupSubscriptionIfNeeded() {
-        let defaults = UserDefaults.standard
-        guard !defaults.bool(forKey: "clovery_ck_subscribed") else { return }
+        guard !UserDefaults.standard.bool(forKey: "clovery_ck_subscribed") else { return }
 
         let subscription = CKQuerySubscription(
             recordType: recordType,
@@ -43,9 +42,11 @@ class CloudKitSync {
 
         db.save(subscription) { _, error in
             if let error = error {
-                print("[Clovery CloudKit] subscription setup failed: \\(error.localizedDescription)")
+                print("[Clovery CloudKit] subscription setup failed: \(error.localizedDescription)")
             } else {
-                defaults.set(true, forKey: "clovery_ck_subscribed")
+                Task { @MainActor in
+                    UserDefaults.standard.set(true, forKey: "clovery_ck_subscribed")
+                }
             }
         }
     }
@@ -81,7 +82,7 @@ class CloudKitSync {
         op.savePolicy = .changedKeys
         op.modifyRecordsResultBlock = { result in
             if case .failure(let error) = result {
-                print("[Clovery CloudKit] push failed for \\(id): \\(error.localizedDescription)")
+                print("[Clovery CloudKit] push failed for \(id): \(error.localizedDescription)")
             }
         }
         db.add(op)
@@ -103,7 +104,7 @@ class CloudKitSync {
         }
         operation.queryResultBlock = { result in
             if case .failure(let error) = result {
-                print("[Clovery CloudKit] pull failed: \\(error.localizedDescription)")
+                print("[Clovery CloudKit] pull failed: \(error.localizedDescription)")
             }
             DispatchQueue.main.async { completion(results) }
         }
@@ -127,7 +128,15 @@ class CloudKitSync {
                 let destName = names[i]
                 let destURL = photosDir.appendingPathComponent(destName)
                 if !FileManager.default.fileExists(atPath: destURL.path) {
-                    try? FileManager.default.copyItem(at: sourceURL, to: destURL)
+                    do {
+                        try FileManager.default.copyItem(at: sourceURL, to: destURL)
+                    } catch {
+                        print(
+                            "[Clovery CloudKit] photo copy failed for \(record.recordID.recordName) "
+                            + "(\(destName)): \(error.localizedDescription)"
+                        )
+                        continue
+                    }
                 }
                 savedNames.append(destName)
             }

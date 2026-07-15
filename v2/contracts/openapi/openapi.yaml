@@ -1,0 +1,1772 @@
+openapi: 3.1.0
+info:
+  title: Clovery API
+  version: 0.1.0
+  description: Versioned contract shared by Clovery clients and the Go API.
+paths:
+  /v1/health:
+    get:
+      operationId: getHealth
+      summary: Report API process health
+      responses:
+        "200":
+          description: The API process is ready to serve requests.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/HealthResponse"
+  /v1/auth/accounts:
+    post:
+      operationId: createCloveryAccount
+      summary: Create a Clovery root account and private Vault
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/CreateAccountRequest"
+      responses:
+        "201":
+          description: Account created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSessionResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/auth/password/login:
+    post:
+      operationId: loginWithCloveryPassword
+      summary: Authenticate with Clovery ID and password
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasswordLoginRequest"
+      responses:
+        "200":
+          description: Authentication succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSessionResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/auth/password/reset/start:
+    post:
+      operationId: startPasswordReset
+      summary: Start a password reset with an approved recovery method
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasswordResetStartRequest"
+      responses:
+        "202":
+          description: A generic reset intent was created when eligible.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PasswordResetStartResponse"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/auth/password/reset/complete:
+    post:
+      operationId: completePasswordReset
+      summary: Complete a password reset and revoke prior refresh sessions
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasswordResetCompleteRequest"
+      responses:
+        "204":
+          description: Password changed and prior refresh sessions revoked.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/auth/recovery-codes:
+    post:
+      operationId: createRecoveryCodes
+      summary: Replace recovery codes after recent reauthentication
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecentReauthenticationRequest"
+      responses:
+        "201":
+          description: New one-time recovery codes; shown only in this response.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecoveryCodesResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /v1/auth/recovery-codes/consume:
+    post:
+      operationId: consumeRecoveryCode
+      summary: Consume one recovery code for account recovery
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RecoveryCodeConsumeRequest"
+      responses:
+        "200":
+          description: Recovery code accepted and a short-lived proof returned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/RecoveryProofResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/auth/sessions/refresh:
+    post:
+      operationId: refreshSession
+      summary: Rotate a refresh token and issue a new session token pair
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/RefreshSessionRequest"
+      responses:
+        "200":
+          description: Refresh token rotated successfully.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSessionResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "429":
+          $ref: "#/components/responses/RateLimited"
+  /v1/auth/federated/{provider}/start:
+    post:
+      operationId: startFederatedLogin
+      summary: Start a one-time federated login intent
+      parameters:
+        - $ref: "#/components/parameters/IdentityProvider"
+      responses:
+        "201":
+          description: Federated login intent created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FederationIntentResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+  /v1/auth/federated/{provider}/complete:
+    post:
+      operationId: completeFederatedLogin
+      summary: Verify a federated identity already bound to a Clovery account
+      parameters:
+        - $ref: "#/components/parameters/IdentityProvider"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/FederatedLoginCompleteRequest"
+      responses:
+        "200":
+          description: Federated login succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSessionResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /v1/auth/passkeys/login/start:
+    post:
+      operationId: startPasskeyLogin
+      summary: Start discoverable Passkey login without preselecting an account
+      responses:
+        "201":
+          description: Passkey assertion challenge created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PasskeyCeremonyResponse"
+  /v1/auth/passkeys/login/complete:
+    post:
+      operationId: completePasskeyLogin
+      summary: Verify a discoverable Passkey and create a Clovery session
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasskeyLoginCompleteRequest"
+      responses:
+        "200":
+          description: Passkey login succeeded.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthSessionResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /v1/account/bindings/start:
+    post:
+      operationId: startFederatedBinding
+      summary: Start binding a new provider to the current Clovery account
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BindingStartRequest"
+      responses:
+        "201":
+          description: Session-bound identity binding intent created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FederationIntentResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+  /v1/account/bindings/complete:
+    post:
+      operationId: completeFederatedBinding
+      summary: Verify and bind a new provider identity to the current account
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/BindingCompleteRequest"
+      responses:
+        "204":
+          description: Identity binding completed.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /v1/account/passkeys/registration/start:
+    post:
+      operationId: startPasskeyRegistration
+      summary: Start adding a Passkey after recent Clovery authentication
+      security:
+        - bearerAuth: []
+      responses:
+        "201":
+          description: Session-bound Passkey registration challenge created.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/PasskeyCeremonyResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /v1/account/passkeys/registration/complete:
+    post:
+      operationId: completePasskeyRegistration
+      summary: Verify and store a new Passkey credential
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/PasskeyRegistrationCompleteRequest"
+      responses:
+        "204":
+          description: Passkey registered.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /v1/account/bindings/{provider}:
+    delete:
+      operationId: removeFederatedBinding
+      summary: Remove one provider after recent authentication and recovery-safety checks
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/IdentityProvider"
+      responses:
+        "204":
+          description: Identity binding removed.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /v1/account:
+    get:
+      operationId: getCurrentAccount
+      summary: Return the authenticated Clovery root account and recovery overview
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Current root account profile.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /v1/account/devices:
+    get:
+      operationId: listCurrentAccountDevices
+      summary: List devices belonging to the authenticated Clovery account
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Account-scoped device list.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeviceListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /v1/account/devices/{deviceId}:
+    delete:
+      operationId: revokeCurrentAccountDevice
+      summary: Revoke one account device and all sessions attached to it
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/DeviceId"
+      responses:
+        "204":
+          description: Device and attached sessions revoked.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /v1/account/deletion-requests:
+    post:
+      operationId: requestCurrentAccountDeletion
+      summary: Lock the account, revoke sessions, and schedule retained-data deletion
+      security:
+        - bearerAuth: []
+      responses:
+        "202":
+          description: Existing or newly created pending deletion request.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/DeletionRequestResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /v1/account/entitlements:
+    get:
+      operationId: listCurrentAccountEntitlements
+      summary: List server-verified entitlements owned by the authenticated Clovery account
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Account-scoped entitlement ledger state.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EntitlementListResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /v1/billing/apple/notifications:
+    post:
+      operationId: processAppleServerNotification
+      summary: Verify and idempotently apply an App Store Server Notification V2 payload
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppleNotificationRequest"
+      responses:
+        "204":
+          description: The signed notification was processed or safely ignored.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "500":
+          description: The notification was not persisted; Apple should retry it.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /v1/billing/apple/transactions/verify:
+    post:
+      operationId: verifyAppleTransaction
+      summary: Fetch and verify one Apple transaction before updating the entitlement ledger
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppleTransactionVerifyRequest"
+      responses:
+        "200":
+          description: Current entitlement derived from the verified transaction.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Entitlement"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          description: Apple returned a transaction that failed cryptographic or claim validation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Apple verification is temporarily unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /v1/billing/apple/legacy-claims:
+    post:
+      operationId: claimLegacyAppleTransaction
+      summary: Verify StoreKit proof and safely bind a V1 purchase to the authenticated Clovery account
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppleLegacyClaimRequest"
+      responses:
+        "200":
+          description: Current entitlement after the historical purchase is safely claimed.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Entitlement"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          description: The StoreKit proof or reassigned transaction failed verification.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Apple verification or account-token assignment is temporarily unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /v1/billing/apple/restore:
+    post:
+      operationId: restoreAppleTransactions
+      summary: Reverify Apple transactions and return root-account entitlements
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AppleRestoreRequest"
+      responses:
+        "200":
+          description: Current root-account entitlements after restore.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/EntitlementListResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          description: At least one Apple transaction failed cryptographic or claim validation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+        "503":
+          description: Apple verification is temporarily unavailable.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
+  /v1/vault:
+    get:
+      operationId: getCurrentVault
+      summary: Return metadata for the Vault in the authenticated account claims
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Authenticated private Vault metadata.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/VaultResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+  /v1/vault/sync/push:
+    post:
+      operationId: pushVaultChanges
+      summary: Idempotently apply journal operations to the authenticated Vault
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        description: The complete encoded JSON request body is limited to 8388608 bytes.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/SyncPushRequest"
+      responses:
+        "200":
+          description: Per-operation applied or conflict results.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SyncPushResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /v1/vault/sync/pull:
+    get:
+      operationId: pullVaultChanges
+      summary: Pull an ordered page of changes after a durable cursor
+      security:
+        - bearerAuth: []
+      parameters:
+        - name: cursor
+          in: query
+          schema:
+            type: integer
+            format: int64
+            minimum: 0
+            default: 0
+        - name: limit
+          in: query
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 500
+            default: 100
+      responses:
+        "200":
+          description: Ordered Vault change page.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/SyncPullResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+  /v1/vault/assets/uploads:
+    post:
+      operationId: startVaultAssetUpload
+      summary: Create an idempotent private asset record and a short-lived upload URL
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AssetUploadRequest"
+      responses:
+        "201":
+          description: Private upload ticket.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssetUploadResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /v1/vault/assets/{assetId}/complete:
+    post:
+      operationId: completeVaultAssetUpload
+      summary: Read the uploaded object and verify its byte size and SHA-256 before completion
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/AssetId"
+      responses:
+        "204":
+          description: Asset verified and completed.
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+  /v1/vault/assets/{assetId}/download:
+    get:
+      operationId: downloadVaultAsset
+      summary: Create a short-lived private download URL for a completed asset
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/AssetId"
+      responses:
+        "200":
+          description: Private download ticket.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssetDownloadResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
+  /v1/vault/migrations:
+    post:
+      operationId: createVaultMigration
+      summary: Create an idempotent V1 or legacy CloudKit migration
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        description: The complete encoded JSON request body is limited to 25165824 bytes.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MigrationCreateRequest"
+      responses:
+        "201":
+          description: Migration created or existing matching migration returned.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MigrationResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /v1/vault/migrations/{migrationId}/entries:
+    post:
+      operationId: addVaultMigrationEntry
+      summary: Add one integrity-checked journal entry to a pending migration
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/MigrationId"
+      requestBody:
+        required: true
+        description: The complete encoded JSON request body is limited to 16777216 bytes.
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MigrationEntryRequest"
+      responses:
+        "204":
+          description: Entry accepted idempotently.
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /v1/vault/migrations/{migrationId}/assets:
+    post:
+      operationId: addVaultMigrationAsset
+      summary: Register one migration photo and return a private upload ticket
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/MigrationId"
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/MigrationAssetRequest"
+      responses:
+        "201":
+          description: Migration asset upload ticket.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AssetUploadResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /v1/vault/migrations/{migrationId}/verify:
+    post:
+      operationId: verifyVaultMigration
+      summary: Verify all counts, bytes, hashes and assets before atomically importing entries
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/MigrationId"
+      responses:
+        "200":
+          description: Verified migration report.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MigrationReport"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "409":
+          $ref: "#/components/responses/Conflict"
+        "422":
+          $ref: "#/components/responses/UnprocessableEntity"
+        "503":
+          $ref: "#/components/responses/ServiceUnavailable"
+  /v1/vault/migrations/{migrationId}/report:
+    get:
+      operationId: getVaultMigrationReport
+      summary: Return an account-scoped migration report
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/MigrationId"
+      responses:
+        "200":
+          description: Migration report.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MigrationReport"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    IdentityProvider:
+      name: provider
+      in: path
+      required: true
+      schema:
+        $ref: "#/components/schemas/IdentityProvider"
+    DeviceId:
+      name: deviceId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    AssetId:
+      name: assetId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    MigrationId:
+      name: migrationId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  responses:
+    BadRequest:
+      description: The request is invalid.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Conflict:
+      description: The requested identifier or binding is unavailable.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Unauthorized:
+      description: Authentication failed without revealing account existence.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    Forbidden:
+      description: The authenticated account does not own the requested resource.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    NotFound:
+      description: The account-scoped resource was not found.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    RateLimited:
+      description: Too many attempts; retry after the response delay.
+      headers:
+        Retry-After:
+          schema:
+            type: integer
+            minimum: 1
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    UnprocessableEntity:
+      description: The request is well-formed but failed integrity or business validation.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+    ServiceUnavailable:
+      description: The operation is temporarily disabled or its dependency is unavailable.
+      content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/ErrorResponse"
+  schemas:
+    CloveryAccountId:
+      type: string
+      format: uuid
+      description: Permanent Clovery root account identifier.
+    VaultId:
+      type: string
+      format: uuid
+      description: Private data vault owned by exactly one Clovery account.
+    IdentityProvider:
+      type: string
+      enum: [apple, google, huawei, wechat, qq]
+    CloveryLoginId:
+      type: string
+      pattern: "^[a-z][a-z0-9_]{3,23}$"
+      description: User-selected, normalized Clovery login ID.
+    CreateAccountRequest:
+      type: object
+      additionalProperties: false
+      required: [login_id, password, recovery_method, device]
+      properties:
+        login_id:
+          $ref: "#/components/schemas/CloveryLoginId"
+        password:
+          type: string
+          minLength: 12
+          maxLength: 256
+          writeOnly: true
+        recovery_method:
+          type: string
+          enum: [passkey, recovery_email, recovery_codes]
+        device:
+          $ref: "#/components/schemas/DeviceRegistration"
+    PasswordLoginRequest:
+      type: object
+      additionalProperties: false
+      required: [login_id, password, device]
+      properties:
+        login_id:
+          type: string
+        password:
+          type: string
+          writeOnly: true
+        device:
+          $ref: "#/components/schemas/DeviceRegistration"
+    DeviceRegistration:
+      type: object
+      additionalProperties: false
+      required: [device_id, platform, display_name]
+      properties:
+        device_id:
+          type: string
+          format: uuid
+        platform:
+          type: string
+          enum: [ios, android, harmonyos]
+        display_name:
+          type: string
+          minLength: 1
+          maxLength: 120
+    AuthSessionResponse:
+      type: object
+      additionalProperties: false
+      required: [account_id, vault_id, access_token, access_token_expires_in, refresh_token]
+      properties:
+        account_id:
+          $ref: "#/components/schemas/CloveryAccountId"
+        vault_id:
+          $ref: "#/components/schemas/VaultId"
+        access_token:
+          type: string
+          writeOnly: true
+        access_token_expires_in:
+          type: integer
+          minimum: 1
+        refresh_token:
+          type: string
+          writeOnly: true
+        recovery_codes:
+          type: array
+          minItems: 8
+          maxItems: 8
+          items:
+            type: string
+          writeOnly: true
+    PasswordResetStartRequest:
+      type: object
+      additionalProperties: false
+      required: [login_id, recovery_method]
+      properties:
+        login_id:
+          type: string
+        recovery_method:
+          type: string
+          enum: [passkey, recovery_email, recovery_code]
+    PasswordResetStartResponse:
+      type: object
+      additionalProperties: false
+      required: [accepted, expires_in]
+      properties:
+        accepted:
+          type: boolean
+          const: true
+        reset_intent_id:
+          type: string
+          format: uuid
+        challenge:
+          type: string
+          writeOnly: true
+        expires_in:
+          type: integer
+          minimum: 1
+    PasswordResetCompleteRequest:
+      type: object
+      additionalProperties: false
+      required: [reset_intent_id, proof, new_password]
+      properties:
+        reset_intent_id:
+          type: string
+          format: uuid
+        proof:
+          type: string
+          writeOnly: true
+        new_password:
+          type: string
+          minLength: 12
+          maxLength: 256
+          writeOnly: true
+    RecentReauthenticationRequest:
+      type: object
+      additionalProperties: false
+      required: [reauthentication_proof]
+      properties:
+        reauthentication_proof:
+          type: string
+          writeOnly: true
+    RecoveryCodesResponse:
+      type: object
+      additionalProperties: false
+      required: [codes]
+      properties:
+        codes:
+          type: array
+          minItems: 8
+          maxItems: 8
+          items:
+            type: string
+          writeOnly: true
+    RecoveryCodeConsumeRequest:
+      type: object
+      additionalProperties: false
+      required: [login_id, recovery_code]
+      properties:
+        login_id:
+          type: string
+        recovery_code:
+          type: string
+          writeOnly: true
+    RecoveryProofResponse:
+      type: object
+      additionalProperties: false
+      required: [reset_intent_id, recovery_proof, expires_in]
+      properties:
+        reset_intent_id:
+          type: string
+          format: uuid
+        recovery_proof:
+          type: string
+          writeOnly: true
+        expires_in:
+          type: integer
+          minimum: 1
+    RefreshSessionRequest:
+      type: object
+      additionalProperties: false
+      required: [refresh_token]
+      properties:
+        refresh_token:
+          type: string
+          minLength: 32
+          writeOnly: true
+    FederationIntentResponse:
+      type: object
+      additionalProperties: false
+      required: [intent_id, provider, nonce, expires_in]
+      properties:
+        intent_id:
+          type: string
+          format: uuid
+        provider:
+          $ref: "#/components/schemas/IdentityProvider"
+        nonce:
+          type: string
+          minLength: 32
+          writeOnly: true
+        expires_in:
+          type: integer
+          minimum: 1
+    FederatedLoginCompleteRequest:
+      type: object
+      additionalProperties: false
+      required: [intent_id, nonce, authorization_code, device]
+      properties:
+        intent_id:
+          type: string
+          format: uuid
+        nonce:
+          type: string
+          writeOnly: true
+        authorization_code:
+          type: string
+          writeOnly: true
+        device:
+          $ref: "#/components/schemas/DeviceRegistration"
+    BindingStartRequest:
+      type: object
+      additionalProperties: false
+      required: [provider]
+      properties:
+        provider:
+          $ref: "#/components/schemas/IdentityProvider"
+    BindingCompleteRequest:
+      type: object
+      additionalProperties: false
+      required: [intent_id, provider, nonce, authorization_code]
+      properties:
+        intent_id:
+          type: string
+          format: uuid
+        provider:
+          $ref: "#/components/schemas/IdentityProvider"
+        nonce:
+          type: string
+          writeOnly: true
+        authorization_code:
+          type: string
+          writeOnly: true
+    PasskeyCeremonyResponse:
+      type: object
+      additionalProperties: false
+      required: [challenge_id, options, expires_in]
+      properties:
+        challenge_id:
+          type: string
+          format: uuid
+        options:
+          type: object
+          additionalProperties: true
+        expires_in:
+          type: integer
+          minimum: 1
+    PasskeyLoginCompleteRequest:
+      type: object
+      additionalProperties: false
+      required: [challenge_id, response, device]
+      properties:
+        challenge_id:
+          type: string
+          format: uuid
+        response:
+          type: object
+          additionalProperties: true
+        device:
+          $ref: "#/components/schemas/DeviceRegistration"
+    PasskeyRegistrationCompleteRequest:
+      type: object
+      additionalProperties: false
+      required: [challenge_id, response]
+      properties:
+        challenge_id:
+          type: string
+          format: uuid
+        response:
+          type: object
+          additionalProperties: true
+        device_metadata:
+          type: object
+          additionalProperties: true
+    AccountBinding:
+      type: object
+      additionalProperties: false
+      required: [provider, issuer, created_at]
+      properties:
+        provider:
+          $ref: "#/components/schemas/IdentityProvider"
+        issuer:
+          type: string
+        created_at:
+          type: string
+          format: date-time
+    AccountResponse:
+      type: object
+      additionalProperties: false
+      required:
+        [account_id, clovery_id, status, created_at, has_password, passkey_count, recovery_codes_remaining, bindings]
+      properties:
+        account_id:
+          $ref: "#/components/schemas/CloveryAccountId"
+        clovery_id:
+          $ref: "#/components/schemas/CloveryLoginId"
+        status:
+          type: string
+          enum: [active, deletion_requested, deleting, deleted]
+        created_at:
+          type: string
+          format: date-time
+        has_password:
+          type: boolean
+        passkey_count:
+          type: integer
+          minimum: 0
+        recovery_codes_remaining:
+          type: integer
+          minimum: 0
+        bindings:
+          type: array
+          items:
+            $ref: "#/components/schemas/AccountBinding"
+    Device:
+      type: object
+      additionalProperties: false
+      required: [device_id, display_name, platform, created_at, current]
+      properties:
+        device_id:
+          type: string
+          format: uuid
+        display_name:
+          type: string
+        platform:
+          type: string
+          enum: [ios, android, harmonyos]
+        created_at:
+          type: string
+          format: date-time
+        revoked_at:
+          type: [string, "null"]
+          format: date-time
+        current:
+          type: boolean
+    DeviceListResponse:
+      type: object
+      additionalProperties: false
+      required: [devices]
+      properties:
+        devices:
+          type: array
+          items:
+            $ref: "#/components/schemas/Device"
+    VaultResponse:
+      type: object
+      additionalProperties: false
+      required: [vault_id, status, created_at]
+      properties:
+        vault_id:
+          $ref: "#/components/schemas/VaultId"
+        status:
+          type: string
+          enum: [active, locked, deleting, deleted]
+        created_at:
+          type: string
+          format: date-time
+    DeletionRequestResponse:
+      type: object
+      additionalProperties: false
+      required: [request_id, status, requested_at, scheduled_for]
+      properties:
+        request_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [pending, processing, completed, cancelled]
+        requested_at:
+          type: string
+          format: date-time
+        scheduled_for:
+          type: string
+          format: date-time
+    SyncOperation:
+      type: object
+      additionalProperties: false
+      required: [operation_id, entry_id, base_revision, payload, deleted]
+      properties:
+        operation_id:
+          type: string
+          format: uuid
+        entry_id:
+          type: string
+          format: uuid
+        base_revision:
+          type: integer
+          format: int64
+          minimum: 0
+        payload:
+          type: object
+          additionalProperties: true
+        deleted:
+          type: boolean
+    SyncPushRequest:
+      type: object
+      additionalProperties: false
+      required: [operations]
+      properties:
+        operations:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            $ref: "#/components/schemas/SyncOperation"
+    JournalEntrySnapshot:
+      type: object
+      additionalProperties: false
+      required: [entry_id, revision, payload]
+      properties:
+        entry_id:
+          type: string
+          format: uuid
+        revision:
+          type: integer
+          format: int64
+          minimum: 1
+        payload:
+          type: object
+          additionalProperties: true
+        deleted_at:
+          type: string
+          format: date-time
+    SyncDecision:
+      type: object
+      additionalProperties: false
+      required: [operation_id, status]
+      properties:
+        operation_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [applied, conflict]
+        entry:
+          $ref: "#/components/schemas/JournalEntrySnapshot"
+        server_snapshot:
+          $ref: "#/components/schemas/JournalEntrySnapshot"
+        cursor:
+          type: integer
+          format: int64
+          minimum: 1
+    SyncPushResponse:
+      type: object
+      additionalProperties: false
+      required: [results]
+      properties:
+        results:
+          type: array
+          items:
+            $ref: "#/components/schemas/SyncDecision"
+    SyncChange:
+      type: object
+      additionalProperties: false
+      required: [cursor, entity_type, entity_id, revision, operation_id, payload, deleted, changed_at]
+      properties:
+        cursor:
+          type: integer
+          format: int64
+          minimum: 1
+        entity_type:
+          type: string
+          const: journal_entry
+        entity_id:
+          type: string
+          format: uuid
+        revision:
+          type: integer
+          format: int64
+          minimum: 1
+        operation_id:
+          type: string
+          format: uuid
+        payload:
+          type: object
+          additionalProperties: true
+        deleted:
+          type: boolean
+        changed_at:
+          type: string
+          format: date-time
+    SyncPullResponse:
+      type: object
+      additionalProperties: false
+      required: [changes, next_cursor, has_more]
+      properties:
+        changes:
+          type: array
+          items:
+            $ref: "#/components/schemas/SyncChange"
+        next_cursor:
+          type: integer
+          format: int64
+          minimum: 0
+        has_more:
+          type: boolean
+    AssetUploadRequest:
+      type: object
+      additionalProperties: false
+      required: [asset_id, content_type, byte_size, sha256]
+      properties:
+        asset_id:
+          type: string
+          format: uuid
+        content_type:
+          type: string
+          enum: [image/jpeg, image/png, image/heic, image/heif, image/webp]
+        byte_size:
+          type: integer
+          format: int64
+          minimum: 1
+          maximum: 52428800
+        sha256:
+          type: string
+          pattern: "^[a-f0-9]{64}$"
+    AssetUploadResponse:
+      type: object
+      additionalProperties: false
+      required: [asset_id, status]
+      properties:
+        asset_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [upload_required, complete]
+        upload_url:
+          type: string
+          format: uri
+        required_headers:
+          type: object
+          additionalProperties:
+            type: string
+        expires_at:
+          type: string
+          format: date-time
+    AssetDownloadResponse:
+      type: object
+      additionalProperties: false
+      required: [asset_id, download_url, expires_at]
+      properties:
+        asset_id:
+          type: string
+          format: uuid
+        download_url:
+          type: string
+          format: uri
+        expires_at:
+          type: string
+          format: date-time
+    MigrationCreateRequest:
+      type: object
+      additionalProperties: false
+      required:
+        - migration_id
+        - format_version
+        - source
+        - entry_count
+        - asset_count
+        - total_bytes
+        - manifest_sha256
+        - manifest_base64
+      properties:
+        migration_id:
+          type: string
+          format: uuid
+        format_version:
+          type: integer
+          enum: [1]
+        source:
+          type: string
+          enum: [v1_bundle, legacy_cloudkit]
+        entry_count:
+          type: integer
+          minimum: 0
+        asset_count:
+          type: integer
+          minimum: 0
+        total_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Canonical active-entry payload bytes, two bytes for each deleted-entry tombstone, plus asset bytes.
+        manifest_sha256:
+          type: string
+          pattern: "^[a-f0-9]{64}$"
+          description: SHA-256 of the exact decoded manifest.json bytes.
+        manifest_base64:
+          type: string
+          format: byte
+          maxLength: 16777216
+          description: Exact bytes of manifest.json encoded as base64. The manifest must bind the raw entries/deleted-ID files and every active entry by source ID, SHA-256, and canonical byte length.
+    MigrationResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - migration_id
+        - format_version
+        - source
+        - entry_count
+        - deleted_count
+        - asset_count
+        - total_bytes
+        - manifest_sha256
+        - status
+        - created_at
+      properties:
+        migration_id:
+          type: string
+          format: uuid
+        format_version:
+          type: integer
+        source:
+          type: string
+        entry_count:
+          type: integer
+        deleted_count:
+          type: integer
+          minimum: 0
+        asset_count:
+          type: integer
+        total_bytes:
+          type: integer
+          format: int64
+        manifest_sha256:
+          type: string
+        status:
+          type: string
+          enum: [uploading, verified, failed]
+        created_at:
+          type: string
+          format: date-time
+    MigrationEntryRequest:
+      type: object
+      additionalProperties: false
+      required: [entry_id, payload, sha256]
+      properties:
+        entry_id:
+          type: string
+          maxLength: 256
+          pattern: "^[A-Za-z0-9][A-Za-z0-9._:-]{0,255}$"
+          description: Stable V1 source entry ID. UUID values are preserved; legacy values such as new-1720000000000 are deterministically mapped inside the Vault.
+        payload:
+          type: object
+          additionalProperties: true
+        deleted_at:
+          type: string
+          format: date-time
+          nullable: true
+        sha256:
+          type: string
+          pattern: "^[a-f0-9]{64}$"
+    MigrationAssetRequest:
+      type: object
+      additionalProperties: false
+      required: [asset_id, source_filename, content_type, byte_size, sha256]
+      properties:
+        asset_id:
+          type: string
+          format: uuid
+        source_filename:
+          type: string
+          pattern: "^[A-Za-z0-9-]+\\.jpg$"
+          description: Filename that must exactly match one photo in manifest.json.
+        content_type:
+          type: string
+          enum: [image/jpeg, image/png, image/heic, image/heif, image/webp]
+        byte_size:
+          type: integer
+          format: int64
+          minimum: 1
+          maximum: 52428800
+        sha256:
+          type: string
+          pattern: "^[a-f0-9]{64}$"
+    MigrationReport:
+      type: object
+      additionalProperties: false
+      required:
+        - migration_id
+        - status
+        - expected_entries
+        - imported_entries
+        - expected_deleted_entries
+        - imported_deleted_entries
+        - expected_assets
+        - verified_assets
+        - expected_bytes
+        - verified_bytes
+        - errors
+      properties:
+        migration_id:
+          type: string
+          format: uuid
+        status:
+          type: string
+          enum: [uploading, verified, failed]
+        expected_entries:
+          type: integer
+          minimum: 0
+        imported_entries:
+          type: integer
+          minimum: 0
+        expected_deleted_entries:
+          type: integer
+          minimum: 0
+        imported_deleted_entries:
+          type: integer
+          minimum: 0
+        expected_assets:
+          type: integer
+          minimum: 0
+        verified_assets:
+          type: integer
+          minimum: 0
+        expected_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+        verified_bytes:
+          type: integer
+          format: int64
+          minimum: 0
+        errors:
+          type: array
+          items:
+            $ref: "#/components/schemas/MigrationError"
+        verified_at:
+          type: string
+          format: date-time
+          nullable: true
+    MigrationError:
+      type: object
+      additionalProperties: false
+      required: [code]
+      properties:
+        code:
+          type: string
+          enum:
+            - entry_payload_invalid
+            - entry_sha256_mismatch
+            - migration_id_content_mismatch
+            - asset_manifest_mismatch
+            - manifest_sha256_mismatch
+            - count_or_size_mismatch
+            - entry_collision
+    AppleEnvironment:
+      type: string
+      enum: [production, sandbox]
+    AppleNotificationRequest:
+      type: object
+      additionalProperties: false
+      required: [signedPayload]
+      properties:
+        signedPayload:
+          type: string
+          minLength: 1
+          maxLength: 1000000
+    AppleTransactionVerifyRequest:
+      type: object
+      additionalProperties: false
+      required: [transaction_id, environment]
+      properties:
+        transaction_id:
+          type: string
+          minLength: 1
+          maxLength: 128
+        environment:
+          $ref: "#/components/schemas/AppleEnvironment"
+    AppleLegacyClaimRequest:
+      type: object
+      additionalProperties: false
+      required: [signed_transaction_info, environment]
+      properties:
+        signed_transaction_info:
+          type: string
+          minLength: 1
+          maxLength: 1000000
+          writeOnly: true
+        environment:
+          $ref: "#/components/schemas/AppleEnvironment"
+    AppleRestoreRequest:
+      type: object
+      additionalProperties: false
+      required: [transaction_ids, environment]
+      properties:
+        transaction_ids:
+          type: array
+          minItems: 1
+          maxItems: 100
+          items:
+            type: string
+            minLength: 1
+            maxLength: 128
+        environment:
+          $ref: "#/components/schemas/AppleEnvironment"
+    Entitlement:
+      type: object
+      additionalProperties: false
+      required:
+        - product_id
+        - state
+        - source_storefront
+        - source_transaction_id
+        - updated_at
+      properties:
+        product_id:
+          type: string
+        state:
+          type: string
+          enum: [active, expired, revoked, cancelled, failed]
+        expires_at:
+          type: string
+          format: date-time
+        revoked_at:
+          type: string
+          format: date-time
+        source_storefront:
+          type: string
+        source_transaction_id:
+          type: string
+        updated_at:
+          type: string
+          format: date-time
+    EntitlementListResponse:
+      type: object
+      additionalProperties: false
+      required: [entitlements]
+      properties:
+        entitlements:
+          type: array
+          items:
+            $ref: "#/components/schemas/Entitlement"
+    ErrorResponse:
+      type: object
+      additionalProperties: false
+      required: [code, message]
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+    HealthResponse:
+      type: object
+      additionalProperties: false
+      required:
+        - status
+        - service
+      properties:
+        status:
+          type: string
+          const: ok
+        service:
+          type: string
+          const: clovery-api

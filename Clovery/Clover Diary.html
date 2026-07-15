@@ -3896,7 +3896,28 @@ function SettingsScreen({entries, theme, onReset, lang, onLangChange, palette, o
   const [darkOpen,  setDarkOpen]  = React.useState(false);
   const [langOpen,  setLangOpen]  = React.useState(false);
   const [fontOpen,  setFontOpen]  = React.useState(false);
+  const [migrationExport, setMigrationExport] = React.useState({status:'idle'});
   const isSystemFont = fontHand === 'System';
+
+  React.useEffect(() => {
+    window.__cloveryMigrationExportResult = result => {
+      setMigrationExport(result || {status:'failed', errorCode:'exportFailed'});
+    };
+    return () => { delete window.__cloveryMigrationExportResult; };
+  }, []);
+
+  const exportMigrationData = () => {
+    if (migrationExport.status === 'working') return;
+    setMigrationExport({status:'working'});
+    try {
+      window.webkit?.messageHandlers?.migrationExport?.postMessage({
+        entries: JSON.stringify(entries || []),
+        deletedIDs: localStorage.getItem('clovery_deleted_ids') || '[]',
+      });
+    } catch(e) {
+      setMigrationExport({status:'failed', errorCode:'bridgeUnavailable'});
+    }
+  };
 
   return (
     <div style={{paddingBottom:110, position:'relative'}}>
@@ -4098,6 +4119,23 @@ function SettingsScreen({entries, theme, onReset, lang, onLangChange, palette, o
 
       {/* More */}
       <SettingGroup title="" theme={theme}>
+        <SettingRow
+          label={lang==='zh'?'为迁移导出数据':lang==='ja'?'移行用データを書き出す':lang==='ko'?'마이그레이션 데이터 내보내기':'Export data for migration'}
+          detail={migrationExport.status==='working' ? (lang==='zh'?'导出中…':'Exporting…') : null}
+          theme={theme}
+          onTap={exportMigrationData}/>
+        {migrationExport.status === 'success' && (
+          <div style={{fontSize:12.5, color:theme.accentDark, padding:'0 0 10px'}}>
+            {lang==='zh'
+              ? `已校验 ${migrationExport.entryCount||0} 条日记、${migrationExport.photoCount||0} 张照片`
+              : `Verified ${migrationExport.entryCount||0} entries and ${migrationExport.photoCount||0} photos`}
+          </div>
+        )}
+        {migrationExport.status === 'failed' && (
+          <div style={{fontSize:12.5, color:'#C0392B', padding:'0 0 10px'}}>
+            {lang==='zh'?'导出失败，原数据未修改，请重试':'Export failed. Your original data was not changed. Please retry.'}
+          </div>
+        )}
         <SpringTap onClick={() => onSheet('review')} style={{
           display:'flex', alignItems:'center', padding:'14px 0',
           borderTop:`1px solid ${theme.divider}`, gap:12,
@@ -4749,6 +4787,7 @@ function EntryEditor({onClose, onSave, theme, lang, editEntry, initialDate, allE
   const [tags,        setTags]        = React.useState(editEntry?.tags  || draft?.tags  || []);
   const [photos,      setPhotos]      = React.useState(editEntry?.photos || draft?.photos || []);
   const [photoBusy,   setPhotoBusy]   = React.useState(false);
+  const [photoError,  setPhotoError]  = React.useState(null);
   const photoInputRef = React.useRef(null);
   const MAX_PHOTOS = 6;
   const [entryDate,   setEntryDate]   = React.useState(editEntry?.date || initialDate || draft?.entryDate || TODAY);
@@ -4815,6 +4854,16 @@ function EntryEditor({onClose, onSave, theme, lang, editEntry, initialDate, allE
     const t = setTimeout(() => luckyRef.current?.focus({preventScroll:true}), 480);
     return () => clearTimeout(t);
   }, []);
+
+  React.useEffect(() => {
+    const handlePhotoSaveFailed = event => {
+      const filename = event.detail?.filename;
+      if (filename) setPhotos(prev => prev.filter(photo => photo !== filename));
+      setPhotoError(lang === 'zh' ? '照片未保存，请重试' : 'Photo was not saved. Please retry.');
+    };
+    window.addEventListener('clovery-photo-save-failed', handlePhotoSaveFailed);
+    return () => window.removeEventListener('clovery-photo-save-failed', handlePhotoSaveFailed);
+  }, [lang]);
 
   // Keyboard-aware: manipulate DOM directly (avoids re-render that breaks IME)
   React.useEffect(() => {
@@ -4892,15 +4941,20 @@ function EntryEditor({onClose, onSave, theme, lang, editEntry, initialDate, allE
     const room = MAX_PHOTOS - photos.length;
     if (room <= 0) return;
     setPhotoBusy(true);
+    setPhotoError(null);
     Haptic.impact('light');
     try {
       for (const file of files.slice(0, room)) {
         try {
           const dataUrl = await readPhotoFile(file);
           const filename = makePhotoFilename();
-          savePhotoFile(filename, dataUrl);
-          setPhotos(prev => prev.length >= MAX_PHOTOS ? prev : [...prev, filename]);
-        } catch (e) {}
+          const saved = await savePhotoFile(filename, dataUrl);
+          if (saved) {
+            setPhotos(prev => prev.length >= MAX_PHOTOS ? prev : [...prev, filename]);
+          }
+        } catch (e) {
+          setPhotoError(lang === 'zh' ? '照片未保存，请重试' : 'Photo was not saved. Please retry.');
+        }
       }
     } finally {
       setPhotoBusy(false);
@@ -5116,6 +5170,7 @@ function EntryEditor({onClose, onSave, theme, lang, editEntry, initialDate, allE
                 <input ref={photoInputRef} type="file" accept="image/*" multiple
                   style={{display:'none'}}
                   onChange={e => { handlePhotoFiles(e.target.files); e.target.value = ''; }}/>
+                {photoError && <div style={{fontSize:12.5, color:'#C0392B', marginBottom:8}}>{photoError}</div>}
                 {photos.length > 0 && (
                   <div style={{display:'flex', flexWrap:'wrap', gap:8, marginBottom:10}}>
                     {photos.map((src, idx) => (
@@ -7831,7 +7886,7 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
   }, []);
 
   // ── Actual save/share (called after confirmation) ──
-  const _execSave  = () => { Haptic.impact('medium'); setSaved(false); window.webkit?.messageHandlers?.shareImage?.postMessage({action:'save',  dataURL:previewURL}); };
+  const _execSave  = () => { Haptic.impact('medium'); setSaved(false); setSaveError(null); window.webkit?.messageHandlers?.shareImage?.postMessage({action:'save',  dataURL:previewURL}); };
   const _execShare = () => { Haptic.impact('medium'); window.webkit?.messageHandlers?.shareImage?.postMessage({action:'share', dataURL:previewURL}); };
 
   // ── Confirm trial use → increment count → execute pending action ──
@@ -7853,6 +7908,7 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
   const [previewURL, setPreviewURL]       = React.useState(null);
   const [spinning, setSpinning]           = React.useState(false);
   const [saved, setSaved]                 = React.useState(false);
+  const [saveError, setSaveError]         = React.useState(null);
   const [boardScale, setBoardScale]       = React.useState(0.37);
   const [selectedItemId, setSelectedItemId] = React.useState(null);
 
@@ -7901,8 +7957,16 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
   }, [boardItems, boardColorIdx]);
 
   React.useEffect(() => {
-    window.__clovery_imageSaved = () => setSaved(true);
-    return () => { delete window.__clovery_imageSaved; };
+    window.__clovery_imageSaveResult = (outcome) => {
+      if (outcome === 'success') {
+        setSaved(true);
+        setSaveError(null);
+      } else {
+        setSaved(false);
+        setSaveError(outcome || 'failed');
+      }
+    };
+    return () => { delete window.__clovery_imageSaveResult; };
   }, []);
 
   // ── Add item ──
@@ -8244,6 +8308,8 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
     save:     lang==='zh'?'保存':lang==='ko'?'저장':lang==='ja'?'保存':'Save',
     share:    lang==='zh'?'分享':lang==='ko'?'공유':lang==='ja'?'共有':'Share',
     saved:    lang==='zh'?'已保存 ✓':lang==='ko'?'저장됨 ✓':lang==='ja'?'保存しました ✓':'Saved ✓',
+    savePermission: lang==='zh'?'无法保存，请在系统设置中允许 Clovery 添加照片':lang==='ko'?'저장하려면 설정에서 사진 추가 권한을 허용해 주세요':lang==='ja'?'保存するには設定で写真の追加を許可してください':'Allow Clovery to add photos in Settings',
+    saveFailed: lang==='zh'?'保存失败，请重试':lang==='ko'?'저장하지 못했습니다. 다시 시도해 주세요':lang==='ja'?'保存できませんでした。もう一度お試しください':'Could not save. Please try again',
     diary:    lang==='zh'?'日记':lang==='ko'?'일기':lang==='ja'?'日記':'Diary',
     photos:   lang==='zh'?'照片':lang==='ko'?'사진':lang==='ja'?'写真':'Photos',
     stickers: lang==='zh'?'贴纸':lang==='ko'?'스티커':lang==='ja'?'シール':'Stickers',
@@ -8475,8 +8541,10 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
         <div style={{flex:'0 0 auto', padding:'10px 28px calc(var(--sab) + 14px)',
           borderTop:`1px solid ${isDark?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)'}`,
           position:'relative'}}>
-          {saved && <div style={{position:'absolute', top:-22, left:0, right:0,
-            textAlign:'center', fontSize:13, color:theme.accent, fontWeight:600}}>{T.saved}</div>}
+          {(saved || saveError) && <div style={{position:'absolute', top:-22, left:0, right:0,
+            textAlign:'center', fontSize:13, color:saved?theme.accent:'#D45A4E', fontWeight:600}}>
+            {saved ? T.saved : (saveError==='permissionDenied' ? T.savePermission : T.saveFailed)}
+          </div>}
           <div style={{display:'flex', gap:10}}>
             <SpringTap onClick={doSave} sfx="tap" style={{
               flex:1, padding:'11px 0', borderRadius:13,
@@ -8773,6 +8841,7 @@ function SplashScreen({ theme, lang, onDone }) {
 const photoCache = new Map(); // filename -> data: URL, in-memory only
 let _photoLoadSeq = 0;
 const _photoLoadResolvers = new Map();
+const _photoSaveResolvers = new Map();
 window.__cloveryPhotoLoaded = (reqId, base64) => {
   const resolve = _photoLoadResolvers.get(reqId);
   if (resolve) {
@@ -8780,13 +8849,38 @@ window.__cloveryPhotoLoaded = (reqId, base64) => {
     resolve(base64 ? `data:image/jpeg;base64,${base64}` : null);
   }
 };
+window.__cloveryPhotoSaved = filename => {
+  const resolve = _photoSaveResolvers.get(filename);
+  if (resolve) {
+    _photoSaveResolvers.delete(filename);
+    resolve(true);
+  }
+};
+window.__cloveryPhotoSaveFailed = (filename, code) => {
+  photoCache.delete(filename);
+  const resolve = _photoSaveResolvers.get(filename);
+  if (resolve) {
+    _photoSaveResolvers.delete(filename);
+    resolve(false);
+  }
+  window.dispatchEvent(new CustomEvent('clovery-photo-save-failed', {detail:{filename, code}}));
+};
 function isLegacyPhoto(ref) { return typeof ref === 'string' && ref.startsWith('data:'); }
 function makePhotoFilename() {
   return `${Date.now()}-${Math.random().toString(36).slice(2, 9)}.jpg`;
 }
 function savePhotoFile(filename, dataURL) {
   photoCache.set(filename, dataURL);
-  try { window.webkit?.messageHandlers?.photoSave?.postMessage({ filename, dataURL }); } catch(e) {}
+  return new Promise(resolve => {
+    _photoSaveResolvers.set(filename, resolve);
+    try { window.webkit?.messageHandlers?.photoSave?.postMessage({ filename, dataURL }); }
+    catch(e) { window.__cloveryPhotoSaveFailed(filename, 'bridgeUnavailable'); }
+    setTimeout(() => {
+      if (_photoSaveResolvers.has(filename)) {
+        window.__cloveryPhotoSaveFailed(filename, 'timeout');
+      }
+    }, 8000);
+  });
 }
 function loadPhotoFromDisk(filename) {
   return new Promise((resolve) => {
@@ -8830,15 +8924,23 @@ function PhotoImg({ src, style, ...props }) {
     if (isLegacyPhoto(src)) return src;
     return photoCache.get(src) || null;
   });
+  const [retryPhotoLoad, setRetryPhotoLoad] = React.useState(0);
+  const [loadFailed, setLoadFailed] = React.useState(false);
   React.useEffect(() => {
-    if (!src) { setResolved(null); return; }
-    if (isLegacyPhoto(src)) { setResolved(src); return; }
-    if (photoCache.has(src)) { setResolved(photoCache.get(src)); return; }
+    if (!src) { setResolved(null); setLoadFailed(false); return; }
+    if (isLegacyPhoto(src)) { setResolved(src); setLoadFailed(false); return; }
+    if (photoCache.has(src)) { setResolved(photoCache.get(src)); setLoadFailed(false); return; }
     let alive = true;
     setResolved(null);
-    resolvePhotoSrc(src).then(r => { if (alive) setResolved(r); });
+    setLoadFailed(false);
+    resolvePhotoSrc(src).then(r => {
+      if (!alive) return;
+      setResolved(r);
+      setLoadFailed(!r);
+    });
     return () => { alive = false; };
-  }, [src]);
+  }, [src, retryPhotoLoad]);
+  if (loadFailed) return <button type="button" aria-label="Retry photo" onClick={() => setRetryPhotoLoad(value => value + 1)} style={{...style, border:0, background:'rgba(0,0,0,0.05)', color:'inherit'}}>↻</button>;
   if (!resolved) return <div style={{...style, background:'rgba(0,0,0,0.04)'}} />;
   return <img src={resolved} style={style} {...props} />;
 }
@@ -9106,19 +9208,23 @@ function App() {
   // One-time migration: convert any legacy inline base64 photos (from before
   // photos were moved to individual files) into file-backed filename refs.
   React.useEffect(() => {
-    setEntries(prev => {
-      const hasLegacy = prev.some(e => Array.isArray(e.photos) && e.photos.some(isLegacyPhoto));
-      if (!hasLegacy) return prev;
-      return prev.map(e => {
+    let cancelled = false;
+    const migrateLegacyPhotos = async () => {
+      const hasLegacy = entries.some(e => Array.isArray(e.photos) && e.photos.some(isLegacyPhoto));
+      if (!hasLegacy) return;
+      const migrated = await Promise.all(entries.map(async e => {
         if (!Array.isArray(e.photos) || !e.photos.some(isLegacyPhoto)) return e;
-        return { ...e, photos: e.photos.map(p => {
+        const photos = await Promise.all(e.photos.map(async p => {
           if (!isLegacyPhoto(p)) return p;
           const filename = makePhotoFilename();
-          savePhotoFile(filename, p);
-          return filename;
-        })};
-      });
-    });
+          return await savePhotoFile(filename, p) ? filename : p;
+        }));
+        return {...e, photos};
+      }));
+      if (!cancelled) setEntries(migrated);
+    };
+    migrateLegacyPhotos();
+    return () => { cancelled = true; };
   }, []);
 
   // Garbage-collect orphaned photo files once per launch (covers files left

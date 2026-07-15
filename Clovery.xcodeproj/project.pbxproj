@@ -19,12 +19,24 @@
 		AABB0000000000000000001E /* app.compiled.js in Resources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000001D /* app.compiled.js */; };
 		AABB0000000000000000001F /* BoardStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000020 /* BoardStore.swift */; };
 		AABB00000000000000000060 /* CloudKitSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000061 /* CloudKitSync.swift */; };
+		AABB00000000000000000064 /* NativeBridgeModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000062 /* NativeBridgeModels.swift */; };
+		AABB00000000000000000065 /* BridgeJavaScript.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000063 /* BridgeJavaScript.swift */; };
+		AABB00000000000000000068 /* PhotoStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000067 /* PhotoStore.swift */; };
+		AABB0000000000000000006B /* MigrationBundle.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000069 /* MigrationBundle.swift */; };
+		AABB0000000000000000006C /* MigrationBundleExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000006A /* MigrationBundleExporter.swift */; };
 		FCECDFE02FE92C7C0067AF51 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFDF2FE92C7C0067AF51 /* WidgetKit.framework */; };
 		FCECDFE22FE92C7C0067AF51 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFE12FE92C7C0067AF51 /* SwiftUI.framework */; };
 		FCECDFEF2FE92C7D0067AF51 /* CloveryWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		AACC0000000000000000000A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AABB00000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AABB00000000000000000031;
+			remoteInfo = Clovery;
+		};
 		FCECDFED2FE92C7D0067AF51 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = AABB00000000000000000001 /* Project object */;
@@ -62,6 +74,13 @@
 		AABB0000000000000000001D /* app.compiled.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = app.compiled.js; sourceTree = "<group>"; };
 		AABB00000000000000000020 /* BoardStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardStore.swift; sourceTree = "<group>"; };
 		AABB00000000000000000061 /* CloudKitSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudKitSync.swift; sourceTree = "<group>"; };
+		AABB00000000000000000062 /* NativeBridgeModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeBridgeModels.swift; sourceTree = "<group>"; };
+		AABB00000000000000000063 /* BridgeJavaScript.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BridgeJavaScript.swift; sourceTree = "<group>"; };
+		AABB00000000000000000066 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		AABB00000000000000000067 /* PhotoStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PhotoStore.swift; sourceTree = "<group>"; };
+		AABB00000000000000000069 /* MigrationBundle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationBundle.swift; sourceTree = "<group>"; };
+		AABB0000000000000000006A /* MigrationBundleExporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationBundleExporter.swift; sourceTree = "<group>"; };
+		AACC00000000000000000001 /* CloveryTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CloveryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC889A182FD464C9002510AD /* Clovery.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Clovery.entitlements; sourceTree = "<group>"; };
 		FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CloveryWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		FCECDFDF2FE92C7C0067AF51 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
@@ -80,10 +99,18 @@
 /* End PBXFileSystemSynchronizedBuildFileExceptionSet section */
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
+		AACC00000000000000000002 /* CloveryTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = CloveryTests; sourceTree = "<group>"; };
 		FCECDFE32FE92C7C0067AF51 /* CloveryWidget */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (FCECDFF32FE92C7D0067AF51 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = CloveryWidget; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		AACC00000000000000000005 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AABB00000000000000000022 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -108,6 +135,7 @@
 			children = (
 				FCECDFF52FE92CA80067AF51 /* CloveryWidgetExtension.entitlements */,
 				AABB00000000000000000003 /* Clovery */,
+				AACC00000000000000000002 /* CloveryTests */,
 				FCECDFE32FE92C7C0067AF51 /* CloveryWidget */,
 				FCECDFDE2FE92C7C0067AF51 /* Frameworks */,
 				AABB00000000000000000004 /* Products */,
@@ -118,11 +146,17 @@
 			isa = PBXGroup;
 			children = (
 				FC889A182FD464C9002510AD /* Clovery.entitlements */,
+				AABB00000000000000000066 /* Info.plist */,
 				AABB00000000000000000007 /* CloveryApp.swift */,
 				AABB00000000000000000008 /* ContentView.swift */,
 				AABB00000000000000000009 /* WebView.swift */,
 				AABB00000000000000000020 /* BoardStore.swift */,
 				AABB00000000000000000061 /* CloudKitSync.swift */,
+				AABB00000000000000000062 /* NativeBridgeModels.swift */,
+				AABB00000000000000000063 /* BridgeJavaScript.swift */,
+				AABB00000000000000000067 /* PhotoStore.swift */,
+				AABB00000000000000000069 /* MigrationBundle.swift */,
+				AABB0000000000000000006A /* MigrationBundleExporter.swift */,
 				AABB0000000000000000000B /* Assets.xcassets */,
 				AABB0000000000000000000C /* Clover Diary.html */,
 				AABB0000000000000000001D /* app.compiled.js */,
@@ -139,6 +173,7 @@
 			children = (
 				AABB00000000000000000006 /* Clovery.app */,
 				FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */,
+				AACC00000000000000000001 /* CloveryTests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -155,6 +190,27 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		AACC00000000000000000003 /* CloveryTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AACC00000000000000000007 /* Build configuration list for PBXNativeTarget "CloveryTests" */;
+			buildPhases = (
+				AACC00000000000000000004 /* Sources */,
+				AACC00000000000000000005 /* Frameworks */,
+				AACC00000000000000000006 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AACC0000000000000000000B /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				AACC00000000000000000002 /* CloveryTests */,
+			);
+			name = CloveryTests;
+			productName = CloveryTests;
+			productReference = AACC00000000000000000001 /* CloveryTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
 		AABB00000000000000000031 /* Clovery */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = AABB00000000000000000052 /* Build configuration list for PBXNativeTarget "Clovery" */;
@@ -209,6 +265,10 @@
 					AABB00000000000000000031 = {
 						CreatedOnToolsVersion = 16.0;
 					};
+					AACC00000000000000000003 = {
+						CreatedOnToolsVersion = 26.0;
+						TestTargetID = AABB00000000000000000031;
+					};
 					FCECDFDC2FE92C7C0067AF51 = {
 						CreatedOnToolsVersion = 26.4.1;
 					};
@@ -230,11 +290,19 @@
 			targets = (
 				AABB00000000000000000031 /* Clovery */,
 				FCECDFDC2FE92C7C0067AF51 /* CloveryWidgetExtension */,
+				AACC00000000000000000003 /* CloveryTests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		AACC00000000000000000006 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AABB00000000000000000023 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -259,6 +327,13 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		AACC00000000000000000004 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AABB00000000000000000021 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -268,6 +343,11 @@
 				AABB00000000000000000013 /* WebView.swift in Sources */,
 				AABB0000000000000000001F /* BoardStore.swift in Sources */,
 				AABB00000000000000000060 /* CloudKitSync.swift in Sources */,
+				AABB00000000000000000064 /* NativeBridgeModels.swift in Sources */,
+				AABB00000000000000000065 /* BridgeJavaScript.swift in Sources */,
+				AABB00000000000000000068 /* PhotoStore.swift in Sources */,
+				AABB0000000000000000006B /* MigrationBundle.swift in Sources */,
+				AABB0000000000000000006C /* MigrationBundleExporter.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -281,6 +361,11 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin PBXTargetDependency section */
+		AACC0000000000000000000B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AABB00000000000000000031 /* Clovery */;
+			targetProxy = AACC0000000000000000000A /* PBXContainerItemProxy */;
+		};
 		FCECDFEE2FE92C7D0067AF51 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = FCECDFDC2FE92C7C0067AF51 /* CloveryWidgetExtension */;
@@ -300,6 +385,44 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		AACC00000000000000000008 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = M92TBSSR2R;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.clovery.app.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Clovery.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Clovery";
+			};
+			name = Debug;
+		};
+		AACC00000000000000000009 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = M92TBSSR2R;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.clovery.app.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Clovery.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Clovery";
+			};
+			name = Release;
+		};
 		AABB00000000000000000041 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -431,13 +554,13 @@
 				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_TEAM = M92TBSSR2R;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Clovery/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Clovery;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Clovery uses your camera to add photos to diary entries.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Clovery saves your lucky moment cards to Photos.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Clovery accesses your photo library to add photos to diary entries.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIBackgroundModes = "remote-notification";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -469,13 +592,13 @@
 				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_TEAM = M92TBSSR2R;
 				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = Clovery/Info.plist;
 				INFOPLIST_KEY_CFBundleDisplayName = Clovery;
 				INFOPLIST_KEY_ITSAppUsesNonExemptEncryption = NO;
 				INFOPLIST_KEY_NSCameraUsageDescription = "Clovery uses your camera to add photos to diary entries.";
 				INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = "Clovery saves your lucky moment cards to Photos.";
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Clovery accesses your photo library to add photos to diary entries.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
-				INFOPLIST_KEY_UIBackgroundModes = "remote-notification";
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
@@ -506,7 +629,7 @@
 				CODE_SIGN_ENTITLEMENTS = CloveryWidgetExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_TEAM = M92TBSSR2R;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = CloveryWidget/Info.plist;
@@ -542,7 +665,7 @@
 				CODE_SIGN_ENTITLEMENTS = CloveryWidgetExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 11;
+				CURRENT_PROJECT_VERSION = 13;
 				DEVELOPMENT_TEAM = M92TBSSR2R;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = CloveryWidget/Info.plist;
@@ -572,6 +695,15 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		AACC00000000000000000007 /* Build configuration list for PBXNativeTarget "CloveryTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AACC00000000000000000008 /* Debug */,
+				AACC00000000000000000009 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		AABB00000000000000000051 /* Build configuration list for PBXProject "Clovery" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
