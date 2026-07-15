@@ -25,10 +25,15 @@ final class PhotoLibrarySaverTests: XCTestCase {
     }
 
     func testNotDeterminedThenAuthorizedWritesAsset() {
+        var requestCount = 0
         var writeCount = 0
+        var authorizationHandler: ((PHAuthorizationStatus) -> Void)?
         let saver = PhotoLibrarySaver(client: PhotoLibraryClient(
             authorizationStatus: { .notDetermined },
-            requestAuthorization: { completion in completion(.authorized) },
+            requestAuthorization: { completion in
+                requestCount += 1
+                authorizationHandler = completion
+            },
             createAsset: { _, completion in writeCount += 1; completion(true, nil) }
         ))
 
@@ -37,8 +42,44 @@ final class PhotoLibrarySaverTests: XCTestCase {
             XCTAssertEqual(outcome, .success)
             result.fulfill()
         }
+
+        XCTAssertEqual(requestCount, 1)
+        XCTAssertEqual(writeCount, 0)
+        authorizationHandler?(.authorized)
+
         wait(for: [result], timeout: 1)
         XCTAssertEqual(writeCount, 1)
+    }
+
+    func testNotDeterminedAfterAuthorizationRequestFailsOnceWithoutWriting() {
+        var requestCount = 0
+        var writeCount = 0
+        var authorizationHandler: ((PHAuthorizationStatus) -> Void)?
+        let saver = PhotoLibrarySaver(client: PhotoLibraryClient(
+            authorizationStatus: { .notDetermined },
+            requestAuthorization: { completion in
+                requestCount += 1
+                authorizationHandler = completion
+            },
+            createAsset: { _, completion in writeCount += 1; completion(true, nil) }
+        ))
+
+        var outcomes: [PhotoSaveOutcome] = []
+        let result = expectation(description: "result")
+        saver.savePNG(validPNG) { outcome in
+            outcomes.append(outcome)
+            result.fulfill()
+        }
+
+        XCTAssertEqual(requestCount, 1)
+        XCTAssertEqual(writeCount, 0)
+        let pendingAuthorization = authorizationHandler
+        pendingAuthorization?(.notDetermined)
+
+        wait(for: [result], timeout: 1)
+        XCTAssertEqual(outcomes.map(\.rawValue), [PhotoSaveOutcome.failed.rawValue])
+        XCTAssertEqual(requestCount, 1)
+        XCTAssertEqual(writeCount, 0)
     }
 
     func testInvalidImageAndWriteFailureAreVisible() {

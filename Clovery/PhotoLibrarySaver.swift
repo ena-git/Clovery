@@ -41,12 +41,18 @@ final class PhotoLibrarySaver: PhotoLibrarySaving {
             return
         }
 
-        handle(client.authorizationStatus(), data: data, completion: completion)
+        handle(
+            client.authorizationStatus(),
+            data: data,
+            canRequestAuthorization: true,
+            completion: completion
+        )
     }
 
     private func handle(
         _ status: PHAuthorizationStatus,
         data: Data,
+        canRequestAuthorization: Bool,
         completion: @escaping (PhotoSaveOutcome) -> Void
     ) {
         switch status {
@@ -55,8 +61,17 @@ final class PhotoLibrarySaver: PhotoLibrarySaving {
                 completion(success ? .success : .failed)
             }
         case .notDetermined:
+            guard canRequestAuthorization else {
+                completion(.failed)
+                return
+            }
             client.requestAuthorization { updatedStatus in
-                self.handle(updatedStatus, data: data, completion: completion)
+                self.handle(
+                    updatedStatus,
+                    data: data,
+                    canRequestAuthorization: false,
+                    completion: completion
+                )
             }
         case .denied, .restricted:
             completion(.permissionDenied)
