@@ -4,11 +4,17 @@ import UIKit
 @main
 struct CloveryApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
+    @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
         WindowGroup {
             ContentView()
                 .ignoresSafeArea()
+        }
+        .onChange(of: scenePhase) { phase in
+            if phase == .active {
+                WebViewCoordinatorBridge.shared.refreshBoardEntitlement()
+            }
         }
     }
 }

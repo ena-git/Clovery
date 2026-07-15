@@ -9,6 +9,10 @@ enum BridgeJavaScript {
         evaluateJSONCallback(name: "window._boardPurchaseResult", payload: [outcome.rawValue])
     }
 
+    static func boardRestoreResult(_ outcome: BoardRestoreOutcome) -> String {
+        evaluateJSONCallback(name: "window._boardRestoreResult", payload: [outcome.rawValue])
+    }
+
     static func boardPriceResult(_ price: String) -> String {
         evaluateJSONCallback(name: "window._boardPriceResult", payload: [price])
     }

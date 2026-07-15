@@ -1,6 +1,7 @@
 import SwiftUI
 import WebKit
 import UIKit
+import Combine
 import UserNotifications
 import StoreKit
 import WidgetKit
@@ -13,6 +14,8 @@ struct WebView: UIViewRepresentable {
 
         // Weak ref so we can push iCloud data into the running WebView
         weak var webView: WKWebView?
+        private var boardEntitlementCancellable: AnyCancellable?
+        private var isReportingBoardRestore = false
         private let photoLogger = Logger(
             subsystem: Bundle.main.bundleIdentifier ?? "com.clovery.app",
             category: "Photos"
@@ -122,11 +125,16 @@ struct WebView: UIViewRepresentable {
                 }
             } else if message.name == "restorePurchases" {
                 Task { @MainActor in
-                    await BoardStore.shared.restore()
+                    self.isReportingBoardRestore = true
+                    let outcome = await BoardStore.shared.restore()
+                    _ = try? await self.webView?.evaluateJavaScript(
+                        BridgeJavaScript.boardRestoreResult(outcome)
+                    )
                     let unlocked = BoardStore.shared.isUnlocked
                     _ = try? await self.webView?.evaluateJavaScript(
                         BridgeJavaScript.boardUnlockStatus(unlocked)
                     )
+                    self.isReportingBoardRestore = false
                 }
             } else if message.name == "photoSave" {
                 guard let body = message.body as? [String: Any],
@@ -314,6 +322,21 @@ struct WebView: UIViewRepresentable {
 
         func handleOpenAppSettings() {
             imageExporter.openSettings()
+        }
+
+        @MainActor
+        func startObservingBoardStore() {
+            guard boardEntitlementCancellable == nil else { return }
+            boardEntitlementCancellable = BoardStore.shared.$isUnlocked
+                .removeDuplicates()
+                .receive(on: DispatchQueue.main)
+                .sink { [weak self] unlocked in
+                    guard let self, !self.isReportingBoardRestore else { return }
+                    self.webView?.evaluateJavaScript(
+                        BridgeJavaScript.boardUnlockStatus(unlocked),
+                        completionHandler: nil
+                    )
+                }
         }
 
         // MARK: iCloud Key-Value Sync
@@ -790,6 +813,7 @@ struct WebView: UIViewRepresentable {
 
         // Wire up iCloud sync
         context.coordinator.webView = webView
+        context.coordinator.startObservingBoardStore()
         context.coordinator.startObservingICloud()
         WebViewCoordinatorBridge.shared.coordinator = context.coordinator
 
@@ -815,6 +839,12 @@ struct WebView: UIViewRepresentable {
 class WebViewCoordinatorBridge {
     static let shared = WebViewCoordinatorBridge()
     weak var coordinator: WebView.Coordinator?
+
+    func refreshBoardEntitlement() {
+        Task { @MainActor in
+            await BoardStore.shared.refresh()
+        }
+    }
 
     func handleRemoteCloudKitNotification(completion: @escaping () -> Void) {
         guard let coordinator = coordinator, let webView = coordinator.webView else {

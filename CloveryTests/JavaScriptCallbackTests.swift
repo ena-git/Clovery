@@ -20,6 +20,13 @@ final class JavaScriptCallbackTests: XCTestCase {
         )
     }
 
+    func testRestoreResultUsesStructuredCallback() {
+        XCTAssertEqual(
+            BridgeJavaScript.boardRestoreResult(.notFound),
+            #"window._boardRestoreResult?.("notFound");"#
+        )
+    }
+
     func testAllWebViewCallbacksUseBridgeJavaScript() throws {
         let source = try read("Clovery/WebView.swift")
         let bridgeSource = try read("Clovery/BridgeJavaScript.swift")

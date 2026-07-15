@@ -7689,7 +7689,7 @@ async function generateShareCard(entries, theme, lang, opts = {}) {
 }
 
 // ── BoardPaywall ──────────────────────────────────────────────────
-function BoardPaywall({ theme, lang, onClose, onPurchase, onRestore, purchasing, restoring, trialMax, purchaseError, boardPrice }) {
+function BoardPaywall({ theme, lang, onClose, onPurchase, onRestore, purchasing, restoring, trialMax, purchaseError, purchaseNotice, boardPrice }) {
   const [open, setOpen] = React.useState(false);
   React.useEffect(() => { requestAnimationFrame(() => requestAnimationFrame(() => setOpen(true))); }, []);
   const close = () => { setOpen(false); setTimeout(onClose, 320); };
@@ -7804,7 +7804,13 @@ function BoardPaywall({ theme, lang, onClose, onPurchase, onRestore, purchasing,
           {/* Purchase failed — shown instead of silently doing nothing */}
           {purchaseError && (
             <div style={{fontSize:12.5, color:'#C0392B', marginBottom:10, lineHeight:1.5}}>
-              {zh ? '购买未成功，请检查网络或登录的 Apple ID 后重试' : "Purchase didn't go through — check your connection or Apple ID and try again"}
+              {zh ? '购买或恢复未成功，请检查网络或登录的 Apple ID 后重试' : "Purchase or restore didn't go through — check your connection or Apple ID and try again"}
+            </div>
+          )}
+
+          {purchaseNotice && (
+            <div style={{fontSize:12.5, color:theme.accentDark, marginBottom:10, lineHeight:1.5}}>
+              {purchaseNotice}
             </div>
           )}
 
@@ -7845,24 +7851,44 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
   const [purchasing, setPurchasing]         = React.useState(false);
   const [restoring, setRestoring]           = React.useState(false);
   const [purchaseError, setPurchaseError]   = React.useState(false);
+  const [purchaseNotice, setPurchaseNotice] = React.useState('');
   const [boardPrice, setBoardPrice]         = React.useState('');
 
   React.useEffect(() => {
+    const pendingNotice = lang === 'zh'
+      ? '购买请求正在等待批准，批准后会自动解锁'
+      : 'Your purchase is awaiting approval and will unlock automatically once approved';
     window._boardUnlockStatus = (unlocked) => {
       setBoardUnlocked(!!unlocked);
       setRestoring(false);
-      if (unlocked) { setPurchasing(false); setPaywallOpen(false); setPurchaseError(false); }
+      if (unlocked) {
+        setPurchasing(false); setPaywallOpen(false); setPurchaseError(false);
+        setPurchaseNotice(notice => notice === pendingNotice ? '' : notice);
+      }
     };
     window._boardPurchaseResult = (outcome) => {
       // outcome: 'success' | 'cancelled' | 'pending' | 'failed'
       if (outcome === 'success') {
-        setBoardUnlocked(true); setPaywallOpen(false); setPurchaseError(false); setPurchasing(false);
+        setBoardUnlocked(true); setPaywallOpen(false); setPurchaseError(false); setPurchasing(false); setPurchaseNotice('');
       } else if (outcome === 'cancelled') {
-        setPurchasing(false); // user cancelled — no error shown
+        setPurchasing(false); setPurchaseError(false); setPurchaseNotice('');
       } else if (outcome === 'pending') {
-        setPurchasing(false); // Ask to Buy pending — no error shown
+        setPurchasing(false); setPurchaseError(false); setPurchaseNotice(pendingNotice);
       } else {
-        setPurchasing(false); setPurchaseError(true);
+        setPurchasing(false); setPurchaseNotice(''); setPurchaseError(true);
+      }
+    };
+    window._boardRestoreResult = (outcome) => {
+      setRestoring(false);
+      if (outcome === 'restored') {
+        setPurchaseError(false);
+        setPurchaseNotice(lang === 'zh' ? '购买已恢复' : 'Purchase restored');
+      } else if (outcome === 'notFound') {
+        setPurchaseError(false);
+        setPurchaseNotice(lang === 'zh' ? '没有找到可恢复的购买记录' : 'No restorable purchases were found');
+      } else {
+        setPurchaseNotice('');
+        setPurchaseError(true);
       }
     };
     window._boardPriceResult = (price) => {
@@ -7873,9 +7899,10 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
     return () => {
       window._boardUnlockStatus = null;
       window._boardPurchaseResult = null;
+      window._boardRestoreResult = null;
       window._boardPriceResult = null;
     };
-  }, []);
+  }, [lang]);
 
   // ── Screenshot protection: notify Swift when board is open/closed ──
   React.useEffect(() => {
@@ -7886,8 +7913,8 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
   }, []);
 
   // ── Actual save/share (called after confirmation) ──
-  const _execSave  = () => { Haptic.impact('medium'); setSaved(false); setSaveError(null); window.webkit?.messageHandlers?.shareImage?.postMessage({action:'save',  dataURL:previewURL}); };
-  const _execShare = () => { Haptic.impact('medium'); window.webkit?.messageHandlers?.shareImage?.postMessage({action:'share', dataURL:previewURL}); };
+  const _execSave  = () => { Haptic.impact('medium'); setPurchaseNotice(''); setSaved(false); setSaveError(null); window.webkit?.messageHandlers?.shareImage?.postMessage({action:'save',  dataURL:previewURL}); };
+  const _execShare = () => { Haptic.impact('medium'); setPurchaseNotice(''); window.webkit?.messageHandlers?.shareImage?.postMessage({action:'share', dataURL:previewURL}); };
 
   // ── Confirm trial use → increment count → execute pending action ──
   const confirmTrial = () => {
@@ -8541,6 +8568,9 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
         <div style={{flex:'0 0 auto', padding:'10px 28px calc(var(--sab) + 14px)',
           borderTop:`1px solid ${isDark?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)'}`,
           position:'relative'}}>
+          {purchaseNotice && !paywallOpen && <div style={{position:'absolute',
+            top:-22, left:0, right:0, textAlign:'center', fontSize:13,
+            color:theme.accent, fontWeight:600}}>{purchaseNotice}</div>}
           {(saved || saveError) && <div style={{position:'absolute',
             top:saveError==='permissionDenied'?-74:-22, left:0, right:0,
             display:'flex', flexDirection:'column', alignItems:'center',
@@ -8585,10 +8615,11 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
       <BoardPaywall theme={theme} lang={lang}
         trialMax={BOARD_TRIAL_MAX}
         boardPrice={boardPrice}
-        onClose={() => setPaywallOpen(false)}
-        onPurchase={() => { setPurchaseError(false); setPurchasing(true); window.webkit?.messageHandlers?.purchaseBoard?.postMessage({}); }}
-        onRestore={() => { setPurchaseError(false); setRestoring(true); window.webkit?.messageHandlers?.restorePurchases?.postMessage({}); }}
-        purchasing={purchasing} restoring={restoring} purchaseError={purchaseError}/>
+        onClose={() => { setPaywallOpen(false); setPurchaseError(false); setPurchaseNotice(''); }}
+        onPurchase={() => { setPurchaseError(false); setPurchaseNotice(''); setPurchasing(true); window.webkit?.messageHandlers?.purchaseBoard?.postMessage({}); }}
+        onRestore={() => { setPurchaseError(false); setPurchaseNotice(''); setRestoring(true); window.webkit?.messageHandlers?.restorePurchases?.postMessage({}); }}
+        purchasing={purchasing} restoring={restoring} purchaseError={purchaseError}
+        purchaseNotice={purchaseNotice}/>
     )}
 
     {/* ── Trial confirmation dialog ── */}

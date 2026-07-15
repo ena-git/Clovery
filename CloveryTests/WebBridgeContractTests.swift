@@ -78,6 +78,18 @@ final class WebBridgeContractTests: XCTestCase {
         XCTAssertTrue(html.contains("deletedIDs: localStorage.getItem('clovery_deleted_ids') || '[]'"))
     }
 
+    func testBoardEntitlementLifecycleAndRestoreFeedbackContract() throws {
+        let webViewSource = try source("Clovery/WebView.swift")
+        let appSource = try source("Clovery/CloveryApp.swift")
+        let html = try source("Clovery/Clover Diary.html")
+
+        XCTAssertTrue(webViewSource.contains("startObservingBoardStore()"))
+        XCTAssertTrue(appSource.contains("refreshBoardEntitlement()"))
+        XCTAssertTrue(html.contains("window._boardRestoreResult = (outcome) =>"))
+        XCTAssertTrue(html.contains("购买请求正在等待批准"))
+        XCTAssertTrue(html.contains("没有找到可恢复的购买记录"))
+    }
+
     private func source(_ relativePath: String) throws -> String {
         try String(
             contentsOf: repositoryRoot.appendingPathComponent(relativePath),
