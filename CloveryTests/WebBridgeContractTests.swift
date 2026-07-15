@@ -63,6 +63,21 @@ final class WebBridgeContractTests: XCTestCase {
         XCTAssertEqual(imageExporter.openSettingsCount, 1)
     }
 
+    @MainActor
+    func testCloudKitPullSkipsContainerWhenUnavailable() async {
+        let completed = expectation(description: "CloudKit fallback completed")
+        var receivedEntries: [[String: Any]]?
+        let sync = CloudKitSync(isAvailable: { false })
+
+        sync.pullAll(photosDir: FileManager.default.temporaryDirectory) { entries in
+            receivedEntries = entries
+            completed.fulfill()
+        }
+
+        await fulfillment(of: [completed], timeout: 1)
+        XCTAssertEqual(receivedEntries?.count, 0)
+    }
+
     func testMigrationExportIsUserTriggeredAndReportsCounts() throws {
         let webViewSource = try source("Clovery/WebView.swift")
         let bridgeSource = try source("Clovery/BridgeJavaScript.swift")

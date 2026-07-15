@@ -20,14 +20,22 @@ import Foundation
 class CloudKitSync {
     static let shared = CloudKitSync()
 
-    private let container = CKContainer(identifier: "iCloud.com.clovery.app")
+    private let isAvailable: () -> Bool
+    private lazy var container = CKContainer(identifier: "iCloud.com.clovery.app")
     private lazy var db = container.privateCloudDatabase
     private let recordType = "DiaryEntry"
     private let subscriptionID = "clovery-diary-entry-changes"
 
+    init(isAvailable: @escaping () -> Bool = {
+        ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil
+    }) {
+        self.isAvailable = isAvailable
+    }
+
     /// Registers a CKQuerySubscription (once) so other devices' writes trigger
     /// a silent push to this device instead of only syncing on next launch.
     func setupSubscriptionIfNeeded() {
+        guard isAvailable() else { return }
         guard !UserDefaults.standard.bool(forKey: "clovery_ck_subscribed") else { return }
 
         let subscription = CKQuerySubscription(
@@ -55,6 +63,7 @@ class CloudKitSync {
     /// `entry` is the decoded JSON dict for a single diary entry; `photosDir`
     /// is the Documents/photos directory the photo-file refactor already writes to.
     func pushEntry(_ entry: [String: Any], photosDir: URL) {
+        guard isAvailable() else { return }
         guard let id = entry["id"] as? String, !id.isEmpty else { return }
         let recordID = CKRecord.ID(recordName: id)
         let record = CKRecord(recordType: recordType, recordID: recordID)
@@ -92,6 +101,10 @@ class CloudKitSync {
     /// `photosDir` (skipping files that already exist locally), and returns
     /// plain JSON-compatible entry dicts ready to merge in on the JS side.
     func pullAll(photosDir: URL, completion: @escaping ([[String: Any]]) -> Void) {
+        guard isAvailable() else {
+            completion([])
+            return
+        }
         let query = CKQuery(recordType: recordType, predicate: NSPredicate(value: true))
         var results: [[String: Any]] = []
 
