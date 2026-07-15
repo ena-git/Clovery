@@ -1,0 +1,47 @@
+{
+  "identifier" : "C10C3A01-0000-4000-8000-000000000103",
+  "nonRenewingSubscriptions" : [
+
+  ],
+  "products" : [
+    {
+      "displayPrice" : "6.00",
+      "familyShareable" : false,
+      "internalID" : "C10C3A02-0000-4000-8000-000000000103",
+      "localizations" : [
+        {
+          "description" : "Unlock the Clovery Board forever.",
+          "displayName" : "Clovery Board Lifetime",
+          "locale" : "en_US"
+        },
+        {
+          "description" : "永久解锁四叶草田功能。",
+          "displayName" : "四叶草田终身版",
+          "locale" : "zh_Hans"
+        }
+      ],
+      "productID" : "com.clovery.app.board.lifetime",
+      "referenceName" : "Clovery Board Lifetime",
+      "type" : "NonConsumable"
+    }
+  ],
+  "settings" : {
+    "_applicationInternalID" : "com.clovery.app",
+    "_developerTeamID" : "M92TBSSR2R",
+    "_failTransactionsEnabled" : false,
+    "_lastSynchronizedDate" : 0,
+    "_locale" : "zh_CN",
+    "_storefront" : "CHN",
+    "_storeKitErrors" : [
+
+    ],
+    "_timeRate" : 0
+  },
+  "subscriptionGroups" : [
+
+  ],
+  "version" : {
+    "major" : 3,
+    "minor" : 0
+  }
+}

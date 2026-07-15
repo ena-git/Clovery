@@ -46,7 +46,7 @@
       <Testables>
          <TestableReference
             skipped = "NO"
-            parallelizable = "YES">
+            parallelizable = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "AACC00000000000000000003"
@@ -56,6 +56,9 @@
             </BuildableReference>
          </TestableReference>
       </Testables>
+      <StoreKitConfigurationFileReference
+         identifier = "../../Clovery/Clovery.storekit">
+      </StoreKitConfigurationFileReference>
    </TestAction>
    <LaunchAction
       buildConfiguration = "Debug"
@@ -78,6 +81,9 @@
             ReferencedContainer = "container:Clovery.xcodeproj">
          </BuildableReference>
       </BuildableProductRunnable>
+      <StoreKitConfigurationFileReference
+         identifier = "../../Clovery/Clovery.storekit">
+      </StoreKitConfigurationFileReference>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"

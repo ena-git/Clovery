@@ -1,130 +1,84 @@
-import StoreKit
-import OSLog
+import Combine
 
-/// Manages the "Today's Board" lifetime in-app purchase.
 @MainActor
-class BoardStore: ObservableObject {
-
+final class BoardStore: ObservableObject {
+    static let productID = "com.clovery.app.board.lifetime"
     static let shared = BoardStore()
 
-    private let productID = "com.clovery.app.board.lifetime"
-    private let logger = Logger(
-        subsystem: Bundle.main.bundleIdentifier ?? "com.clovery.app",
-        category: "StoreKit"
-    )
+    @Published private(set) var isUnlocked = false
 
-    @Published var isUnlocked = false
+    private let client: BoardStoreClient
+    private var updatesTask: Task<Void, Never>?
 
-    private var transactionUpdatesTask: Task<Void, Never>?
-
-    init() {
-        transactionUpdatesTask = Task { [weak self] in
-            await self?.observeTransactionUpdates()
+    init(
+        client: BoardStoreClient = .live,
+        observesUpdates: Bool = true,
+        refreshesOnInit: Bool = true
+    ) {
+        self.client = client
+        if observesUpdates {
+            updatesTask = Task { [weak self] in
+                await self?.observeTransactionUpdates()
+            }
         }
-        Task { await refresh() }
+        if refreshesOnInit {
+            Task { [weak self] in
+                await self?.refresh()
+            }
+        }
     }
 
-    /// Re-checks current entitlements (call on every app launch or foreground).
     func refresh() async {
-        var hasActiveEntitlement = false
-        for await result in Transaction.currentEntitlements {
-            switch result {
-            case .verified(let transaction):
-                guard transaction.productID == productID,
-                      transaction.revocationDate == nil else { continue }
-                hasActiveEntitlement = true
-            case .unverified(_, let error):
-                logger.error(
-                    "Unverified current entitlement: \(String(describing: error), privacy: .public)"
-                )
-            }
+        let transactions = await client.currentEntitlements()
+        isUnlocked = transactions.contains {
+            $0.productID == Self.productID && $0.revocationDate == nil
         }
-        isUnlocked = hasActiveEntitlement
     }
 
-    /// Initiates the StoreKit purchase flow.
     func purchase() async -> BoardPurchaseOutcome {
-        do {
-            let products = try await Product.products(for: [productID])
-            guard let product = products.first else {
-                logger.error("Product unavailable: \(self.productID, privacy: .public)")
-                return .failed
-            }
-
-            let result = try await product.purchase()
-
-            switch result {
-            case .success(let verification):
-                switch verification {
-                case .verified(let transaction):
-                    guard transaction.productID == productID else {
-                        logger.error(
-                            "Unexpected purchased product: \(transaction.productID, privacy: .public)"
-                        )
-                        return .failed
-                    }
-                    await transaction.finish()
-                    isUnlocked = true
-                    return .success
-                case .unverified(_, let error):
-                    logger.error(
-                        "Purchase verification failed: \(String(describing: error), privacy: .public)"
-                    )
-                    return .failed
-                }
-            case .userCancelled:
-                return .cancelled
-            case .pending:
-                return .pending
-            @unknown default:
-                logger.error("Unknown StoreKit purchase result")
-                return .failed
-            }
-        } catch {
-            logger.error("Purchase failed: \(error.localizedDescription, privacy: .public)")
+        switch await client.purchase(Self.productID) {
+        case .success(let transaction)
+            where transaction.productID == Self.productID && transaction.revocationDate == nil:
+            isUnlocked = true
+            await transaction.finish()
+            return .success
+        case .cancelled:
+            return .cancelled
+        case .pending:
+            return .pending
+        case .success, .failed:
             return .failed
         }
     }
 
-    /// Returns the localized price string for the board lifetime IAP (e.g. "$4.99").
     func fetchDisplayPrice() async -> String? {
-        do {
-            let products = try await Product.products(for: [productID])
-            guard let product = products.first else {
-                logger.error("Price unavailable for product: \(self.productID, privacy: .public)")
-                return nil
-            }
-            return product.displayPrice
-        } catch {
-            logger.error("Price request failed: \(error.localizedDescription, privacy: .public)")
-            return nil
-        }
+        await client.displayPrice(Self.productID)
     }
 
-    /// Restores previous purchases by syncing with the App Store.
-    func restore() async {
+    @discardableResult
+    func restore() async -> BoardRestoreOutcome {
         do {
-            try await AppStore.sync()
+            try await client.sync()
             await refresh()
+            return isUnlocked ? .restored : .notFound
         } catch {
-            logger.error("Restore failed: \(error.localizedDescription, privacy: .public)")
+            return .failed
         }
     }
 
     private func observeTransactionUpdates() async {
-        for await result in Transaction.updates {
+        for await transaction in client.updates() {
             guard !Task.isCancelled else { return }
-
-            switch result {
-            case .verified(let transaction):
-                guard transaction.productID == productID else { continue }
+            if transaction.productID == Self.productID && transaction.revocationDate == nil {
+                isUnlocked = true
                 await transaction.finish()
+            } else {
                 await refresh()
-            case .unverified(_, let error):
-                logger.error(
-                    "Unverified transaction update: \(String(describing: error), privacy: .public)"
-                )
             }
         }
+    }
+
+    deinit {
+        updatesTask?.cancel()
     }
 }
