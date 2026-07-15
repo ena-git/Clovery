@@ -58,6 +58,11 @@ Available destinations for the "Clovery" scheme:
     { platform:iOS Simulator, arch:arm64, id:IPAD-AVAILABLE-ID, OS:26.0, name:iPad Pro 13-inch }
     { platform:iOS Simulator, id:dvtdevice-DVTiOSDeviceSimulatorPlaceholder-iphonesimulator:placeholder, name:Any iOS Simulator Device }
 DESTINATIONS
+  elif [ "${REQUIRE_SIMCTL_WARMUP:-}" = 1 ] && [ ! -f "${SIMCTL_WARMUP_MARKER:-}" ]; then
+    cat <<'DESTINATIONS'
+Available destinations for the "Clovery" scheme:
+    { platform:iOS Simulator, id:dvtdevice-DVTiOSDeviceSimulatorPlaceholder-iphonesimulator:placeholder, name:Any iOS Simulator Device }
+DESTINATIONS
   else
     cat <<'DESTINATIONS'
 Available destinations for the "Clovery" scheme:
@@ -100,6 +105,26 @@ SETTINGS
 esac
 EOF
 chmod +x "$fixture_bin/xcodebuild"
+
+cat > "$fixture_bin/xcrun" <<'EOF'
+#!/bin/sh
+set -eu
+
+if [ "$#" -eq 4 ] &&
+   [ "$1" = simctl ] &&
+   [ "$2" = list ] &&
+   [ "$3" = devices ] &&
+   [ "$4" = available ]; then
+  if [ -n "${SIMCTL_WARMUP_MARKER:-}" ]; then
+    : > "$SIMCTL_WARMUP_MARKER"
+  fi
+  exit 0
+fi
+
+echo "unexpected fake xcrun invocation: $*" >&2
+exit 1
+EOF
+chmod +x "$fixture_bin/xcrun"
 
 write_app_entitlements() {
   app_group_key=$1
@@ -260,6 +285,17 @@ expect_success "exact release identity fixture" env PATH="$fixture_bin:$PATH" "$
 discovered_destination=$(PATH="$fixture_bin:$PATH" "$fixture_selector")
 if [ "$discovered_destination" != "id=IPHONE-AVAILABLE-ID" ]; then
   echo "selector did not discover the first available iPhone: $discovered_destination" >&2
+  exit 1
+fi
+
+simctl_warmup_marker="$temporary_directory/simctl-warmed"
+warmed_destination=$(env \
+  PATH="$fixture_bin:$PATH" \
+  REQUIRE_SIMCTL_WARMUP=1 \
+  SIMCTL_WARMUP_MARKER="$simctl_warmup_marker" \
+  "$fixture_selector")
+if [ "$warmed_destination" != "id=IPHONE-AVAILABLE-ID" ]; then
+  echo "selector did not retry after CoreSimulator warmup: $warmed_destination" >&2
   exit 1
 fi
 

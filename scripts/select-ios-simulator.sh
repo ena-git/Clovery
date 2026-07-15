@@ -3,15 +3,15 @@ set -eu
 
 repository_root=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
 
-if ! destinations=$(xcodebuild \
-  -project "$repository_root/Clovery.xcodeproj" \
-  -scheme Clovery \
-  -showdestinations); then
-  echo "failed to query iOS simulator destinations" >&2
-  exit 1
-fi
+query_destinations() {
+  xcodebuild \
+    -project "$repository_root/Clovery.xcodeproj" \
+    -scheme Clovery \
+    -showdestinations
+}
 
-available_ids=$(printf '%s\n' "$destinations" | awk '
+extract_available_ids() {
+  awk '
   /Available destinations/ { ineligible = 0; next }
   /Ineligible destinations/ { ineligible = 1; next }
   !ineligible && /platform:iOS Simulator/ && /name:iPhone/ && !/error:/ {
@@ -23,9 +23,28 @@ available_ids=$(printf '%s\n' "$destinations" | awk '
       print device_id
     }
   }
-')
+  '
+}
+
+if ! destinations=$(query_destinations); then
+  echo "failed to query iOS simulator destinations" >&2
+  exit 1
+fi
+
+available_ids=$(printf '%s\n' "$destinations" | extract_available_ids)
+
+if [ -z "$available_ids" ] && command -v xcrun >/dev/null 2>&1; then
+  xcrun simctl list devices available >/dev/null 2>&1 || true
+  sleep 1
+  if ! destinations=$(query_destinations); then
+    echo "failed to query iOS simulator destinations after CoreSimulator warmup" >&2
+    exit 1
+  fi
+  available_ids=$(printf '%s\n' "$destinations" | extract_available_ids)
+fi
 
 if [ -z "$available_ids" ]; then
+  printf '%s\n' "$destinations" >&2
   echo "no available iPhone Simulator destination" >&2
   exit 1
 fi
