@@ -67,6 +67,7 @@ DESTINATIONS
     cat <<'DESTINATIONS'
 Available destinations for the "Clovery" scheme:
     { platform:macOS, arch:arm64, id:MAC-AVAILABLE-ID, name:My Mac }
+    { platform:iOS Simulator, arch:arm64, id:IPHONE-OLD-ID, OS:18.5, name:iPhone 16 }
     { platform:iOS Simulator, arch:arm64, id:IPHONE-AVAILABLE-ID, OS:26.0, name:iPhone 17 Pro }
     { platform:iOS Simulator, arch:arm64, id:IPAD-AVAILABLE-ID, OS:26.0, name:iPad Pro 13-inch }
     { platform:iOS Simulator, id:dvtdevice-DVTiOSDeviceSimulatorPlaceholder-iphonesimulator:placeholder, name:Any iOS Simulator Device }
@@ -284,7 +285,7 @@ expect_success "exact release identity fixture" env PATH="$fixture_bin:$PATH" "$
 
 discovered_destination=$(PATH="$fixture_bin:$PATH" "$fixture_selector")
 if [ "$discovered_destination" != "id=IPHONE-AVAILABLE-ID" ]; then
-  echo "selector did not discover the first available iPhone: $discovered_destination" >&2
+  echo "selector did not prefer the newest available iPhone runtime: $discovered_destination" >&2
   exit 1
 fi
 
@@ -302,6 +303,13 @@ fi
 validated_destination=$(CLOVERY_IOS_DESTINATION="$discovered_destination" PATH="$fixture_bin:$PATH" "$fixture_selector")
 if [ "$validated_destination" != "$discovered_destination" ]; then
   echo "selector changed a valid override: $validated_destination" >&2
+  exit 1
+fi
+
+older_destination=id=IPHONE-OLD-ID
+validated_older_destination=$(CLOVERY_IOS_DESTINATION="$older_destination" PATH="$fixture_bin:$PATH" "$fixture_selector")
+if [ "$validated_older_destination" != "$older_destination" ]; then
+  echo "selector changed an available older-runtime override: $validated_older_destination" >&2
   exit 1
 fi
 

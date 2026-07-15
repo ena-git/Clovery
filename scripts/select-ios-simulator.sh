@@ -19,8 +19,36 @@ extract_available_ids() {
     sub(/^.*id:/, "", device_id)
     sub(/,.*/, "", device_id)
     gsub(/[[:space:]]/, "", device_id)
-    if (device_id != "" && device_id !~ /[Pp]laceholder/ && device_id !~ /^dvtdevice-/) {
-      print device_id
+    if (device_id != "" &&
+        device_id !~ /[Pp]laceholder/ &&
+        device_id !~ /^dvtdevice-/ &&
+        !seen[device_id]++) {
+      device_os = $0
+      sub(/^.*OS:/, "", device_os)
+      sub(/,.*/, "", device_os)
+      gsub(/[[:space:]]/, "", device_os)
+      version_count = split(device_os, version, ".")
+      major = version_count >= 1 ? version[1] + 0 : 0
+      minor = version_count >= 2 ? version[2] + 0 : 0
+      patch = version_count >= 3 ? version[3] + 0 : 0
+      score = major * 1000000 + minor * 1000 + patch
+
+      device_count++
+      device_ids[device_count] = device_id
+      if (device_count == 1 || score > best_score) {
+        best_score = score
+        best_index = device_count
+      }
+    }
+  }
+  END {
+    if (best_index > 0) {
+      print device_ids[best_index]
+    }
+    for (device_index = 1; device_index <= device_count; device_index++) {
+      if (device_index != best_index) {
+        print device_ids[device_index]
+      }
     }
   }
   '
