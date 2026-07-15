@@ -25,6 +25,7 @@ Pods/
 !.env.example
 coverage.out
 /build/
+.worktrees/
 
 # Claude
 .claude/
