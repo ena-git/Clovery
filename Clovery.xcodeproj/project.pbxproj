@@ -551,7 +551,7 @@
 				CODE_SIGN_ENTITLEMENTS = Clovery/Clovery.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 13;
+				CURRENT_PROJECT_VERSION = 14;
 				DEVELOPMENT_TEAM = M92TBSSR2R;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Clovery/Info.plist;
@@ -567,7 +567,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.2;
+				MARKETING_VERSION = 1.0.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.clovery.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -589,7 +589,7 @@
 				CODE_SIGN_ENTITLEMENTS = Clovery/Clovery.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 13;
+				CURRENT_PROJECT_VERSION = 14;
 				DEVELOPMENT_TEAM = M92TBSSR2R;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = Clovery/Info.plist;
@@ -605,7 +605,7 @@
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
-				MARKETING_VERSION = 1.0.2;
+				MARKETING_VERSION = 1.0.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.clovery.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
@@ -629,7 +629,7 @@
 				CODE_SIGN_ENTITLEMENTS = CloveryWidgetExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 13;
+				CURRENT_PROJECT_VERSION = 14;
 				DEVELOPMENT_TEAM = M92TBSSR2R;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = CloveryWidget/Info.plist;
@@ -642,7 +642,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.0.2;
+				MARKETING_VERSION = 1.0.3;
 				PRODUCT_BUNDLE_IDENTIFIER = com.clovery.app.CloveryWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -665,7 +665,7 @@
 				CODE_SIGN_ENTITLEMENTS = CloveryWidgetExtension.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 13;
+				CURRENT_PROJECT_VERSION = 14;
 				DEVELOPMENT_TEAM = M92TBSSR2R;
 				GENERATE_INFOPLIST_FILE = YES;
 				INFOPLIST_FILE = CloveryWidget/Info.plist;
@@ -678,7 +678,7 @@
 					"@executable_path/../../Frameworks",
 				);
 				LOCALIZATION_PREFERS_STRING_CATALOGS = YES;
-				MARKETING_VERSION = 1.0.2;
+				MARKETING_VERSION = 1.0.3;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = com.clovery.app.CloveryWidget;
 				PRODUCT_NAME = "$(TARGET_NAME)";
