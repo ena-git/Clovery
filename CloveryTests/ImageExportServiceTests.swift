@@ -24,7 +24,7 @@ final class ImageExportServiceTests: XCTestCase {
         XCTAssertEqual(share.sharedImageCount, 0)
     }
 
-    func testShareAndSettingsUseSeparateSystemCapabilities() {
+    func testShareUsesSeparateSystemCapability() {
         let photoLibrary = PhotoLibrarySpy(outcome: .success)
         let share = ImageShareSpy()
         let settings = AppSettingsSpy()
@@ -37,10 +37,26 @@ final class ImageExportServiceTests: XCTestCase {
         service.handle(action: "share", dataURL: validDataURL) { _ in
             XCTFail("share must not report a photo-library save")
         }
-        service.openSettings()
 
         XCTAssertEqual(photoLibrary.savedImageCount, 0)
         XCTAssertEqual(share.sharedImageCount, 1)
+        XCTAssertEqual(settings.openCount, 0)
+    }
+
+    func testOpenSettingsUsesSeparateSystemCapability() {
+        let photoLibrary = PhotoLibrarySpy(outcome: .success)
+        let share = ImageShareSpy()
+        let settings = AppSettingsSpy()
+        let service = ImageExportService(
+            photoLibrary: photoLibrary,
+            sharePresenter: share,
+            settingsOpener: settings
+        )
+
+        service.openSettings()
+
+        XCTAssertEqual(photoLibrary.savedImageCount, 0)
+        XCTAssertEqual(share.sharedImageCount, 0)
         XCTAssertEqual(settings.openCount, 1)
     }
 

@@ -1,5 +1,6 @@
 import Foundation
 import XCTest
+@testable import Clovery
 
 final class WebBridgeContractTests: XCTestCase {
     private var repositoryRoot: URL {
@@ -46,8 +47,20 @@ final class WebBridgeContractTests: XCTestCase {
         let webViewSource = try source("Clovery/WebView.swift")
         let html = try source("Clovery/Clover Diary.html")
 
+        XCTAssertTrue(webViewSource.contains("message.name == \"openAppSettings\""))
+        XCTAssertTrue(webViewSource.contains("handleOpenAppSettings()"))
         XCTAssertTrue(html.contains("messageHandlers?.openAppSettings?.postMessage"))
+        XCTAssertTrue(html.contains("minHeight:44"))
         XCTAssertFalse(webViewSource.contains("PHPhotoLibrary.shared().performChanges"))
+    }
+
+    func testOpenAppSettingsRoutesToImageExporter() {
+        let imageExporter = ImageExportingSpy()
+        let coordinator = WebView.Coordinator(imageExporter: imageExporter)
+
+        coordinator.handleOpenAppSettings()
+
+        XCTAssertEqual(imageExporter.openSettingsCount, 1)
     }
 
     func testMigrationExportIsUserTriggeredAndReportsCounts() throws {
@@ -70,5 +83,19 @@ final class WebBridgeContractTests: XCTestCase {
             contentsOf: repositoryRoot.appendingPathComponent(relativePath),
             encoding: .utf8
         )
+    }
+}
+
+private final class ImageExportingSpy: ImageExporting {
+    private(set) var openSettingsCount = 0
+
+    func handle(
+        action: String,
+        dataURL: String,
+        saveCompletion: @escaping (PhotoSaveOutcome) -> Void
+    ) {}
+
+    func openSettings() {
+        openSettingsCount += 1
     }
 }

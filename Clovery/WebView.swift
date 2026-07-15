@@ -97,7 +97,7 @@ struct WebView: UIViewRepresentable {
                     self?.reportPhotoSave(outcome)
                 }
             } else if message.name == "openAppSettings" {
-                imageExporter.openSettings()
+                handleOpenAppSettings()
             } else if message.name == "checkBoardUnlocked" {
                 Task { @MainActor in
                     await BoardStore.shared.refresh()
@@ -310,6 +310,10 @@ struct WebView: UIViewRepresentable {
                     completionHandler: nil
                 )
             }
+        }
+
+        func handleOpenAppSettings() {
+            imageExporter.openSettings()
         }
 
         // MARK: iCloud Key-Value Sync

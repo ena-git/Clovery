@@ -8542,7 +8542,7 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
           borderTop:`1px solid ${isDark?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)'}`,
           position:'relative'}}>
           {(saved || saveError) && <div style={{position:'absolute',
-            top:saveError==='permissionDenied'?-54:-22, left:0, right:0,
+            top:saveError==='permissionDenied'?-74:-22, left:0, right:0,
             display:'flex', flexDirection:'column', alignItems:'center',
             textAlign:'center', fontSize:13, color:saved?theme.accent:'#D45A4E', fontWeight:600}}>
             {saved ? T.saved : (saveError==='permissionDenied' ? T.savePermission : T.saveFailed)}
@@ -8551,7 +8551,9 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
                 window.webkit?.messageHandlers?.openAppSettings?.postMessage({});
               }} style={{
                 marginTop:6, border:0, background:'transparent', color:theme.accentDark,
-                textDecoration:'underline', fontSize:13, fontWeight:600
+                textDecoration:'underline', fontSize:13, fontWeight:600,
+                minHeight:44, padding:'0 12px', display:'inline-flex',
+                alignItems:'center', justifyContent:'center'
               }}>
                 {lang==='zh' ? '前往系统设置' : lang==='ja' ? '設定を開く' : lang==='ko' ? '설정 열기' : 'Open Settings'}
               </button>
