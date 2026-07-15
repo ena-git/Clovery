@@ -55,3 +55,10 @@ CloverDiary-iOS/
 - Widget: `com.clovery.app.CloveryWidget`
 - App Group: `group.com.clovery.app`
 - iCloud Container: `iCloud.com.clovery.app`
+
+## Verification
+
+- Native App Store iOS V1: `scripts/verify-ios-v1.sh`
+- Go/Flutter V2 platform: `cd v2 && make verify`
+
+Flutter feature development must resume only after the native iOS release gate passes.

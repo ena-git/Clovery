@@ -1,0 +1,53 @@
+name: Verify Clovery Native iOS
+
+"on":
+  pull_request:
+    paths:
+      - ".github/workflows/verify-ios-v1.yml"
+      - "Clovery/**"
+      - "CloveryTests/**"
+      - "CloveryWidget/**"
+      - "Clovery.xcodeproj/**"
+      - "CloveryWidgetExtension.entitlements"
+      - "Tests/**"
+      - "scripts/**"
+      - "docs/release/**"
+  push:
+    branches:
+      - main
+    paths:
+      - ".github/workflows/verify-ios-v1.yml"
+      - "Clovery/**"
+      - "CloveryTests/**"
+      - "CloveryWidget/**"
+      - "Clovery.xcodeproj/**"
+      - "CloveryWidgetExtension.entitlements"
+      - "Tests/**"
+      - "scripts/**"
+      - "docs/release/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: verify-ios-v1-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  native-ios:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Reject beta Xcode
+        run: |
+          xcode_version=$(xcodebuild -version)
+          printf '%s\n' "$xcode_version"
+          if printf '%s\n' "$xcode_version" | grep -qi beta; then
+            echo "Beta Xcode is not allowed for native iOS verification." >&2
+            exit 1
+          fi
+      - name: Verify native iOS
+        run: scripts/verify-ios-v1.sh
