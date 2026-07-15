@@ -94,6 +94,46 @@ final class BoardEntitlementReporterTests: XCTestCase {
         reporter.reportObservedEntitlement(false)
         XCTAssertEqual(reportedEntitlements, [true, false])
     }
+
+    func testOverlappingRestoreIsIgnoredUntilActiveRestoreCompletes() async {
+        var restoreCount = 0
+        var resumeRestore: CheckedContinuation<Void, Never>?
+        let restoreStarted = expectation(description: "first restore started")
+        let reporter = BoardEntitlementReporter(
+            currentEntitlement: { false },
+            reportUnlock: { _ in }
+        )
+
+        let firstRestore = Task { @MainActor in
+            await reporter.reportRestore(
+                performRestore: {
+                    restoreCount += 1
+                    restoreStarted.fulfill()
+                    await withCheckedContinuation { continuation in
+                        resumeRestore = continuation
+                    }
+                    return "first"
+                },
+                reportOutcome: { _ in }
+            )
+        }
+        await fulfillment(of: [restoreStarted], timeout: 0.5)
+
+        await reporter.reportRestore(
+            performRestore: {
+                restoreCount += 1
+                return "second"
+            },
+            reportOutcome: { _ in }
+        )
+
+        XCTAssertEqual(restoreCount, 1)
+        XCTAssertTrue(reporter.isSuppressingObservedEntitlements)
+
+        resumeRestore?.resume()
+        await firstRestore.value
+        XCTAssertFalse(reporter.isSuppressingObservedEntitlements)
+    }
 }
 
 private enum ReporterTestError: Error {

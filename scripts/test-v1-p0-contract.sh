@@ -97,6 +97,12 @@ assert(reporterCall >= 0, 'the entitlement reporter owns the complete restore li
 assert(reporterCall < restoreCall && restoreCall < restoreCallback, 'restore and outcome reporting both run inside the entitlement reporter');
 assert(!restoreHandler.includes('let unlocked = BoardStore.shared.isUnlocked'), 'restore does not snapshot entitlement before an awaited JavaScript callback');
 
+const checkHandlerStart = webViewSource.indexOf('message.name == "checkBoardUnlocked"');
+const checkHandlerEnd = webViewSource.indexOf('message.name == "purchaseBoard"', checkHandlerStart);
+const checkHandler = webViewSource.slice(checkHandlerStart, checkHandlerEnd);
+assert(checkHandler.includes('boardEntitlementReporter.reportObservedEntitlement'), 'initial entitlement checks flow through the restore-aware reporter');
+assert(!checkHandler.includes('BridgeJavaScript.boardUnlockStatus'), 'initial entitlement checks cannot bypass restore ordering');
+
 const webViewBinding = webViewSource.indexOf('context.coordinator.webView = webView');
 const observerStart = webViewSource.indexOf(
   'context.coordinator.startObservingBoardStore()',

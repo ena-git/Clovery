@@ -112,9 +112,8 @@ struct WebView: UIViewRepresentable {
             } else if message.name == "checkBoardUnlocked" {
                 Task { @MainActor in
                     await BoardStore.shared.refresh()
-                    let unlocked = BoardStore.shared.isUnlocked
-                    _ = try? await self.webView?.evaluateJavaScript(
-                        BridgeJavaScript.boardUnlockStatus(unlocked)
+                    self.boardEntitlementReporter.reportObservedEntitlement(
+                        BoardStore.shared.isUnlocked
                     )
                 }
             } else if message.name == "purchaseBoard" {

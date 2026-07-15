@@ -22,6 +22,7 @@ final class BoardEntitlementReporter {
         performRestore: () async throws -> Outcome,
         reportOutcome: (Outcome) async throws -> Void
     ) async {
+        guard !isSuppressingObservedEntitlements else { return }
         await performRestoreWhileSuppressingObservation(
             performRestore: performRestore,
             reportOutcome: reportOutcome

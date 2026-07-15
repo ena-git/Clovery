@@ -34,6 +34,23 @@ struct BoardEntitlementReporterRegressionTests {
 
         expect(events, ["restore", "outcome:notFound", "unlock:true", "unlock:true"])
         expect(reporter.isSuppressingObservedEntitlements, false)
+
+        var nestedRestoreCount = 0
+        await reporter.reportRestore(
+            performRestore: {
+                nestedRestoreCount += 1
+                await reporter.reportRestore(
+                    performRestore: {
+                        nestedRestoreCount += 1
+                        return "nested"
+                    },
+                    reportOutcome: { _ in }
+                )
+                return "outer"
+            },
+            reportOutcome: { _ in }
+        )
+        expect(nestedRestoreCount, 1)
     }
 
     private static func expect<T: Equatable>(
