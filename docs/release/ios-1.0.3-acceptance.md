@@ -1,13 +1,13 @@
 # Clovery iOS 1.0.3 Acceptance Evidence
 
-**Commit:** `NOT_RUN`
-**Archive:** `NOT_RUN`
+**Commit:** `c73f6ceb1d2ce7c7ea7882975bdfff17f4064835`
+**Archive:** `build/Clovery-1.0.3-14.xcarchive`
 **TestFlight build:** `NOT_RUN`
 
 ## Automated
-- [ ] Native verification script — `NOT_RUN`
-- [ ] Signed Release archive — `NOT_RUN`
-- [ ] App and widget identity inspection — `NOT_RUN`
+- [x] Native verification script — PASS — Time: 2026-07-16T02:52:23+08:00; Device: iPhone 17 Pro simulator; OS: iOS 26.0.1; Evidence: automated/verify-ios-v1.log
+- [x] Signed Release archive — PASS — Time: 2026-07-16T02:53:31+08:00; Device: Mac; OS: macOS 15.7.4; Evidence: automated/archive.log
+- [x] App and widget identity inspection — PASS — Time: 2026-07-16T02:53:54+08:00; Device: Mac; OS: macOS 15.7.4; Evidence: automated/archive-inspection.txt
 
 ## Upgrade And Migration
 - [ ] `1.0.2 (13)` to `1.0.3 (14)` data retention — `NOT_RUN`
