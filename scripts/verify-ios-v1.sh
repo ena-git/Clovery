@@ -11,6 +11,7 @@ scripts/test-v1-p0-contract.sh
 scripts/test-v1-bridge.sh
 scripts/test-migration-zip.sh
 Tests/IOSReleaseIdentityTests.sh
+Tests/IOSReleaseEvidenceGateTests.sh
 scripts/verify-ios-release-config.sh
 
 xcodebuild \

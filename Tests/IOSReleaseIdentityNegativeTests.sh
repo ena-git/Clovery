@@ -79,6 +79,7 @@ Build settings for action build and target Clovery:
     MARKETING_VERSION = 1.0.3
     CURRENT_PROJECT_VERSION = 14
     PRODUCT_BUNDLE_IDENTIFIER = com.clovery.app
+    CLOVERY_SOURCE_COMMIT = ${APP_SOURCE_COMMIT-NOT_SET}
     INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = ${APP_PHOTO_USAGE-Clovery saves your lucky moment cards to Photos.}
     CODE_SIGN_ENTITLEMENTS = ${APP_CODE_SIGN_ENTITLEMENTS-Clovery/Clovery.entitlements}
 SETTINGS
@@ -151,6 +152,20 @@ reset_entitlements() {
     group.com.clovery.app
 }
 
+write_app_info() {
+  source_commit_value=$1
+  cat > "$fixture_root/Clovery/Info.plist" <<EOF
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CloverySourceCommit</key>
+  <string>$source_commit_value</string>
+</dict>
+</plist>
+EOF
+}
+
 expect_failure() {
   label=$1
   shift
@@ -172,8 +187,15 @@ expect_success() {
 }
 
 reset_entitlements
+write_app_info '$(CLOVERY_SOURCE_COMMIT)'
 expect_failure "empty photo-library usage description" \
   env PATH="$fixture_bin:$PATH" APP_PHOTO_USAGE= "$fixture_checker"
+expect_failure "wrong source commit build default" \
+  env PATH="$fixture_bin:$PATH" APP_SOURCE_COMMIT=WRONG "$fixture_checker"
+write_app_info 'WRONG'
+expect_failure "wrong source commit Info placeholder" \
+  env PATH="$fixture_bin:$PATH" "$fixture_checker"
+write_app_info '$(CLOVERY_SOURCE_COMMIT)'
 expect_failure "mismatched app CODE_SIGN_ENTITLEMENTS" \
   env PATH="$fixture_bin:$PATH" APP_CODE_SIGN_ENTITLEMENTS=Wrong/App.entitlements "$fixture_checker"
 expect_failure "mismatched widget CODE_SIGN_ENTITLEMENTS" \

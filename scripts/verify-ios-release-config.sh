@@ -58,12 +58,18 @@ widget=$(build_settings CloveryWidgetExtension)
 assert_equal "$(setting "$app" MARKETING_VERSION)" "1.0.3" "app marketing version"
 assert_equal "$(setting "$app" CURRENT_PROJECT_VERSION)" "14" "app build number"
 assert_equal "$(setting "$app" PRODUCT_BUNDLE_IDENTIFIER)" "com.clovery.app" "app bundle id"
+assert_equal "$(setting "$app" CLOVERY_SOURCE_COMMIT)" "NOT_SET" "app source commit default"
 assert_non_empty "$(setting "$app" INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription)" "app photo-library usage description"
 assert_equal "$(setting "$app" CODE_SIGN_ENTITLEMENTS)" "Clovery/Clovery.entitlements" "app entitlements path"
 assert_equal "$(setting "$widget" MARKETING_VERSION)" "1.0.3" "widget marketing version"
 assert_equal "$(setting "$widget" CURRENT_PROJECT_VERSION)" "14" "widget build number"
 assert_equal "$(setting "$widget" PRODUCT_BUNDLE_IDENTIFIER)" "com.clovery.app.CloveryWidget" "widget bundle id"
 assert_equal "$(setting "$widget" CODE_SIGN_ENTITLEMENTS)" "CloveryWidgetExtension.entitlements" "widget entitlements path"
+
+assert_equal \
+  "$(/usr/libexec/PlistBuddy -c 'Print :CloverySourceCommit' "$repository_root/Clovery/Info.plist")" \
+  '$(CLOVERY_SOURCE_COMMIT)' \
+  "app source commit Info placeholder"
 
 assert_plist_single_array_value \
   "$repository_root/Clovery/Clovery.entitlements" \

@@ -30,21 +30,8 @@
 - [ ] TestFlight smoke — `NOT_RUN`
 
 ## Privacy
-
-Git must never contain email addresses or other stable account identifiers for
-Apple, Sandbox, or Clovery accounts; passwords, verification codes, or recovery
-codes; receipts, tokens, transaction payloads, transaction IDs, or original
-transaction IDs; diary content, photos, tombstones, raw entitlement state,
-migration ZIPs or manifests, content SHA-256 hashes, device UDIDs, or other
-stable device identifiers.
-
-For each checklist item, Git records only the aggregate `PASS`, test time, device
-model, OS version, and non-sensitive evidence filename. Evidence filenames must
-be safe relative paths containing only letters, numbers, dots, underscores,
-hyphens, and slashes; absolute paths and `..` are forbidden. Raw counts, hashes,
-screenshots, logs, and archives must remain outside Git and be stored only under
-the gitignored `build/release-evidence/ios-1.0.3/` directory.
-
-The release checker trusts only the committed
-`HEAD:docs/release/ios-1.0.3-acceptance.md`. Uncommitted working-tree edits are
-never release evidence.
+- Git excludes account credentials, email addresses, stable account identifiers, passwords, verification codes, and recovery codes.
+- Git excludes receipts, tokens, transaction payloads, transaction IDs, original transaction IDs, and raw entitlement state.
+- Git excludes diary content, photos, tombstones, migration ZIPs, manifests, content SHA-256 hashes, device UDIDs, and stable device identifiers.
+- Git records only aggregate PASS results, test time, device model, OS version, and non-sensitive evidence filenames.
+- Raw counts, hashes, screenshots, logs, archives, and restricted evidence remain under the gitignored `build/release-evidence/ios-1.0.3/` directory.
