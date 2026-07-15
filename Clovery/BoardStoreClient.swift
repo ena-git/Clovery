@@ -11,6 +11,11 @@ struct BoardTransaction: Sendable {
     }
 }
 
+enum BoardEntitlementResult: Sendable {
+    case verified([BoardTransaction])
+    case verificationFailed
+}
+
 enum BoardClientPurchaseResult: Sendable {
     case success(BoardTransaction)
     case cancelled
@@ -19,7 +24,7 @@ enum BoardClientPurchaseResult: Sendable {
 }
 
 struct BoardStoreClient: Sendable {
-    let currentEntitlements: @Sendable () async -> [BoardTransaction]
+    let currentEntitlements: @Sendable (_ productID: String) async -> BoardEntitlementResult
     let purchase: @Sendable (_ productID: String) async -> BoardClientPurchaseResult
     let displayPrice: @Sendable (_ productID: String) async -> String?
     let sync: @Sendable () async throws -> Void
@@ -42,19 +47,27 @@ private extension BoardTransaction {
 extension BoardStoreClient {
     static var live: BoardStoreClient {
         BoardStoreClient(
-            currentEntitlements: {
+            currentEntitlements: { productID in
                 var transactions: [BoardTransaction] = []
+                var targetVerificationFailed = false
                 for await result in StoreKit.Transaction.currentEntitlements {
                     switch result {
                     case .verified(let transaction):
+                        guard transaction.productID == productID else { continue }
                         transactions.append(BoardTransaction(storeKitTransaction: transaction))
-                    case .unverified(_, let error):
+                    case .unverified(let transaction, let error):
                         boardStoreClientLogger.error(
                             "Unverified entitlement: \(String(describing: error), privacy: .public)"
                         )
+                        if transaction.productID == productID {
+                            targetVerificationFailed = true
+                        }
                     }
                 }
-                return transactions
+                if targetVerificationFailed {
+                    return .verificationFailed
+                }
+                return .verified(transactions)
             },
             purchase: { productID in
                 do {
