@@ -12,6 +12,6 @@ final class AuthenticationRoutingTests: XCTestCase {
         XCTAssertEqual(AuthenticationProviderKind.apple.accessibilityLabel, "使用 Apple 登录")
         XCTAssertEqual(AuthenticationProviderKind.google.accessibilityLabel, "使用 Google 登录")
         XCTAssertEqual(AuthenticationProviderKind.huawei.accessibilityLabel, "使用华为账号登录")
-        XCTAssertEqual(AuthenticationProviderKind.passkey.accessibilityLabel, "使用 Clovery Passkey 登录")
+        XCTAssertEqual(AuthenticationProviderKind.passkey.accessibilityLabel, "使用 Clovery 通行密钥登录")
     }
 }
