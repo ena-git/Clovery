@@ -4,6 +4,12 @@
 <dict>
 	<key>CloverySourceCommit</key>
 	<string>$(CLOVERY_SOURCE_COMMIT)</string>
+	<key>UIAppFonts</key>
+	<array>
+		<string>fonts/Gaegu-Regular.ttf</string>
+		<string>fonts/Gaegu-Light.ttf</string>
+		<string>fonts/Gaegu-Bold.ttf</string>
+	</array>
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>remote-notification</string>

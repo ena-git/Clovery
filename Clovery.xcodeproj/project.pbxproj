@@ -43,6 +43,17 @@
 		AABB0000000000000000008B /* ApplicationSessionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000009B /* ApplicationSessionController.swift */; };
 		AABB0000000000000000008C /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000009C /* LoginViewModel.swift */; };
 		AABB0000000000000000008D /* SignUpViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000009D /* SignUpViewModel.swift */; };
+		AABB0000000000000000008E /* AuthenticationTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000009E /* AuthenticationTheme.swift */; };
+		AABB0000000000000000008F /* AuthenticationAssets.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000009F /* AuthenticationAssets.swift */; };
+		AABB000000000000000000A0 /* AuthDashedCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000B0 /* AuthDashedCard.swift */; };
+		AABB000000000000000000A1 /* AuthCapsuleField.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000B1 /* AuthCapsuleField.swift */; };
+		AABB000000000000000000A2 /* AuthProviderButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000B2 /* AuthProviderButton.swift */; };
+		AABB000000000000000000A3 /* AuthDivider.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000B3 /* AuthDivider.swift */; };
+		AABB000000000000000000A4 /* AuthenticationEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000B4 /* AuthenticationEntryView.swift */; };
+		AABB000000000000000000A5 /* AuthenticationFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000B5 /* AuthenticationFlowView.swift */; };
+		AABB000000000000000000A6 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000B6 /* LoginView.swift */; };
+		AABB000000000000000000A7 /* SignUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000B7 /* SignUpView.swift */; };
+		AABB000000000000000000A8 /* RecoveryCodesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000B8 /* RecoveryCodesView.swift */; };
 		FCECDFE02FE92C7C0067AF51 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFDF2FE92C7C0067AF51 /* WidgetKit.framework */; };
 		FCECDFE22FE92C7C0067AF51 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFE12FE92C7C0067AF51 /* SwiftUI.framework */; };
 		FCECDFEF2FE92C7D0067AF51 /* CloveryWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -118,6 +129,17 @@
 		AABB0000000000000000009B /* ApplicationSessionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/ApplicationSessionController.swift; sourceTree = "<group>"; };
 		AABB0000000000000000009C /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/LoginViewModel.swift; sourceTree = "<group>"; };
 		AABB0000000000000000009D /* SignUpViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/SignUpViewModel.swift; sourceTree = "<group>"; };
+		AABB0000000000000000009E /* AuthenticationTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/AuthenticationTheme.swift; sourceTree = "<group>"; };
+		AABB0000000000000000009F /* AuthenticationAssets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/AuthenticationAssets.swift; sourceTree = "<group>"; };
+		AABB000000000000000000B0 /* AuthDashedCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/Components/AuthDashedCard.swift; sourceTree = "<group>"; };
+		AABB000000000000000000B1 /* AuthCapsuleField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/Components/AuthCapsuleField.swift; sourceTree = "<group>"; };
+		AABB000000000000000000B2 /* AuthProviderButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/Components/AuthProviderButton.swift; sourceTree = "<group>"; };
+		AABB000000000000000000B3 /* AuthDivider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/Components/AuthDivider.swift; sourceTree = "<group>"; };
+		AABB000000000000000000B4 /* AuthenticationEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/AuthenticationEntryView.swift; sourceTree = "<group>"; };
+		AABB000000000000000000B5 /* AuthenticationFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/AuthenticationFlowView.swift; sourceTree = "<group>"; };
+		AABB000000000000000000B6 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/LoginView.swift; sourceTree = "<group>"; };
+		AABB000000000000000000B7 /* SignUpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/SignUpView.swift; sourceTree = "<group>"; };
+		AABB000000000000000000B8 /* RecoveryCodesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/RecoveryCodesView.swift; sourceTree = "<group>"; };
 		AACC00000000000000000001 /* CloveryTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CloveryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC889A182FD464C9002510AD /* Clovery.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Clovery.entitlements; sourceTree = "<group>"; };
 		FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CloveryWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -203,6 +225,17 @@
 				AABB0000000000000000009B /* ApplicationSessionController.swift */,
 				AABB0000000000000000009C /* LoginViewModel.swift */,
 				AABB0000000000000000009D /* SignUpViewModel.swift */,
+				AABB0000000000000000009E /* AuthenticationTheme.swift */,
+				AABB0000000000000000009F /* AuthenticationAssets.swift */,
+				AABB000000000000000000B0 /* AuthDashedCard.swift */,
+				AABB000000000000000000B1 /* AuthCapsuleField.swift */,
+				AABB000000000000000000B2 /* AuthProviderButton.swift */,
+				AABB000000000000000000B3 /* AuthDivider.swift */,
+				AABB000000000000000000B4 /* AuthenticationEntryView.swift */,
+				AABB000000000000000000B5 /* AuthenticationFlowView.swift */,
+				AABB000000000000000000B6 /* LoginView.swift */,
+				AABB000000000000000000B7 /* SignUpView.swift */,
+				AABB000000000000000000B8 /* RecoveryCodesView.swift */,
 				AABB00000000000000000020 /* BoardStore.swift */,
 				AABB00000000000000000072 /* BoardStoreClient.swift */,
 				AABB00000000000000000074 /* Clovery.storekit */,
@@ -424,6 +457,17 @@
 				AABB0000000000000000008B /* ApplicationSessionController.swift in Sources */,
 				AABB0000000000000000008C /* LoginViewModel.swift in Sources */,
 				AABB0000000000000000008D /* SignUpViewModel.swift in Sources */,
+				AABB0000000000000000008E /* AuthenticationTheme.swift in Sources */,
+				AABB0000000000000000008F /* AuthenticationAssets.swift in Sources */,
+				AABB000000000000000000A0 /* AuthDashedCard.swift in Sources */,
+				AABB000000000000000000A1 /* AuthCapsuleField.swift in Sources */,
+				AABB000000000000000000A2 /* AuthProviderButton.swift in Sources */,
+				AABB000000000000000000A3 /* AuthDivider.swift in Sources */,
+				AABB000000000000000000A4 /* AuthenticationEntryView.swift in Sources */,
+				AABB000000000000000000A5 /* AuthenticationFlowView.swift in Sources */,
+				AABB000000000000000000A6 /* LoginView.swift in Sources */,
+				AABB000000000000000000A7 /* SignUpView.swift in Sources */,
+				AABB000000000000000000A8 /* RecoveryCodesView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
