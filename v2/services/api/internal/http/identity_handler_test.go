@@ -91,6 +91,9 @@ func TestFederatedLoginCompleteReturnsRootAccountSession(t *testing.T) {
 	if response.Body.String() != wantBody {
 		t.Fatalf("session body = %s, want %s", response.Body.String(), wantBody)
 	}
+	if response.Header().Get("Cache-Control") != "" {
+		t.Fatalf("200 Cache-Control = %q, want empty", response.Header().Get("Cache-Control"))
+	}
 	if application.loginCommand.Provider != "apple" || application.loginCommand.Device.Platform != "ios" {
 		t.Fatalf("federated login command = %#v", application.loginCommand)
 	}
@@ -101,8 +104,8 @@ func TestFederatedLoginCompleteReturnsRootAccountSession(t *testing.T) {
 
 func TestFederatedLoginCompleteReturnsAcceptedIdentityClaim(t *testing.T) {
 	const rawToken = "claim_token_visible_only_in_transport"
-	claim := IdentityClaimHTTPResult{Provider: "google", IdentityClaimToken: rawToken, ExpiresIn: 600}
-	application := &stubFederatedHTTPApplication{completion: FederatedHTTPCompletion{Claim: &claim}}
+	claim := newIdentityClaimHTTPResult("google", 600, rawToken)
+	application := &stubFederatedHTTPApplication{completion: FederatedHTTPCompletion{Claim: claim}}
 	router := NewRouter(RouterDependencies{
 		Federation: application,
 		Sessions:   &fakeHTTPSessionService{},
@@ -124,7 +127,13 @@ func TestFederatedLoginCompleteReturnsAcceptedIdentityClaim(t *testing.T) {
 	if strings.Contains(response.Body.String(), "identity_not_bound") || strings.Count(response.Body.String(), rawToken) != 1 {
 		t.Fatal("claim response contained identity_not_bound or repeated the token")
 	}
+	if response.Header().Get("Cache-Control") != "no-store" {
+		t.Fatalf("202 Cache-Control = %q, want no-store", response.Header().Get("Cache-Control"))
+	}
 	assertSingleJSONDocument(t, response.Body.String())
+	if token, ok := claim.takeToken(); ok || token != "" {
+		t.Fatal("handler did not consume the HTTP claim token exactly once")
+	}
 	if application.loginCalls != 1 {
 		t.Fatalf("application calls = %d", application.loginCalls)
 	}
@@ -180,8 +189,8 @@ func TestFederatedLoginCompletePreservesAuthenticationErrorMappings(t *testing.T
 func TestFederatedLoginCompleteRejectsImpossibleUnionWithoutTokenDisclosure(t *testing.T) {
 	const rawToken = "must_not_appear_in_error"
 	session := AuthSession{AccountID: "account-id"}
-	claim := IdentityClaimHTTPResult{Provider: "apple", IdentityClaimToken: rawToken, ExpiresIn: 600}
-	application := &stubFederatedHTTPApplication{completion: FederatedHTTPCompletion{Session: &session, Claim: &claim}}
+	claim := newIdentityClaimHTTPResult("apple", 600, rawToken)
+	application := &stubFederatedHTTPApplication{completion: FederatedHTTPCompletion{Session: &session, Claim: claim}}
 	router := NewRouter(RouterDependencies{Federation: application, Sessions: &fakeHTTPSessionService{}})
 	request := httptest.NewRequest(
 		http.MethodPost,
@@ -200,6 +209,33 @@ func TestFederatedLoginCompleteRejectsImpossibleUnionWithoutTokenDisclosure(t *t
 	if application.loginCalls != 1 {
 		t.Fatalf("application calls = %d", application.loginCalls)
 	}
+	if token, ok := claim.takeToken(); !ok || token != rawToken {
+		t.Fatal("impossible union consumed or changed the HTTP claim token")
+	}
+}
+
+func TestFederatedLoginCompleteRejectsAlreadyTakenHTTPClaimToken(t *testing.T) {
+	const rawToken = "already_taken_http_transport_secret"
+	claim := newIdentityClaimHTTPResult("apple", 600, rawToken)
+	if token, ok := claim.takeToken(); !ok || token != rawToken {
+		t.Fatal("test setup could not take the HTTP claim token")
+	}
+	application := &stubFederatedHTTPApplication{completion: FederatedHTTPCompletion{Claim: claim}}
+	router := NewRouter(RouterDependencies{Federation: application, Sessions: &fakeHTTPSessionService{}})
+	request := httptest.NewRequest(
+		http.MethodPost,
+		"/v1/auth/federated/apple/complete",
+		strings.NewReader(`{"intent_id":"44444444-4444-4444-8444-444444444444","nonce":"nonce","authorization_code":"code","device":{}}`),
+	)
+	request.Header.Set("Content-Type", "application/json")
+	response := httptest.NewRecorder()
+
+	router.ServeHTTP(response, request)
+
+	if response.Code != http.StatusInternalServerError || strings.Contains(response.Body.String(), rawToken) {
+		t.Fatalf("status = %d or error disclosed the token", response.Code)
+	}
+	assertSingleJSONDocument(t, response.Body.String())
 }
 
 func TestFederatedBindingCompletePassesBearerAndIntent(t *testing.T) {

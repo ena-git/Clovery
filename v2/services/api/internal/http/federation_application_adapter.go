@@ -2,6 +2,8 @@ package httpapi
 
 import (
 	"context"
+	"strings"
+	"time"
 
 	"github.com/clovery/clovery/services/api/internal/application/identityflow"
 )
@@ -63,15 +65,29 @@ func (adapter *federatedApplicationAdapter) CompleteFederatedLogin(
 		return FederatedHTTPCompletion{Session: &session}, nil
 	}
 	issued := &completion.Claim.Issued
+	provider := strings.ToLower(strings.TrimSpace(command.Provider))
+	if !supportedFederatedClaimProvider(issued.Provider) ||
+		issued.Provider != provider || issued.ExpiresIn != 10*time.Minute {
+		return FederatedHTTPCompletion{}, errInvalidIdentityClaimMetadata
+	}
 	rawToken, ok := issued.TakeToken()
 	if !ok || rawToken == "" {
 		return FederatedHTTPCompletion{}, errIdentityClaimTokenUnavailable
 	}
-	return FederatedHTTPCompletion{Claim: &IdentityClaimHTTPResult{
-		Provider:           issued.Provider,
-		IdentityClaimToken: rawToken,
-		ExpiresIn:          int(issued.ExpiresIn.Seconds()),
-	}}, nil
+	return FederatedHTTPCompletion{Claim: newIdentityClaimHTTPResult(
+		issued.Provider,
+		int(issued.ExpiresIn.Seconds()),
+		rawToken,
+	)}, nil
+}
+
+func supportedFederatedClaimProvider(provider string) bool {
+	switch provider {
+	case "apple", "google", "huawei":
+		return true
+	default:
+		return false
+	}
 }
 
 func (adapter *federatedApplicationAdapter) StartBinding(

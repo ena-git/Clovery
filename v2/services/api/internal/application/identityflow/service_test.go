@@ -156,6 +156,28 @@ func TestNewFederatedFlowRequiresEveryDependency(t *testing.T) {
 	}
 }
 
+func TestNewFederatedFlowRejectsTypedNilDependencies(t *testing.T) {
+	var nilFederation *stubFederationService
+	var nilSessions *stubSessionIssuer
+	var nilClaims *stubIdentityClaimIssuer
+	for name, dependencies := range map[string]struct {
+		federation federatedLoginCompleter
+		sessions   sessionIssuer
+		claims     IdentityClaimIssuer
+	}{
+		"federation": {federation: nilFederation, sessions: &stubSessionIssuer{}, claims: &stubIdentityClaimIssuer{}},
+		"sessions":   {federation: &stubFederationService{}, sessions: nilSessions, claims: &stubIdentityClaimIssuer{}},
+		"claims":     {federation: &stubFederationService{}, sessions: &stubSessionIssuer{}, claims: nilClaims},
+	} {
+		t.Run(name, func(t *testing.T) {
+			flow, err := NewFederatedFlow(dependencies.federation, dependencies.sessions, dependencies.claims)
+			if err == nil || flow != nil {
+				t.Fatalf("NewFederatedFlow() = %#v, %v", flow, err)
+			}
+		})
+	}
+}
+
 func TestFederatedBindingPassesCurrentAccessTokenToRecentAuthentication(t *testing.T) {
 	federation := &stubFederationService{intent: auth.BindingIntent{
 		ID:       "55555555-5555-4555-8555-555555555555",

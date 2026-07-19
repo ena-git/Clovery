@@ -3,6 +3,7 @@ package identityflow
 import (
 	"context"
 	"fmt"
+	"reflect"
 
 	"github.com/clovery/clovery/services/api/internal/auth"
 	"github.com/clovery/clovery/services/api/internal/identityclaim"
@@ -92,10 +93,25 @@ func NewFederatedFlow(
 	sessions sessionIssuer,
 	claims IdentityClaimIssuer,
 ) (*FederatedFlow, error) {
-	if federation == nil || sessions == nil || claims == nil {
+	if nilFederatedFlowDependency(federation) ||
+		nilFederatedFlowDependency(sessions) ||
+		nilFederatedFlowDependency(claims) {
 		return nil, fmt.Errorf("federated flow dependencies are required")
 	}
 	return &FederatedFlow{federation: federation, sessions: sessions, claims: claims}, nil
+}
+
+func nilFederatedFlowDependency(dependency any) bool {
+	if dependency == nil {
+		return true
+	}
+	value := reflect.ValueOf(dependency)
+	switch value.Kind() {
+	case reflect.Chan, reflect.Func, reflect.Interface, reflect.Map, reflect.Pointer, reflect.Slice:
+		return value.IsNil()
+	default:
+		return false
+	}
 }
 
 func (flow *FederatedFlow) CompleteFederatedLogin(

@@ -102,14 +102,16 @@ func (handler federationHandler) completeFederatedLogin(
 		return
 	}
 	if completion.Claim != nil {
-		if completion.Claim.IdentityClaimToken == "" {
+		rawToken, ok := completion.Claim.takeToken()
+		if !ok || rawToken == "" {
 			writeAuthError(responseWriter, errIdentityClaimTokenUnavailable)
 			return
 		}
+		responseWriter.Header().Set("Cache-Control", "no-store")
 		writeJSON(responseWriter, http.StatusAccepted, identityClaimRequiredResponse{
 			Status:             "identity_claim_required",
 			Provider:           completion.Claim.Provider,
-			IdentityClaimToken: completion.Claim.IdentityClaimToken,
+			IdentityClaimToken: rawToken,
 			ExpiresIn:          completion.Claim.ExpiresIn,
 		})
 		return

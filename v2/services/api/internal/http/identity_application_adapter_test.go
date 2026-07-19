@@ -1,10 +1,15 @@
 package httpapi
 
 import (
+	"bytes"
 	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
+	"log/slog"
 	"strings"
+	"sync"
+	"sync/atomic"
 	"testing"
 	"time"
 
@@ -49,17 +54,20 @@ func TestFederatedApplicationAdapterExtractsClaimTokenOnce(t *testing.T) {
 	}}
 	adapter := NewFederatedApplication(flow)
 
-	result, err := adapter.CompleteFederatedLogin(context.Background(), FederatedLoginHTTPCommand{})
+	result, err := adapter.CompleteFederatedLogin(context.Background(), FederatedLoginHTTPCommand{Provider: " Google "})
 	if err != nil {
 		t.Fatalf("complete federated login: %v", err)
 	}
 	if result.Session != nil || result.Claim == nil || result.Claim.Provider != "google" ||
-		result.Claim.IdentityClaimToken == "" || result.Claim.ExpiresIn != 600 {
+		result.Claim.ExpiresIn != 600 {
 		t.Fatal("adapter did not return the expected claim metadata and token")
 	}
-	firstToken := result.Claim.IdentityClaimToken
+	firstToken, ok := result.Claim.takeToken()
+	if !ok || firstToken == "" {
+		t.Fatal("HTTP claim token was unavailable")
+	}
 
-	second, err := adapter.CompleteFederatedLogin(context.Background(), FederatedLoginHTTPCommand{})
+	second, err := adapter.CompleteFederatedLogin(context.Background(), FederatedLoginHTTPCommand{Provider: "google"})
 	if !errors.Is(err, errIdentityClaimTokenUnavailable) {
 		t.Fatalf("second mapping error = %v", err)
 	}
@@ -68,6 +76,109 @@ func TestFederatedApplicationAdapterExtractsClaimTokenOnce(t *testing.T) {
 	}
 	if strings.Contains(err.Error(), firstToken) {
 		t.Fatal("token extraction error disclosed the raw token")
+	}
+}
+
+func TestFederatedApplicationAdapterValidatesClaimMetadataBeforeTakingToken(t *testing.T) {
+	for name, mutate := range map[string]func(*identityclaim.IssuedClaim){
+		"empty provider":       func(claim *identityclaim.IssuedClaim) { claim.Provider = "" },
+		"unsupported provider": func(claim *identityclaim.IssuedClaim) { claim.Provider = "github" },
+		"mismatched provider":  func(claim *identityclaim.IssuedClaim) { claim.Provider = "google" },
+		"zero expiry":          func(claim *identityclaim.IssuedClaim) { claim.ExpiresIn = 0 },
+		"non-600 expiry":       func(claim *identityclaim.IssuedClaim) { claim.ExpiresIn = 5 * time.Minute },
+	} {
+		t.Run(name, func(t *testing.T) {
+			issued := issueAdapterTestClaim(t, "apple")
+			mutate(&issued)
+			flow := &stubFederatedFlowApplication{completion: identityflow.FederatedCompletion{
+				Claim: &identityflow.IdentityClaimResult{Issued: issued},
+			}}
+			adapter := NewFederatedApplication(flow)
+
+			result, err := adapter.CompleteFederatedLogin(
+				context.Background(),
+				FederatedLoginHTTPCommand{Provider: "apple"},
+			)
+			if !errors.Is(err, errInvalidIdentityClaimMetadata) {
+				t.Fatalf("metadata validation error = %v", err)
+			}
+			if result != (FederatedHTTPCompletion{}) {
+				t.Fatal("metadata validation returned a partial result")
+			}
+			rawToken, ok := issued.TakeToken()
+			if !ok || rawToken == "" {
+				t.Fatal("metadata validation consumed the domain claim token")
+			}
+			if strings.Contains(err.Error(), rawToken) {
+				t.Fatal("metadata validation error disclosed the raw token")
+			}
+		})
+	}
+}
+
+func TestFederatedHTTPCompletionRedactsClaimTokenFromFormattingLoggingAndJSON(t *testing.T) {
+	const rawToken = "http_transport_secret_must_be_redacted"
+	claim := newIdentityClaimHTTPResult("huawei", 600, rawToken)
+	completion := FederatedHTTPCompletion{Claim: claim}
+
+	formatted := []string{
+		fmt.Sprintf("%v", completion),
+		fmt.Sprintf("%+v", completion),
+		fmt.Sprintf("%#v", completion),
+		fmt.Sprintf("%q", completion),
+		fmt.Sprintf("%s", completion),
+		fmt.Sprintf("%v", *claim),
+		fmt.Sprintf("%#v", *claim),
+	}
+	var logBuffer bytes.Buffer
+	logger := slog.New(slog.NewJSONHandler(&logBuffer, nil))
+	logger.Info("federated completion", "completion", completion)
+	jsonValue, err := json.Marshal(completion)
+	if err != nil {
+		t.Fatalf("marshal federated completion: %v", err)
+	}
+	formatted = append(formatted, logBuffer.String(), string(jsonValue))
+	for _, value := range formatted {
+		if strings.Contains(value, rawToken) {
+			t.Fatal("generic formatting, logging, or JSON disclosed the HTTP claim token")
+		}
+	}
+	if token, ok := claim.takeToken(); !ok || token != rawToken {
+		t.Fatal("redaction consumed or changed the HTTP claim token")
+	}
+}
+
+func TestIdentityClaimHTTPResultTakeTokenSucceedsOnceAcrossConcurrentCopies(t *testing.T) {
+	const rawToken = "concurrent_http_transport_secret"
+	original := newIdentityClaimHTTPResult("apple", 600, rawToken)
+	const workers = 64
+	start := make(chan struct{})
+	var waitGroup sync.WaitGroup
+	var successes atomic.Int32
+	for index := 0; index < workers; index++ {
+		copyOfClaim := *original
+		waitGroup.Add(1)
+		go func(claim IdentityClaimHTTPResult) {
+			defer waitGroup.Done()
+			<-start
+			token, ok := claim.takeToken()
+			if ok {
+				if token != rawToken {
+					t.Errorf("takeToken() returned an unexpected token")
+				}
+				successes.Add(1)
+			} else if token != "" {
+				t.Error("failed takeToken() returned token data")
+			}
+		}(copyOfClaim)
+	}
+	close(start)
+	waitGroup.Wait()
+	if successes.Load() != 1 {
+		t.Fatalf("successful token extractions = %d, want 1", successes.Load())
+	}
+	if token, ok := original.takeToken(); ok || token != "" {
+		t.Fatal("takeToken() succeeded after concurrent extraction")
 	}
 }
 
@@ -83,7 +194,7 @@ func TestFederatedApplicationAdapterRejectsImpossibleCompletions(t *testing.T) {
 	} {
 		t.Run(name, func(t *testing.T) {
 			adapter := NewFederatedApplication(&stubFederatedFlowApplication{completion: completion})
-			result, err := adapter.CompleteFederatedLogin(context.Background(), FederatedLoginHTTPCommand{})
+			result, err := adapter.CompleteFederatedLogin(context.Background(), FederatedLoginHTTPCommand{Provider: "apple"})
 			if !errors.Is(err, errInvalidFederatedCompletion) {
 				t.Fatalf("mapping error = %v", err)
 			}

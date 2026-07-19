@@ -13,6 +13,7 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/clovery/clovery/services/api/internal/application/identityflow"
 	"github.com/clovery/clovery/services/api/internal/auth"
 	"github.com/clovery/clovery/services/api/internal/config"
 	"github.com/clovery/clovery/services/api/internal/database"
@@ -47,7 +48,7 @@ func TestBuildHandlerRegistersIdentityRoutesWithoutProviderCredentials(t *testin
 	}
 }
 
-func TestBuildIdentityApplicationsAcceptsSharedClaimIssuer(t *testing.T) {
+func TestBuildIdentityApplicationsPassesSharedClaimIssuerToFederatedFlow(t *testing.T) {
 	databaseHandle, _, err := sqlmock.New()
 	if err != nil {
 		t.Fatalf("create mock database: %v", err)
@@ -60,13 +61,31 @@ func TestBuildIdentityApplicationsAcceptsSharedClaimIssuer(t *testing.T) {
 	}
 	sessions := auth.NewSessionService(databaseHandle, signer)
 	claims := &bootstrapClaimIssuer{}
+	var capturedClaims identityflow.IdentityClaimIssuer
+	builder := func(
+		federation *auth.FederationService,
+		sessions *auth.SessionService,
+		claims identityflow.IdentityClaimIssuer,
+	) (*identityflow.FederatedFlow, error) {
+		capturedClaims = claims
+		return identityflow.NewFederatedFlow(federation, sessions, claims)
+	}
 
-	federation, passkeys, err := buildIdentityApplications(databaseHandle, sessions, claims, applicationConfig)
+	federation, passkeys, err := buildIdentityApplicationsWithFederatedFlowBuilder(
+		databaseHandle,
+		sessions,
+		claims,
+		applicationConfig,
+		builder,
+	)
 	if err != nil {
 		t.Fatalf("build identity applications: %v", err)
 	}
 	if federation == nil || passkeys == nil {
 		t.Fatalf("identity applications = %#v, %#v", federation, passkeys)
+	}
+	if capturedClaims != claims {
+		t.Fatal("federated flow builder did not receive the shared claim issuer")
 	}
 }
 
