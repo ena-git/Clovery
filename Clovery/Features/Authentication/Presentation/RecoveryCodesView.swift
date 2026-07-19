@@ -9,12 +9,12 @@ struct RecoveryCodesView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 24) {
-                Text("RECOVERY CODES")
+                Text("恢复码")
                     .font(.authTitle)
                     .foregroundColor(.authInk)
                     .multilineTextAlignment(.center)
 
-                Text("Please save these eight one-time codes. Clovery cannot show them again.")
+                Text("请保存这 8 个一次性恢复码。Clovery 之后无法再次显示。")
                     .font(.authAction)
                     .foregroundColor(.authInk)
                     .multilineTextAlignment(.center)
@@ -31,7 +31,7 @@ struct RecoveryCodesView: View {
                 }
                 .frame(maxWidth: 347)
 
-                Button("COPY ALL") {
+                Button("复制全部") {
                     UIPasteboard.general.string = codes.joined(separator: "\n")
                 }
                 .font(.authAction)
@@ -39,13 +39,13 @@ struct RecoveryCodesView: View {
                 .buttonStyle(.plain)
                 .frame(minHeight: 44)
 
-                Toggle("I saved my recovery codes", isOn: $confirmedSaved)
+                Toggle("我已保存恢复码", isOn: $confirmedSaved)
                     .font(.authCaption)
                     .tint(.authInk)
                     .padding(.horizontal, 36)
 
                 Button(action: acknowledge) {
-                    Text("CONTINUE")
+                    Text("继续")
                         .font(.authAction)
                         .foregroundColor(.authInk)
                         .frame(maxWidth: .infinity)

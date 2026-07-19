@@ -45,10 +45,10 @@ struct AccountRecoveryView: View {
 
     private var header: some View {
         VStack(spacing: 0) {
-            Text("RECOVER")
+            Text("找回账户")
                 .font(.authTitle)
                 .foregroundColor(.authInk)
-            Text("Use one Clovery recovery code")
+            Text("使用 Clovery 恢复码")
                 .font(.authAction)
                 .foregroundColor(.authInk)
         }
@@ -65,18 +65,18 @@ struct AccountRecoveryView: View {
                         contentType: .username
                     )
                     AuthTextField(
-                        placeholder: "Recovery code...",
+                        placeholder: "恢复码…",
                         text: $viewModel.recoveryCode,
                         contentType: .oneTimeCode
                     )
                     AuthTextField(
-                        placeholder: "New password...",
+                        placeholder: "新密码…",
                         text: $viewModel.newPassword,
                         isSecure: true,
                         contentType: .newPassword
                     )
                     AuthTextField(
-                        placeholder: "Confirm password...",
+                        placeholder: "确认密码…",
                         text: $viewModel.confirmPassword,
                         isSecure: true,
                         contentType: .newPassword,
@@ -103,7 +103,7 @@ struct AccountRecoveryView: View {
                         ProgressView()
                             .tint(.authInk)
                     } else {
-                        Text("RESET PASSWORD")
+                        Text("重置密码")
                             .font(.authAction)
                     }
                 }
@@ -119,15 +119,15 @@ struct AccountRecoveryView: View {
     private var completionCard: some View {
         AuthDashedCard(height: 230) {
             VStack(spacing: 22) {
-                Text("Password updated")
+                Text("密码已更新")
                     .font(.authAction)
                     .foregroundColor(.authInk)
-                Text("All previous sessions have been signed out. Log in again with your new password.")
+                Text("之前的登录会话已退出，请使用新密码重新登录。")
                     .font(.authCaption)
                     .foregroundColor(.authInk)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 24)
-                Button("BACK TO LOG IN", action: { dismiss() })
+                Button("返回登录", action: { dismiss() })
                     .font(.authAction)
                     .foregroundColor(.authInk)
                     .buttonStyle(.plain)

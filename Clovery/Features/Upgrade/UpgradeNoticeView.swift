@@ -6,18 +6,18 @@ struct UpgradeNoticeView: View {
 
     var body: some View {
         VStack(spacing: 18) {
-            Text("A little update for Clovery")
+            Text("Clovery 小更新")
                 .font(.authAction)
                 .foregroundColor(.authInk)
 
-            Text("Your diary is still here. You can keep using it as before, or bind a Clovery account to prepare for secure cross-device sync.")
+            Text("你的日记仍然完整保留。你可以继续像以前一样使用，也可以绑定 Clovery 账户，为安全的跨设备同步做好准备。")
                 .font(.authCaption)
                 .foregroundColor(.authInk)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
 
             HStack(spacing: 16) {
-                Button("LATER", action: later)
+                Button("稍后", action: later)
                     .font(.authAction)
                     .foregroundColor(.authInk)
                     .buttonStyle(.plain)
@@ -25,7 +25,7 @@ struct UpgradeNoticeView: View {
                     .frame(height: 56)
                     .background(Color.authBackground, in: Capsule())
 
-                Button("BIND CLOVERY ACCOUNT", action: bindAccount)
+                Button("绑定 Clovery 账户", action: bindAccount)
                     .font(.authCaption)
                     .foregroundColor(.authBackground)
                     .buttonStyle(.plain)

@@ -27,7 +27,11 @@ class CloudKitSync {
     private let subscriptionID = "clovery-diary-entry-changes"
 
     init(isAvailable: @escaping () -> Bool = {
+#if targetEnvironment(simulator)
+        false
+#else
         ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil
+#endif
     }) {
         self.isAvailable = isAvailable
     }

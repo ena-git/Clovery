@@ -105,9 +105,9 @@ final class AuthenticationProviderViewModel: ObservableObject {
         case .authenticated, .cancelled:
             message = nil
         case .unavailable:
-            message = "此设备暂不支持 Clovery Passkey"
+            message = "此设备暂不支持 Clovery 通行密钥"
         case .failed:
-            message = "Passkey 登录失败，请稍后再试"
+            message = "通行密钥登录失败，请稍后再试"
         }
     }
 }

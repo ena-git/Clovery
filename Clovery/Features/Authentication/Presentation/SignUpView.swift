@@ -40,13 +40,13 @@ struct SignUpView: View {
                                 contentType: .username
                             )
                             AuthTextField(
-                                placeholder: "Password...",
+                                placeholder: "密码…",
                                 text: $viewModel.password,
                                 isSecure: true,
                                 contentType: .newPassword
                             )
                             AuthTextField(
-                                placeholder: "Confirm Password...",
+                                placeholder: "确认密码…",
                                 text: $viewModel.confirmPassword,
                                 isSecure: true,
                                 contentType: .newPassword,
@@ -67,7 +67,7 @@ struct SignUpView: View {
                                 ProgressView()
                                     .tint(.authInk)
                             } else {
-                                Text("SIGN UP")
+                                Text("注册")
                                     .font(.authAction)
                             }
                         }
@@ -87,9 +87,9 @@ struct SignUpView: View {
                     Spacer(minLength: 26)
 
                     HStack(spacing: 4) {
-                        Text("Already have an account?")
+                        Text("已有账户？")
                             .foregroundColor(.authPlaceholder)
-                        Button("Log In", action: showLogin)
+                        Button("登录", action: showLogin)
                             .foregroundColor(.authInk)
                             .buttonStyle(.plain)
                     }
@@ -132,10 +132,10 @@ struct SignUpView: View {
 
     private var header: some View {
         VStack(spacing: 0) {
-            Text("SIGN UP")
+            Text("注册")
                 .font(.authTitle)
                 .foregroundColor(.authInk)
-            Text("Welcome to join us!")
+            Text("欢迎加入我们！")
                 .font(.authAction)
                 .foregroundColor(.authInk)
         }

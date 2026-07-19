@@ -18,8 +18,8 @@ struct AuthenticationEntryView: View {
 
                     AuthDashedCard(height: 251) {
                         VStack(spacing: 26) {
-                            entryButton(title: "LOG IN", action: showLogin)
-                            entryButton(title: "SIGN UP", action: showSignUp)
+                            entryButton(title: "登录", action: showLogin)
+                            entryButton(title: "注册", action: showSignUp)
                         }
                     }
                     .frame(maxWidth: 340)
@@ -44,6 +44,6 @@ struct AuthenticationEntryView: View {
                 .background(Color.authSurface, in: Capsule())
         }
         .buttonStyle(.plain)
-        .accessibilityLabel(title == "LOG IN" ? "登录" : "注册")
+        .accessibilityLabel(title)
     }
 }

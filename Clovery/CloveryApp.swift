@@ -29,9 +29,13 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         guard ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil else {
             return true
         }
+#if targetEnvironment(simulator)
+        return true
+#else
         application.registerForRemoteNotifications()
         CloudKitSync.shared.setupSubscriptionIfNeeded()
         return true
+#endif
     }
 
     func application(

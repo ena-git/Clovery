@@ -28,7 +28,7 @@ enum AuthenticationProviderKind: CaseIterable, Hashable {
         case .huawei:
             return "使用华为账号登录"
         case .passkey:
-            return "使用 Clovery Passkey 登录"
+            return "使用 Clovery 通行密钥登录"
         }
     }
 }

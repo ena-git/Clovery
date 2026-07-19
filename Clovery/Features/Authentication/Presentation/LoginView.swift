@@ -43,7 +43,7 @@ struct LoginView: View {
                                 contentType: .username
                             )
                             AuthTextField(
-                                placeholder: "Password...",
+                                placeholder: "密码…",
                                 text: $viewModel.password,
                                 isSecure: true,
                                 contentType: .password,
@@ -64,7 +64,7 @@ struct LoginView: View {
                                 ProgressView()
                                     .tint(.authInk)
                             } else {
-                                Text("LOG IN")
+                                Text("登录")
                                     .font(.authAction)
                             }
                         }
@@ -75,7 +75,7 @@ struct LoginView: View {
                     .disabled(viewModel.isSubmitting)
                     .padding(.top, 12)
 
-                    Button("Recover account", action: recoverAccount)
+                    Button("找回账户", action: recoverAccount)
                         .font(.authCaption)
                         .foregroundColor(.authInk)
                         .buttonStyle(.plain)
@@ -90,9 +90,9 @@ struct LoginView: View {
                     Spacer(minLength: 54)
 
                     HStack(spacing: 4) {
-                        Text("New here?")
+                        Text("新用户？")
                             .foregroundColor(.authPlaceholder)
-                        Button("Sign Up", action: showSignUp)
+                        Button("注册", action: showSignUp)
                             .foregroundColor(.authInk)
                             .buttonStyle(.plain)
                     }
@@ -121,10 +121,10 @@ struct LoginView: View {
 
     private var header: some View {
         VStack(spacing: 0) {
-            Text("LOG IN")
+            Text("登录")
                 .font(.authTitle)
                 .foregroundColor(.authInk)
-            Text("Welcome back to us!")
+            Text("欢迎回来！")
                 .font(.authAction)
                 .foregroundColor(.authInk)
         }
