@@ -763,6 +763,8 @@ git commit -m "feat: preserve legacy users during auth rollout"
 **Files:**
 - Modify: `Clovery/Info.plist`
 - Modify: `Clovery.xcodeproj/project.pbxproj`
+- Create: `Config/Debug.xcconfig`
+- Create: `Config/Release.xcconfig`
 - Create: `CloveryTests/AuthenticationReleaseConfigurationTests.swift`
 - Modify: `docs/superpowers/specs/2026-07-19-swift-auth-foundation-design.md` only if an implementation decision changes the approved contract
 
@@ -776,10 +778,9 @@ Add:
 
 ```text
 CLOVERY_API_BASE_URL = http://127.0.0.1:8080
-CLOVERY_API_BASE_URL[sdk=iphoneos*][config=Release] = https://api.clovery.cn
 ```
 
-The release URL must be replaced with the actually provisioned production host before archive. Provider client IDs and redirect schemes remain build settings or protected CI values. No secret is committed.
+Put the Debug value in `Config/Debug.xcconfig`. Put the Release setting in `Config/Release.xcconfig` as an environment-injected `CLOVERY_RELEASE_API_BASE_URL` value, and make the release verification test fail when that value is empty, non-HTTPS, or points at the staging host documented in `v2/docs/release/backend-deployment.md`. The actual production API hostname is supplied by the release environment after backend provisioning; no unverified hostname is committed. Provider client IDs and redirect schemes remain build settings or protected CI values. No secret is committed.
 
 - [ ] **Step 3: Run the complete automated verification**
 
@@ -833,7 +834,7 @@ Never record passwords, tokens, recovery codes, authorization codes, diary text,
 - [ ] **Step 6: Commit and push the complete implementation**
 
 ```bash
-git add Clovery CloveryTests Clovery.xcodeproj/project.pbxproj docs/superpowers/plans
+git add Clovery CloveryTests Config Clovery.xcodeproj/project.pbxproj docs/superpowers/plans
 git commit -m "feat: complete native Swift authentication flow"
 git push -u origin codex/swift-auth-foundation
 ```
@@ -852,4 +853,3 @@ git push -u origin codex/swift-auth-foundation
 - [ ] Existing V1 bridge, photo export, StoreKit, CloudKit, migration, and release tests remain green.
 - [ ] The implementation is pushed to `codex/swift-auth-foundation`.
 - [ ] Real-device testing remains the next gate before Flutter work begins.
-
