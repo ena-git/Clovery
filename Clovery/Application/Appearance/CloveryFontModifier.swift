@@ -28,15 +28,24 @@ enum CloveryFontRole {
 struct CloveryFontResolver {
     typealias FontLoader = (_ name: String, _ size: CGFloat) -> UIFont?
 
+    private let languageCode: String
     private let loadFont: FontLoader
 
-    init(loadFont: @escaping FontLoader = { UIFont(name: $0, size: $1) }) {
+    init(
+        languageCode: String = Locale.preferredLanguages.first ?? "en",
+        loadFont: @escaping FontLoader = { UIFont(name: $0, size: $1) }
+    ) {
+        self.languageCode = languageCode
+            .split(whereSeparator: { $0 == "-" || $0 == "_" })
+            .first?
+            .lowercased() ?? "en"
         self.loadFont = loadFont
     }
 
     func uiFont(
         for selection: AppFontSelection,
-        role: CloveryFontRole
+        role: CloveryFontRole,
+        contentSizeCategory: UIContentSizeCategory = .large
     ) -> UIFont {
         let baseFont: UIFont
         if selection == .system {
@@ -45,40 +54,55 @@ struct CloveryFontResolver {
             baseFont = customFont(for: selection, size: role.pointSize) ??
                 UIFont.systemFont(ofSize: role.pointSize)
         }
-        return UIFontMetrics(forTextStyle: role.textStyle).scaledFont(for: baseFont)
+        let traits = UITraitCollection(
+            preferredContentSizeCategory: contentSizeCategory
+        )
+        return UIFontMetrics(forTextStyle: role.textStyle).scaledFont(
+            for: baseFont,
+            compatibleWith: traits
+        )
     }
 
     private func customFont(
         for selection: AppFontSelection,
         size: CGFloat
     ) -> UIFont? {
-        let fonts = postScriptNames(for: selection).compactMap {
-            loadFont($0, size)
-        }
-        guard let primary = fonts.first else {
+        guard let plan = fontPlan(for: selection),
+              let primary = loadFont(plan.primary, size) else {
             return nil
         }
-        guard fonts.count > 1 else {
+
+        let cascadeFonts = plan.cascade.compactMap { loadFont($0, size) }
+        guard !cascadeFonts.isEmpty else {
             return primary
         }
         let descriptor = primary.fontDescriptor.addingAttributes([
-            .cascadeList: fonts.dropFirst().map(\.fontDescriptor)
+            .cascadeList: cascadeFonts.map(\.fontDescriptor)
         ])
         return UIFont(descriptor: descriptor, size: size)
     }
 
-    private func postScriptNames(
+    private func fontPlan(
         for selection: AppFontSelection
-    ) -> [String] {
+    ) -> (primary: String, cascade: [String])? {
         switch selection {
         case .handwriting:
-            ["YLHZYS", "Gaegu-Regular", "Yomogi-Regular"]
+            let names: [String]
+            switch languageCode {
+            case "zh":
+                names = ["YLHZYS", "Gaegu-Regular", "Yomogi-Regular"]
+            case "ja":
+                names = ["Yomogi-Regular", "YLHZYS", "Gaegu-Regular"]
+            default:
+                names = ["Gaegu-Regular", "YLHZYS", "Yomogi-Regular"]
+            }
+            return (names[0], Array(names.dropFirst()))
         case .system:
-            []
+            return nil
         case .notoSerifSC:
-            ["NotoSerifSC-ExtraLight", "STSongti-SC-Regular"]
+            return ("NotoSerifSC-ExtraLight", ["STSongti-SC-Regular"])
         case .naiChaTi:
-            ["BoBoNaiChaTi", "YLHZYS", "Gaegu-Regular"]
+            return ("BoBoNaiChaTi", ["YLHZYS", "Gaegu-Regular"])
         }
     }
 }
@@ -96,11 +120,53 @@ extension EnvironmentValues {
 
 private struct CloveryFontModifier: ViewModifier {
     @Environment(\.appFontSelection) private var selection
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     let role: CloveryFontRole
     private let resolver = CloveryFontResolver()
 
     func body(content: Content) -> some View {
-        content.font(Font(resolver.uiFont(for: selection, role: role)))
+        content.font(
+            Font(
+                resolver.uiFont(
+                    for: selection,
+                    role: role,
+                    contentSizeCategory: dynamicTypeSize.uiContentSizeCategory
+                )
+            )
+        )
+    }
+}
+
+private extension DynamicTypeSize {
+    var uiContentSizeCategory: UIContentSizeCategory {
+        switch self {
+        case .xSmall:
+            .extraSmall
+        case .small:
+            .small
+        case .medium:
+            .medium
+        case .large:
+            .large
+        case .xLarge:
+            .extraLarge
+        case .xxLarge:
+            .extraExtraLarge
+        case .xxxLarge:
+            .extraExtraExtraLarge
+        case .accessibility1:
+            .accessibilityMedium
+        case .accessibility2:
+            .accessibilityLarge
+        case .accessibility3:
+            .accessibilityExtraLarge
+        case .accessibility4:
+            .accessibilityExtraExtraLarge
+        case .accessibility5:
+            .accessibilityExtraExtraExtraLarge
+        @unknown default:
+            .large
+        }
     }
 }
 
