@@ -67,6 +67,8 @@
 		AABB000000000000000000CA /* LegacyUpgradeController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000DA /* LegacyUpgradeController.swift */; };
 		AABB000000000000000000CB /* LegacyDataDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000DB /* LegacyDataDetector.swift */; };
 		AABB000000000000000000CC /* UpgradeNoticeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000DC /* UpgradeNoticeView.swift */; };
+		AABB000000000000000000F0 /* AppFontSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000F3 /* AppFontSelection.swift */; };
+		AABB000000000000000000F1 /* AppFontStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000F4 /* AppFontStore.swift */; };
 		FCECDFE02FE92C7C0067AF51 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFDF2FE92C7C0067AF51 /* WidgetKit.framework */; };
 		FCECDFE22FE92C7C0067AF51 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFE12FE92C7C0067AF51 /* SwiftUI.framework */; };
 		FCECDFEF2FE92C7D0067AF51 /* CloveryWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -168,6 +170,8 @@
 		AABB000000000000000000DC /* UpgradeNoticeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Upgrade/UpgradeNoticeView.swift; sourceTree = "<group>"; };
 		AABB000000000000000000E0 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		AABB000000000000000000E1 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
+		AABB000000000000000000F3 /* AppFontSelection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/Appearance/AppFontSelection.swift; sourceTree = "<group>"; };
+		AABB000000000000000000F4 /* AppFontStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/Appearance/AppFontStore.swift; sourceTree = "<group>"; };
 		AACC00000000000000000001 /* CloveryTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CloveryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC889A182FD464C9002510AD /* Clovery.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Clovery.entitlements; sourceTree = "<group>"; };
 		FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CloveryWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -276,6 +280,8 @@
 				AABB000000000000000000D8 /* AuthenticationProviderViewModel.swift */,
 				AABB000000000000000000D9 /* ApplicationRootView.swift */,
 				AABB000000000000000000DA /* LegacyUpgradeController.swift */,
+				AABB000000000000000000F3 /* AppFontSelection.swift */,
+				AABB000000000000000000F4 /* AppFontStore.swift */,
 				AABB000000000000000000DB /* LegacyDataDetector.swift */,
 				AABB000000000000000000DC /* UpgradeNoticeView.swift */,
 				AABB00000000000000000020 /* BoardStore.swift */,
@@ -530,6 +536,8 @@
 				AABB000000000000000000C8 /* AuthenticationProviderViewModel.swift in Sources */,
 				AABB000000000000000000C9 /* ApplicationRootView.swift in Sources */,
 				AABB000000000000000000CA /* LegacyUpgradeController.swift in Sources */,
+				AABB000000000000000000F0 /* AppFontSelection.swift in Sources */,
+				AABB000000000000000000F1 /* AppFontStore.swift in Sources */,
 				AABB000000000000000000CB /* LegacyDataDetector.swift in Sources */,
 				AABB000000000000000000CC /* UpgradeNoticeView.swift in Sources */,
 			);
