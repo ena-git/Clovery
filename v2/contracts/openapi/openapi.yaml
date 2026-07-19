@@ -1064,7 +1064,6 @@ components:
           $ref: "#/components/schemas/IdentityProvider"
         identity_claim_token:
           type: string
-          writeOnly: true
         expires_in:
           type: integer
           minimum: 1
