@@ -128,6 +128,8 @@ func TestPostgresIdentityClaims(t *testing.T) {
 		accountID := "21000000-0000-4000-8000-000000000001"
 		vaultID := "22000000-0000-4000-8000-000000000001"
 		requestID := "23000000-0000-4000-8000-000000000001"
+		clientTimestamp := now.Add(24 * time.Hour)
+		operationWindowStart := time.Now().UTC().Add(-time.Second)
 		seedIdentityClaimIntent(t, databaseHandle, intentID, "huawei", now)
 		service := integrationService(repository, bytes.Repeat([]byte{0x44}, 32), now, claimID)
 		issued, err := service.Issue(ctx, Identity{
@@ -170,7 +172,6 @@ func TestPostgresIdentityClaims(t *testing.T) {
 			ctx,
 			secondTransaction,
 			resolution.PendingConsumption,
-			now,
 			accountID,
 			requestID,
 		); !errors.Is(err, ErrInvalidClaim) {
@@ -205,7 +206,6 @@ func TestPostgresIdentityClaims(t *testing.T) {
 			ctx,
 			firstTransaction,
 			resolution.PendingConsumption,
-			now,
 			accountID,
 			requestID,
 		); err != nil {
@@ -213,6 +213,19 @@ func TestPostgresIdentityClaims(t *testing.T) {
 		}
 		if err := firstTransaction.Commit(); err != nil {
 			t.Fatalf("commit capability transaction: %v", err)
+		}
+		operationWindowEnd := time.Now().UTC().Add(time.Second)
+		var databaseConsumedAt time.Time
+		if err := databaseHandle.QueryRow(
+			"SELECT consumed_at FROM identity_claims WHERE id = $1",
+			claimID,
+		).Scan(&databaseConsumedAt); err != nil {
+			t.Fatalf("load database consumption timestamp: %v", err)
+		}
+		if databaseConsumedAt.Equal(clientTimestamp) ||
+			databaseConsumedAt.Before(operationWindowStart) ||
+			databaseConsumedAt.After(operationWindowEnd) {
+			t.Fatalf("database consumed_at = %v, want database operation window", databaseConsumedAt)
 		}
 	})
 
@@ -358,7 +371,6 @@ func exerciseConcurrentClaim(
 		ctx,
 		firstTransaction,
 		firstResolution.PendingConsumption,
-		now,
 		fixture.accountID,
 		fixture.registrationRequest,
 	); err != nil {
@@ -382,7 +394,6 @@ func exerciseConcurrentClaim(
 		ctx,
 		secondTransaction,
 		firstResolution.PendingConsumption,
-		now.Add(time.Second),
 		"1e000000-0000-4000-8000-000000000001",
 		competingRequestID,
 	); !errors.Is(err, ErrInvalidClaim) {

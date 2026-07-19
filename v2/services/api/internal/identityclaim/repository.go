@@ -5,7 +5,6 @@ import (
 	"database/sql"
 	"errors"
 	"fmt"
-	"time"
 )
 
 type IssueRepository interface {
@@ -77,11 +76,11 @@ func (repository *PostgresRepository) LockForRegistration(
 		digest,
 	).Scan(
 		&claim.id,
-		&claim.Identity.Provider,
-		&claim.Identity.Issuer,
-		&claim.Identity.Subject,
-		&claim.Identity.IntentID,
-		&claim.ExpiresAt,
+		&claim.identity.Provider,
+		&claim.identity.Issuer,
+		&claim.identity.Subject,
+		&claim.identity.IntentID,
+		&claim.expiresAt,
 		&consumedAt,
 		&consumedByAccountID,
 		&registrationRequestID,
@@ -94,13 +93,13 @@ func (repository *PostgresRepository) LockForRegistration(
 	}
 	claim.transaction = transaction
 	if consumedAt.Valid {
-		claim.ConsumedAt = &consumedAt.Time
+		claim.consumedAt = &consumedAt.Time
 	}
 	if consumedByAccountID.Valid {
-		claim.ConsumedByAccountID = &consumedByAccountID.String
+		claim.consumedByAccountID = &consumedByAccountID.String
 	}
 	if registrationRequestID.Valid {
-		claim.RegistrationRequestID = &registrationRequestID.String
+		claim.registrationRequestID = &registrationRequestID.String
 	}
 	if consumedByAccountID.Valid {
 		var existingVaultID string
@@ -119,7 +118,7 @@ func (repository *PostgresRepository) LockForRegistration(
 		if err != nil {
 			return nil, fmt.Errorf("load consumed identity claim vault: %w", err)
 		}
-		claim.ExistingVaultID = &existingVaultID
+		claim.existingVaultID = &existingVaultID
 	}
 	return &claim, nil
 }
@@ -128,7 +127,6 @@ func (repository *PostgresRepository) MarkConsumed(
 	ctx context.Context,
 	transaction *sql.Tx,
 	pending *PendingConsumption,
-	consumedAt time.Time,
 	accountID string,
 	registrationRequestID string,
 ) error {
@@ -142,13 +140,12 @@ func (repository *PostgresRepository) MarkConsumed(
 	result, err := transaction.ExecContext(
 		ctx,
 		`UPDATE identity_claims
-		 SET consumed_at = $2,
-		     consumed_by_account_id = $3,
-		     registration_request_id = $4
+		 SET consumed_at = CURRENT_TIMESTAMP,
+		     consumed_by_account_id = $2,
+		     registration_request_id = $3
 		 WHERE id = $1
 		   AND consumed_at IS NULL`,
 		pending.claimID,
-		consumedAt,
 		accountID,
 		registrationRequestID,
 	)

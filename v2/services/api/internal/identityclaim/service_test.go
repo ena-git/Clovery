@@ -11,6 +11,7 @@ import (
 	"errors"
 	"fmt"
 	"log/slog"
+	"reflect"
 	"strings"
 	"testing"
 	"time"
@@ -176,6 +177,23 @@ func TestConstructorsRejectNilDependencies(t *testing.T) {
 	t.Run("postgres repository", func(t *testing.T) {
 		assertPanics(t, func() { NewPostgresRepository(nil) })
 	})
+	t.Run("typed nil service repository", func(t *testing.T) {
+		var repository *recordingIssueRepository
+		assertPanics(t, func() { NewService(repository) })
+	})
+	t.Run("value service repository", func(t *testing.T) {
+		NewService(valueIssueRepository{})
+	})
+}
+
+func TestLockedClaimHasNoExportedFields(t *testing.T) {
+	claimType := reflect.TypeOf(LockedClaim{})
+	for fieldIndex := 0; fieldIndex < claimType.NumField(); fieldIndex++ {
+		field := claimType.Field(fieldIndex)
+		if field.IsExported() {
+			t.Errorf("LockedClaim field %s is exported", field.Name)
+		}
+	}
 }
 
 func TestIssueStoresDigestAndReturnsOpaqueToken(t *testing.T) {
@@ -323,8 +341,8 @@ func TestResolveForRegistrationAcceptsValidUnconsumedClaim(t *testing.T) {
 	claim := &LockedClaim{
 		id:          "60000000-0000-4000-8000-000000000001",
 		transaction: transaction,
-		Identity:    identity,
-		ExpiresAt:   now.Add(time.Minute),
+		identity:    identity,
+		expiresAt:   now.Add(time.Minute),
 	}
 
 	resolution, err := service.ResolveForRegistration(claim, "70000000-0000-4000-8000-000000000001")
@@ -353,7 +371,7 @@ func TestResolveForRegistrationRejectsInvalidRegistrationRequestID(t *testing.T)
 	claim := &LockedClaim{
 		id:          "61000000-0000-4000-8000-000000000001",
 		transaction: &sql.Tx{},
-		ExpiresAt:   now.Add(time.Minute),
+		expiresAt:   now.Add(time.Minute),
 	}
 	for _, requestID := range []string{"", "request-id", "70000000-0000-4000-8000-00000000000A"} {
 		resolution, err := service.ResolveForRegistration(claim, requestID)
@@ -375,7 +393,7 @@ func TestResolveForRegistrationRejectsExpiredClaim(t *testing.T) {
 		claim := &LockedClaim{
 			id:          "62000000-0000-4000-8000-000000000001",
 			transaction: transaction,
-			ExpiresAt:   expiresAt,
+			expiresAt:   expiresAt,
 		}
 		_, err := service.ResolveForRegistration(claim, "72000000-0000-4000-8000-000000000001")
 		if !errors.Is(err, ErrExpiredClaim) {
@@ -394,12 +412,12 @@ func TestResolveForRegistrationReplaysSameRequest(t *testing.T) {
 	claim := &LockedClaim{
 		id:                    "63000000-0000-4000-8000-000000000001",
 		transaction:           &sql.Tx{},
-		Identity:              Identity{Provider: "huawei", Issuer: "issuer", Subject: "subject", IntentID: "intent"},
-		ExpiresAt:             now.Add(time.Minute),
-		ConsumedAt:            &consumedAt,
-		ConsumedByAccountID:   &accountID,
-		RegistrationRequestID: &requestID,
-		ExistingVaultID:       &vaultID,
+		identity:              Identity{Provider: "huawei", Issuer: "issuer", Subject: "subject", IntentID: "intent"},
+		expiresAt:             now.Add(time.Minute),
+		consumedAt:            &consumedAt,
+		consumedByAccountID:   &accountID,
+		registrationRequestID: &requestID,
+		existingVaultID:       &vaultID,
 	}
 
 	resolution, err := service.ResolveForRegistration(claim, requestID)
@@ -409,8 +427,8 @@ func TestResolveForRegistrationReplaysSameRequest(t *testing.T) {
 	if resolution.Existing == nil || resolution.Existing.AccountID != accountID || resolution.Existing.VaultID != vaultID {
 		t.Fatalf("existing registration = %#v", resolution.Existing)
 	}
-	if resolution.Identity != claim.Identity {
-		t.Fatalf("resolved identity = %#v, want %#v", resolution.Identity, claim.Identity)
+	if resolution.Identity != claim.identity {
+		t.Fatalf("resolved identity = %#v, want %#v", resolution.Identity, claim.identity)
 	}
 	if resolution.PendingConsumption != nil {
 		t.Fatal("consumed replay returned pending consumption")
@@ -427,12 +445,12 @@ func TestResolveForRegistrationReplaysExpiredConsumedClaimForSameRequest(t *test
 	claim := &LockedClaim{
 		id:                    "64000000-0000-4000-8000-000000000001",
 		transaction:           &sql.Tx{},
-		Identity:              Identity{Provider: "apple", Issuer: "issuer", Subject: "subject", IntentID: "intent"},
-		ExpiresAt:             now.Add(-time.Minute),
-		ConsumedAt:            &consumedAt,
-		ConsumedByAccountID:   &accountID,
-		RegistrationRequestID: &requestID,
-		ExistingVaultID:       &vaultID,
+		identity:              Identity{Provider: "apple", Issuer: "issuer", Subject: "subject", IntentID: "intent"},
+		expiresAt:             now.Add(-time.Minute),
+		consumedAt:            &consumedAt,
+		consumedByAccountID:   &accountID,
+		registrationRequestID: &requestID,
+		existingVaultID:       &vaultID,
 	}
 
 	resolution, err := service.ResolveForRegistration(claim, requestID)
@@ -454,11 +472,11 @@ func TestResolveForRegistrationRejectsDifferentRequest(t *testing.T) {
 	claim := &LockedClaim{
 		id:                    "65000000-0000-4000-8000-000000000001",
 		transaction:           &sql.Tx{},
-		ExpiresAt:             now.Add(time.Minute),
-		ConsumedAt:            &consumedAt,
-		ConsumedByAccountID:   &accountID,
-		RegistrationRequestID: &originalRequestID,
-		ExistingVaultID:       &vaultID,
+		expiresAt:             now.Add(time.Minute),
+		consumedAt:            &consumedAt,
+		consumedByAccountID:   &accountID,
+		registrationRequestID: &originalRequestID,
+		existingVaultID:       &vaultID,
 	}
 
 	_, err := service.ResolveForRegistration(claim, "a3000000-0000-4000-8000-000000000001")
@@ -477,11 +495,11 @@ func TestResolveForRegistrationRejectsDifferentRequestForExpiredConsumedClaim(t 
 	claim := &LockedClaim{
 		id:                    "66000000-0000-4000-8000-000000000001",
 		transaction:           &sql.Tx{},
-		ExpiresAt:             now,
-		ConsumedAt:            &consumedAt,
-		ConsumedByAccountID:   &accountID,
-		RegistrationRequestID: &originalRequestID,
-		ExistingVaultID:       &vaultID,
+		expiresAt:             now,
+		consumedAt:            &consumedAt,
+		consumedByAccountID:   &accountID,
+		registrationRequestID: &originalRequestID,
+		existingVaultID:       &vaultID,
 	}
 
 	_, err := service.ResolveForRegistration(claim, "a5000000-0000-4000-8000-000000000001")
@@ -501,15 +519,15 @@ func TestResolveForRegistrationRejectsUnknownOrInconsistentClaim(t *testing.T) {
 		claim *LockedClaim
 	}{
 		{name: "unknown", claim: nil},
-		{name: "missing id", claim: &LockedClaim{transaction: &sql.Tx{}, ExpiresAt: now.Add(time.Minute)}},
+		{name: "missing id", claim: &LockedClaim{transaction: &sql.Tx{}, expiresAt: now.Add(time.Minute)}},
 		{
 			name: "incomplete consumed state",
 			claim: &LockedClaim{
 				id:                    "67000000-0000-4000-8000-000000000001",
 				transaction:           &sql.Tx{},
-				ExpiresAt:             now.Add(time.Minute),
-				ConsumedAt:            &consumedAt,
-				RegistrationRequestID: &requestID,
+				expiresAt:             now.Add(time.Minute),
+				consumedAt:            &consumedAt,
+				registrationRequestID: &requestID,
 			},
 		},
 	}
@@ -602,7 +620,6 @@ func TestMarkConsumedRejectsInvalidCapabilityAndUUIDsBeforeSQL(t *testing.T) {
 				context.Background(),
 				test.transaction,
 				test.pending,
-				time.Now(),
 				test.accountID,
 				test.registrationRequestID,
 			)
@@ -641,6 +658,12 @@ type recordingIssueRepository struct {
 	claim      StoredClaim
 	issueCalls int
 	err        error
+}
+
+type valueIssueRepository struct{}
+
+func (valueIssueRepository) Issue(context.Context, StoredClaim) error {
+	return nil
 }
 
 func (repository *recordingIssueRepository) Issue(_ context.Context, claim StoredClaim) error {

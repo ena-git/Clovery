@@ -5,6 +5,7 @@ import (
 	"crypto/rand"
 	"fmt"
 	"io"
+	"reflect"
 	"time"
 
 	"github.com/google/uuid"
@@ -20,7 +21,7 @@ type Service struct {
 }
 
 func NewService(repository IssueRepository) *Service {
-	if repository == nil {
+	if nilDependency(repository) {
 		panic("identityclaim: nil issue repository")
 	}
 	return &Service{
@@ -62,18 +63,18 @@ func (service *Service) ResolveForRegistration(
 	registrationRequestID string,
 ) (RegistrationResolution, error) {
 	if !canonicalUUID(registrationRequestID) || claim == nil ||
-		!canonicalUUID(claim.id) || claim.transaction == nil || claim.ExpiresAt.IsZero() {
+		!canonicalUUID(claim.id) || claim.transaction == nil || claim.expiresAt.IsZero() {
 		return RegistrationResolution{}, ErrInvalidClaim
 	}
-	if claim.ConsumedAt == nil {
-		if claim.ConsumedByAccountID != nil || claim.RegistrationRequestID != nil || claim.ExistingVaultID != nil {
+	if claim.consumedAt == nil {
+		if claim.consumedByAccountID != nil || claim.registrationRequestID != nil || claim.existingVaultID != nil {
 			return RegistrationResolution{}, ErrInvalidClaim
 		}
-		if !claim.ExpiresAt.After(service.now()) {
+		if !claim.expiresAt.After(service.now()) {
 			return RegistrationResolution{}, ErrExpiredClaim
 		}
 		return RegistrationResolution{
-			Identity: claim.Identity,
+			Identity: claim.identity,
 			PendingConsumption: &PendingConsumption{
 				claimID:               claim.id,
 				transaction:           claim.transaction,
@@ -81,19 +82,19 @@ func (service *Service) ResolveForRegistration(
 			},
 		}, nil
 	}
-	if claim.ConsumedByAccountID == nil || *claim.ConsumedByAccountID == "" ||
-		claim.RegistrationRequestID == nil || *claim.RegistrationRequestID == "" ||
-		claim.ExistingVaultID == nil || *claim.ExistingVaultID == "" {
+	if claim.consumedByAccountID == nil || *claim.consumedByAccountID == "" ||
+		claim.registrationRequestID == nil || *claim.registrationRequestID == "" ||
+		claim.existingVaultID == nil || *claim.existingVaultID == "" {
 		return RegistrationResolution{}, ErrInvalidClaim
 	}
-	if *claim.RegistrationRequestID != registrationRequestID {
+	if *claim.registrationRequestID != registrationRequestID {
 		return RegistrationResolution{}, ErrConsumedClaim
 	}
 	return RegistrationResolution{
-		Identity: claim.Identity,
+		Identity: claim.identity,
 		Existing: &ExistingRegistration{
-			AccountID: *claim.ConsumedByAccountID,
-			VaultID:   *claim.ExistingVaultID,
+			AccountID: *claim.consumedByAccountID,
+			VaultID:   *claim.existingVaultID,
 		},
 	}, nil
 }
@@ -113,4 +114,17 @@ func validIdentity(identity Identity) bool {
 func canonicalUUID(value string) bool {
 	parsed, err := uuid.Parse(value)
 	return err == nil && parsed != uuid.Nil && parsed.String() == value
+}
+
+func nilDependency(dependency any) bool {
+	if dependency == nil {
+		return true
+	}
+	value := reflect.ValueOf(dependency)
+	switch value.Kind() {
+	case reflect.Chan, reflect.Func, reflect.Interface, reflect.Map, reflect.Pointer, reflect.Slice:
+		return value.IsNil()
+	default:
+		return false
+	}
 }

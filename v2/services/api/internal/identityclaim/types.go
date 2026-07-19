@@ -78,12 +78,12 @@ type StoredClaim struct {
 type LockedClaim struct {
 	id                    string
 	transaction           *sql.Tx
-	Identity              Identity
-	ExpiresAt             time.Time
-	ConsumedAt            *time.Time
-	ConsumedByAccountID   *string
-	RegistrationRequestID *string
-	ExistingVaultID       *string
+	identity              Identity
+	expiresAt             time.Time
+	consumedAt            *time.Time
+	consumedByAccountID   *string
+	registrationRequestID *string
+	existingVaultID       *string
 }
 
 type PendingConsumption struct {
