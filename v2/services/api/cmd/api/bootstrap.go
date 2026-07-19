@@ -38,7 +38,7 @@ func buildHandler(databaseHandle *sql.DB, applicationConfig config.Config) (http
 	sessions := auth.NewSessionService(databaseHandle, signer)
 	claimRepository := identityclaim.NewPostgresRepository(databaseHandle)
 	claims := identityclaim.NewService(claimRepository)
-	authService, err := authflow.NewServiceWithSessions(databaseHandle, sessions)
+	authService, err := authflow.NewServiceWithIdentityClaims(databaseHandle, sessions, claimRepository, claims)
 	if err != nil {
 		return nil, err
 	}

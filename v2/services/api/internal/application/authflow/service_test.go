@@ -8,10 +8,14 @@ import (
 	"os"
 	"path/filepath"
 	"runtime"
+	"strings"
 	"testing"
+	"time"
 
 	"github.com/clovery/clovery/services/api/internal/auth"
 	"github.com/clovery/clovery/services/api/internal/database"
+	"github.com/clovery/clovery/services/api/internal/identityclaim"
+	"github.com/google/uuid"
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
@@ -87,11 +91,88 @@ func TestBackendAuthFlowWorksWithoutFrontend(t *testing.T) {
 	}
 }
 
+func TestClaimRegistrationRetriesSessionIssuanceWithoutDuplicateAccounts(t *testing.T) {
+	databaseHandle := openAuthFlowDatabase(t)
+	signer, err := auth.NewAccessTokenSigner("clovery-test", []byte("0123456789abcdef0123456789abcdef"))
+	if err != nil {
+		t.Fatalf("create signer: %v", err)
+	}
+	claimRepository := identityclaim.NewPostgresRepository(databaseHandle)
+	claims := identityclaim.NewService(claimRepository)
+	service, err := NewServiceWithIdentityClaims(
+		databaseHandle,
+		auth.NewSessionService(databaseHandle, signer),
+		claimRepository,
+		claims,
+	)
+	if err != nil {
+		t.Fatalf("create auth flow service: %v", err)
+	}
+	rawToken := issueAuthFlowClaim(t, databaseHandle, claims)
+	if _, err := databaseHandle.Exec(`
+		CREATE FUNCTION fail_claim_session() RETURNS trigger LANGUAGE plpgsql AS $$
+		BEGIN
+			RAISE EXCEPTION 'injected session failure';
+		END
+		$$;
+		CREATE TRIGGER fail_claim_session BEFORE INSERT ON sessions
+		FOR EACH ROW EXECUTE FUNCTION fail_claim_session();
+	`); err != nil {
+		t.Fatalf("install session failure trigger: %v", err)
+	}
+	claimToken := rawToken
+	requestID := strings.ToUpper("71000000-0000-4000-8000-000000000001")
+	sourceKind := "new_install"
+	command := RegisterCommand{
+		LoginID: "session_retry_user", Password: "four quiet words together", RecoveryMethod: "bound_identity",
+		IdentityClaimToken: &claimToken, RegistrationRequestID: &requestID, SourceKind: &sourceKind,
+		Device: Device{ID: "71000000-0000-4000-8000-000000000002", Platform: "ios", DisplayName: "Retry iPhone"},
+	}
+
+	if _, err := service.Register(context.Background(), command); err == nil {
+		t.Fatal("first Register() error = nil")
+	}
+	var committedAccountID string
+	var committedVaultID string
+	if err := databaseHandle.QueryRow(`
+		SELECT account.id::text, vault.id::text
+		FROM clovery_accounts AS account
+		JOIN vaults AS vault ON vault.owner_account_id = account.id
+	`).Scan(&committedAccountID, &committedVaultID); err != nil {
+		t.Fatalf("load committed claimed account after session failure: %v", err)
+	}
+	if _, err := databaseHandle.Exec("DROP TRIGGER fail_claim_session ON sessions"); err != nil {
+		t.Fatalf("drop session failure trigger: %v", err)
+	}
+	registered, err := service.Register(context.Background(), command)
+	if err != nil {
+		t.Fatalf("retried Register() error = %v", err)
+	}
+	if registered.AccountID == "" || registered.VaultID == "" || len(registered.RecoveryCodes) != 0 {
+		t.Fatalf("retried registration result = %#v", registered)
+	}
+	if registered.AccountID != committedAccountID || registered.VaultID != committedVaultID {
+		t.Fatalf("retried registration roots = %q/%q, want %q/%q", registered.AccountID, registered.VaultID, committedAccountID, committedVaultID)
+	}
+	for table, want := range map[string]int{
+		"clovery_accounts": 1, "vaults": 1, "external_identities": 1,
+		"account_bootstrap_jobs": 1, "devices": 1, "sessions": 1, "recovery_codes": 0,
+	} {
+		var count int
+		if err := databaseHandle.QueryRow("SELECT COUNT(*) FROM " + table).Scan(&count); err != nil {
+			t.Fatalf("count %s: %v", table, err)
+		}
+		if count != want {
+			t.Errorf("%s count = %d, want %d", table, count, want)
+		}
+	}
+}
+
 func openAuthFlowDatabase(t *testing.T) *sql.DB {
 	t.Helper()
-	databaseURL := os.Getenv("DATABASE_URL")
+	databaseURL := os.Getenv("TEST_DATABASE_URL")
 	if databaseURL == "" {
-		t.Skip("DATABASE_URL is required for auth flow integration tests")
+		t.Skip("TEST_DATABASE_URL is required for auth flow integration tests")
 	}
 	const schemaName = "clovery_w2_authflow_test"
 	adminDatabase, err := sql.Open("pgx", databaseURL)
@@ -126,4 +207,27 @@ func openAuthFlowDatabase(t *testing.T) *sql.DB {
 	}
 	t.Cleanup(func() { _ = databaseHandle.Close() })
 	return databaseHandle
+}
+
+func issueAuthFlowClaim(t *testing.T, databaseHandle *sql.DB, claims *identityclaim.Service) string {
+	t.Helper()
+	intentID := uuid.NewString()
+	now := time.Now().UTC()
+	if _, err := databaseHandle.Exec(`
+		INSERT INTO federation_intents (id, purpose, provider, nonce_hash, created_at, expires_at, used_at)
+		VALUES ($1, 'login', 'apple', decode(repeat('00', 32), 'hex'), $2, $3, $2)
+	`, intentID, now.Add(-time.Minute), now.Add(time.Hour)); err != nil {
+		t.Fatalf("seed auth flow claim intent: %v", err)
+	}
+	issued, err := claims.Issue(context.Background(), identityclaim.Identity{
+		Provider: "apple", Issuer: "https://appleid.apple.com", Subject: "session-retry-subject", IntentID: intentID,
+	})
+	if err != nil {
+		t.Fatalf("issue auth flow claim: %v", err)
+	}
+	rawToken, ok := issued.TakeToken()
+	if !ok {
+		t.Fatal("auth flow claim did not reveal token")
+	}
+	return rawToken
 }

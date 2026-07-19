@@ -2,6 +2,7 @@ package account
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 )
 
@@ -23,6 +24,21 @@ func (repository *Repository) CreateAccount(ctx context.Context, params CreateAc
 	}
 	defer func() { _ = transaction.Rollback() }()
 
+	if err := insertAccountRows(ctx, transaction, params, normalizedID); err != nil {
+		return err
+	}
+	if err := transaction.Commit(); err != nil {
+		return fmt.Errorf("commit account transaction: %w", err)
+	}
+	return nil
+}
+
+func insertAccountRows(
+	ctx context.Context,
+	transaction *sql.Tx,
+	params CreateAccountParams,
+	normalizedID string,
+) error {
 	if _, err := transaction.ExecContext(ctx, "INSERT INTO clovery_accounts (id) VALUES ($1)", params.AccountID); err != nil {
 		return fmt.Errorf("insert account: %w", err)
 	}
@@ -54,9 +70,6 @@ func (repository *Repository) CreateAccount(ctx context.Context, params CreateAc
 		params.AccountID,
 	); err != nil {
 		return fmt.Errorf("insert account vault: %w", err)
-	}
-	if err := transaction.Commit(); err != nil {
-		return fmt.Errorf("commit account transaction: %w", err)
 	}
 	return nil
 }

@@ -19,10 +19,13 @@ func (adapter *authApplicationAdapter) Register(
 	command CreateAccountCommand,
 ) (AuthSession, error) {
 	result, err := adapter.service.Register(ctx, authflow.RegisterCommand{
-		LoginID:        command.LoginID,
-		Password:       command.Password,
-		RecoveryMethod: command.RecoveryMethod,
-		Device:         authflowDevice(command.Device),
+		LoginID:               command.LoginID,
+		Password:              command.Password,
+		RecoveryMethod:        command.RecoveryMethod,
+		IdentityClaimToken:    command.IdentityClaimToken,
+		RegistrationRequestID: command.RegistrationRequestID,
+		SourceKind:            command.SourceKind,
+		Device:                authflowDevice(command.Device),
 	})
 	return authSessionFromFlow(result), err
 }

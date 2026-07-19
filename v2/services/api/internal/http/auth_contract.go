@@ -12,17 +12,22 @@ type AuthApplication interface {
 }
 
 type CreateAccountCommand struct {
-	LoginID        string             `json:"login_id"`
-	Password       string             `json:"password"`
-	RecoveryMethod string             `json:"recovery_method"`
-	Device         DeviceRegistration `json:"device"`
+	LoginID               string        `json:"login_id"`
+	Password              string        `json:"password"`
+	RecoveryMethod        string        `json:"recovery_method"`
+	IdentityClaimToken    *string       `json:"identity_claim_token"`
+	RegistrationRequestID *string       `json:"registration_request_id"`
+	SourceKind            *string       `json:"source_kind"`
+	Device                DeviceCommand `json:"device"`
 }
 
-type DeviceRegistration struct {
+type DeviceCommand struct {
 	DeviceID    string `json:"device_id"`
 	Platform    string `json:"platform"`
 	DisplayName string `json:"display_name"`
 }
+
+type DeviceRegistration = DeviceCommand
 
 type PasswordLoginCommand struct {
 	LoginID  string             `json:"login_id"`

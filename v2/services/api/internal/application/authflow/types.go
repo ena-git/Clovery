@@ -7,10 +7,13 @@ type Device struct {
 }
 
 type RegisterCommand struct {
-	LoginID        string
-	Password       string
-	RecoveryMethod string
-	Device         Device
+	LoginID               string
+	Password              string
+	RecoveryMethod        string
+	IdentityClaimToken    *string
+	RegistrationRequestID *string
+	SourceKind            *string
+	Device                Device
 }
 
 type LoginCommand struct {
