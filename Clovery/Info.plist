@@ -4,6 +4,24 @@
 <dict>
 	<key>CloverySourceCommit</key>
 	<string>$(CLOVERY_SOURCE_COMMIT)</string>
+	<key>CloveryAPIBaseURL</key>
+	<string>$(CLOVERY_API_BASE_URL)</string>
+	<key>CloveryGoogleAuthorizationURL</key>
+	<string>$(CLOVERY_GOOGLE_AUTHORIZATION_URL)</string>
+	<key>CloveryGoogleClientID</key>
+	<string>$(CLOVERY_GOOGLE_CLIENT_ID)</string>
+	<key>CloveryGoogleRedirectURL</key>
+	<string>$(CLOVERY_GOOGLE_REDIRECT_URL)</string>
+	<key>CloveryGoogleScopes</key>
+	<string>$(CLOVERY_GOOGLE_SCOPES)</string>
+	<key>CloveryHuaweiAuthorizationURL</key>
+	<string>$(CLOVERY_HUAWEI_AUTHORIZATION_URL)</string>
+	<key>CloveryHuaweiClientID</key>
+	<string>$(CLOVERY_HUAWEI_CLIENT_ID)</string>
+	<key>CloveryHuaweiRedirectURL</key>
+	<string>$(CLOVERY_HUAWEI_REDIRECT_URL)</string>
+	<key>CloveryHuaweiScopes</key>
+	<string>$(CLOVERY_HUAWEI_SCOPES)</string>
 	<key>UIAppFonts</key>
 	<array>
 		<string>fonts/Gaegu-Regular.ttf</string>

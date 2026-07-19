@@ -85,10 +85,23 @@ struct ApplicationRootView: View {
     }
 
     private static func makeAPI() -> AuthenticationAPI {
-        let configuration = (try? APIConfiguration.current()) ??
-            APIConfiguration(
+        let buildConfiguration: BuildConfiguration
+        #if DEBUG
+            buildConfiguration = .debug
+        #else
+            buildConfiguration = .release
+        #endif
+
+        let configuration: APIConfiguration
+        if let current = try? APIConfiguration.current(),
+           (try? current.validate(for: buildConfiguration)) != nil
+        {
+            configuration = current
+        } else {
+            configuration = APIConfiguration(
                 baseURL: URL(string: "https://invalid.clovery.local")!
             )
+        }
         return AuthenticationAPI(client: APIClient(configuration: configuration))
     }
 }

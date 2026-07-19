@@ -166,6 +166,8 @@
 		AABB000000000000000000DA /* LegacyUpgradeController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/LegacyUpgradeController.swift; sourceTree = "<group>"; };
 		AABB000000000000000000DB /* LegacyDataDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Upgrade/LegacyDataDetector.swift; sourceTree = "<group>"; };
 		AABB000000000000000000DC /* UpgradeNoticeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Upgrade/UpgradeNoticeView.swift; sourceTree = "<group>"; };
+		AABB000000000000000000E0 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
+		AABB000000000000000000E1 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
 		AACC00000000000000000001 /* CloveryTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CloveryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC889A182FD464C9002510AD /* Clovery.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Clovery.entitlements; sourceTree = "<group>"; };
 		FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CloveryWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -223,6 +225,7 @@
 				AABB00000000000000000003 /* Clovery */,
 				AACC00000000000000000002 /* CloveryTests */,
 				FCECDFE32FE92C7C0067AF51 /* CloveryWidget */,
+				AABB000000000000000000E2 /* Config */,
 				FCECDFDE2FE92C7C0067AF51 /* Frameworks */,
 				AABB00000000000000000004 /* Products */,
 			);
@@ -314,6 +317,15 @@
 				FCECDFE12FE92C7C0067AF51 /* SwiftUI.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		AABB000000000000000000E2 /* Config */ = {
+			isa = PBXGroup;
+			children = (
+				AABB000000000000000000E0 /* Debug.xcconfig */,
+				AABB000000000000000000E1 /* Release.xcconfig */,
+			);
+			path = Config;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -717,13 +729,13 @@
 		};
 		AABB00000000000000000043 /* Debug */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = AABB000000000000000000E0 /* Debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Clovery/Clovery.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CLOVERY_SOURCE_COMMIT = NOT_SET;
 				CURRENT_PROJECT_VERSION = 14;
 				DEVELOPMENT_TEAM = M92TBSSR2R;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -756,13 +768,13 @@
 		};
 		AABB00000000000000000044 /* Release */ = {
 			isa = XCBuildConfiguration;
+			baseConfigurationReference = AABB000000000000000000E1 /* Release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Clovery/Clovery.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				CLOVERY_SOURCE_COMMIT = NOT_SET;
 				CURRENT_PROJECT_VERSION = 14;
 				DEVELOPMENT_TEAM = M92TBSSR2R;
 				GENERATE_INFOPLIST_FILE = YES;
