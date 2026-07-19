@@ -7,6 +7,7 @@ struct LoginView: View {
     var recoverAccount: () -> Void = {}
     var authenticateWithProvider: (AuthenticationProviderKind) -> Void = { _ in }
     var providerAvailability: (AuthenticationProviderKind) -> Bool = { _ in true }
+    var providerMessage: String?
 
     init(
         api: AuthenticationAPIProtocol,
@@ -14,7 +15,8 @@ struct LoginView: View {
         showSignUp: @escaping () -> Void,
         recoverAccount: @escaping () -> Void = {},
         authenticateWithProvider: @escaping (AuthenticationProviderKind) -> Void = { _ in },
-        providerAvailability: @escaping (AuthenticationProviderKind) -> Bool = { _ in true }
+        providerAvailability: @escaping (AuthenticationProviderKind) -> Bool = { _ in true },
+        providerMessage: String? = nil
     ) {
         _viewModel = StateObject(
             wrappedValue: LoginViewModel(api: api, sessionController: sessionController)
@@ -23,6 +25,7 @@ struct LoginView: View {
         self.recoverAccount = recoverAccount
         self.authenticateWithProvider = authenticateWithProvider
         self.providerAvailability = providerAvailability
+        self.providerMessage = providerMessage
     }
 
     var body: some View {
@@ -129,7 +132,7 @@ struct LoginView: View {
 
     @ViewBuilder
     private var errorMessage: some View {
-        if let errorMessage = viewModel.errorMessage {
+        if let errorMessage = viewModel.errorMessage ?? providerMessage {
             Text(errorMessage)
                 .font(.authCaption)
                 .foregroundColor(.red)

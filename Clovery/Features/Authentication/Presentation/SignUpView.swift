@@ -6,13 +6,15 @@ struct SignUpView: View {
     let showLogin: () -> Void
     var authenticateWithProvider: (AuthenticationProviderKind) -> Void = { _ in }
     var providerAvailability: (AuthenticationProviderKind) -> Bool = { _ in true }
+    var providerMessage: String?
 
     init(
         api: AuthenticationAPIProtocol,
         sessionController: ApplicationSessionController,
         showLogin: @escaping () -> Void,
         authenticateWithProvider: @escaping (AuthenticationProviderKind) -> Void = { _ in },
-        providerAvailability: @escaping (AuthenticationProviderKind) -> Bool = { _ in true }
+        providerAvailability: @escaping (AuthenticationProviderKind) -> Bool = { _ in true },
+        providerMessage: String? = nil
     ) {
         _viewModel = StateObject(
             wrappedValue: SignUpViewModel(api: api, sessionController: sessionController)
@@ -20,6 +22,7 @@ struct SignUpView: View {
         self.showLogin = showLogin
         self.authenticateWithProvider = authenticateWithProvider
         self.providerAvailability = providerAvailability
+        self.providerMessage = providerMessage
     }
 
     var body: some View {
@@ -140,7 +143,7 @@ struct SignUpView: View {
 
     @ViewBuilder
     private var formMessage: some View {
-        if let message = validationMessage ?? viewModel.errorMessage {
+        if let message = validationMessage ?? viewModel.errorMessage ?? providerMessage {
             Text(message)
                 .font(.authCaption)
                 .foregroundColor(.red)

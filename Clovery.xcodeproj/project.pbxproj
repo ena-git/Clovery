@@ -62,6 +62,11 @@
 		AABB000000000000000000C5 /* PasskeyAuthenticationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000D5 /* PasskeyAuthenticationProvider.swift */; };
 		AABB000000000000000000C6 /* AccountRecoveryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000D6 /* AccountRecoveryViewModel.swift */; };
 		AABB000000000000000000C7 /* AccountRecoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000D7 /* AccountRecoveryView.swift */; };
+		AABB000000000000000000C8 /* AuthenticationProviderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000D8 /* AuthenticationProviderViewModel.swift */; };
+		AABB000000000000000000C9 /* ApplicationRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000D9 /* ApplicationRootView.swift */; };
+		AABB000000000000000000CA /* LegacyUpgradeController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000DA /* LegacyUpgradeController.swift */; };
+		AABB000000000000000000CB /* LegacyDataDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000DB /* LegacyDataDetector.swift */; };
+		AABB000000000000000000CC /* UpgradeNoticeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000DC /* UpgradeNoticeView.swift */; };
 		FCECDFE02FE92C7C0067AF51 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFDF2FE92C7C0067AF51 /* WidgetKit.framework */; };
 		FCECDFE22FE92C7C0067AF51 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFE12FE92C7C0067AF51 /* SwiftUI.framework */; };
 		FCECDFEF2FE92C7D0067AF51 /* CloveryWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -156,6 +161,11 @@
 		AABB000000000000000000D5 /* PasskeyAuthenticationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Providers/PasskeyAuthenticationProvider.swift; sourceTree = "<group>"; };
 		AABB000000000000000000D6 /* AccountRecoveryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/AccountRecoveryViewModel.swift; sourceTree = "<group>"; };
 		AABB000000000000000000D7 /* AccountRecoveryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/AccountRecoveryView.swift; sourceTree = "<group>"; };
+		AABB000000000000000000D8 /* AuthenticationProviderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/AuthenticationProviderViewModel.swift; sourceTree = "<group>"; };
+		AABB000000000000000000D9 /* ApplicationRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/ApplicationRootView.swift; sourceTree = "<group>"; };
+		AABB000000000000000000DA /* LegacyUpgradeController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/LegacyUpgradeController.swift; sourceTree = "<group>"; };
+		AABB000000000000000000DB /* LegacyDataDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Upgrade/LegacyDataDetector.swift; sourceTree = "<group>"; };
+		AABB000000000000000000DC /* UpgradeNoticeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Upgrade/UpgradeNoticeView.swift; sourceTree = "<group>"; };
 		AACC00000000000000000001 /* CloveryTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CloveryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC889A182FD464C9002510AD /* Clovery.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Clovery.entitlements; sourceTree = "<group>"; };
 		FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CloveryWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -260,6 +270,11 @@
 				AABB000000000000000000D5 /* PasskeyAuthenticationProvider.swift */,
 				AABB000000000000000000D6 /* AccountRecoveryViewModel.swift */,
 				AABB000000000000000000D7 /* AccountRecoveryView.swift */,
+				AABB000000000000000000D8 /* AuthenticationProviderViewModel.swift */,
+				AABB000000000000000000D9 /* ApplicationRootView.swift */,
+				AABB000000000000000000DA /* LegacyUpgradeController.swift */,
+				AABB000000000000000000DB /* LegacyDataDetector.swift */,
+				AABB000000000000000000DC /* UpgradeNoticeView.swift */,
 				AABB00000000000000000020 /* BoardStore.swift */,
 				AABB00000000000000000072 /* BoardStoreClient.swift */,
 				AABB00000000000000000074 /* Clovery.storekit */,
@@ -500,6 +515,11 @@
 				AABB000000000000000000C5 /* PasskeyAuthenticationProvider.swift in Sources */,
 				AABB000000000000000000C6 /* AccountRecoveryViewModel.swift in Sources */,
 				AABB000000000000000000C7 /* AccountRecoveryView.swift in Sources */,
+				AABB000000000000000000C8 /* AuthenticationProviderViewModel.swift in Sources */,
+				AABB000000000000000000C9 /* ApplicationRootView.swift in Sources */,
+				AABB000000000000000000CA /* LegacyUpgradeController.swift in Sources */,
+				AABB000000000000000000CB /* LegacyDataDetector.swift in Sources */,
+				AABB000000000000000000CC /* UpgradeNoticeView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

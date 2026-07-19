@@ -9,7 +9,6 @@ struct CloveryApp: App {
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .ignoresSafeArea()
         }
         .onChange(of: scenePhase) { phase in
             if phase == .active {

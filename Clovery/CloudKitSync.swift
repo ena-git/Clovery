@@ -32,6 +32,14 @@ class CloudKitSync {
         self.isAvailable = isAvailable
     }
 
+    func hasLegacyKeyValueData() -> Bool {
+        let store = NSUbiquitousKeyValueStore.default
+        store.synchronize()
+        return store.data(forKey: "clovery_entries_z") != nil ||
+            store.string(forKey: "clovery_entries") != nil ||
+            store.string(forKey: "clovery_name") != nil
+    }
+
     /// Registers a CKQuerySubscription (once) so other devices' writes trigger
     /// a silent push to this device instead of only syncing on next launch.
     func setupSubscriptionIfNeeded() {

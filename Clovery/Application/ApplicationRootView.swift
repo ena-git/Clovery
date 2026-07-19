@@ -1,0 +1,94 @@
+import SwiftUI
+
+struct ApplicationRootView: View {
+    let api: AuthenticationAPIProtocol
+    @StateObject private var sessionController: ApplicationSessionController
+    @StateObject private var upgradeController: LegacyUpgradeController
+    @State private var hasRestoredSession = false
+    @State private var showsBindingAuthentication = false
+
+    init(
+        api: AuthenticationAPIProtocol? = nil,
+        sessionController: ApplicationSessionController? = nil,
+        detector: LegacyDataDetecting? = nil,
+        userDefaults: UserDefaults = .standard,
+        currentVersion: String? = nil
+    ) {
+        let resolvedAPI = api ?? Self.makeAPI()
+        let resolvedSessionController = sessionController ??
+            ApplicationSessionController(api: resolvedAPI)
+        let resolvedDetector = detector ?? LegacyDataDetector(userDefaults: userDefaults)
+        let resolvedVersion = currentVersion ??
+            (Bundle.main.object(
+                forInfoDictionaryKey: "CFBundleShortVersionString"
+            ) as? String ?? "0.0.0")
+
+        self.api = resolvedAPI
+        _sessionController = StateObject(wrappedValue: resolvedSessionController)
+        _upgradeController = StateObject(
+            wrappedValue: LegacyUpgradeController(
+                detector: resolvedDetector,
+                currentVersion: resolvedVersion,
+                userDefaults: userDefaults
+            )
+        )
+    }
+
+    var body: some View {
+        routeView
+            .task {
+                guard !hasRestoredSession else { return }
+                hasRestoredSession = true
+                await sessionController.restoreSession()
+            }
+            .onChange(of: sessionController.state.session != nil) { hasSession in
+                guard hasSession, showsBindingAuthentication else { return }
+                upgradeController.dismissNotice()
+                showsBindingAuthentication = false
+            }
+            .sheet(isPresented: $showsBindingAuthentication) {
+                NavigationStack {
+                    AuthenticationFlowView(
+                        api: api,
+                        sessionController: sessionController
+                    )
+                }
+            }
+    }
+
+    @ViewBuilder
+    private var routeView: some View {
+        switch upgradeController.currentRoute(
+            hasSession: sessionController.state.session != nil
+        ) {
+        case .authentication:
+            AuthenticationFlowView(
+                api: api,
+                sessionController: sessionController
+            )
+        case .diary:
+            diaryView
+        case .legacyDiaryWithUpgradeNotice:
+            diaryView
+                .overlay(alignment: .bottom) {
+                    UpgradeNoticeView(
+                        later: upgradeController.dismissNotice,
+                        bindAccount: { showsBindingAuthentication = true }
+                    )
+                }
+        }
+    }
+
+    private var diaryView: some View {
+        WebView()
+            .ignoresSafeArea()
+    }
+
+    private static func makeAPI() -> AuthenticationAPI {
+        let configuration = (try? APIConfiguration.current()) ??
+            APIConfiguration(
+                baseURL: URL(string: "https://invalid.clovery.local")!
+            )
+        return AuthenticationAPI(client: APIClient(configuration: configuration))
+    }
+}
