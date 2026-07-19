@@ -1,6 +1,47 @@
 import Foundation
 
-protocol AuthenticationAPIProtocol {
+protocol FederatedAuthenticationAPIProtocol {
+    func startFederatedLogin(
+        provider: IdentityProvider
+    ) async throws -> FederationIntentResponse
+
+    func completeFederatedLogin(
+        provider: IdentityProvider,
+        intentID: String,
+        nonce: String,
+        authorizationCode: String,
+        device: DeviceRegistration
+    ) async throws -> AuthSessionResponse
+}
+
+protocol PasskeyAuthenticationAPIProtocol {
+    func startPasskeyLogin() async throws -> PasskeyCeremonyResponse
+
+    func completePasskeyLogin(
+        challengeID: String,
+        response: [String: JSONValue],
+        device: DeviceRegistration
+    ) async throws -> AuthSessionResponse
+}
+
+protocol AccountRecoveryAPIProtocol {
+    func consumeRecoveryCode(
+        loginID: String,
+        recoveryCode: String
+    ) async throws -> RecoveryProofResponse
+
+    func completePasswordReset(
+        resetIntentID: String,
+        proof: String,
+        newPassword: String
+    ) async throws
+}
+
+protocol AuthenticationAPIProtocol:
+    FederatedAuthenticationAPIProtocol,
+    PasskeyAuthenticationAPIProtocol,
+    AccountRecoveryAPIProtocol
+{
     func register(
         loginID: String,
         password: String,
@@ -15,25 +56,6 @@ protocol AuthenticationAPIProtocol {
 
     func refresh(refreshToken: String) async throws -> AuthSessionResponse
 
-    func startFederatedLogin(
-        provider: IdentityProvider
-    ) async throws -> FederationIntentResponse
-
-    func completeFederatedLogin(
-        provider: IdentityProvider,
-        intentID: String,
-        nonce: String,
-        authorizationCode: String,
-        device: DeviceRegistration
-    ) async throws -> AuthSessionResponse
-
-    func startPasskeyLogin() async throws -> PasskeyCeremonyResponse
-
-    func completePasskeyLogin(
-        challengeID: String,
-        response: [String: JSONValue],
-        device: DeviceRegistration
-    ) async throws -> AuthSessionResponse
 }
 
 final class AuthenticationAPI: AuthenticationAPIProtocol {
@@ -146,6 +168,47 @@ final class AuthenticationAPI: AuthenticationAPIProtocol {
             decoding: AuthSessionResponse.self
         )
     }
+
+    func consumeRecoveryCode(
+        loginID: String,
+        recoveryCode: String
+    ) async throws -> RecoveryProofResponse {
+        let body = try encoder.encode(
+            RecoveryCodeConsumeRequest(
+                loginID: loginID,
+                recoveryCode: recoveryCode
+            )
+        )
+        return try await client.send(
+            APIRequest(
+                method: "POST",
+                path: "/v1/auth/recovery-codes/consume",
+                body: body
+            ),
+            decoding: RecoveryProofResponse.self
+        )
+    }
+
+    func completePasswordReset(
+        resetIntentID: String,
+        proof: String,
+        newPassword: String
+    ) async throws {
+        let body = try encoder.encode(
+            PasswordResetCompleteRequest(
+                resetIntentID: resetIntentID,
+                proof: proof,
+                newPassword: newPassword
+            )
+        )
+        try await client.sendWithoutResponse(
+            APIRequest(
+                method: "POST",
+                path: "/v1/auth/password/reset/complete",
+                body: body
+            )
+        )
+    }
 }
 
 private struct RegisterRequest: Encodable {
@@ -205,5 +268,27 @@ private struct PasskeyLoginCompleteRequest: Encodable {
         case challengeID = "challenge_id"
         case response
         case device
+    }
+}
+
+private struct RecoveryCodeConsumeRequest: Encodable {
+    let loginID: String
+    let recoveryCode: String
+
+    enum CodingKeys: String, CodingKey {
+        case loginID = "login_id"
+        case recoveryCode = "recovery_code"
+    }
+}
+
+private struct PasswordResetCompleteRequest: Encodable {
+    let resetIntentID: String
+    let proof: String
+    let newPassword: String
+
+    enum CodingKeys: String, CodingKey {
+        case resetIntentID = "reset_intent_id"
+        case proof
+        case newPassword = "new_password"
     }
 }

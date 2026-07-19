@@ -125,4 +125,21 @@ private final class AuthenticationAPISpy: AuthenticationAPIProtocol {
     ) async throws -> AuthSessionResponse {
         registerResponse
     }
+
+    func consumeRecoveryCode(
+        loginID: String,
+        recoveryCode: String
+    ) async throws -> RecoveryProofResponse {
+        RecoveryProofResponse(
+            resetIntentID: "reset-intent",
+            recoveryProof: "reset-proof",
+            expiresIn: 600
+        )
+    }
+
+    func completePasswordReset(
+        resetIntentID: String,
+        proof: String,
+        newPassword: String
+    ) async throws {}
 }

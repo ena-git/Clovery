@@ -3,6 +3,7 @@ import SwiftUI
 enum AuthenticationRoute: Hashable {
     case login
     case signUp
+    case recovery
 }
 
 struct AuthenticationFlowView: View {
@@ -22,7 +23,8 @@ struct AuthenticationFlowView: View {
                     LoginView(
                         api: api,
                         sessionController: sessionController,
-                        showSignUp: { path.append(.signUp) }
+                        showSignUp: { path.append(.signUp) },
+                        recoverAccount: { path.append(.recovery) }
                     )
                 case .signUp:
                     SignUpView(
@@ -30,6 +32,8 @@ struct AuthenticationFlowView: View {
                         sessionController: sessionController,
                         showLogin: { path.append(.login) }
                     )
+                case .recovery:
+                    AccountRecoveryView(api: api)
                 }
             }
         }

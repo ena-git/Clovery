@@ -93,6 +93,62 @@ final class AuthenticationAPIClientTests: XCTestCase {
         XCTAssertEqual(URLProtocolStub.lastRequest?.url?.path, "/v1/auth/federated/apple/start")
     }
 
+    func testFederatedCompletePreservesIntentNonceAndAuthorizationCode() async throws {
+        let api = makeAPI(response: makeSession())
+
+        _ = try await api.completeFederatedLogin(
+            provider: .apple,
+            intentID: "server-intent",
+            nonce: "server-nonce",
+            authorizationCode: "provider-code",
+            device: DeviceRegistration(
+                deviceID: "device",
+                platform: "ios",
+                displayName: "Test iPhone"
+            )
+        )
+
+        XCTAssertEqual(URLProtocolStub.lastRequest?.url?.path, "/v1/auth/federated/apple/complete")
+        XCTAssertEqual(URLProtocolStub.lastJSON?["intent_id"] as? String, "server-intent")
+        XCTAssertEqual(URLProtocolStub.lastJSON?["nonce"] as? String, "server-nonce")
+        XCTAssertEqual(URLProtocolStub.lastJSON?["authorization_code"] as? String, "provider-code")
+    }
+
+    func testRecoveryCodeResetConsumesCodeThenAcceptsNoContentCompletion() async throws {
+        let api = makeAPI(response: makeSession())
+        URLProtocolStub.responseData = try JSONEncoder().encode(
+            RecoveryProofResponse(
+                resetIntentID: "reset-intent",
+                recoveryProof: "reset-proof",
+                expiresIn: 600
+            )
+        )
+
+        let proof = try await api.consumeRecoveryCode(
+            loginID: "clovery_user",
+            recoveryCode: "one-time-code"
+        )
+
+        XCTAssertEqual(proof.recoveryProof, "reset-proof")
+        XCTAssertEqual(URLProtocolStub.lastRequest?.url?.path, "/v1/auth/recovery-codes/consume")
+        XCTAssertEqual(URLProtocolStub.lastJSON?["login_id"] as? String, "clovery_user")
+        XCTAssertEqual(URLProtocolStub.lastJSON?["recovery_code"] as? String, "one-time-code")
+
+        URLProtocolStub.statusCode = 204
+        URLProtocolStub.responseData = Data()
+
+        try await api.completePasswordReset(
+            resetIntentID: proof.resetIntentID,
+            proof: proof.recoveryProof,
+            newPassword: "eight888"
+        )
+
+        XCTAssertEqual(URLProtocolStub.lastRequest?.url?.path, "/v1/auth/password/reset/complete")
+        XCTAssertEqual(URLProtocolStub.lastJSON?["reset_intent_id"] as? String, "reset-intent")
+        XCTAssertEqual(URLProtocolStub.lastJSON?["proof"] as? String, "reset-proof")
+        XCTAssertEqual(URLProtocolStub.lastJSON?["new_password"] as? String, "eight888")
+    }
+
     func testAPIErrorEnvelopeMapsToTypedError() async throws {
         URLProtocolStub.statusCode = 401
         URLProtocolStub.responseData = Data(#"{"code":"invalid_credentials","message":"Authentication failed."}"#.utf8)

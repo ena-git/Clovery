@@ -54,6 +54,14 @@
 		AABB000000000000000000A6 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000B6 /* LoginView.swift */; };
 		AABB000000000000000000A7 /* SignUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000B7 /* SignUpView.swift */; };
 		AABB000000000000000000A8 /* RecoveryCodesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000B8 /* RecoveryCodesView.swift */; };
+		AABB000000000000000000C0 /* ProviderAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000D0 /* ProviderAuthentication.swift */; };
+		AABB000000000000000000C1 /* AuthorizationControllerBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000D1 /* AuthorizationControllerBridge.swift */; };
+		AABB000000000000000000C2 /* AppleAuthenticationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000D2 /* AppleAuthenticationProvider.swift */; };
+		AABB000000000000000000C3 /* WebAuthenticationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000D3 /* WebAuthenticationProvider.swift */; };
+		AABB000000000000000000C4 /* WebAuthnSerialization.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000D4 /* WebAuthnSerialization.swift */; };
+		AABB000000000000000000C5 /* PasskeyAuthenticationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000D5 /* PasskeyAuthenticationProvider.swift */; };
+		AABB000000000000000000C6 /* AccountRecoveryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000D6 /* AccountRecoveryViewModel.swift */; };
+		AABB000000000000000000C7 /* AccountRecoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000D7 /* AccountRecoveryView.swift */; };
 		FCECDFE02FE92C7C0067AF51 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFDF2FE92C7C0067AF51 /* WidgetKit.framework */; };
 		FCECDFE22FE92C7C0067AF51 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFE12FE92C7C0067AF51 /* SwiftUI.framework */; };
 		FCECDFEF2FE92C7D0067AF51 /* CloveryWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -140,6 +148,14 @@
 		AABB000000000000000000B6 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/LoginView.swift; sourceTree = "<group>"; };
 		AABB000000000000000000B7 /* SignUpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/SignUpView.swift; sourceTree = "<group>"; };
 		AABB000000000000000000B8 /* RecoveryCodesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/RecoveryCodesView.swift; sourceTree = "<group>"; };
+		AABB000000000000000000D0 /* ProviderAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Providers/ProviderAuthentication.swift; sourceTree = "<group>"; };
+		AABB000000000000000000D1 /* AuthorizationControllerBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Providers/AuthorizationControllerBridge.swift; sourceTree = "<group>"; };
+		AABB000000000000000000D2 /* AppleAuthenticationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Providers/AppleAuthenticationProvider.swift; sourceTree = "<group>"; };
+		AABB000000000000000000D3 /* WebAuthenticationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Providers/WebAuthenticationProvider.swift; sourceTree = "<group>"; };
+		AABB000000000000000000D4 /* WebAuthnSerialization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Providers/WebAuthnSerialization.swift; sourceTree = "<group>"; };
+		AABB000000000000000000D5 /* PasskeyAuthenticationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Providers/PasskeyAuthenticationProvider.swift; sourceTree = "<group>"; };
+		AABB000000000000000000D6 /* AccountRecoveryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/AccountRecoveryViewModel.swift; sourceTree = "<group>"; };
+		AABB000000000000000000D7 /* AccountRecoveryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/AccountRecoveryView.swift; sourceTree = "<group>"; };
 		AACC00000000000000000001 /* CloveryTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CloveryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC889A182FD464C9002510AD /* Clovery.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Clovery.entitlements; sourceTree = "<group>"; };
 		FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CloveryWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -236,6 +252,14 @@
 				AABB000000000000000000B6 /* LoginView.swift */,
 				AABB000000000000000000B7 /* SignUpView.swift */,
 				AABB000000000000000000B8 /* RecoveryCodesView.swift */,
+				AABB000000000000000000D0 /* ProviderAuthentication.swift */,
+				AABB000000000000000000D1 /* AuthorizationControllerBridge.swift */,
+				AABB000000000000000000D2 /* AppleAuthenticationProvider.swift */,
+				AABB000000000000000000D3 /* WebAuthenticationProvider.swift */,
+				AABB000000000000000000D4 /* WebAuthnSerialization.swift */,
+				AABB000000000000000000D5 /* PasskeyAuthenticationProvider.swift */,
+				AABB000000000000000000D6 /* AccountRecoveryViewModel.swift */,
+				AABB000000000000000000D7 /* AccountRecoveryView.swift */,
 				AABB00000000000000000020 /* BoardStore.swift */,
 				AABB00000000000000000072 /* BoardStoreClient.swift */,
 				AABB00000000000000000074 /* Clovery.storekit */,
@@ -468,6 +492,14 @@
 				AABB000000000000000000A6 /* LoginView.swift in Sources */,
 				AABB000000000000000000A7 /* SignUpView.swift in Sources */,
 				AABB000000000000000000A8 /* RecoveryCodesView.swift in Sources */,
+				AABB000000000000000000C0 /* ProviderAuthentication.swift in Sources */,
+				AABB000000000000000000C1 /* AuthorizationControllerBridge.swift in Sources */,
+				AABB000000000000000000C2 /* AppleAuthenticationProvider.swift in Sources */,
+				AABB000000000000000000C3 /* WebAuthenticationProvider.swift in Sources */,
+				AABB000000000000000000C4 /* WebAuthnSerialization.swift in Sources */,
+				AABB000000000000000000C5 /* PasskeyAuthenticationProvider.swift in Sources */,
+				AABB000000000000000000C6 /* AccountRecoveryViewModel.swift in Sources */,
+				AABB000000000000000000C7 /* AccountRecoveryView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
