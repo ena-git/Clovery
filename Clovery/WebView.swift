@@ -8,6 +8,11 @@ import WidgetKit
 import OSLog
 
 struct WebView: UIViewRepresentable {
+    private let fontStore: AppFontStore?
+
+    init(fontStore: AppFontStore? = nil) {
+        self.fontStore = fontStore
+    }
 
     // MARK: – Message handler (haptic + notifications + iCloud)
     class Coordinator: NSObject, WKScriptMessageHandler, WKNavigationDelegate, UNUserNotificationCenterDelegate {
@@ -30,14 +35,22 @@ struct WebView: UIViewRepresentable {
         )
         private let photoStore: PhotoStoring
         private let imageExporter: ImageExporting
+        private let fontStore: AppFontStore?
 
         init(
             photoStore: PhotoStoring = PhotoStore(),
-            imageExporter: ImageExporting = ImageExportService()
+            imageExporter: ImageExporting = ImageExportService(),
+            fontStore: AppFontStore? = nil
         ) {
             self.photoStore = photoStore
             self.imageExporter = imageExporter
+            self.fontStore = fontStore
             super.init()
+        }
+
+        @MainActor
+        func handleFontPreference(_ rawValue: String) {
+            fontStore?.update(rawValue: rawValue)
         }
 
         // MARK: Screenshot protection (UITextField isSecureTextEntry trick)
@@ -564,7 +577,10 @@ struct WebView: UIViewRepresentable {
                     shared.set(ts, forKey: "widget_lastModified")
                 }
                 if let font = payload["widget_font"] as? String {
-                    shared.set(font, forKey: "widget_font")
+                    shared.set(font, forKey: AppFontStorageKey.widgetCompatibility)
+                    Task { @MainActor [weak self] in
+                        self?.handleFontPreference(font)
+                    }
                 }
                 if let palette = payload["widget_palette"] as? String {
                     shared.set(palette, forKey: "widget_palette")
@@ -771,7 +787,9 @@ struct WebView: UIViewRepresentable {
         }
     }
 
-    func makeCoordinator() -> Coordinator { Coordinator() }
+    func makeCoordinator() -> Coordinator {
+        Coordinator(fontStore: fontStore)
+    }
 
     func makeUIView(context: Context) -> WKWebView {
         let config = WKWebViewConfiguration()

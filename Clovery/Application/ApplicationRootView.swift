@@ -4,12 +4,14 @@ struct ApplicationRootView: View {
     let api: AuthenticationAPIProtocol
     @StateObject private var sessionController: ApplicationSessionController
     @StateObject private var upgradeController: LegacyUpgradeController
+    @StateObject private var fontStore: AppFontStore
     @State private var hasRestoredSession = false
     @State private var showsBindingAuthentication = false
 
     init(
         api: AuthenticationAPIProtocol? = nil,
         sessionController: ApplicationSessionController? = nil,
+        fontStore: AppFontStore? = nil,
         detector: LegacyDataDetecting? = nil,
         userDefaults: UserDefaults = .standard,
         currentVersion: String? = nil
@@ -25,6 +27,7 @@ struct ApplicationRootView: View {
 
         self.api = resolvedAPI
         _sessionController = StateObject(wrappedValue: resolvedSessionController)
+        _fontStore = StateObject(wrappedValue: fontStore ?? AppFontStore())
         _upgradeController = StateObject(
             wrappedValue: LegacyUpgradeController(
                 detector: resolvedDetector,
@@ -54,6 +57,7 @@ struct ApplicationRootView: View {
                     )
                 }
             }
+            .environment(\.appFontSelection, fontStore.selection)
     }
 
     @ViewBuilder
@@ -80,7 +84,7 @@ struct ApplicationRootView: View {
     }
 
     private var diaryView: some View {
-        WebView()
+        WebView(fontStore: fontStore)
             .ignoresSafeArea()
     }
 
