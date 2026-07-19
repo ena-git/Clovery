@@ -65,7 +65,7 @@ struct LoginView: View {
                                     .tint(.authInk)
                             } else {
                                 Text("登录")
-                                    .font(.authAction)
+                                    .cloveryFont(.action)
                             }
                         }
                         .foregroundColor(.authInk)
@@ -76,7 +76,7 @@ struct LoginView: View {
                     .padding(.top, 12)
 
                     Button("找回账户", action: recoverAccount)
-                        .font(.authCaption)
+                        .cloveryFont(.caption)
                         .foregroundColor(.authInk)
                         .buttonStyle(.plain)
                         .padding(.top, 2)
@@ -96,7 +96,7 @@ struct LoginView: View {
                             .foregroundColor(.authInk)
                             .buttonStyle(.plain)
                     }
-                    .font(.authCaption)
+                    .cloveryFont(.caption)
                     .padding(.bottom, 34)
                 }
                 .frame(maxWidth: .infinity)
@@ -122,10 +122,10 @@ struct LoginView: View {
     private var header: some View {
         VStack(spacing: 0) {
             Text("登录")
-                .font(.authTitle)
+                .cloveryFont(.title)
                 .foregroundColor(.authInk)
             Text("欢迎回来！")
-                .font(.authAction)
+                .cloveryFont(.action)
                 .foregroundColor(.authInk)
         }
     }
@@ -134,7 +134,7 @@ struct LoginView: View {
     private var errorMessage: some View {
         if let errorMessage = viewModel.errorMessage ?? providerMessage {
             Text(errorMessage)
-                .font(.authCaption)
+                .cloveryFont(.caption)
                 .foregroundColor(.red)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)

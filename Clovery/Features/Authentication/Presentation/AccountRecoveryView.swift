@@ -46,10 +46,10 @@ struct AccountRecoveryView: View {
     private var header: some View {
         VStack(spacing: 0) {
             Text("找回账户")
-                .font(.authTitle)
+                .cloveryFont(.title)
                 .foregroundColor(.authInk)
             Text("使用 Clovery 恢复码")
-                .font(.authAction)
+                .cloveryFont(.action)
                 .foregroundColor(.authInk)
         }
         .multilineTextAlignment(.center)
@@ -90,7 +90,7 @@ struct AccountRecoveryView: View {
 
             if let errorMessage = viewModel.errorMessage {
                 Text(errorMessage)
-                    .font(.authCaption)
+                    .cloveryFont(.caption)
                     .foregroundColor(.red)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
@@ -104,7 +104,7 @@ struct AccountRecoveryView: View {
                             .tint(.authInk)
                     } else {
                         Text("重置密码")
-                            .font(.authAction)
+                            .cloveryFont(.action)
                     }
                 }
                 .foregroundColor(.authInk)
@@ -120,15 +120,15 @@ struct AccountRecoveryView: View {
         AuthDashedCard(height: 230) {
             VStack(spacing: 22) {
                 Text("密码已更新")
-                    .font(.authAction)
+                    .cloveryFont(.action)
                     .foregroundColor(.authInk)
                 Text("之前的登录会话已退出，请使用新密码重新登录。")
-                    .font(.authCaption)
+                    .cloveryFont(.caption)
                     .foregroundColor(.authInk)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 24)
                 Button("返回登录", action: { dismiss() })
-                    .font(.authAction)
+                    .cloveryFont(.action)
                     .foregroundColor(.authInk)
                     .buttonStyle(.plain)
             }

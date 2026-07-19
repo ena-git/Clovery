@@ -37,7 +37,7 @@ struct AuthenticationEntryView: View {
     private func entryButton(title: String, action: @escaping () -> Void) -> some View {
         Button(action: action) {
             Text(title)
-                .font(.authAction)
+                .cloveryFont(.action)
                 .foregroundColor(.authInk)
                 .frame(maxWidth: .infinity)
                 .frame(height: 78)

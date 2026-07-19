@@ -68,7 +68,7 @@ struct SignUpView: View {
                                     .tint(.authInk)
                             } else {
                                 Text("注册")
-                                    .font(.authAction)
+                                    .cloveryFont(.action)
                             }
                         }
                         .foregroundColor(.authInk)
@@ -93,7 +93,7 @@ struct SignUpView: View {
                             .foregroundColor(.authInk)
                             .buttonStyle(.plain)
                     }
-                    .font(.authCaption)
+                    .cloveryFont(.caption)
                     .padding(.bottom, 28)
                 }
                 .frame(maxWidth: .infinity)
@@ -133,10 +133,10 @@ struct SignUpView: View {
     private var header: some View {
         VStack(spacing: 0) {
             Text("注册")
-                .font(.authTitle)
+                .cloveryFont(.title)
                 .foregroundColor(.authInk)
             Text("欢迎加入我们！")
-                .font(.authAction)
+                .cloveryFont(.action)
                 .foregroundColor(.authInk)
         }
     }
@@ -145,7 +145,7 @@ struct SignUpView: View {
     private var formMessage: some View {
         if let message = validationMessage ?? viewModel.errorMessage ?? providerMessage {
             Text(message)
-                .font(.authCaption)
+                .cloveryFont(.caption)
                 .foregroundColor(.red)
                 .multilineTextAlignment(.center)
                 .padding(.horizontal, 32)

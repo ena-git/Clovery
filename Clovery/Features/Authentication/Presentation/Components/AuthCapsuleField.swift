@@ -38,7 +38,7 @@ struct AuthTextField: View {
                     )
                 }
             }
-            .font(.authBody)
+            .cloveryFont(.body)
             .foregroundColor(.authInk)
             .textContentType(contentType)
             .textInputAutocapitalization(.never)

@@ -7,7 +7,7 @@ struct AuthDivider: View {
                 .resizable()
                 .frame(width: 108, height: 4)
             Text("或")
-                .font(.authCaption)
+                .cloveryFont(.caption)
                 .foregroundColor(.authPlaceholder)
                 .frame(width: 24)
             Image(AuthenticationAsset.divider.rawValue)
