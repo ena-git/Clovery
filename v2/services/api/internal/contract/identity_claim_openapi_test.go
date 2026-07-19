@@ -4,6 +4,7 @@ import (
 	"path/filepath"
 	"reflect"
 	"runtime"
+	"strings"
 	"testing"
 
 	"github.com/getkin/kin-openapi/openapi3"
@@ -75,6 +76,34 @@ func TestIdentityClaimTokenVisibilityContract(t *testing.T) {
 		if !containsString(claim.Required, property) {
 			t.Errorf("ClaimCreateAccountRequest must require %s", property)
 		}
+	}
+}
+
+func TestCreateAccountDocumentsExpiredIdentityClaimReauthorization(t *testing.T) {
+	document := loadIdentityClaimOpenAPI(t)
+	accountsPath := document.Paths.Find("/v1/auth/accounts")
+	if accountsPath == nil || accountsPath.Post == nil {
+		t.Fatal("missing account registration POST contract")
+	}
+	for _, status := range []string{"201", "400", "409", "429"} {
+		if response := accountsPath.Post.Responses.Value(status); response == nil || response.Value == nil {
+			t.Errorf("account registration lost %s response", status)
+		}
+	}
+	expired := accountsPath.Post.Responses.Value("401")
+	if expired == nil || expired.Value == nil {
+		t.Fatal("account registration must document expired identity claim 401 response")
+	}
+	if expired.Value.Description == nil {
+		t.Fatal("account registration 401 response needs a description")
+	}
+	description := strings.ToLower(*expired.Value.Description)
+	if !strings.Contains(description, "expired identity claim") || !strings.Contains(description, "reauthorization") {
+		t.Fatalf("account registration 401 description = %q", *expired.Value.Description)
+	}
+	errorSchema := expired.Value.Content["application/json"].Schema
+	if errorSchema == nil || errorSchema.Ref != "#/components/schemas/ErrorResponse" {
+		t.Fatalf("account registration 401 schema = %#v", errorSchema)
 	}
 }
 
