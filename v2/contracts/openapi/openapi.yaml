@@ -386,6 +386,8 @@ paths:
           $ref: "#/components/responses/BadRequest"
         "401":
           $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
   /v1/account/devices:
     get:
       operationId: listCurrentAccountDevices

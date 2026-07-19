@@ -13,6 +13,7 @@ type RouterDependencies struct {
 	Federation             FederatedHTTPApplication
 	Passkeys               PasskeyHTTPApplication
 	Account                AccountHTTPApplication
+	Bootstrap              BootstrapHTTPApplication
 	Devices                DeviceHTTPApplication
 	Vault                  VaultHTTPApplication
 	Sync                   SyncHTTPApplication
@@ -47,6 +48,9 @@ func NewRouter(dependencies ...RouterDependencies) http.Handler {
 	}
 	if len(dependencies) > 0 && dependencies[0].Account != nil && dependencies[0].Sessions != nil {
 		registerAccountRoutes(router, dependencies[0].Account, dependencies[0].Sessions)
+	}
+	if len(dependencies) > 0 && dependencies[0].Bootstrap != nil && dependencies[0].Sessions != nil {
+		registerBootstrapRoutes(router, dependencies[0].Bootstrap, dependencies[0].Sessions)
 	}
 	if len(dependencies) > 0 && dependencies[0].Devices != nil && dependencies[0].Sessions != nil {
 		registerDeviceRoutes(router, dependencies[0].Devices, dependencies[0].Sessions)

@@ -8,6 +8,7 @@ import (
 
 	"github.com/clovery/clovery/services/api/internal/application/authflow"
 	"github.com/clovery/clovery/services/api/internal/auth"
+	"github.com/clovery/clovery/services/api/internal/bootstrapjob"
 	"github.com/clovery/clovery/services/api/internal/config"
 	httpapi "github.com/clovery/clovery/services/api/internal/http"
 	"github.com/clovery/clovery/services/api/internal/identityclaim"
@@ -42,6 +43,10 @@ func buildHandler(databaseHandle *sql.DB, applicationConfig config.Config) (http
 	if err != nil {
 		return nil, err
 	}
+	bootstrapService, err := bootstrapjob.NewService(bootstrapjob.NewPostgresRepository(databaseHandle))
+	if err != nil {
+		return nil, err
+	}
 	federation, passkeys, err := buildIdentityApplications(databaseHandle, sessions, claims, applicationConfig)
 	if err != nil {
 		return nil, err
@@ -73,6 +78,7 @@ func buildHandler(databaseHandle *sql.DB, applicationConfig config.Config) (http
 		Federation:             federation,
 		Passkeys:               passkeys,
 		Account:                accounts,
+		Bootstrap:              httpapi.NewBootstrapApplication(bootstrapService),
 		Devices:                devices,
 		Vault:                  vaults,
 		Sync:                   syncApplication,

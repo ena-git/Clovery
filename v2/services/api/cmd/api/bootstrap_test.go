@@ -102,6 +102,8 @@ func TestBuildHandlerRegistersProtectedManagementRoutes(t *testing.T) {
 
 	for _, request := range []*http.Request{
 		httptest.NewRequest(http.MethodGet, "/v1/account", nil),
+		httptest.NewRequest(http.MethodGet, "/v1/account/bootstrap", nil),
+		httptest.NewRequest(http.MethodPost, "/v1/account/bootstrap/resume", nil),
 		httptest.NewRequest(http.MethodGet, "/v1/account/devices", nil),
 		httptest.NewRequest(http.MethodGet, "/v1/vault", nil),
 		httptest.NewRequest(http.MethodPost, "/v1/account/deletion-requests", nil),
