@@ -184,6 +184,32 @@ func TestResolveForRegistrationReplaysSameRequest(t *testing.T) {
 	}
 }
 
+func TestResolveForRegistrationReplaysExpiredConsumedClaimForSameRequest(t *testing.T) {
+	now := time.Date(2026, time.July, 19, 10, 0, 0, 0, time.UTC)
+	service := newTestService(&recordingIssueRepository{}, bytes.Repeat([]byte{1}, 32), now)
+	consumedAt := now.Add(-time.Hour)
+	accountID := "81000000-0000-4000-8000-000000000001"
+	vaultID := "91000000-0000-4000-8000-000000000001"
+	requestID := "a1000000-0000-4000-8000-000000000001"
+	claim := &LockedClaim{
+		ID:                    "claim-id",
+		Identity:              Identity{Provider: "apple", Issuer: "issuer", Subject: "subject", IntentID: "intent"},
+		ExpiresAt:             now.Add(-time.Minute),
+		ConsumedAt:            &consumedAt,
+		ConsumedByAccountID:   &accountID,
+		RegistrationRequestID: &requestID,
+		ExistingVaultID:       &vaultID,
+	}
+
+	resolution, err := service.ResolveForRegistration(claim, requestID)
+	if err != nil {
+		t.Fatalf("ResolveForRegistration() error = %v", err)
+	}
+	if resolution.Existing == nil || resolution.Existing.AccountID != accountID || resolution.Existing.VaultID != vaultID {
+		t.Fatalf("existing registration = %#v", resolution.Existing)
+	}
+}
+
 func TestResolveForRegistrationRejectsDifferentRequest(t *testing.T) {
 	now := time.Date(2026, time.July, 19, 10, 0, 0, 0, time.UTC)
 	service := newTestService(&recordingIssueRepository{}, bytes.Repeat([]byte{1}, 32), now)
@@ -194,6 +220,28 @@ func TestResolveForRegistrationRejectsDifferentRequest(t *testing.T) {
 	claim := &LockedClaim{
 		ID:                    "claim-id",
 		ExpiresAt:             now.Add(time.Minute),
+		ConsumedAt:            &consumedAt,
+		ConsumedByAccountID:   &accountID,
+		RegistrationRequestID: &originalRequestID,
+		ExistingVaultID:       &vaultID,
+	}
+
+	_, err := service.ResolveForRegistration(claim, "different-request")
+	if !errors.Is(err, ErrConsumedClaim) {
+		t.Fatalf("ResolveForRegistration() error = %v, want ErrConsumedClaim", err)
+	}
+}
+
+func TestResolveForRegistrationRejectsDifferentRequestForExpiredConsumedClaim(t *testing.T) {
+	now := time.Date(2026, time.July, 19, 10, 0, 0, 0, time.UTC)
+	service := newTestService(&recordingIssueRepository{}, bytes.Repeat([]byte{1}, 32), now)
+	consumedAt := now.Add(-time.Hour)
+	accountID := "account-id"
+	vaultID := "vault-id"
+	originalRequestID := "original-request"
+	claim := &LockedClaim{
+		ID:                    "claim-id",
+		ExpiresAt:             now,
 		ConsumedAt:            &consumedAt,
 		ConsumedByAccountID:   &accountID,
 		RegistrationRequestID: &originalRequestID,

@@ -216,19 +216,21 @@ func exerciseConcurrentClaim(
 	if _, err := secondTransaction.ExecContext(ctx, "SET LOCAL lock_timeout = '5s'"); err != nil {
 		t.Fatalf("set competing lock timeout: %v", err)
 	}
-	lockStarted := make(chan struct{})
+	var secondBackendPID int
+	if err := secondTransaction.QueryRowContext(ctx, "SELECT pg_backend_pid()").Scan(&secondBackendPID); err != nil {
+		t.Fatalf("load competing backend PID: %v", err)
+	}
+	observerConnection, err := databaseHandle.Conn(ctx)
+	if err != nil {
+		t.Fatalf("open lock observer connection: %v", err)
+	}
+	defer func() { _ = observerConnection.Close() }()
 	lockResult := make(chan lockedClaimResult, 1)
 	go func() {
-		close(lockStarted)
 		claim, lockErr := repository.LockForRegistration(ctx, secondTransaction, issued.Token)
 		lockResult <- lockedClaimResult{claim: claim, err: lockErr}
 	}()
-	<-lockStarted
-	select {
-	case result := <-lockResult:
-		t.Fatalf("competing lock returned before first commit: claim=%#v error=%v", result.claim, result.err)
-	case <-time.After(200 * time.Millisecond):
-	}
+	waitForBackendLock(t, observerConnection, secondBackendPID, 4*time.Second)
 
 	if _, err := firstTransaction.ExecContext(ctx, "INSERT INTO clovery_accounts (id) VALUES ($1)", fixture.accountID); err != nil {
 		t.Fatalf("insert claimed account: %v", err)
@@ -308,6 +310,56 @@ func exerciseConcurrentClaim(
 		t.Fatalf("ownership counts account=%d vault=%d consumed=%d", accountCount, vaultCount, consumedCount)
 	}
 	return resolution, resolutionErr
+}
+
+func waitForBackendLock(
+	t *testing.T,
+	observerConnection *sql.Conn,
+	backendPID int,
+	timeout time.Duration,
+) {
+	t.Helper()
+	deadline := time.Now().Add(timeout)
+	var lastState string
+	var lastWaitEventType string
+	var lastWaitEvent string
+	var lastQuery string
+	var lastBlockingPIDs string
+	for {
+		err := observerConnection.QueryRowContext(context.Background(), `
+			SELECT state,
+			       COALESCE(wait_event_type, ''),
+			       COALESCE(wait_event, ''),
+			       query,
+			       pg_blocking_pids(pid)::text
+			FROM pg_stat_activity
+			WHERE pid = $1
+		`, backendPID).Scan(
+			&lastState,
+			&lastWaitEventType,
+			&lastWaitEvent,
+			&lastQuery,
+			&lastBlockingPIDs,
+		)
+		if err != nil && !errors.Is(err, sql.ErrNoRows) {
+			t.Fatalf("observe competing backend lock: %v", err)
+		}
+		if err == nil && lastWaitEventType == "Lock" {
+			return
+		}
+		if time.Now().After(deadline) {
+			t.Fatalf(
+				"backend %d did not enter Lock wait: state=%q wait_event_type=%q wait_event=%q blocking_pids=%q query=%q",
+				backendPID,
+				lastState,
+				lastWaitEventType,
+				lastWaitEvent,
+				lastBlockingPIDs,
+				lastQuery,
+			)
+		}
+		time.Sleep(10 * time.Millisecond)
+	}
 }
 
 func integrationService(

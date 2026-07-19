@@ -61,12 +61,12 @@ func (service *Service) ResolveForRegistration(
 	if claim == nil || claim.ID == "" || claim.ExpiresAt.IsZero() {
 		return RegistrationResolution{}, ErrInvalidClaim
 	}
-	if !claim.ExpiresAt.After(service.now()) {
-		return RegistrationResolution{}, ErrExpiredClaim
-	}
 	if claim.ConsumedAt == nil {
 		if claim.ConsumedByAccountID != nil || claim.RegistrationRequestID != nil || claim.ExistingVaultID != nil {
 			return RegistrationResolution{}, ErrInvalidClaim
+		}
+		if !claim.ExpiresAt.After(service.now()) {
+			return RegistrationResolution{}, ErrExpiredClaim
 		}
 		return RegistrationResolution{Identity: claim.Identity}, nil
 	}
