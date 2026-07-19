@@ -64,11 +64,21 @@ CREATE TABLE account_bootstrap_jobs (
         )
     ),
     CONSTRAINT account_bootstrap_jobs_attention_state_check CHECK (
-        (status = 'needs_attention') = (
-            identity_state = 'needs_attention'
+        (
+            status <> 'needs_attention'
+            OR identity_state = 'needs_attention'
             OR migration_state = 'needs_attention'
             OR entitlement_state = 'needs_attention'
             OR vault_state = 'needs_attention'
+        )
+        AND (
+            status IN ('needs_attention', 'running')
+            OR NOT (
+                identity_state = 'needs_attention'
+                OR migration_state = 'needs_attention'
+                OR entitlement_state = 'needs_attention'
+                OR vault_state = 'needs_attention'
+            )
         )
     ),
     CONSTRAINT account_bootstrap_jobs_attention_error_check CHECK (

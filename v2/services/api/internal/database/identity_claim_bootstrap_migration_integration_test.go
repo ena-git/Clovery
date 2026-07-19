@@ -111,11 +111,25 @@ func TestIdentityClaimBootstrapMigrationEnforcesDatabaseContract(t *testing.T) {
 				`,
 			},
 			{
-				name: "attention stage under running status",
+				name: "attention stage under pending status",
 				query: `
 					INSERT INTO account_bootstrap_jobs (
 						account_id, vault_id, source_kind, migration_state, status, last_error_code
-					) VALUES ($1, $2, 'legacy_local', 'needs_attention', 'running', 'migration_failed')
+					) VALUES ($1, $2, 'legacy_local', 'needs_attention', 'pending', 'migration_failed')
+				`,
+			},
+			{
+				name: "attention stage under complete status",
+				query: `
+					INSERT INTO account_bootstrap_jobs (
+						account_id, vault_id, source_kind,
+						identity_state, migration_state, entitlement_state, vault_state,
+						status, last_error_code
+					) VALUES (
+						$1, $2, 'legacy_local',
+						'complete', 'needs_attention', 'complete', 'complete',
+						'complete', 'migration_failed'
+					)
 				`,
 			},
 		}
@@ -123,6 +137,66 @@ func TestIdentityClaimBootstrapMigrationEnforcesDatabaseContract(t *testing.T) {
 			t.Run(test.name, func(t *testing.T) {
 				expectDatabaseRejection(t, database, test.query, bootstrapAccountA, bootstrapVaultA)
 			})
+		}
+	})
+
+	t.Run("allows running retry while stage needs attention", func(t *testing.T) {
+		if _, err := database.Exec(`
+			INSERT INTO account_bootstrap_jobs (
+				account_id, vault_id, source_kind,
+				migration_state, entitlement_state, status, last_error_code
+			) VALUES (
+				$1, $2, 'legacy_local',
+				'needs_attention', 'complete', 'needs_attention', 'migration_failed'
+			)
+		`, bootstrapAccountA, bootstrapVaultA); err != nil {
+			t.Fatalf("insert needs-attention bootstrap job: %v", err)
+		}
+		t.Cleanup(func() {
+			if _, err := database.Exec("DELETE FROM account_bootstrap_jobs WHERE account_id = $1", bootstrapAccountA); err != nil {
+				t.Errorf("remove resumed bootstrap job: %v", err)
+			}
+		})
+		if _, err := database.Exec(`
+			UPDATE account_bootstrap_jobs
+			SET status = 'running', last_error_code = NULL, retry_count = retry_count + 1
+			WHERE account_id = $1
+		`, bootstrapAccountA); err != nil {
+			t.Fatalf("resume needs-attention bootstrap job: %v", err)
+		}
+
+		var identityState string
+		var migrationState string
+		var entitlementState string
+		var status string
+		var lastErrorCode sql.NullString
+		var retryCount int
+		if err := database.QueryRow(`
+			SELECT identity_state, migration_state, entitlement_state, status, last_error_code, retry_count
+			FROM account_bootstrap_jobs
+			WHERE account_id = $1
+		`, bootstrapAccountA).Scan(
+			&identityState,
+			&migrationState,
+			&entitlementState,
+			&status,
+			&lastErrorCode,
+			&retryCount,
+		); err != nil {
+			t.Fatalf("read resumed bootstrap job: %v", err)
+		}
+		if identityState != "complete" || migrationState != "needs_attention" ||
+			entitlementState != "complete" || status != "running" ||
+			lastErrorCode.Valid || retryCount != 1 {
+			t.Fatalf(
+				"resumed bootstrap state identity=%s migration=%s entitlement=%s status=%s error=%v retries=%d",
+				identityState,
+				migrationState,
+				entitlementState,
+				status,
+				lastErrorCode,
+				retryCount,
+			)
 		}
 	})
 
