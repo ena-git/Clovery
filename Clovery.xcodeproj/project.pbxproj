@@ -29,6 +29,15 @@
 		AABB00000000000000000071 /* BoardStoreClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000072 /* BoardStoreClient.swift */; };
 		AABB00000000000000000073 /* Clovery.storekit in Resources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000074 /* Clovery.storekit */; };
 		AABB00000000000000000075 /* BoardEntitlementReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000076 /* BoardEntitlementReporter.swift */; };
+		AABB00000000000000000080 /* APIConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000090 /* APIConfiguration.swift */; };
+		AABB00000000000000000081 /* APIError.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000091 /* APIError.swift */; };
+		AABB00000000000000000082 /* APIRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000092 /* APIRequest.swift */; };
+		AABB00000000000000000083 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000093 /* APIClient.swift */; };
+		AABB00000000000000000084 /* AuthenticationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000094 /* AuthenticationModels.swift */; };
+		AABB00000000000000000085 /* AuthenticationAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000095 /* AuthenticationAPI.swift */; };
+		AABB00000000000000000086 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000096 /* KeychainStore.swift */; };
+		AABB00000000000000000087 /* DeviceIdentityStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000097 /* DeviceIdentityStore.swift */; };
+		AABB00000000000000000088 /* AuthenticationSessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000098 /* AuthenticationSessionStore.swift */; };
 		FCECDFE02FE92C7C0067AF51 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFDF2FE92C7C0067AF51 /* WidgetKit.framework */; };
 		FCECDFE22FE92C7C0067AF51 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFE12FE92C7C0067AF51 /* SwiftUI.framework */; };
 		FCECDFEF2FE92C7D0067AF51 /* CloveryWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -90,6 +99,15 @@
 		AABB00000000000000000072 /* BoardStoreClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardStoreClient.swift; sourceTree = "<group>"; };
 		AABB00000000000000000074 /* Clovery.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Clovery.storekit; sourceTree = "<group>"; };
 		AABB00000000000000000076 /* BoardEntitlementReporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardEntitlementReporter.swift; sourceTree = "<group>"; };
+		AABB00000000000000000090 /* APIConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/Configuration/APIConfiguration.swift; sourceTree = "<group>"; };
+		AABB00000000000000000091 /* APIError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/Networking/APIError.swift; sourceTree = "<group>"; };
+		AABB00000000000000000092 /* APIRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/Networking/APIRequest.swift; sourceTree = "<group>"; };
+		AABB00000000000000000093 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/Networking/APIClient.swift; sourceTree = "<group>"; };
+		AABB00000000000000000094 /* AuthenticationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Data/AuthenticationModels.swift; sourceTree = "<group>"; };
+		AABB00000000000000000095 /* AuthenticationAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Data/AuthenticationAPI.swift; sourceTree = "<group>"; };
+		AABB00000000000000000096 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/Security/KeychainStore.swift; sourceTree = "<group>"; };
+		AABB00000000000000000097 /* DeviceIdentityStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/Security/DeviceIdentityStore.swift; sourceTree = "<group>"; };
+		AABB00000000000000000098 /* AuthenticationSessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/Security/AuthenticationSessionStore.swift; sourceTree = "<group>"; };
 		AACC00000000000000000001 /* CloveryTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CloveryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC889A182FD464C9002510AD /* Clovery.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Clovery.entitlements; sourceTree = "<group>"; };
 		FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CloveryWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -161,6 +179,15 @@
 				AABB00000000000000000008 /* ContentView.swift */,
 				AABB00000000000000000009 /* WebView.swift */,
 				AABB00000000000000000076 /* BoardEntitlementReporter.swift */,
+				AABB00000000000000000090 /* APIConfiguration.swift */,
+				AABB00000000000000000091 /* APIError.swift */,
+				AABB00000000000000000092 /* APIRequest.swift */,
+				AABB00000000000000000093 /* APIClient.swift */,
+				AABB00000000000000000094 /* AuthenticationModels.swift */,
+				AABB00000000000000000095 /* AuthenticationAPI.swift */,
+				AABB00000000000000000096 /* KeychainStore.swift */,
+				AABB00000000000000000097 /* DeviceIdentityStore.swift */,
+				AABB00000000000000000098 /* AuthenticationSessionStore.swift */,
 				AABB00000000000000000020 /* BoardStore.swift */,
 				AABB00000000000000000072 /* BoardStoreClient.swift */,
 				AABB00000000000000000074 /* Clovery.storekit */,
@@ -368,6 +395,15 @@
 				AABB0000000000000000006C /* MigrationBundleExporter.swift in Sources */,
 				AABB0000000000000000006E /* PhotoLibrarySaver.swift in Sources */,
 				AABB00000000000000000070 /* ImageExportService.swift in Sources */,
+				AABB00000000000000000080 /* APIConfiguration.swift in Sources */,
+				AABB00000000000000000081 /* APIError.swift in Sources */,
+				AABB00000000000000000082 /* APIRequest.swift in Sources */,
+				AABB00000000000000000083 /* APIClient.swift in Sources */,
+				AABB00000000000000000084 /* AuthenticationModels.swift in Sources */,
+				AABB00000000000000000085 /* AuthenticationAPI.swift in Sources */,
+				AABB00000000000000000086 /* KeychainStore.swift in Sources */,
+				AABB00000000000000000087 /* DeviceIdentityStore.swift in Sources */,
+				AABB00000000000000000088 /* AuthenticationSessionStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
