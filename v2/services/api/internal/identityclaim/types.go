@@ -7,6 +7,7 @@ import (
 	"io"
 	"log/slog"
 	"strconv"
+	"sync"
 	"time"
 )
 
@@ -25,17 +26,27 @@ type Identity struct {
 }
 
 type IssuedClaim struct {
-	rawToken  string
+	secret    *issuedClaimSecret
 	Provider  string
 	ExpiresIn time.Duration
 }
 
+type issuedClaimSecret struct {
+	mutex    sync.Mutex
+	rawToken string
+}
+
 func (claim *IssuedClaim) TakeToken() (string, bool) {
-	if claim == nil || claim.rawToken == "" {
+	if claim == nil || claim.secret == nil {
 		return "", false
 	}
-	rawToken := claim.rawToken
-	claim.rawToken = ""
+	claim.secret.mutex.Lock()
+	defer claim.secret.mutex.Unlock()
+	if claim.secret.rawToken == "" {
+		return "", false
+	}
+	rawToken := claim.secret.rawToken
+	claim.secret.rawToken = ""
 	return rawToken, true
 }
 

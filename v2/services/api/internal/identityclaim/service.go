@@ -51,7 +51,7 @@ func (service *Service) Issue(ctx context.Context, identity Identity) (IssuedCla
 		return IssuedClaim{}, fmt.Errorf("issue identity claim: %w", err)
 	}
 	return IssuedClaim{
-		rawToken:  rawToken,
+		secret:    &issuedClaimSecret{rawToken: rawToken},
 		Provider:  identity.Provider,
 		ExpiresIn: claimLifetime,
 	}, nil

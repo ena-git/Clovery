@@ -59,6 +59,116 @@ func TestIssuedClaimRedactsRawTokenFromFormattingLoggingAndJSON(t *testing.T) {
 	}
 }
 
+func TestIssuedClaimTakeTokenSucceedsOnceAcrossCopies(t *testing.T) {
+	for _, firstTarget := range []string{"original", "copy"} {
+		t.Run(firstTarget+" first", func(t *testing.T) {
+			randomBytes := bytes.Repeat([]byte{0x4b}, 32)
+			wantToken := base64.RawURLEncoding.EncodeToString(randomBytes)
+			service := newTestService(&recordingIssueRepository{}, randomBytes, time.Now())
+			issued, err := service.Issue(context.Background(), Identity{
+				Provider: "google",
+				Issuer:   "issuer",
+				Subject:  "subject",
+				IntentID: "02000000-0000-4000-8000-000000000001",
+			})
+			if err != nil {
+				t.Fatalf("Issue() error = %v", err)
+			}
+			copied := issued
+			first := &issued
+			if firstTarget == "copy" {
+				first = &copied
+			}
+
+			token, ok := first.TakeToken()
+			if !ok || token != wantToken {
+				t.Fatal("first TakeToken() did not return the issued token")
+			}
+			for _, candidate := range []*IssuedClaim{&issued, &copied, first} {
+				if token, ok := candidate.TakeToken(); ok || token != "" {
+					t.Fatal("TakeToken() revealed a copied token more than once")
+				}
+			}
+		})
+	}
+
+	var zero IssuedClaim
+	if token, ok := zero.TakeToken(); ok || token != "" {
+		t.Fatal("zero IssuedClaim revealed a token")
+	}
+	var nilClaim *IssuedClaim
+	if token, ok := nilClaim.TakeToken(); ok || token != "" {
+		t.Fatal("nil *IssuedClaim revealed a token")
+	}
+}
+
+func TestIssuedClaimTakeTokenConcurrentAcrossCopies(t *testing.T) {
+	randomBytes := bytes.Repeat([]byte{0x4c}, 32)
+	wantToken := base64.RawURLEncoding.EncodeToString(randomBytes)
+	service := newTestService(&recordingIssueRepository{}, randomBytes, time.Now())
+	issued, err := service.Issue(context.Background(), Identity{
+		Provider: "huawei",
+		Issuer:   "issuer",
+		Subject:  "subject",
+		IntentID: "03000000-0000-4000-8000-000000000001",
+	})
+	if err != nil {
+		t.Fatalf("Issue() error = %v", err)
+	}
+	copied := issued
+	type extraction struct {
+		token string
+		ok    bool
+	}
+	const attempts = 64
+	start := make(chan struct{})
+	results := make(chan extraction, attempts)
+	for attempt := 0; attempt < attempts; attempt++ {
+		switch attempt % 3 {
+		case 0:
+			go func() {
+				<-start
+				token, ok := issued.TakeToken()
+				results <- extraction{token: token, ok: ok}
+			}()
+		case 1:
+			go func() {
+				<-start
+				token, ok := copied.TakeToken()
+				results <- extraction{token: token, ok: ok}
+			}()
+		default:
+			valueCopy := issued
+			go func(claim IssuedClaim) {
+				<-start
+				token, ok := claim.TakeToken()
+				results <- extraction{token: token, ok: ok}
+			}(valueCopy)
+		}
+	}
+	close(start)
+	successes := 0
+	for range attempts {
+		result := <-results
+		if result.ok {
+			successes++
+			if result.token != wantToken {
+				t.Fatal("TakeToken() returned an unexpected token")
+			}
+		} else if result.token != "" {
+			t.Fatal("failed TakeToken() returned token data")
+		}
+	}
+	if successes != 1 {
+		t.Fatalf("successful concurrent extractions = %d, want 1", successes)
+	}
+	for _, candidate := range []*IssuedClaim{&issued, &copied} {
+		if token, ok := candidate.TakeToken(); ok || token != "" {
+			t.Fatal("TakeToken() succeeded after concurrent extraction")
+		}
+	}
+}
+
 func TestConstructorsRejectNilDependencies(t *testing.T) {
 	t.Run("service", func(t *testing.T) {
 		assertPanics(t, func() { NewService(nil) })
