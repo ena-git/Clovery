@@ -7,6 +7,10 @@ final class AppFontSelectionTests: XCTestCase {
         XCTAssertEqual(AppFontSelection.system.rawValue, "System")
         XCTAssertEqual(AppFontSelection.notoSerifSC.rawValue, "NotoSerifSC")
         XCTAssertEqual(AppFontSelection.naiChaTi.rawValue, "NaiChaTi")
+        XCTAssertEqual(AppFontSelection(storedValue: "Gaegu"), .handwriting)
+        XCTAssertEqual(AppFontSelection(storedValue: "System"), .system)
+        XCTAssertEqual(AppFontSelection(storedValue: "NotoSerifSC"), .notoSerifSC)
+        XCTAssertEqual(AppFontSelection(storedValue: "NaiChaTi"), .naiChaTi)
         XCTAssertEqual(
             AppFontSelection.allCases,
             [.handwriting, .system, .notoSerifSC, .naiChaTi]
