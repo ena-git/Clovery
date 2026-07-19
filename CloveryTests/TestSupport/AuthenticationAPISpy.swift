@@ -11,7 +11,7 @@ final class AuthenticationAPISpy: AuthenticationAPIProtocol {
         recoveryCodes: nil
     )
     var registerError: Error?
-    var loginError: Error?
+    var loginError: APIError?
     var loginDelayNanoseconds: UInt64 = 0
     private(set) var registerCallCount = 0
     private(set) var loginCallCount = 0
