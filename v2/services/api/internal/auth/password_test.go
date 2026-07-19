@@ -8,6 +8,11 @@ import (
 func TestPasswordPolicyRejectsWeakPasswordsAndAllowsSpaces(t *testing.T) {
 	for _, password := range []string{
 		"short",
+		"seven77",
+		"password",
+		"12345678",
+		"qwertyui",
+		"clovery1",
 		"password1234",
 		"123456789012",
 		"clovery12345",
@@ -21,6 +26,18 @@ func TestPasswordPolicyRejectsWeakPasswordsAndAllowsSpaces(t *testing.T) {
 
 	if err := ValidatePassword("four quiet words together"); err != nil {
 		t.Fatalf("password with spaces was rejected: %v", err)
+	}
+}
+
+func TestPasswordPolicyAcceptsEightCharacters(t *testing.T) {
+	if err := ValidatePassword("eight888"); err != nil {
+		t.Fatalf("8-character password rejected: %v", err)
+	}
+}
+
+func TestPasswordPolicyRejectsSevenCharacters(t *testing.T) {
+	if err := ValidatePassword("seven77"); !errors.Is(err, ErrWeakPassword) {
+		t.Fatalf("7-character password error = %v", err)
 	}
 }
 

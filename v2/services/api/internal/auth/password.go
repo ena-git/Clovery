@@ -32,6 +32,10 @@ type PasswordHasher struct {
 }
 
 var weakPasswords = map[string]struct{}{
+	"password":      {},
+	"12345678":      {},
+	"qwertyui":      {},
+	"clovery1":      {},
 	"123456789012": {},
 	"clovery12345": {},
 	"password1234": {},
@@ -53,7 +57,7 @@ func NewPasswordHasher() PasswordHasher {
 
 func ValidatePassword(password string) error {
 	passwordLength := utf8.RuneCountInString(password)
-	if passwordLength < 12 || passwordLength > 256 {
+	if passwordLength < 8 || passwordLength > 256 {
 		return ErrWeakPassword
 	}
 	if _, weak := weakPasswords[strings.ToLower(strings.TrimSpace(password))]; weak {
