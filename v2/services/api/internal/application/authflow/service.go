@@ -2,6 +2,7 @@ package authflow
 
 import (
 	"database/sql"
+	"fmt"
 
 	"github.com/clovery/clovery/services/api/internal/account"
 	"github.com/clovery/clovery/services/api/internal/auth"
@@ -43,6 +44,12 @@ func NewServiceWithIdentityClaims(
 	claimRepository *identityclaim.PostgresRepository,
 	claims *identityclaim.Service,
 ) (*Service, error) {
+	if claimRepository == nil {
+		return nil, fmt.Errorf("authflow: nil identity claim repository")
+	}
+	if claims == nil {
+		return nil, fmt.Errorf("authflow: nil identity claim service")
+	}
 	loginService, err := auth.NewLoginService(database)
 	if err != nil {
 		return nil, err

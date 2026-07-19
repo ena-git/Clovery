@@ -1,8 +1,10 @@
 package authflow
 
 import (
+	"bytes"
 	"context"
 	"database/sql"
+	"encoding/base64"
 	"fmt"
 	"net/url"
 	"os"
@@ -88,6 +90,28 @@ func TestBackendAuthFlowWorksWithoutFrontend(t *testing.T) {
 		},
 	}); err != nil {
 		t.Fatalf("login with reset password: %v", err)
+	}
+}
+
+func TestRegisterCommandRedactsClaimTokenFromNestedValuesAndPointers(t *testing.T) {
+	rawToken := base64.RawURLEncoding.EncodeToString(bytes.Repeat([]byte{0x72}, 32))
+	token, err := identityclaim.ParseRegistrationToken(rawToken)
+	if err != nil {
+		t.Fatalf("parse registration token: %v", err)
+	}
+	command := RegisterCommand{IdentityClaimToken: &token}
+	assertAuthFlowClaimTokenRedacted(t, rawToken, command, &command)
+}
+
+func assertAuthFlowClaimTokenRedacted(t *testing.T, rawToken string, values ...any) {
+	t.Helper()
+	for _, value := range values {
+		for _, format := range []string{"%v", "%+v", "%#v", "%q"} {
+			formatted := fmt.Sprintf(format, value)
+			if strings.Contains(formatted, rawToken) || !strings.Contains(formatted, "<redacted>") {
+				t.Fatalf("format %s for %T was not redacted: %q", format, value, formatted)
+			}
+		}
 	}
 }
 
@@ -209,7 +233,7 @@ func openAuthFlowDatabase(t *testing.T) *sql.DB {
 	return databaseHandle
 }
 
-func issueAuthFlowClaim(t *testing.T, databaseHandle *sql.DB, claims *identityclaim.Service) string {
+func issueAuthFlowClaim(t *testing.T, databaseHandle *sql.DB, claims *identityclaim.Service) identityclaim.RegistrationToken {
 	t.Helper()
 	intentID := uuid.NewString()
 	now := time.Now().UTC()
@@ -229,5 +253,9 @@ func issueAuthFlowClaim(t *testing.T, databaseHandle *sql.DB, claims *identitycl
 	if !ok {
 		t.Fatal("auth flow claim did not reveal token")
 	}
-	return rawToken
+	token, err := identityclaim.ParseRegistrationToken(rawToken)
+	if err != nil {
+		t.Fatalf("parse auth flow registration token: %v", err)
+	}
+	return token
 }

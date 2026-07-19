@@ -17,7 +17,7 @@ import (
 	"time"
 )
 
-var _ func(*PostgresRepository, context.Context, *sql.Tx, string) (*LockedClaim, error) = (*PostgresRepository).LockForRegistration
+var _ func(*PostgresRepository, context.Context, *sql.Tx, RegistrationToken) (*LockedClaim, error) = (*PostgresRepository).LockForRegistration
 
 func TestIssuedClaimRedactsRawTokenFromFormattingLoggingAndJSON(t *testing.T) {
 	randomBytes := bytes.Repeat([]byte{0x4a}, 32)
@@ -571,16 +571,14 @@ func TestLockForRegistrationRejectsInvalidInputsBeforeQuery(t *testing.T) {
 	tests := []struct {
 		name        string
 		transaction *sql.Tx
-		rawToken    string
+		token       RegistrationToken
 	}{
-		{name: "nil transaction", transaction: nil, rawToken: validToken},
-		{name: "empty token", transaction: &sql.Tx{}, rawToken: ""},
-		{name: "padded token", transaction: &sql.Tx{}, rawToken: validToken + "="},
-		{name: "short token", transaction: &sql.Tx{}, rawToken: base64.RawURLEncoding.EncodeToString(make([]byte, 31))},
+		{name: "nil transaction", transaction: nil, token: mustParseRegistrationToken(t, validToken)},
+		{name: "zero token", transaction: &sql.Tx{}},
 	}
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
-			_, err := repository.LockForRegistration(context.Background(), test.transaction, test.rawToken)
+			_, err := repository.LockForRegistration(context.Background(), test.transaction, test.token)
 			if !errors.Is(err, ErrInvalidClaim) {
 				t.Fatalf("LockForRegistration() error = %v, want ErrInvalidClaim", err)
 			}

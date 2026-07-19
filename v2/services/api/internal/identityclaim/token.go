@@ -25,9 +25,7 @@ func tokenSHA256(rawToken string) string {
 }
 
 func parseTokenDigest(rawToken string) (string, error) {
-	decoded, err := base64.RawURLEncoding.DecodeString(rawToken)
-	if err != nil || len(decoded) != tokenByteLength ||
-		base64.RawURLEncoding.EncodeToString(decoded) != rawToken {
+	if !canonicalRegistrationToken(rawToken) {
 		return "", ErrInvalidClaim
 	}
 	return tokenSHA256(rawToken), nil

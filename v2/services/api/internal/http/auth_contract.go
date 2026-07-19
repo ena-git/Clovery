@@ -1,6 +1,10 @@
 package httpapi
 
-import "context"
+import (
+	"context"
+
+	"github.com/clovery/clovery/services/api/internal/identityclaim"
+)
 
 type AuthApplication interface {
 	Register(context.Context, CreateAccountCommand) (AuthSession, error)
@@ -12,13 +16,13 @@ type AuthApplication interface {
 }
 
 type CreateAccountCommand struct {
-	LoginID               string        `json:"login_id"`
-	Password              string        `json:"password"`
-	RecoveryMethod        string        `json:"recovery_method"`
-	IdentityClaimToken    *string       `json:"identity_claim_token"`
-	RegistrationRequestID *string       `json:"registration_request_id"`
-	SourceKind            *string       `json:"source_kind"`
-	Device                DeviceCommand `json:"device"`
+	LoginID               string                           `json:"login_id"`
+	Password              string                           `json:"password"`
+	RecoveryMethod        string                           `json:"recovery_method"`
+	IdentityClaimToken    *identityclaim.RegistrationToken `json:"identity_claim_token"`
+	RegistrationRequestID *string                          `json:"registration_request_id"`
+	SourceKind            *string                          `json:"source_kind"`
+	Device                DeviceCommand                    `json:"device"`
 }
 
 type DeviceCommand struct {

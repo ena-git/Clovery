@@ -67,7 +67,7 @@ func (service *Service) Register(ctx context.Context, command RegisterCommand) (
 func (service *Service) registerClaimedAccount(ctx context.Context, command RegisterCommand) (SessionResult, error) {
 	if command.RecoveryMethod != "bound_identity" || command.IdentityClaimToken == nil ||
 		command.RegistrationRequestID == nil || command.SourceKind == nil ||
-		*command.IdentityClaimToken == "" || !validSourceKind(*command.SourceKind) {
+		!command.IdentityClaimToken.Valid() || !validSourceKind(*command.SourceKind) {
 		return SessionResult{}, ErrInvalidAuthRequest
 	}
 	requestUUID, err := uuid.Parse(*command.RegistrationRequestID)

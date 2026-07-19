@@ -46,12 +46,12 @@ func (repository *PostgresRepository) Issue(ctx context.Context, claim StoredCla
 func (repository *PostgresRepository) LockForRegistration(
 	ctx context.Context,
 	transaction *sql.Tx,
-	rawToken string,
+	token RegistrationToken,
 ) (*LockedClaim, error) {
 	if transaction == nil {
 		return nil, ErrInvalidClaim
 	}
-	digest, err := parseTokenDigest(rawToken)
+	digest, err := token.digest()
 	if err != nil {
 		return nil, err
 	}

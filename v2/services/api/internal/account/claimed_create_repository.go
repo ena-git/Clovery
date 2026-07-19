@@ -12,7 +12,7 @@ type CreateClaimedAccountParams struct {
 	VaultID               string
 	LoginID               string
 	PasswordHash          string
-	IdentityClaimToken    string
+	IdentityClaimToken    identityclaim.RegistrationToken
 	RegistrationRequestID string
 	SourceKind            string
 }
@@ -28,6 +28,12 @@ func (repository *Repository) CreateClaimedAccount(
 	claimRepository *identityclaim.PostgresRepository,
 	claims *identityclaim.Service,
 ) (CreateClaimedAccountResult, error) {
+	if claimRepository == nil {
+		return CreateClaimedAccountResult{}, fmt.Errorf("account: nil identity claim repository")
+	}
+	if claims == nil {
+		return CreateClaimedAccountResult{}, fmt.Errorf("account: nil identity claim service")
+	}
 	normalizedID, err := NormalizeLoginID(params.LoginID)
 	if err != nil {
 		return CreateClaimedAccountResult{}, err

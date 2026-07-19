@@ -111,7 +111,7 @@ func TestPostgresIdentityClaims(t *testing.T) {
 		}
 		defer func() { _ = transaction.Rollback() }()
 
-		_, err = repository.LockForRegistration(context.Background(), transaction, rawToken)
+		_, err = repository.LockForRegistration(context.Background(), transaction, mustParseRegistrationToken(t, rawToken))
 		if !errors.Is(err, ErrInvalidClaim) {
 			t.Fatalf("LockForRegistration() error = %v, want ErrInvalidClaim", err)
 		}
@@ -154,7 +154,7 @@ func TestPostgresIdentityClaims(t *testing.T) {
 			t.Fatalf("begin capability transaction: %v", err)
 		}
 		defer func() { _ = firstTransaction.Rollback() }()
-		locked, err := repository.LockForRegistration(ctx, firstTransaction, rawToken)
+		locked, err := repository.LockForRegistration(ctx, firstTransaction, mustParseRegistrationToken(t, rawToken))
 		if err != nil {
 			t.Fatalf("lock capability claim: %v", err)
 		}
@@ -323,7 +323,8 @@ func exerciseConcurrentClaim(
 		t.Fatalf("begin first transaction: %v", err)
 	}
 	defer func() { _ = firstTransaction.Rollback() }()
-	firstLocked, err := repository.LockForRegistration(ctx, firstTransaction, rawToken)
+	registrationToken := mustParseRegistrationToken(t, rawToken)
+	firstLocked, err := repository.LockForRegistration(ctx, firstTransaction, registrationToken)
 	if err != nil {
 		t.Fatalf("lock claim in first transaction: %v", err)
 	}
@@ -351,7 +352,7 @@ func exerciseConcurrentClaim(
 	defer func() { _ = observerConnection.Close() }()
 	lockResult := make(chan lockedClaimResult, 1)
 	go func() {
-		claim, lockErr := repository.LockForRegistration(ctx, secondTransaction, rawToken)
+		claim, lockErr := repository.LockForRegistration(ctx, secondTransaction, registrationToken)
 		lockResult <- lockedClaimResult{claim: claim, err: lockErr}
 	}()
 	waitForBackendLock(t, observerConnection, secondBackendPID, 4*time.Second)
