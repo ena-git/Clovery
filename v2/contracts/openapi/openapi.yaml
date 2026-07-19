@@ -969,14 +969,21 @@ components:
     IdentityProvider:
       type: string
       enum: [apple, google, huawei, wechat, qq]
+    IdentityClaimProvider:
+      type: string
+      enum: [apple, google, huawei]
     CloveryLoginId:
       type: string
       pattern: "^[a-z][a-z0-9_]{3,23}$"
       description: User-selected, normalized Clovery login ID.
     CreateAccountRequest:
+      description: For claim registration, identity_claim_token and registration_request_id must be supplied together, and recovery_method must be bound_identity.
+      oneOf:
+        - $ref: "#/components/schemas/PlainCreateAccountRequest"
+        - $ref: "#/components/schemas/ClaimCreateAccountRequest"
+    PlainCreateAccountRequest:
       type: object
       additionalProperties: false
-      description: For claim registration, identity_claim_token and registration_request_id must be supplied together, and recovery_method must be bound_identity.
       required: [login_id, password, recovery_method, device]
       properties:
         login_id:
@@ -988,7 +995,25 @@ components:
           writeOnly: true
         recovery_method:
           type: string
-          enum: [passkey, recovery_email, recovery_codes, bound_identity]
+          enum: [passkey, recovery_email, recovery_codes]
+        device:
+          $ref: "#/components/schemas/DeviceRegistration"
+    ClaimCreateAccountRequest:
+      type: object
+      additionalProperties: false
+      required:
+        [login_id, password, recovery_method, identity_claim_token, registration_request_id, source_kind, device]
+      properties:
+        login_id:
+          $ref: "#/components/schemas/CloveryLoginId"
+        password:
+          type: string
+          minLength: 8
+          maxLength: 256
+          writeOnly: true
+        recovery_method:
+          type: string
+          const: bound_identity
         identity_claim_token:
           type: string
           writeOnly: true
@@ -1061,7 +1086,7 @@ components:
           type: string
           const: identity_claim_required
         provider:
-          $ref: "#/components/schemas/IdentityProvider"
+          $ref: "#/components/schemas/IdentityClaimProvider"
         identity_claim_token:
           type: string
         expires_in:
