@@ -38,6 +38,11 @@
 		AABB00000000000000000086 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000096 /* KeychainStore.swift */; };
 		AABB00000000000000000087 /* DeviceIdentityStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000097 /* DeviceIdentityStore.swift */; };
 		AABB00000000000000000088 /* AuthenticationSessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000098 /* AuthenticationSessionStore.swift */; };
+		AABB00000000000000000089 /* AuthenticationValidation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000099 /* AuthenticationValidation.swift */; };
+		AABB0000000000000000008A /* AuthenticationState.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000009A /* AuthenticationState.swift */; };
+		AABB0000000000000000008B /* ApplicationSessionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000009B /* ApplicationSessionController.swift */; };
+		AABB0000000000000000008C /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000009C /* LoginViewModel.swift */; };
+		AABB0000000000000000008D /* SignUpViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000009D /* SignUpViewModel.swift */; };
 		FCECDFE02FE92C7C0067AF51 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFDF2FE92C7C0067AF51 /* WidgetKit.framework */; };
 		FCECDFE22FE92C7C0067AF51 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFE12FE92C7C0067AF51 /* SwiftUI.framework */; };
 		FCECDFEF2FE92C7D0067AF51 /* CloveryWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -108,6 +113,11 @@
 		AABB00000000000000000096 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/Security/KeychainStore.swift; sourceTree = "<group>"; };
 		AABB00000000000000000097 /* DeviceIdentityStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/Security/DeviceIdentityStore.swift; sourceTree = "<group>"; };
 		AABB00000000000000000098 /* AuthenticationSessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/Security/AuthenticationSessionStore.swift; sourceTree = "<group>"; };
+		AABB00000000000000000099 /* AuthenticationValidation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Domain/AuthenticationValidation.swift; sourceTree = "<group>"; };
+		AABB0000000000000000009A /* AuthenticationState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Domain/AuthenticationState.swift; sourceTree = "<group>"; };
+		AABB0000000000000000009B /* ApplicationSessionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/ApplicationSessionController.swift; sourceTree = "<group>"; };
+		AABB0000000000000000009C /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/LoginViewModel.swift; sourceTree = "<group>"; };
+		AABB0000000000000000009D /* SignUpViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/SignUpViewModel.swift; sourceTree = "<group>"; };
 		AACC00000000000000000001 /* CloveryTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CloveryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC889A182FD464C9002510AD /* Clovery.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Clovery.entitlements; sourceTree = "<group>"; };
 		FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CloveryWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -188,6 +198,11 @@
 				AABB00000000000000000096 /* KeychainStore.swift */,
 				AABB00000000000000000097 /* DeviceIdentityStore.swift */,
 				AABB00000000000000000098 /* AuthenticationSessionStore.swift */,
+				AABB00000000000000000099 /* AuthenticationValidation.swift */,
+				AABB0000000000000000009A /* AuthenticationState.swift */,
+				AABB0000000000000000009B /* ApplicationSessionController.swift */,
+				AABB0000000000000000009C /* LoginViewModel.swift */,
+				AABB0000000000000000009D /* SignUpViewModel.swift */,
 				AABB00000000000000000020 /* BoardStore.swift */,
 				AABB00000000000000000072 /* BoardStoreClient.swift */,
 				AABB00000000000000000074 /* Clovery.storekit */,
@@ -404,6 +419,11 @@
 				AABB00000000000000000086 /* KeychainStore.swift in Sources */,
 				AABB00000000000000000087 /* DeviceIdentityStore.swift in Sources */,
 				AABB00000000000000000088 /* AuthenticationSessionStore.swift in Sources */,
+				AABB00000000000000000089 /* AuthenticationValidation.swift in Sources */,
+				AABB0000000000000000008A /* AuthenticationState.swift in Sources */,
+				AABB0000000000000000008B /* ApplicationSessionController.swift in Sources */,
+				AABB0000000000000000008C /* LoginViewModel.swift in Sources */,
+				AABB0000000000000000008D /* SignUpViewModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
