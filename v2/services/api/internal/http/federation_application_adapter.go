@@ -11,7 +11,7 @@ type federatedFlowApplication interface {
 	CompleteFederatedLogin(
 		ctx context.Context,
 		command identityflow.FederatedLoginCommand,
-	) (identityflow.SessionResult, error)
+	) (identityflow.FederatedCompletion, error)
 	StartBinding(ctx context.Context, accessToken string, provider string) (identityflow.FederationIntent, error)
 	CompleteBinding(ctx context.Context, command identityflow.FederatedBindingCommand) error
 	Unbind(ctx context.Context, accessToken string, provider string) error
@@ -44,15 +44,34 @@ func (adapter *federatedApplicationAdapter) StartFederatedLogin(
 func (adapter *federatedApplicationAdapter) CompleteFederatedLogin(
 	ctx context.Context,
 	command FederatedLoginHTTPCommand,
-) (AuthSession, error) {
-	session, err := adapter.flow.CompleteFederatedLogin(ctx, identityflow.FederatedLoginCommand{
+) (FederatedHTTPCompletion, error) {
+	completion, err := adapter.flow.CompleteFederatedLogin(ctx, identityflow.FederatedLoginCommand{
 		IntentID:          command.IntentID,
 		Provider:          command.Provider,
 		AuthorizationCode: command.AuthorizationCode,
 		Nonce:             command.Nonce,
 		Device:            identityflowDevice(command.Device),
 	})
-	return authSessionFromIdentityFlow(session), err
+	if err != nil {
+		return FederatedHTTPCompletion{}, err
+	}
+	if (completion.Session == nil) == (completion.Claim == nil) {
+		return FederatedHTTPCompletion{}, errInvalidFederatedCompletion
+	}
+	if completion.Session != nil {
+		session := authSessionFromIdentityFlow(*completion.Session)
+		return FederatedHTTPCompletion{Session: &session}, nil
+	}
+	issued := &completion.Claim.Issued
+	rawToken, ok := issued.TakeToken()
+	if !ok || rawToken == "" {
+		return FederatedHTTPCompletion{}, errIdentityClaimTokenUnavailable
+	}
+	return FederatedHTTPCompletion{Claim: &IdentityClaimHTTPResult{
+		Provider:           issued.Provider,
+		IdentityClaimToken: rawToken,
+		ExpiresIn:          int(issued.ExpiresIn.Seconds()),
+	}}, nil
 }
 
 func (adapter *federatedApplicationAdapter) StartBinding(

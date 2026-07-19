@@ -10,6 +10,7 @@ import (
 	"github.com/clovery/clovery/services/api/internal/auth"
 	"github.com/clovery/clovery/services/api/internal/config"
 	httpapi "github.com/clovery/clovery/services/api/internal/http"
+	"github.com/clovery/clovery/services/api/internal/identityclaim"
 	"github.com/clovery/clovery/services/api/internal/observability"
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
@@ -35,11 +36,13 @@ func buildHandler(databaseHandle *sql.DB, applicationConfig config.Config) (http
 		return nil, err
 	}
 	sessions := auth.NewSessionService(databaseHandle, signer)
+	claimRepository := identityclaim.NewPostgresRepository(databaseHandle)
+	claims := identityclaim.NewService(claimRepository)
 	authService, err := authflow.NewServiceWithSessions(databaseHandle, sessions)
 	if err != nil {
 		return nil, err
 	}
-	federation, passkeys, err := buildIdentityApplications(databaseHandle, sessions, applicationConfig)
+	federation, passkeys, err := buildIdentityApplications(databaseHandle, sessions, claims, applicationConfig)
 	if err != nil {
 		return nil, err
 	}

@@ -2,7 +2,13 @@ package httpapi
 
 import (
 	"context"
+	"errors"
 	"time"
+)
+
+var (
+	errInvalidFederatedCompletion    = errors.New("invalid federated completion")
+	errIdentityClaimTokenUnavailable = errors.New("identity claim token unavailable")
 )
 
 type FederationIntent struct {
@@ -28,9 +34,20 @@ type FederatedBindingHTTPCommand struct {
 	Nonce             string
 }
 
+type IdentityClaimHTTPResult struct {
+	Provider           string
+	IdentityClaimToken string
+	ExpiresIn          int
+}
+
+type FederatedHTTPCompletion struct {
+	Session *AuthSession
+	Claim   *IdentityClaimHTTPResult
+}
+
 type FederatedHTTPApplication interface {
 	StartFederatedLogin(ctx context.Context, provider string) (FederationIntent, error)
-	CompleteFederatedLogin(ctx context.Context, command FederatedLoginHTTPCommand) (AuthSession, error)
+	CompleteFederatedLogin(ctx context.Context, command FederatedLoginHTTPCommand) (FederatedHTTPCompletion, error)
 	StartBinding(ctx context.Context, accessToken string, provider string) (FederationIntent, error)
 	CompleteBinding(ctx context.Context, command FederatedBindingHTTPCommand) error
 	Unbind(ctx context.Context, accessToken string, provider string) error
@@ -59,4 +76,11 @@ type federationIntentResponse struct {
 	Provider  string `json:"provider"`
 	Nonce     string `json:"nonce"`
 	ExpiresIn int    `json:"expires_in"`
+}
+
+type identityClaimRequiredResponse struct {
+	Status             string `json:"status"`
+	Provider           string `json:"provider"`
+	IdentityClaimToken string `json:"identity_claim_token"`
+	ExpiresIn          int    `json:"expires_in"`
 }

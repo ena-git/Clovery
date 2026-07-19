@@ -83,7 +83,7 @@ func (handler federationHandler) completeFederatedLogin(
 		writeAPIError(responseWriter, http.StatusBadRequest, "invalid_request", "The request is invalid.")
 		return
 	}
-	session, err := handler.application.CompleteFederatedLogin(
+	completion, err := handler.application.CompleteFederatedLogin(
 		request.Context(),
 		FederatedLoginHTTPCommand{
 			IntentID:          payload.IntentID,
@@ -97,7 +97,24 @@ func (handler federationHandler) completeFederatedLogin(
 		writeAuthError(responseWriter, err)
 		return
 	}
-	writeJSON(responseWriter, http.StatusOK, session)
+	if (completion.Session == nil) == (completion.Claim == nil) {
+		writeAuthError(responseWriter, errInvalidFederatedCompletion)
+		return
+	}
+	if completion.Claim != nil {
+		if completion.Claim.IdentityClaimToken == "" {
+			writeAuthError(responseWriter, errIdentityClaimTokenUnavailable)
+			return
+		}
+		writeJSON(responseWriter, http.StatusAccepted, identityClaimRequiredResponse{
+			Status:             "identity_claim_required",
+			Provider:           completion.Claim.Provider,
+			IdentityClaimToken: completion.Claim.IdentityClaimToken,
+			ExpiresIn:          completion.Claim.ExpiresIn,
+		})
+		return
+	}
+	writeJSON(responseWriter, http.StatusOK, *completion.Session)
 }
 
 func (handler federationHandler) startFederatedLogin(

@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"net/http"
@@ -12,8 +13,10 @@ import (
 	"testing"
 
 	"github.com/DATA-DOG/go-sqlmock"
+	"github.com/clovery/clovery/services/api/internal/auth"
 	"github.com/clovery/clovery/services/api/internal/config"
 	"github.com/clovery/clovery/services/api/internal/database"
+	"github.com/clovery/clovery/services/api/internal/identityclaim"
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
@@ -41,6 +44,29 @@ func TestBuildHandlerRegistersIdentityRoutesWithoutProviderCredentials(t *testin
 	handler.ServeHTTP(passkeyResponse, passkeyRequest)
 	if passkeyResponse.Code != http.StatusMethodNotAllowed {
 		t.Fatalf("passkey route status = %d, want %d", passkeyResponse.Code, http.StatusMethodNotAllowed)
+	}
+}
+
+func TestBuildIdentityApplicationsAcceptsSharedClaimIssuer(t *testing.T) {
+	databaseHandle, _, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("create mock database: %v", err)
+	}
+	t.Cleanup(func() { _ = databaseHandle.Close() })
+	applicationConfig := identityTestConfig()
+	signer, err := auth.NewAccessTokenSigner(applicationConfig.JWTIssuer, []byte(applicationConfig.JWTSigningKey))
+	if err != nil {
+		t.Fatalf("create access token signer: %v", err)
+	}
+	sessions := auth.NewSessionService(databaseHandle, signer)
+	claims := &bootstrapClaimIssuer{}
+
+	federation, passkeys, err := buildIdentityApplications(databaseHandle, sessions, claims, applicationConfig)
+	if err != nil {
+		t.Fatalf("build identity applications: %v", err)
+	}
+	if federation == nil || passkeys == nil {
+		t.Fatalf("identity applications = %#v, %#v", federation, passkeys)
 	}
 }
 
@@ -148,4 +174,13 @@ func TestBuildHandlerServesRegistrationWithoutFrontend(t *testing.T) {
 	if response.Code != http.StatusCreated || !strings.Contains(response.Body.String(), `"recovery_codes"`) {
 		t.Fatalf("status = %d, body = %s", response.Code, response.Body.String())
 	}
+}
+
+type bootstrapClaimIssuer struct{}
+
+func (*bootstrapClaimIssuer) Issue(
+	context.Context,
+	identityclaim.Identity,
+) (identityclaim.IssuedClaim, error) {
+	return identityclaim.IssuedClaim{}, nil
 }

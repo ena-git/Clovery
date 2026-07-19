@@ -3,6 +3,8 @@ package identityflow
 import (
 	"encoding/json"
 	"time"
+
+	"github.com/clovery/clovery/services/api/internal/identityclaim"
 )
 
 type Device struct {
@@ -52,6 +54,15 @@ type SessionResult struct {
 	AccessToken          string
 	AccessTokenExpiresIn int
 	RefreshToken         string
+}
+
+type IdentityClaimResult struct {
+	Issued identityclaim.IssuedClaim
+}
+
+type FederatedCompletion struct {
+	Session *SessionResult
+	Claim   *IdentityClaimResult
 }
 
 type FederationIntent struct {

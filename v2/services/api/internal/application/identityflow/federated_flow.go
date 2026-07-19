@@ -5,11 +5,12 @@ import (
 	"fmt"
 
 	"github.com/clovery/clovery/services/api/internal/auth"
+	"github.com/clovery/clovery/services/api/internal/identityclaim"
 )
 
 type federatedLoginCompleter interface {
 	StartLogin(ctx context.Context, providerName string) (auth.FederatedLoginIntent, error)
-	CompleteLogin(ctx context.Context, command auth.FederatedLoginCommand) (auth.FederatedAccount, error)
+	CompleteLogin(ctx context.Context, command auth.FederatedLoginCommand) (auth.FederatedLoginResolution, error)
 	StartBinding(ctx context.Context, accessToken string, providerName string) (auth.BindingIntent, error)
 	CompleteBinding(ctx context.Context, command auth.FederatedBindingCommand) error
 	UnbindIdentity(ctx context.Context, command auth.FederatedUnbindingCommand) error
@@ -76,45 +77,64 @@ type sessionIssuer interface {
 	Create(ctx context.Context, params auth.SessionCreateParams) (auth.SessionTokens, error)
 }
 
+type IdentityClaimIssuer interface {
+	Issue(context.Context, identityclaim.Identity) (identityclaim.IssuedClaim, error)
+}
+
 type FederatedFlow struct {
 	federation federatedLoginCompleter
 	sessions   sessionIssuer
+	claims     IdentityClaimIssuer
 }
 
 func NewFederatedFlow(
 	federation federatedLoginCompleter,
 	sessions sessionIssuer,
+	claims IdentityClaimIssuer,
 ) (*FederatedFlow, error) {
-	if federation == nil || sessions == nil {
+	if federation == nil || sessions == nil || claims == nil {
 		return nil, fmt.Errorf("federated flow dependencies are required")
 	}
-	return &FederatedFlow{federation: federation, sessions: sessions}, nil
+	return &FederatedFlow{federation: federation, sessions: sessions, claims: claims}, nil
 }
 
 func (flow *FederatedFlow) CompleteFederatedLogin(
 	ctx context.Context,
 	command FederatedLoginCommand,
-) (SessionResult, error) {
-	account, err := flow.federation.CompleteLogin(ctx, auth.FederatedLoginCommand{
+) (FederatedCompletion, error) {
+	resolution, err := flow.federation.CompleteLogin(ctx, auth.FederatedLoginCommand{
 		IntentID:          command.IntentID,
 		Provider:          command.Provider,
 		AuthorizationCode: command.AuthorizationCode,
 		Nonce:             command.Nonce,
 	})
 	if err != nil {
-		return SessionResult{}, err
+		return FederatedCompletion{}, err
+	}
+	if resolution.Account == nil {
+		issued, err := flow.claims.Issue(ctx, identityclaim.Identity{
+			Provider: resolution.Identity.Provider,
+			Issuer:   resolution.Identity.Issuer,
+			Subject:  resolution.Identity.Subject,
+			IntentID: command.IntentID,
+		})
+		if err != nil {
+			return FederatedCompletion{}, err
+		}
+		return FederatedCompletion{Claim: &IdentityClaimResult{Issued: issued}}, nil
 	}
 	tokens, err := flow.sessions.Create(ctx, auth.SessionCreateParams{
-		AccountID:   account.AccountID,
-		VaultID:     account.VaultID,
+		AccountID:   resolution.Account.AccountID,
+		VaultID:     resolution.Account.VaultID,
 		DeviceID:    command.Device.ID,
 		Platform:    command.Device.Platform,
 		DisplayName: command.Device.DisplayName,
 	})
 	if err != nil {
-		return SessionResult{}, err
+		return FederatedCompletion{}, err
 	}
-	return sessionResult(tokens), nil
+	session := sessionResult(tokens)
+	return FederatedCompletion{Session: &session}, nil
 }
 
 func sessionResult(tokens auth.SessionTokens) SessionResult {

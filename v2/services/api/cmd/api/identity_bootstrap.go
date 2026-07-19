@@ -13,6 +13,7 @@ import (
 func buildIdentityApplications(
 	databaseHandle *sql.DB,
 	sessions *auth.SessionService,
+	claims identityflow.IdentityClaimIssuer,
 	applicationConfig config.Config,
 ) (httpapi.FederatedHTTPApplication, httpapi.PasskeyHTTPApplication, error) {
 	providers, err := buildOIDCProviders(context.Background(), applicationConfig)
@@ -27,7 +28,7 @@ func buildIdentityApplications(
 	if err != nil {
 		return nil, nil, err
 	}
-	federatedFlow, err := identityflow.NewFederatedFlow(federation, sessions)
+	federatedFlow, err := identityflow.NewFederatedFlow(federation, sessions, claims)
 	if err != nil {
 		return nil, nil, err
 	}
