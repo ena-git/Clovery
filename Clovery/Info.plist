@@ -27,6 +27,10 @@
 		<string>fonts/Gaegu-Regular.ttf</string>
 		<string>fonts/Gaegu-Light.ttf</string>
 		<string>fonts/Gaegu-Bold.ttf</string>
+		<string>fonts/Yomogi-Regular.ttf</string>
+		<string>fonts/YueLiangHai-ZiYouShu-2.ttf</string>
+		<string>fonts/NotoSerifSC-VariableFont_wght.ttf</string>
+		<string>fonts/NaiChaTi-2.ttf</string>
 	</array>
 	<key>UIBackgroundModes</key>
 	<array>
