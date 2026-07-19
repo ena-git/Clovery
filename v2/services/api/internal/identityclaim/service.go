@@ -20,6 +20,9 @@ type Service struct {
 }
 
 func NewService(repository IssueRepository) *Service {
+	if repository == nil {
+		panic("identityclaim: nil issue repository")
+	}
 	return &Service{
 		repository:   repository,
 		randomSource: rand.Reader,
@@ -48,7 +51,7 @@ func (service *Service) Issue(ctx context.Context, identity Identity) (IssuedCla
 		return IssuedClaim{}, fmt.Errorf("issue identity claim: %w", err)
 	}
 	return IssuedClaim{
-		Token:     rawToken,
+		rawToken:  rawToken,
 		Provider:  identity.Provider,
 		ExpiresIn: claimLifetime,
 	}, nil
@@ -58,7 +61,8 @@ func (service *Service) ResolveForRegistration(
 	claim *LockedClaim,
 	registrationRequestID string,
 ) (RegistrationResolution, error) {
-	if claim == nil || claim.ID == "" || claim.ExpiresAt.IsZero() {
+	if !canonicalUUID(registrationRequestID) || claim == nil ||
+		!canonicalUUID(claim.id) || claim.transaction == nil || claim.ExpiresAt.IsZero() {
 		return RegistrationResolution{}, ErrInvalidClaim
 	}
 	if claim.ConsumedAt == nil {
@@ -68,7 +72,14 @@ func (service *Service) ResolveForRegistration(
 		if !claim.ExpiresAt.After(service.now()) {
 			return RegistrationResolution{}, ErrExpiredClaim
 		}
-		return RegistrationResolution{Identity: claim.Identity}, nil
+		return RegistrationResolution{
+			Identity: claim.Identity,
+			PendingConsumption: &PendingConsumption{
+				claimID:               claim.id,
+				transaction:           claim.transaction,
+				registrationRequestID: registrationRequestID,
+			},
+		}, nil
 	}
 	if claim.ConsumedByAccountID == nil || *claim.ConsumedByAccountID == "" ||
 		claim.RegistrationRequestID == nil || *claim.RegistrationRequestID == "" ||
@@ -88,7 +99,7 @@ func (service *Service) ResolveForRegistration(
 }
 
 func validIdentity(identity Identity) bool {
-	if identity.Issuer == "" || identity.Subject == "" || identity.IntentID == "" {
+	if identity.Issuer == "" || identity.Subject == "" || !canonicalUUID(identity.IntentID) {
 		return false
 	}
 	switch identity.Provider {
@@ -97,4 +108,9 @@ func validIdentity(identity Identity) bool {
 	default:
 		return false
 	}
+}
+
+func canonicalUUID(value string) bool {
+	parsed, err := uuid.Parse(value)
+	return err == nil && parsed != uuid.Nil && parsed.String() == value
 }

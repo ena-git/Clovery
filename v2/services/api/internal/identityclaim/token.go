@@ -23,3 +23,12 @@ func tokenSHA256(rawToken string) string {
 	digest := sha256.Sum256([]byte(rawToken))
 	return hex.EncodeToString(digest[:])
 }
+
+func parseTokenDigest(rawToken string) (string, error) {
+	decoded, err := base64.RawURLEncoding.DecodeString(rawToken)
+	if err != nil || len(decoded) != tokenByteLength ||
+		base64.RawURLEncoding.EncodeToString(decoded) != rawToken {
+		return "", ErrInvalidClaim
+	}
+	return tokenSHA256(rawToken), nil
+}

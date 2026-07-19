@@ -12,16 +12,14 @@ type IssueRepository interface {
 	Issue(ctx context.Context, claim StoredClaim) error
 }
 
-type RegistrationTransaction interface {
-	QueryRowContext(ctx context.Context, query string, arguments ...any) *sql.Row
-	ExecContext(ctx context.Context, query string, arguments ...any) (sql.Result, error)
-}
-
 type PostgresRepository struct {
 	database *sql.DB
 }
 
 func NewPostgresRepository(database *sql.DB) *PostgresRepository {
+	if database == nil {
+		panic("identityclaim: nil PostgreSQL database")
+	}
 	return &PostgresRepository{database: database}
 }
 
@@ -48,14 +46,21 @@ func (repository *PostgresRepository) Issue(ctx context.Context, claim StoredCla
 
 func (repository *PostgresRepository) LockForRegistration(
 	ctx context.Context,
-	transaction RegistrationTransaction,
+	transaction *sql.Tx,
 	rawToken string,
 ) (*LockedClaim, error) {
+	if transaction == nil {
+		return nil, ErrInvalidClaim
+	}
+	digest, err := parseTokenDigest(rawToken)
+	if err != nil {
+		return nil, err
+	}
 	var claim LockedClaim
 	var consumedAt sql.NullTime
 	var consumedByAccountID sql.NullString
 	var registrationRequestID sql.NullString
-	err := transaction.QueryRowContext(
+	err = transaction.QueryRowContext(
 		ctx,
 		`SELECT claim.id::text,
 		        claim.provider,
@@ -69,9 +74,9 @@ func (repository *PostgresRepository) LockForRegistration(
 		 FROM identity_claims AS claim
 		 WHERE claim.token_sha256 = $1
 		 FOR UPDATE OF claim`,
-		tokenSHA256(rawToken),
+		digest,
 	).Scan(
-		&claim.ID,
+		&claim.id,
 		&claim.Identity.Provider,
 		&claim.Identity.Issuer,
 		&claim.Identity.Subject,
@@ -87,6 +92,7 @@ func (repository *PostgresRepository) LockForRegistration(
 	if err != nil {
 		return nil, fmt.Errorf("lock identity claim: %w", err)
 	}
+	claim.transaction = transaction
 	if consumedAt.Valid {
 		claim.ConsumedAt = &consumedAt.Time
 	}
@@ -120,12 +126,19 @@ func (repository *PostgresRepository) LockForRegistration(
 
 func (repository *PostgresRepository) MarkConsumed(
 	ctx context.Context,
-	transaction RegistrationTransaction,
-	claimID string,
+	transaction *sql.Tx,
+	pending *PendingConsumption,
 	consumedAt time.Time,
 	accountID string,
 	registrationRequestID string,
 ) error {
+	if transaction == nil || pending == nil || pending.transaction == nil ||
+		pending.transaction != transaction || !canonicalUUID(pending.claimID) ||
+		!canonicalUUID(accountID) || !canonicalUUID(registrationRequestID) ||
+		!canonicalUUID(pending.registrationRequestID) ||
+		pending.registrationRequestID != registrationRequestID {
+		return ErrInvalidClaim
+	}
 	result, err := transaction.ExecContext(
 		ctx,
 		`UPDATE identity_claims
@@ -134,7 +147,7 @@ func (repository *PostgresRepository) MarkConsumed(
 		     registration_request_id = $4
 		 WHERE id = $1
 		   AND consumed_at IS NULL`,
-		claimID,
+		pending.claimID,
 		consumedAt,
 		accountID,
 		registrationRequestID,
