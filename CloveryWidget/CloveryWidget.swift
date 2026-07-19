@@ -20,7 +20,10 @@ struct CD {
         let s = UserDefaults(suiteName: "group.com.clovery.app")
         let name = s?.string(forKey: "widget_name") ?? ""
         let raw = s?.string(forKey: "widget_entries") ?? "[]"
-        let fontName = s?.string(forKey: "widget_font") ?? "Gaegu"
+        let fontName =
+            s?.string(forKey: "clovery_font_selection") ??
+            s?.string(forKey: "widget_font") ??
+            "Gaegu"
         let palette = s?.string(forKey: "widget_palette") ?? "clover"
         let lang = s?.string(forKey: "widget_lang") ?? "zh"
         var all: [DiaryEntry] = []
@@ -40,9 +43,37 @@ struct CD {
         if !days.contains(f.string(from:c.date(byAdding:.day,value:-o,to:n)!)){return 0}
         var s=0; while days.contains(f.string(from:c.date(byAdding:.day,value:-(o+s),to:n)!)){s+=1}; return s
     }
-    var ps: String { if fontName=="System"{return ""}; if lang=="zh"{return "YLHZYS"}; if lang=="ja"{return "Yomogi-Regular"}; return "Gaegu-Regular" }
-    var psB: String { if fontName=="System"{return ""}; if lang=="zh"{return "YLHZYS"}; if lang=="ja"{return "Yomogi-Regular"}; return "Gaegu-Bold" }
-    var isSys: Bool { fontName == "System" }
+    var ps: String {
+        switch fontName {
+        case "System":
+            ""
+        case "NotoSerifSC":
+            "NotoSerifSC-ExtraLight"
+        case "NaiChaTi":
+            "BoBoNaiChaTi"
+        default:
+            lang == "zh" ? "YLHZYS" :
+                lang == "ja" ? "Yomogi-Regular" : "Gaegu-Regular"
+        }
+    }
+
+    var psB: String {
+        switch fontName {
+        case "System":
+            ""
+        case "NotoSerifSC":
+            "NotoSerifSC-ExtraLight"
+        case "NaiChaTi":
+            "BoBoNaiChaTi"
+        default:
+            lang == "zh" ? "YLHZYS" :
+                lang == "ja" ? "Yomogi-Regular" : "Gaegu-Bold"
+        }
+    }
+
+    var isSys: Bool {
+        fontName == "System"
+    }
 }
 func af(_ d:CD,_ sz:CGFloat,bold:Bool=false)->Font{
     d.isSys ? .system(size:sz,weight:bold ? .bold:.regular,design:.rounded) : .custom(bold ? d.psB:d.ps, size:sz)

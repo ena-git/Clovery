@@ -27,12 +27,13 @@
 	</dict>
 	<key>UIAppFonts</key>
 	<array>
-		<string>Gaegu-Light.ttf</string>
-		<string>Gaegu-Regular.ttf</string>
-		<string>Gaegu-Bold.ttf</string>
-		<string>Yomogi-Regular.ttf</string>
-		<string>YueLiangHai-ZiYouShu-2.ttf</string>
-		<string>NaiChaTi-2.ttf</string>
+		<string>fonts/Gaegu-Light.ttf</string>
+		<string>fonts/Gaegu-Regular.ttf</string>
+		<string>fonts/Gaegu-Bold.ttf</string>
+		<string>fonts/Yomogi-Regular.ttf</string>
+		<string>fonts/YueLiangHai-ZiYouShu-2.ttf</string>
+		<string>fonts/NotoSerifSC-VariableFont_wght.ttf</string>
+		<string>fonts/NaiChaTi-2.ttf</string>
 	</array>
 </dict>
 </plist>

@@ -73,6 +73,7 @@
 		FCECDFE02FE92C7C0067AF51 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFDF2FE92C7C0067AF51 /* WidgetKit.framework */; };
 		FCECDFE22FE92C7C0067AF51 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFE12FE92C7C0067AF51 /* SwiftUI.framework */; };
 		FCECDFEF2FE92C7D0067AF51 /* CloveryWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		FCECE0002FE92C7D0067AF51 /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000005 /* fonts */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -472,6 +473,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FCECE0002FE92C7D0067AF51 /* fonts in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
