@@ -13,6 +13,7 @@ type bootstrapService interface {
 		accountID string,
 		vaultID string,
 		source bootstrapjob.SourceKind,
+		checkpoints ...*bootstrapjob.VaultCheckpoint,
 	) (bootstrapjob.Job, error)
 }
 
@@ -37,8 +38,17 @@ func (adapter *bootstrapApplicationAdapter) ResumeBootstrap(
 	accountID string,
 	vaultID string,
 	sourceKind string,
+	vaultCheckpoint *BootstrapVaultCheckpoint,
 ) (BootstrapStatus, error) {
-	job, err := adapter.service.Resume(ctx, accountID, vaultID, bootstrapjob.SourceKind(sourceKind))
+	var checkpoint *bootstrapjob.VaultCheckpoint
+	if vaultCheckpoint != nil {
+		checkpoint = &bootstrapjob.VaultCheckpoint{
+			Cursor: vaultCheckpoint.Cursor, HasMore: vaultCheckpoint.HasMore,
+		}
+	}
+	job, err := adapter.service.Resume(
+		ctx, accountID, vaultID, bootstrapjob.SourceKind(sourceKind), checkpoint,
+	)
 	return bootstrapStatus(job), err
 }
 

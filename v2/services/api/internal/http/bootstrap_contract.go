@@ -29,9 +29,16 @@ type BootstrapHTTPApplication interface {
 		accountID string,
 		vaultID string,
 		sourceKind string,
+		vaultCheckpoint *BootstrapVaultCheckpoint,
 	) (BootstrapStatus, error)
 }
 
 type bootstrapResumeRequest struct {
-	SourceKind string `json:"source_kind"`
+	SourceKind      string                    `json:"source_kind"`
+	VaultCheckpoint *BootstrapVaultCheckpoint `json:"vault_checkpoint,omitempty"`
+}
+
+type BootstrapVaultCheckpoint struct {
+	Cursor  int64 `json:"cursor"`
+	HasMore bool  `json:"has_more"`
 }

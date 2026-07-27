@@ -73,3 +73,8 @@ type Job struct {
 	RetryCount       int
 	UpdatedAt        time.Time
 }
+
+type VaultCheckpoint struct {
+	Cursor  int64
+	HasMore bool
+}

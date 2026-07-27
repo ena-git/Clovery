@@ -142,10 +142,12 @@ func TestOpenAPIContractIsValid(t *testing.T) {
 		t.Fatal("missing GET migration report contract")
 	}
 	for schemaName, properties := range map[string][]string{
-		"MigrationResponse":     {"deleted_count"},
-		"MigrationReport":       {"expected_deleted_entries", "imported_deleted_entries"},
-		"MigrationAssetMapping": {"source_filename", "asset_id", "byte_size", "sha256"},
-		"AssetUploadResponse":   {"status"},
+		"AccountBootstrapResumeRequest":   {"vault_checkpoint"},
+		"AccountBootstrapVaultCheckpoint": {"cursor", "has_more"},
+		"MigrationResponse":               {"deleted_count"},
+		"MigrationReport":                 {"expected_deleted_entries", "imported_deleted_entries"},
+		"MigrationAssetMapping":           {"source_filename", "asset_id", "byte_size", "sha256"},
+		"AssetUploadResponse":             {"status"},
 	} {
 		schema := document.Components.Schemas[schemaName].Value
 		for _, property := range properties {

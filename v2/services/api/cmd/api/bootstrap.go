@@ -13,6 +13,7 @@ import (
 	httpapi "github.com/clovery/clovery/services/api/internal/http"
 	"github.com/clovery/clovery/services/api/internal/identityclaim"
 	"github.com/clovery/clovery/services/api/internal/observability"
+	cloverysync "github.com/clovery/clovery/services/api/internal/sync"
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
@@ -43,7 +44,10 @@ func buildHandler(databaseHandle *sql.DB, applicationConfig config.Config) (http
 	if err != nil {
 		return nil, err
 	}
-	bootstrapService, err := bootstrapjob.NewService(bootstrapjob.NewPostgresRepository(databaseHandle))
+	syncRepository := cloverysync.NewPostgresRepository(databaseHandle)
+	bootstrapService, err := bootstrapjob.NewService(
+		bootstrapjob.NewPostgresRepository(databaseHandle), syncRepository,
+	)
 	if err != nil {
 		return nil, err
 	}
@@ -55,7 +59,7 @@ func buildHandler(databaseHandle *sql.DB, applicationConfig config.Config) (http
 	if err != nil {
 		return nil, err
 	}
-	syncApplication, err := buildSyncApplication(databaseHandle)
+	syncApplication, err := buildSyncApplication(databaseHandle, syncRepository)
 	if err != nil {
 		return nil, err
 	}

@@ -65,7 +65,7 @@ func TestBootstrapRoutesUseOnlyAuthenticatedAccountAndVault(t *testing.T) {
 	resumeRequest = httptest.NewRequest(
 		http.MethodPost,
 		"/v1/account/bootstrap/resume?account_id=attacker&vault_id=attacker",
-		strings.NewReader(`{"source_kind":"legacy_local"}`),
+		strings.NewReader(`{"source_kind":"legacy_local","vault_checkpoint":{"cursor":42,"has_more":false}}`),
 	)
 	resumeRequest.Header.Set("Authorization", "Bearer access-token")
 	resumeRequest.Header.Set("Content-Type", "application/json")
@@ -75,7 +75,8 @@ func TestBootstrapRoutesUseOnlyAuthenticatedAccountAndVault(t *testing.T) {
 		t.Fatalf("resume status = %d, body = %s", resumeResponse.Code, resumeResponse.Body.String())
 	}
 	if application.accountID != sessions.claims.AccountID || application.vaultID != sessions.claims.VaultID ||
-		application.sourceKind != "legacy_local" {
+		application.sourceKind != "legacy_local" || application.vaultCheckpoint == nil ||
+		application.vaultCheckpoint.Cursor != 42 || application.vaultCheckpoint.HasMore {
 		t.Fatalf("resume scope account=%q vault=%q source=%q", application.accountID, application.vaultID, application.sourceKind)
 	}
 }
@@ -128,11 +129,12 @@ func TestBootstrapHandlerReturnsStableErrors(t *testing.T) {
 }
 
 type stubBootstrapHTTPApplication struct {
-	accountID  string
-	vaultID    string
-	sourceKind string
-	result     BootstrapStatus
-	err        error
+	accountID       string
+	vaultID         string
+	sourceKind      string
+	vaultCheckpoint *BootstrapVaultCheckpoint
+	result          BootstrapStatus
+	err             error
 }
 
 func (application *stubBootstrapHTTPApplication) GetBootstrap(
@@ -148,9 +150,11 @@ func (application *stubBootstrapHTTPApplication) ResumeBootstrap(
 	accountID string,
 	vaultID string,
 	sourceKind string,
+	vaultCheckpoint *BootstrapVaultCheckpoint,
 ) (BootstrapStatus, error) {
 	application.accountID = accountID
 	application.vaultID = vaultID
 	application.sourceKind = sourceKind
+	application.vaultCheckpoint = vaultCheckpoint
 	return application.result, application.err
 }

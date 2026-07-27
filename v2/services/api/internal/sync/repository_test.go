@@ -131,3 +131,22 @@ func TestPostgresRepositoryListsChangesAfterCursor(t *testing.T) {
 		t.Fatalf("changes = %#v", changes)
 	}
 }
+
+func TestPostgresRepositoryReturnsLatestVaultCursor(t *testing.T) {
+	databaseHandle, mock, err := sqlmock.New()
+	if err != nil {
+		t.Fatalf("create SQL mock: %v", err)
+	}
+	t.Cleanup(func() { _ = databaseHandle.Close() })
+	mock.ExpectQuery("SELECT COALESCE\\(MAX\\(cursor\\), 0\\) FROM sync_changes WHERE vault_id = \\$1").
+		WithArgs("vault").
+		WillReturnRows(sqlmock.NewRows([]string{"cursor"}).AddRow(int64(42)))
+
+	cursor, err := NewPostgresRepository(databaseHandle).LatestCursor(context.Background(), "vault")
+	if err != nil || cursor != 42 {
+		t.Fatalf("LatestCursor() = %d, error = %v", cursor, err)
+	}
+	if err := mock.ExpectationsWereMet(); err != nil {
+		t.Fatal(err)
+	}
+}

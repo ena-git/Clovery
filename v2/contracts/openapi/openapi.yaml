@@ -1171,6 +1171,21 @@ components:
         source_kind:
           type: string
           enum: [legacy_local, legacy_cloudkit, new_install]
+        vault_checkpoint:
+          $ref: "#/components/schemas/AccountBootstrapVaultCheckpoint"
+    AccountBootstrapVaultCheckpoint:
+      type: object
+      additionalProperties: false
+      required: [cursor, has_more]
+      properties:
+        cursor:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Highest server sync cursor fully applied to the authenticated Vault.
+        has_more:
+          type: boolean
+          description: Whether the client still has another page from its current pull response.
     PasswordResetStartRequest:
       type: object
       additionalProperties: false

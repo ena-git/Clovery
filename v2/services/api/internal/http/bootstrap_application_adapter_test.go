@@ -28,12 +28,14 @@ func TestBootstrapApplicationAdapterMapsDomainStateAndSource(t *testing.T) {
 
 	status, err := application.ResumeBootstrap(
 		context.Background(), "account", "vault", "legacy_cloudkit",
+		&BootstrapVaultCheckpoint{Cursor: 42, HasMore: false},
 	)
 	if err != nil {
 		t.Fatalf("ResumeBootstrap() error = %v", err)
 	}
 	if service.accountID != "account" || service.vaultID != "vault" ||
-		service.source != bootstrapjob.SourceLegacyCloudKit {
+		service.source != bootstrapjob.SourceLegacyCloudKit || service.checkpoint == nil ||
+		service.checkpoint.Cursor != 42 || service.checkpoint.HasMore {
 		t.Fatalf("service scope account=%q vault=%q source=%q", service.accountID, service.vaultID, service.source)
 	}
 	if status.Status != "needs_attention" || status.SourceKind != "legacy_cloudkit" ||
@@ -47,10 +49,11 @@ func TestBootstrapApplicationAdapterMapsDomainStateAndSource(t *testing.T) {
 }
 
 type stubBootstrapService struct {
-	accountID string
-	vaultID   string
-	source    bootstrapjob.SourceKind
-	job       bootstrapjob.Job
+	accountID  string
+	vaultID    string
+	source     bootstrapjob.SourceKind
+	checkpoint *bootstrapjob.VaultCheckpoint
+	job        bootstrapjob.Job
 }
 
 func (service *stubBootstrapService) Get(context.Context, string) (bootstrapjob.Job, error) {
@@ -62,9 +65,13 @@ func (service *stubBootstrapService) Resume(
 	accountID string,
 	vaultID string,
 	source bootstrapjob.SourceKind,
+	checkpoints ...*bootstrapjob.VaultCheckpoint,
 ) (bootstrapjob.Job, error) {
 	service.accountID = accountID
 	service.vaultID = vaultID
 	service.source = source
+	if len(checkpoints) > 0 {
+		service.checkpoint = checkpoints[0]
+	}
 	return service.job, nil
 }

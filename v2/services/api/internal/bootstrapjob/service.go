@@ -44,13 +44,22 @@ type repository interface {
 
 type Service struct {
 	repository repository
+	cursors    vaultCursorReader
 }
 
-func NewService(repository repository) (*Service, error) {
+type vaultCursorReader interface {
+	LatestCursor(ctx context.Context, vaultID string) (int64, error)
+}
+
+func NewService(repository repository, cursorReaders ...vaultCursorReader) (*Service, error) {
 	if nilRepository(repository) {
 		return nil, fmt.Errorf("bootstrap repository is required")
 	}
-	return &Service{repository: repository}, nil
+	service := &Service{repository: repository}
+	if len(cursorReaders) > 0 {
+		service.cursors = cursorReaders[0]
+	}
+	return service, nil
 }
 
 func (service *Service) Get(ctx context.Context, accountID string) (Job, error) {
@@ -65,14 +74,35 @@ func (service *Service) Resume(
 	accountID string,
 	vaultID string,
 	source SourceKind,
+	checkpoints ...*VaultCheckpoint,
 ) (Job, error) {
-	if accountID == "" || vaultID == "" || !source.Valid() {
+	if accountID == "" || vaultID == "" || !source.Valid() || len(checkpoints) > 1 ||
+		(len(checkpoints) == 1 && checkpoints[0] != nil && checkpoints[0].Cursor < 0) {
 		if !source.Valid() {
 			return Job{}, errors.Join(ErrInvalidRequest, ErrInvalidSourceKind)
 		}
 		return Job{}, ErrInvalidRequest
 	}
-	return service.repository.ResumeByAccountID(ctx, accountID, vaultID, source)
+	job, err := service.repository.ResumeByAccountID(ctx, accountID, vaultID, source)
+	if err != nil || len(checkpoints) == 0 || checkpoints[0] == nil || job.VaultState == StageComplete {
+		return job, err
+	}
+	if service.cursors == nil {
+		return Job{}, fmt.Errorf("bootstrap vault cursor reader is required")
+	}
+	latestCursor, err := service.cursors.LatestCursor(ctx, job.VaultID)
+	if err != nil {
+		return Job{}, fmt.Errorf("load bootstrap vault checkpoint: %w", err)
+	}
+	state := StagePending
+	checkpoint := checkpoints[0]
+	if !checkpoint.HasMore && checkpoint.Cursor >= latestCursor {
+		state = StageComplete
+	}
+	if err := service.repository.MarkVaultByAccountID(ctx, accountID, state, nil); err != nil {
+		return Job{}, err
+	}
+	return service.repository.GetByAccountID(ctx, accountID)
 }
 
 func (service *Service) MarkMigration(

@@ -15,6 +15,7 @@ import (
 	"time"
 
 	cloverydatabase "github.com/clovery/clovery/services/api/internal/database"
+	cloverysync "github.com/clovery/clovery/services/api/internal/sync"
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
@@ -111,6 +112,50 @@ func TestBootstrapJobRetryableErrorPreservesPendingMigration(t *testing.T) {
 	if job.MigrationState != StagePending || job.Status != StatusRunning || job.RetryCount != 1 ||
 		job.LastErrorCode == nil || *job.LastErrorCode != "migration_temporarily_unavailable" {
 		t.Fatalf("retryable job = %#v", job)
+	}
+}
+
+func TestBootstrapJobVaultCheckpointUsesAuthenticatedVaultCursor(t *testing.T) {
+	databaseHandle, service := openBootstrapJobDatabase(t)
+	accountID, vaultID := seedBootstrapAccount(t, databaseHandle, "27500000-0000-4000-8000-000000000001", "27500000-0000-4000-8000-000000000002")
+	var latestCursor int64
+	if err := databaseHandle.QueryRow(
+		`INSERT INTO sync_changes (
+			vault_id, entity_type, entity_id, revision, operation_id, payload, deleted, changed_at
+		) VALUES ($1, 'journal_entry', $2, 1, $3, '{}'::jsonb, false, NOW()) RETURNING cursor`,
+		vaultID, "27500000-0000-4000-8000-000000000003", "27500000-0000-4000-8000-000000000004",
+	).Scan(&latestCursor); err != nil {
+		t.Fatalf("seed bootstrap sync cursor: %v", err)
+	}
+
+	job, err := service.Resume(
+		context.Background(), accountID, vaultID, SourceLegacyLocal,
+		&VaultCheckpoint{Cursor: latestCursor - 1, HasMore: false},
+	)
+	if err != nil || job.VaultState != StagePending {
+		t.Fatalf("behind checkpoint job = %#v, error = %v", job, err)
+	}
+	job, err = service.Resume(
+		context.Background(), accountID, vaultID, SourceLegacyLocal,
+		&VaultCheckpoint{Cursor: latestCursor, HasMore: false},
+	)
+	if err != nil || job.VaultState != StageComplete {
+		t.Fatalf("caught-up checkpoint job = %#v, error = %v", job, err)
+	}
+	if _, err := databaseHandle.Exec(
+		`INSERT INTO sync_changes (
+			vault_id, entity_type, entity_id, revision, operation_id, payload, deleted, changed_at
+		) VALUES ($1, 'journal_entry', $2, 1, $3, '{}'::jsonb, false, NOW())`,
+		vaultID, "27500000-0000-4000-8000-000000000005", "27500000-0000-4000-8000-000000000006",
+	); err != nil {
+		t.Fatalf("seed later sync cursor: %v", err)
+	}
+	job, err = service.Resume(
+		context.Background(), accountID, vaultID, SourceLegacyLocal,
+		&VaultCheckpoint{Cursor: latestCursor, HasMore: false},
+	)
+	if err != nil || job.VaultState != StageComplete {
+		t.Fatalf("one-time completed checkpoint job = %#v, error = %v", job, err)
 	}
 }
 
@@ -244,7 +289,9 @@ func openBootstrapJobDatabase(t *testing.T) (*sql.DB, *Service) {
 		t.Fatalf("open bootstrap database: %v", err)
 	}
 	t.Cleanup(func() { _ = databaseHandle.Close() })
-	service, err := NewService(NewPostgresRepository(databaseHandle))
+	service, err := NewService(
+		NewPostgresRepository(databaseHandle), cloverysync.NewPostgresRepository(databaseHandle),
+	)
 	if err != nil {
 		t.Fatalf("NewService() error = %v", err)
 	}

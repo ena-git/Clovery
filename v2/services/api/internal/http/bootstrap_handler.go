@@ -58,6 +58,7 @@ func (handler bootstrapHandler) resume(responseWriter http.ResponseWriter, reque
 	}
 	snapshot, err := handler.application.ResumeBootstrap(
 		request.Context(), claims.AccountID, claims.VaultID, resumeRequest.SourceKind,
+		resumeRequest.VaultCheckpoint,
 	)
 	if err != nil {
 		writeBootstrapResumeError(responseWriter, err)
