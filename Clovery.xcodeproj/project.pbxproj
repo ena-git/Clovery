@@ -87,6 +87,13 @@
 		AABB0000000000000000010F /* LegacySnapshotMerger.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000123 /* LegacySnapshotMerger.swift */; };
 		AABB00000000000000000110 /* MigrationBundleContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000124 /* MigrationBundleContent.swift */; };
 		AABB00000000000000000130 /* MigrationBundleContentValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000131 /* MigrationBundleContentValidator.swift */; };
+		AABB00000000000000000140 /* AtomicJSONFileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000146 /* AtomicJSONFileStore.swift */; };
+		AABB00000000000000000141 /* LegacyMigrationCheckpointStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000147 /* LegacyMigrationCheckpointStore.swift */; };
+		AABB00000000000000000142 /* LegacyMigrationAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000148 /* LegacyMigrationAPI.swift */; };
+		AABB00000000000000000143 /* LegacyMigrationArchiveReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000149 /* LegacyMigrationArchiveReader.swift */; };
+		AABB00000000000000000144 /* LegacyMigrationArchivePreparer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000014A /* LegacyMigrationArchivePreparer.swift */; };
+		AABB00000000000000000145 /* LegacyMigrationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000014B /* LegacyMigrationCoordinator.swift */; };
+		AABB0000000000000000014C /* LegacyMigrationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000014D /* LegacyMigrationModels.swift */; };
 		FCECDFE02FE92C7C0067AF51 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFDF2FE92C7C0067AF51 /* WidgetKit.framework */; };
 		FCECDFE22FE92C7C0067AF51 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFE12FE92C7C0067AF51 /* SwiftUI.framework */; };
 		FCECDFEF2FE92C7D0067AF51 /* CloveryWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -209,6 +216,13 @@
 		AABB00000000000000000123 /* LegacySnapshotMerger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Migration/Domain/LegacySnapshotMerger.swift; sourceTree = "<group>"; };
 		AABB00000000000000000124 /* MigrationBundleContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationBundleContent.swift; sourceTree = "<group>"; };
 		AABB00000000000000000131 /* MigrationBundleContentValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationBundleContentValidator.swift; sourceTree = "<group>"; };
+		AABB00000000000000000146 /* AtomicJSONFileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/Storage/AtomicJSONFileStore.swift; sourceTree = "<group>"; };
+		AABB00000000000000000147 /* LegacyMigrationCheckpointStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Migration/Domain/LegacyMigrationCheckpointStore.swift; sourceTree = "<group>"; };
+		AABB00000000000000000148 /* LegacyMigrationAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Migration/Data/LegacyMigrationAPI.swift; sourceTree = "<group>"; };
+		AABB00000000000000000149 /* LegacyMigrationArchiveReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Migration/Data/LegacyMigrationArchiveReader.swift; sourceTree = "<group>"; };
+		AABB0000000000000000014A /* LegacyMigrationArchivePreparer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Migration/Domain/LegacyMigrationArchivePreparer.swift; sourceTree = "<group>"; };
+		AABB0000000000000000014B /* LegacyMigrationCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Migration/Domain/LegacyMigrationCoordinator.swift; sourceTree = "<group>"; };
+		AABB0000000000000000014D /* LegacyMigrationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Migration/Data/LegacyMigrationModels.swift; sourceTree = "<group>"; };
 		AACC00000000000000000001 /* CloveryTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CloveryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC889A182FD464C9002510AD /* Clovery.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Clovery.entitlements; sourceTree = "<group>"; };
 		FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CloveryWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -304,6 +318,13 @@
 				AABB00000000000000000123 /* LegacySnapshotMerger.swift */,
 				AABB00000000000000000124 /* MigrationBundleContent.swift */,
 				AABB00000000000000000131 /* MigrationBundleContentValidator.swift */,
+				AABB00000000000000000146 /* AtomicJSONFileStore.swift */,
+				AABB00000000000000000147 /* LegacyMigrationCheckpointStore.swift */,
+				AABB00000000000000000148 /* LegacyMigrationAPI.swift */,
+				AABB00000000000000000149 /* LegacyMigrationArchiveReader.swift */,
+				AABB0000000000000000014A /* LegacyMigrationArchivePreparer.swift */,
+				AABB0000000000000000014B /* LegacyMigrationCoordinator.swift */,
+				AABB0000000000000000014D /* LegacyMigrationModels.swift */,
 				AABB00000000000000000096 /* KeychainStore.swift */,
 				AABB00000000000000000097 /* DeviceIdentityStore.swift */,
 				AABB00000000000000000098 /* AuthenticationSessionStore.swift */,
@@ -579,6 +600,13 @@
 				AABB0000000000000000010F /* LegacySnapshotMerger.swift in Sources */,
 				AABB00000000000000000110 /* MigrationBundleContent.swift in Sources */,
 				AABB00000000000000000130 /* MigrationBundleContentValidator.swift in Sources */,
+				AABB00000000000000000140 /* AtomicJSONFileStore.swift in Sources */,
+				AABB00000000000000000141 /* LegacyMigrationCheckpointStore.swift in Sources */,
+				AABB00000000000000000142 /* LegacyMigrationAPI.swift in Sources */,
+				AABB00000000000000000143 /* LegacyMigrationArchiveReader.swift in Sources */,
+				AABB00000000000000000144 /* LegacyMigrationArchivePreparer.swift in Sources */,
+				AABB00000000000000000145 /* LegacyMigrationCoordinator.swift in Sources */,
+				AABB0000000000000000014C /* LegacyMigrationModels.swift in Sources */,
 				AABB00000000000000000086 /* KeychainStore.swift in Sources */,
 				AABB00000000000000000087 /* DeviceIdentityStore.swift in Sources */,
 				AABB00000000000000000088 /* AuthenticationSessionStore.swift in Sources */,

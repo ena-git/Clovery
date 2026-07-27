@@ -646,7 +646,7 @@ git commit -m "feat(ios): collect legacy data without loss"
 - Create: `CloveryTests/LegacyMigrationCheckpointStoreTests.swift`
 - Create: `CloveryTests/LegacyMigrationCoordinatorTests.swift`
 
-- [ ] **Step 1: Write exact HTTP contract tests**
+- [x] **Step 1: Write exact HTTP contract tests**
 
 Assert this order and payload:
 
@@ -662,7 +662,7 @@ GET  /v1/vault/migrations/{id}/report on restart
 
 Use the archive's exact manifest bytes as base64 and SHA. Active entry requests contain canonical payload and SHA. Deleted entries contain `{}`, deletion time from snapshot when available, and the empty-object SHA.
 
-- [ ] **Step 2: Write checkpoint state tests**
+- [x] **Step 2: Write checkpoint state tests**
 
 Checkpoint fields:
 
@@ -680,7 +680,7 @@ struct LegacyMigrationCheckpoint: Codable, Equatable {
 
 Prove atomic save, crash recovery, same-account reuse, and cross-account rejection. Store the file under `Documents/CloveryMigration/checkpoint.json`; do not use UserDefaults for large sets.
 
-- [ ] **Step 3: Write coordinator interruption tests**
+- [x] **Step 3: Write coordinator interruption tests**
 
 Interrupt after each network step and assert retry resumes the same migration ID without re-exporting or deleting data. Also test:
 
@@ -694,7 +694,7 @@ verify needs_attention -> retain bundle and checkpoint
 account/vault changed -> block upload and surface support path
 ```
 
-- [ ] **Step 4: Run focused tests and observe missing implementation**
+- [x] **Step 4: Run focused tests and observe missing implementation**
 
 ```bash
 xcodebuild -project Clovery.xcodeproj -scheme Clovery \
@@ -706,11 +706,11 @@ xcodebuild -project Clovery.xcodeproj -scheme Clovery \
 
 Expected: new tests fail to compile.
 
-- [ ] **Step 5: Implement typed migration transport**
+- [x] **Step 5: Implement typed migration transport**
 
 Keep API models in `LegacyMigrationAPI.swift`, checkpoint persistence in its own file, and orchestration in `LegacyMigrationCoordinator.swift`. Presigned uploads use a separate `URLSession` request and copy only server-required headers. Never attach the Clovery bearer token to object-storage URLs.
 
-- [ ] **Step 6: Implement retry-safe orchestration**
+- [x] **Step 6: Implement retry-safe orchestration**
 
 Before first upload, bind the checkpoint to current account/vault. After each accepted entry/photo, atomically persist progress. Mark local checkpoint verified only after the server report is `verified` and all expected counts match. Never remove:
 
@@ -724,7 +724,7 @@ CloudKit records
 migration_bundle.zip
 ```
 
-- [ ] **Step 7: Run migration tests**
+- [x] **Step 7: Run migration tests**
 
 ```bash
 xcodebuild -project Clovery.xcodeproj -scheme Clovery \
@@ -736,7 +736,7 @@ xcodebuild -project Clovery.xcodeproj -scheme Clovery \
 
 Expected: selected tests pass.
 
-- [ ] **Step 8: Commit migration upload**
+- [x] **Step 8: Commit migration upload**
 
 ```bash
 git add Clovery/Features/Migration Clovery/Core/Storage CloveryTests \
