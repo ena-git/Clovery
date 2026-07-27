@@ -54,9 +54,13 @@ final class WebBridgeContractTests: XCTestCase {
         XCTAssertFalse(webViewSource.contains("PHPhotoLibrary.shared().performChanges"))
     }
 
+    @MainActor
     func testOpenAppSettingsRoutesToImageExporter() {
         let imageExporter = ImageExportingSpy()
-        let coordinator = WebView.Coordinator(imageExporter: imageExporter)
+        let coordinator = WebView.Coordinator(
+            imageExporter: imageExporter,
+            boardStore: makeTestBoardStore()
+        )
 
         coordinator.handleOpenAppSettings()
 

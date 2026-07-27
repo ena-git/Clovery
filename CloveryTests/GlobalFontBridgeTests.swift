@@ -14,7 +14,10 @@ final class GlobalFontBridgeTests: XCTestCase {
             primaryDefaults: primary,
             fallbackDefaults: fallback
         )
-        let coordinator = WebView.Coordinator(fontStore: store)
+        let coordinator = WebView.Coordinator(
+            boardStore: makeTestBoardStore(),
+            fontStore: store
+        )
 
         coordinator.handleFontPreference("NotoSerifSC")
 

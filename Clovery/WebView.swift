@@ -8,9 +8,11 @@ import WidgetKit
 import OSLog
 
 struct WebView: UIViewRepresentable {
+    private let boardStore: BoardStore
     private let fontStore: AppFontStore?
 
-    init(fontStore: AppFontStore? = nil) {
+    init(boardStore: BoardStore, fontStore: AppFontStore? = nil) {
+        self.boardStore = boardStore
         self.fontStore = fontStore
     }
 
@@ -20,8 +22,9 @@ struct WebView: UIViewRepresentable {
         // Weak ref so we can push iCloud data into the running WebView
         weak var webView: WKWebView?
         private var boardEntitlementCancellable: AnyCancellable?
+        private let boardStore: BoardStore
         private lazy var boardEntitlementReporter = BoardEntitlementReporter(
-            currentEntitlement: { BoardStore.shared.isUnlocked },
+            currentEntitlement: { [weak boardStore] in boardStore?.isUnlocked ?? false },
             reportUnlock: { [weak self] unlocked in
                 self?.webView?.evaluateJavaScript(
                     BridgeJavaScript.boardUnlockStatus(unlocked),
@@ -40,10 +43,12 @@ struct WebView: UIViewRepresentable {
         init(
             photoStore: PhotoStoring = PhotoStore(),
             imageExporter: ImageExporting = ImageExportService(),
+            boardStore: BoardStore,
             fontStore: AppFontStore? = nil
         ) {
             self.photoStore = photoStore
             self.imageExporter = imageExporter
+            self.boardStore = boardStore
             self.fontStore = fontStore
             super.init()
         }
@@ -124,21 +129,21 @@ struct WebView: UIViewRepresentable {
                 handleOpenAppSettings()
             } else if message.name == "checkBoardUnlocked" {
                 Task { @MainActor in
-                    await BoardStore.shared.refresh()
+                    await self.boardStore.refresh()
                     self.boardEntitlementReporter.reportObservedEntitlement(
-                        BoardStore.shared.isUnlocked
+                        self.boardStore.isUnlocked
                     )
                 }
             } else if message.name == "purchaseBoard" {
                 Task { @MainActor in
-                    let outcome = await BoardStore.shared.purchase()
+                    let outcome = await self.boardStore.purchase()
                     _ = try? await self.webView?.evaluateJavaScript(
                         BridgeJavaScript.boardPurchaseResult(outcome)
                     )
                 }
             } else if message.name == "fetchBoardPrice" {
                 Task { @MainActor in
-                    let price = await BoardStore.shared.fetchDisplayPrice() ?? ""
+                    let price = await self.boardStore.fetchDisplayPrice() ?? ""
                     _ = try? await self.webView?.evaluateJavaScript(
                         BridgeJavaScript.boardPriceResult(price)
                     )
@@ -146,7 +151,7 @@ struct WebView: UIViewRepresentable {
             } else if message.name == "restorePurchases" {
                 Task { @MainActor in
                     await self.boardEntitlementReporter.reportRestore(
-                        performRestore: { await BoardStore.shared.restore() },
+                        performRestore: { await self.boardStore.restore() },
                         reportOutcome: { outcome in
                             _ = try await self.webView?.evaluateJavaScript(
                                 BridgeJavaScript.boardRestoreResult(outcome)
@@ -345,12 +350,17 @@ struct WebView: UIViewRepresentable {
         @MainActor
         func startObservingBoardStore() {
             guard boardEntitlementCancellable == nil else { return }
-            boardEntitlementCancellable = BoardStore.shared.$isUnlocked
+            boardEntitlementCancellable = boardStore.$isUnlocked
                 .removeDuplicates()
                 .receive(on: DispatchQueue.main)
                 .sink { [weak self] unlocked in
                     self?.boardEntitlementReporter.reportObservedEntitlement(unlocked)
                 }
+        }
+
+        @MainActor
+        func refreshBoardEntitlement() async {
+            await boardStore.refresh()
         }
 
         // MARK: iCloud Key-Value Sync
@@ -718,7 +728,7 @@ struct WebView: UIViewRepresentable {
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(fontStore: fontStore)
+        Coordinator(boardStore: boardStore, fontStore: fontStore)
     }
 
     func makeUIView(context: Context) -> WKWebView {
@@ -791,7 +801,7 @@ class WebViewCoordinatorBridge {
 
     func refreshBoardEntitlement() {
         Task { @MainActor in
-            await BoardStore.shared.refresh()
+            await coordinator?.refreshBoardEntitlement()
         }
     }
 

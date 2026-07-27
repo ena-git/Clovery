@@ -758,7 +758,7 @@ git commit -m "feat(ios): upload legacy vault migration"
 - Create: `CloveryTests/EntitlementReconcilerTests.swift`
 - Modify: `CloveryTests/BoardStoreTests.swift`
 
-- [ ] **Step 1: Write server-entitlement API tests**
+- [x] **Step 1: Write server-entitlement API tests**
 
 Cover:
 
@@ -773,7 +773,7 @@ apple_verification_unavailable -> retryable pending
 
 No request sends Apple Sign in subject or email.
 
-- [ ] **Step 2: Expand StoreKit transaction evidence tests**
+- [x] **Step 2: Expand StoreKit transaction evidence tests**
 
 `BoardTransaction` must carry:
 
@@ -787,7 +787,7 @@ let revocationDate: Date?
 
 The live client obtains JWS from `VerificationResult.jwsRepresentation`. Unverified transactions never reach the backend. Tests must prove JWS and transaction IDs are never printed.
 
-- [ ] **Step 3: Require `appAccountToken` for new purchases**
+- [x] **Step 3: Require `appAccountToken` for new purchases**
 
 Change purchase to accept the authenticated Clovery account UUID and call:
 
@@ -797,7 +797,7 @@ product.purchase(options: [.appAccountToken(accountUUID)])
 
 If account ID is not a UUID or there is no authenticated account, fail before presenting StoreKit. After verified purchase, call the backend verify endpoint and reload account entitlements before setting `isUnlocked` or finishing the transaction.
 
-- [ ] **Step 4: Write reconciliation behavior tests**
+- [x] **Step 4: Write reconciliation behavior tests**
 
 Require:
 
@@ -814,15 +814,15 @@ server revoked/expired entitlement -> lock
 network failure -> use only recent same-account cache, keep bootstrap pending
 ```
 
-- [ ] **Step 5: Implement an account-scoped entitlement cache**
+- [x] **Step 5: Implement an account-scoped entitlement cache**
 
 Persist only server-returned entitlement summaries, account ID, fetched time, and API environment in Keychain or protected atomic storage with `NSFileProtectionCompleteUntilFirstUserAuthentication`. Never cache signed StoreKit JWS. A cache is usable for at most 72 hours and only for the same authenticated account; stale cache cannot complete bootstrap.
 
-- [ ] **Step 6: Make `BoardStore` server authoritative**
+- [x] **Step 6: Make `BoardStore` server authoritative**
 
 Keep display price, StoreKit purchase UI, and transaction updates in `BoardStoreClient`. Move entitlement ownership into `EntitlementReconciler`. `BoardStore.isUnlocked` updates from server entitlement/cache events. Remove the startup path that permanently unlocks solely because `Transaction.currentEntitlements` contains the product.
 
-- [ ] **Step 7: Run entitlement tests**
+- [x] **Step 7: Run entitlement tests**
 
 ```bash
 xcodebuild -project Clovery.xcodeproj -scheme Clovery \
@@ -835,7 +835,7 @@ xcodebuild -project Clovery.xcodeproj -scheme Clovery \
 
 Expected: selected tests pass.
 
-- [ ] **Step 8: Commit entitlement reconciliation**
+- [x] **Step 8: Commit entitlement reconciliation**
 
 ```bash
 git add Clovery/Features/Entitlements Clovery/BoardStore* Clovery/WebView.swift \

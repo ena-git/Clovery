@@ -2,9 +2,31 @@ import OSLog
 import StoreKit
 
 struct BoardTransaction: Sendable {
+    let transactionID: UInt64
     let productID: String
+    let environment: AccountEntitlementEnvironment
+    let signedTransactionInfo: String
+    let appAccountToken: UUID?
     let revocationDate: Date?
     let finishOperation: @Sendable () async -> Void
+
+    init(
+        transactionID: UInt64 = 0,
+        productID: String,
+        environment: AccountEntitlementEnvironment = .production,
+        signedTransactionInfo: String = "",
+        appAccountToken: UUID? = nil,
+        revocationDate: Date?,
+        finishOperation: @escaping @Sendable () async -> Void
+    ) {
+        self.transactionID = transactionID
+        self.productID = productID
+        self.environment = environment
+        self.signedTransactionInfo = signedTransactionInfo
+        self.appAccountToken = appAccountToken
+        self.revocationDate = revocationDate
+        self.finishOperation = finishOperation
+    }
 
     func finish() async {
         await finishOperation()
@@ -24,11 +46,14 @@ enum BoardClientPurchaseResult: Sendable {
 }
 
 struct BoardStoreClient: Sendable {
-    let currentEntitlements: @Sendable (_ productID: String) async -> BoardEntitlementResult
-    let purchase: @Sendable (_ productID: String) async -> BoardClientPurchaseResult
-    let displayPrice: @Sendable (_ productID: String) async -> String?
-    let sync: @Sendable () async throws -> Void
-    let updates: @Sendable () -> AsyncStream<BoardTransaction>
+    let currentEntitlements: @MainActor @Sendable (_ productID: String) async -> BoardEntitlementResult
+    let purchase: @MainActor @Sendable (
+        _ productID: String,
+        _ accountUUID: UUID
+    ) async -> BoardClientPurchaseResult
+    let displayPrice: @MainActor @Sendable (_ productID: String) async -> String?
+    let sync: @MainActor @Sendable () async throws -> Void
+    let updates: @MainActor @Sendable () -> AsyncStream<BoardTransaction>
 }
 
 private let boardStoreClientLogger = Logger(
@@ -37,14 +62,28 @@ private let boardStoreClientLogger = Logger(
 )
 
 private extension BoardTransaction {
-    init(storeKitTransaction: StoreKit.Transaction) {
+    init(
+        storeKitTransaction: StoreKit.Transaction,
+        signedTransactionInfo: String
+    ) {
+        transactionID = storeKitTransaction.id
         productID = storeKitTransaction.productID
+        environment = AccountEntitlementEnvironment(storeKitTransaction.environment)
+        self.signedTransactionInfo = signedTransactionInfo
+        appAccountToken = storeKitTransaction.appAccountToken
         revocationDate = storeKitTransaction.revocationDate
         finishOperation = { await storeKitTransaction.finish() }
     }
 }
 
+private extension AccountEntitlementEnvironment {
+    init(_ environment: StoreKit.AppStore.Environment) {
+        self = environment == .production ? .production : .sandbox
+    }
+}
+
 extension BoardStoreClient {
+    @MainActor
     static var live: BoardStoreClient {
         BoardStoreClient(
             currentEntitlements: { productID in
@@ -54,7 +93,10 @@ extension BoardStoreClient {
                     switch result {
                     case .verified(let transaction):
                         guard transaction.productID == productID else { continue }
-                        transactions.append(BoardTransaction(storeKitTransaction: transaction))
+                        transactions.append(BoardTransaction(
+                            storeKitTransaction: transaction,
+                            signedTransactionInfo: result.jwsRepresentation
+                        ))
                     case .unverified(let transaction, let error):
                         boardStoreClientLogger.error(
                             "Unverified entitlement: \(String(describing: error), privacy: .public)"
@@ -69,7 +111,7 @@ extension BoardStoreClient {
                 }
                 return .verified(transactions)
             },
-            purchase: { productID in
+            purchase: { productID, accountUUID in
                 do {
                     let products = try await Product.products(for: [productID])
                     guard let product = products.first(where: { $0.id == productID }) else {
@@ -79,7 +121,9 @@ extension BoardStoreClient {
                         return .failed
                     }
 
-                    var options: Set<Product.PurchaseOption> = []
+                    var options: Set<Product.PurchaseOption> = [
+                        .appAccountToken(accountUUID)
+                    ]
                     #if DEBUG
                     if ProcessInfo.processInfo.arguments.contains("-CloverySimulateAskToBuy") {
                         options.insert(.simulatesAskToBuyInSandbox(true))
@@ -90,7 +134,10 @@ extension BoardStoreClient {
                     case .success(let result):
                         switch result {
                         case .verified(let transaction):
-                            return .success(BoardTransaction(storeKitTransaction: transaction))
+                            return .success(BoardTransaction(
+                                storeKitTransaction: transaction,
+                                signedTransactionInfo: result.jwsRepresentation
+                            ))
                         case .unverified(_, let error):
                             boardStoreClientLogger.error(
                                 "Purchase verification failed: \(String(describing: error), privacy: .public)"
@@ -135,7 +182,10 @@ extension BoardStoreClient {
                             switch result {
                             case .verified(let transaction):
                                 continuation.yield(
-                                    BoardTransaction(storeKitTransaction: transaction)
+                                    BoardTransaction(
+                                        storeKitTransaction: transaction,
+                                        signedTransactionInfo: result.jwsRepresentation
+                                    )
                                 )
                             case .unverified(_, let error):
                                 boardStoreClientLogger.error(

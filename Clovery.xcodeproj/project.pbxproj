@@ -94,6 +94,9 @@
 		AABB00000000000000000144 /* LegacyMigrationArchivePreparer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000014A /* LegacyMigrationArchivePreparer.swift */; };
 		AABB00000000000000000145 /* LegacyMigrationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000014B /* LegacyMigrationCoordinator.swift */; };
 		AABB0000000000000000014C /* LegacyMigrationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000014D /* LegacyMigrationModels.swift */; };
+		AABB00000000000000000150 /* AccountEntitlementAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000156 /* AccountEntitlementAPI.swift */; };
+		AABB00000000000000000151 /* AccountEntitlementCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000157 /* AccountEntitlementCache.swift */; };
+		AABB00000000000000000152 /* EntitlementReconciler.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000158 /* EntitlementReconciler.swift */; };
 		FCECDFE02FE92C7C0067AF51 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFDF2FE92C7C0067AF51 /* WidgetKit.framework */; };
 		FCECDFE22FE92C7C0067AF51 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFE12FE92C7C0067AF51 /* SwiftUI.framework */; };
 		FCECDFEF2FE92C7D0067AF51 /* CloveryWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -223,6 +226,9 @@
 		AABB0000000000000000014A /* LegacyMigrationArchivePreparer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Migration/Domain/LegacyMigrationArchivePreparer.swift; sourceTree = "<group>"; };
 		AABB0000000000000000014B /* LegacyMigrationCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Migration/Domain/LegacyMigrationCoordinator.swift; sourceTree = "<group>"; };
 		AABB0000000000000000014D /* LegacyMigrationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Migration/Data/LegacyMigrationModels.swift; sourceTree = "<group>"; };
+		AABB00000000000000000156 /* AccountEntitlementAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Entitlements/Data/AccountEntitlementAPI.swift; sourceTree = "<group>"; };
+		AABB00000000000000000157 /* AccountEntitlementCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Entitlements/Data/AccountEntitlementCache.swift; sourceTree = "<group>"; };
+		AABB00000000000000000158 /* EntitlementReconciler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Entitlements/Domain/EntitlementReconciler.swift; sourceTree = "<group>"; };
 		AACC00000000000000000001 /* CloveryTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CloveryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC889A182FD464C9002510AD /* Clovery.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Clovery.entitlements; sourceTree = "<group>"; };
 		FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CloveryWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -325,6 +331,9 @@
 				AABB0000000000000000014A /* LegacyMigrationArchivePreparer.swift */,
 				AABB0000000000000000014B /* LegacyMigrationCoordinator.swift */,
 				AABB0000000000000000014D /* LegacyMigrationModels.swift */,
+				AABB00000000000000000156 /* AccountEntitlementAPI.swift */,
+				AABB00000000000000000157 /* AccountEntitlementCache.swift */,
+				AABB00000000000000000158 /* EntitlementReconciler.swift */,
 				AABB00000000000000000096 /* KeychainStore.swift */,
 				AABB00000000000000000097 /* DeviceIdentityStore.swift */,
 				AABB00000000000000000098 /* AuthenticationSessionStore.swift */,
@@ -607,6 +616,9 @@
 				AABB00000000000000000144 /* LegacyMigrationArchivePreparer.swift in Sources */,
 				AABB00000000000000000145 /* LegacyMigrationCoordinator.swift in Sources */,
 				AABB0000000000000000014C /* LegacyMigrationModels.swift in Sources */,
+				AABB00000000000000000150 /* AccountEntitlementAPI.swift in Sources */,
+				AABB00000000000000000151 /* AccountEntitlementCache.swift in Sources */,
+				AABB00000000000000000152 /* EntitlementReconciler.swift in Sources */,
 				AABB00000000000000000086 /* KeychainStore.swift in Sources */,
 				AABB00000000000000000087 /* DeviceIdentityStore.swift in Sources */,
 				AABB00000000000000000088 /* AuthenticationSessionStore.swift in Sources */,

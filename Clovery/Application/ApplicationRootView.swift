@@ -6,6 +6,7 @@ struct ApplicationRootView: View {
     private let sourceKind: BootstrapSourceKind
     @StateObject private var sessionController: ApplicationSessionController
     @StateObject private var bootstrapCoordinator: AccountBootstrapCoordinator
+    @StateObject private var boardStore: BoardStore
     @StateObject private var fontStore: AppFontStore
 
     @MainActor
@@ -19,6 +20,7 @@ struct ApplicationRootView: View {
         sourceKind = resolved.sourceKind
         _sessionController = StateObject(wrappedValue: resolved.sessionController)
         _bootstrapCoordinator = StateObject(wrappedValue: resolved.coordinator)
+        _boardStore = StateObject(wrappedValue: resolved.boardStore)
         _fontStore = StateObject(wrappedValue: fontStore ?? AppFontStore())
     }
 
@@ -29,6 +31,7 @@ struct ApplicationRootView: View {
                 await bootstrapCoordinator.waitForIdle()
             }
             .onChange(of: authenticatedAccountKey) { _ in
+                boardStore.accountDidChange()
                 bootstrapCoordinator.sessionDidChange()
             }
             .environment(\.appFontSelection, fontStore.selection)
@@ -61,7 +64,7 @@ struct ApplicationRootView: View {
                 logout: bootstrapCoordinator.logout
             )
         case .diary:
-            WebView(fontStore: fontStore)
+            WebView(boardStore: boardStore, fontStore: fontStore)
                 .ignoresSafeArea()
         }
     }

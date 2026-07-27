@@ -6,6 +6,7 @@ struct BootstrapDependencies {
     let identityClaimAPI: IdentityClaimAPIProtocol
     let sessionController: ApplicationSessionController
     let coordinator: AccountBootstrapCoordinator
+    let boardStore: BoardStore
     let sourceKind: BootstrapSourceKind
 
     static func live(
@@ -35,12 +36,26 @@ struct BootstrapDependencies {
             api: AccountBootstrapAPI(client: authenticatedClient),
             checkpointStore: BootstrapCheckpointStore(userDefaults: userDefaults)
         )
+        let entitlementAPI = AccountEntitlementAPI(client: authenticatedClient)
+        let entitlementReconciler = EntitlementReconciler(
+            api: entitlementAPI,
+            cache: AccountEntitlementCache(),
+            defaultEnvironment: entitlementEnvironment
+        )
+        let boardStore = BoardStore(
+            accountIDProvider: { [weak sessionController] in
+                sessionController?.authenticationSession()?.accountID
+            },
+            client: .live,
+            reconciler: entitlementReconciler
+        )
 
         return BootstrapDependencies(
             authenticationAPI: authenticationAPI,
             identityClaimAPI: identityClaimAPI,
             sessionController: sessionController,
             coordinator: coordinator,
+            boardStore: boardStore,
             sourceKind: sourceKind
         )
     }
@@ -64,5 +79,13 @@ struct BootstrapDependencies {
             return current
         }
         return APIConfiguration(baseURL: URL(string: "https://invalid.clovery.local")!)
+    }
+
+    private static var entitlementEnvironment: AccountEntitlementEnvironment {
+#if DEBUG
+        .sandbox
+#else
+        .production
+#endif
     }
 }

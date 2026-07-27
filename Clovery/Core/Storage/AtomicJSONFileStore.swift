@@ -22,7 +22,12 @@ struct AtomicJSONFileStore {
         return try decoder.decode(type, from: Data(contentsOf: url))
     }
 
-    func write<Value: Encodable>(_ value: Value, to url: URL) throws {
+    func write<Value: Encodable>(
+        _ value: Value,
+        to url: URL,
+        options: Data.WritingOptions = .atomic,
+        attributes: [FileAttributeKey: Any] = [:]
+    ) throws {
         let directory = url.deletingLastPathComponent()
         try fileManager.createDirectory(
             at: directory,
@@ -32,11 +37,14 @@ struct AtomicJSONFileStore {
             ".\(url.lastPathComponent).\(UUID().uuidString).tmp"
         )
         do {
-            try encoder.encode(value).write(to: temporaryURL, options: .atomic)
+            try encoder.encode(value).write(to: temporaryURL, options: options)
             if fileManager.fileExists(atPath: url.path) {
                 _ = try fileManager.replaceItemAt(url, withItemAt: temporaryURL)
             } else {
                 try fileManager.moveItem(at: temporaryURL, to: url)
+            }
+            if !attributes.isEmpty {
+                try fileManager.setAttributes(attributes, ofItemAtPath: url.path)
             }
         } catch {
             try? fileManager.removeItem(at: temporaryURL)

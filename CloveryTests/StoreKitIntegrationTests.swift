@@ -22,7 +22,9 @@ final class StoreKitIntegrationTests: XCTestCase {
     func testAskToBuyApprovalUnlocksThroughTransactionUpdates() async throws {
         session.askToBuyEnabled = true
         let store = BoardStore(
+            accountID: "11111111-1111-4111-8111-111111111111",
             client: .live,
+            reconciler: StoreKitAuthoritativeReconciler(),
             observesUpdates: true,
             refreshesOnInit: false
         )
@@ -42,11 +44,43 @@ final class StoreKitIntegrationTests: XCTestCase {
         XCTAssertTrue(store.isUnlocked)
 
         let relaunchedStore = BoardStore(
+            accountID: "11111111-1111-4111-8111-111111111111",
             client: .live,
+            reconciler: StoreKitAuthoritativeReconciler(),
             observesUpdates: false,
             refreshesOnInit: false
         )
         await relaunchedStore.refresh()
         XCTAssertTrue(relaunchedStore.isUnlocked)
     }
+}
+
+@MainActor
+private final class StoreKitAuthoritativeReconciler: EntitlementReconciling {
+    func reconcile(
+        accountID: String,
+        storeKitResult: BoardEntitlementResult
+    ) async -> EntitlementReconciliationOutcome {
+        guard case let .verified(transactions) = storeKitResult,
+              !transactions.isEmpty else {
+            return .complete([])
+        }
+        return .complete([Self.activeEntitlement])
+    }
+
+    func reconcilePurchase(
+        accountID: String,
+        transaction: BoardTransaction
+    ) async -> EntitlementReconciliationOutcome {
+        .complete([Self.activeEntitlement])
+    }
+
+    private static let activeEntitlement = AccountEntitlementSummary(
+        productID: "com.clovery.app.board.lifetime",
+        state: .active,
+        expiresAt: nil,
+        revokedAt: nil,
+        sourceStorefront: "XCODE",
+        updatedAt: Date()
+    )
 }
