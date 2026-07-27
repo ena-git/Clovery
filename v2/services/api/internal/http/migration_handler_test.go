@@ -65,9 +65,68 @@ func TestMigrationEntryAcceptsLegacyPayloadAboveDefaultJSONLimit(t *testing.T) {
 	}
 }
 
+func TestMigrationAssetsReturnsVerifiedFilenameMappings(t *testing.T) {
+	application := &stubMigrationHTTPApplication{mappings: []cloverymigration.AssetMapping{{
+		SourceFilename: "photo-0001.jpg",
+		AssetID:        "33333333-3333-4333-8333-333333333333",
+		ByteSize:       20,
+		SHA256:         strings.Repeat("a", 64),
+	}}}
+	router := NewRouter(RouterDependencies{
+		Sessions: managementSessions(), Migrations: application, MigrationWritesEnabled: true,
+	})
+	request := httptest.NewRequest(
+		http.MethodGet,
+		"/v1/vault/migrations/11111111-1111-4111-8111-111111111111/assets",
+		nil,
+	)
+	request.Header.Set("Authorization", "Bearer access-token")
+	response := httptest.NewRecorder()
+
+	router.ServeHTTP(response, request)
+
+	if response.Code != http.StatusOK || !strings.Contains(response.Body.String(), `"source_filename":"photo-0001.jpg"`) {
+		t.Fatalf("status = %d, body = %s", response.Code, response.Body.String())
+	}
+}
+
+func TestMigrationAssetsRejectsUnavailableMappings(t *testing.T) {
+	for _, test := range []struct {
+		name       string
+		err        error
+		wantStatus int
+		wantCode   string
+	}{
+		{name: "not found", err: cloverymigration.ErrMigrationNotFound, wantStatus: http.StatusNotFound, wantCode: "migration_not_found"},
+		{name: "uploading", err: cloverymigration.ErrMigrationNotVerified, wantStatus: http.StatusConflict, wantCode: "migration_not_verified"},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			application := &stubMigrationHTTPApplication{assetsError: test.err}
+			router := NewRouter(RouterDependencies{
+				Sessions: managementSessions(), Migrations: application, MigrationWritesEnabled: true,
+			})
+			request := httptest.NewRequest(
+				http.MethodGet,
+				"/v1/vault/migrations/11111111-1111-4111-8111-111111111111/assets",
+				nil,
+			)
+			request.Header.Set("Authorization", "Bearer access-token")
+			response := httptest.NewRecorder()
+
+			router.ServeHTTP(response, request)
+
+			if response.Code != test.wantStatus || !strings.Contains(response.Body.String(), test.wantCode) {
+				t.Fatalf("status = %d, body = %s", response.Code, response.Body.String())
+			}
+		})
+	}
+}
+
 type stubMigrationHTTPApplication struct {
-	vaultID   string
-	migration cloverymigration.Migration
+	vaultID     string
+	migration   cloverymigration.Migration
+	mappings    []cloverymigration.AssetMapping
+	assetsError error
 }
 
 func (stub *stubMigrationHTTPApplication) Create(
@@ -91,4 +150,8 @@ func (*stubMigrationHTTPApplication) Verify(context.Context, string, string, str
 
 func (*stubMigrationHTTPApplication) Report(context.Context, string, string, string) (cloverymigration.Report, error) {
 	return cloverymigration.Report{}, nil
+}
+
+func (stub *stubMigrationHTTPApplication) Assets(context.Context, string, string, string) ([]cloverymigration.AssetMapping, error) {
+	return stub.mappings, stub.assetsError
 }

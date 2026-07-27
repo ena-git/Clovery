@@ -795,6 +795,30 @@ paths:
         "503":
           $ref: "#/components/responses/ServiceUnavailable"
   /v1/vault/migrations/{migrationId}/assets:
+    get:
+      operationId: listVaultMigrationAssets
+      summary: Return verified migration filename-to-asset mappings
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/MigrationId"
+      responses:
+        "200":
+          description: Verified migration asset mappings in filename order.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MigrationAssetMappings"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
     post:
       operationId: addVaultMigrationAsset
       summary: Register one migration photo and return a private upload ticket
@@ -1741,6 +1765,32 @@ components:
         sha256:
           type: string
           pattern: "^[a-f0-9]{64}$"
+    MigrationAssetMapping:
+      type: object
+      additionalProperties: false
+      required: [source_filename, asset_id, byte_size, sha256]
+      properties:
+        source_filename:
+          type: string
+        asset_id:
+          type: string
+          format: uuid
+        byte_size:
+          type: integer
+          format: int64
+          minimum: 1
+        sha256:
+          type: string
+          pattern: "^[a-f0-9]{64}$"
+    MigrationAssetMappings:
+      type: object
+      additionalProperties: false
+      required: [assets]
+      properties:
+        assets:
+          type: array
+          items:
+            $ref: "#/components/schemas/MigrationAssetMapping"
     MigrationReport:
       type: object
       additionalProperties: false
@@ -1827,7 +1877,6 @@ components:
             - asset_manifest_mismatch
             - manifest_sha256_mismatch
             - count_or_size_mismatch
-            - entry_collision
     AppleEnvironment:
       type: string
       enum: [production, sandbox]

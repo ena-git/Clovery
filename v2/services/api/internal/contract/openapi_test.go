@@ -114,6 +114,7 @@ func TestOpenAPIContractIsValid(t *testing.T) {
 	for _, path := range []string{
 		"/v1/vault/sync/pull",
 		"/v1/vault/assets/{assetId}/download",
+		"/v1/vault/migrations/{migrationId}/assets",
 	} {
 		pathItem := document.Paths.Find(path)
 		if pathItem == nil || pathItem.Get == nil {
@@ -141,9 +142,10 @@ func TestOpenAPIContractIsValid(t *testing.T) {
 		t.Fatal("missing GET migration report contract")
 	}
 	for schemaName, properties := range map[string][]string{
-		"MigrationResponse":   {"deleted_count"},
-		"MigrationReport":     {"expected_deleted_entries", "imported_deleted_entries"},
-		"AssetUploadResponse": {"status"},
+		"MigrationResponse":     {"deleted_count"},
+		"MigrationReport":       {"expected_deleted_entries", "imported_deleted_entries"},
+		"MigrationAssetMapping": {"source_filename", "asset_id", "byte_size", "sha256"},
+		"AssetUploadResponse":   {"status"},
 	} {
 		schema := document.Components.Schemas[schemaName].Value
 		for _, property := range properties {

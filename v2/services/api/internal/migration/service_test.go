@@ -281,6 +281,8 @@ type stubMigrationStore struct {
 	errorCode        string
 	createdMigration Migration
 	addedEntry       EntryInput
+	assetMappings    []AssetMapping
+	assetsRequested  bool
 }
 
 func (store *stubMigrationStore) Create(_ context.Context, migration Migration) (Migration, error) {
@@ -305,6 +307,11 @@ func (*stubMigrationStore) Verify(context.Context, string, string) (Report, erro
 
 func (*stubMigrationStore) GetReport(context.Context, string, string) (Report, error) {
 	return Report{}, nil
+}
+
+func (store *stubMigrationStore) GetAssetMappings(context.Context, string, string) ([]AssetMapping, error) {
+	store.assetsRequested = true
+	return store.assetMappings, nil
 }
 
 func (store *stubMigrationStore) RecordError(_ context.Context, _, _, code string) error {

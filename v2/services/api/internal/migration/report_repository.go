@@ -31,6 +31,12 @@ func loadReport(
 		`SELECT migration.id, migration.status,
 		 migration.expected_entry_count,
 		 (SELECT COUNT(*) FROM migration_entries WHERE migration_id = migration.id AND deleted_at IS NULL),
+		 (SELECT COUNT(*) FROM migration_entries WHERE migration_id = migration.id
+		  AND resolution IN ('insert', 'id_conflict_copy')),
+		 (SELECT COUNT(*) FROM migration_entries WHERE migration_id = migration.id
+		  AND resolution IN ('exact_duplicate', 'content_duplicate')),
+		 (SELECT COUNT(*) FROM migration_entries WHERE migration_id = migration.id
+		  AND resolution = 'id_conflict_copy'),
 		 migration.expected_deleted_count,
 		 (SELECT COUNT(*) FROM migration_entries WHERE migration_id = migration.id AND deleted_at IS NOT NULL),
 		 migration.expected_asset_count,
@@ -45,6 +51,7 @@ func loadReport(
 		vaultID,
 	).Scan(
 		&report.MigrationID, &report.Status, &report.ExpectedEntries, &report.ImportedEntries,
+		&report.InsertedEntries, &report.DuplicateEntries, &report.ConflictCopies,
 		&report.ExpectedDeletedEntries, &report.ImportedDeletedEntries,
 		&report.ExpectedAssets, &report.VerifiedAssets, &report.ExpectedBytes,
 		&report.VerifiedBytes, &report.Errors, &report.VerifiedAt,
