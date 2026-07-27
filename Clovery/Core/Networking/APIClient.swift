@@ -74,8 +74,14 @@ final class APIClient {
 
     private func makeURLRequest(_ request: APIRequest) throws -> URLRequest {
         let normalizedPath = request.path.trimmingCharacters(in: CharacterSet(charactersIn: "/"))
-        let url = configuration.baseURL.appendingPathComponent(normalizedPath)
-        guard url.scheme != nil, url.host != nil else {
+        let baseURL = configuration.baseURL.appendingPathComponent(normalizedPath)
+        guard var components = URLComponents(url: baseURL, resolvingAgainstBaseURL: false) else {
+            throw APIError.invalidConfiguration("Clovery API request URL is invalid.")
+        }
+        if !request.queryItems.isEmpty {
+            components.queryItems = request.queryItems
+        }
+        guard let url = components.url, url.scheme != nil, url.host != nil else {
             throw APIError.invalidConfiguration("Clovery API request URL is invalid.")
         }
 

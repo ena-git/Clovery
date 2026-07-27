@@ -4977,7 +4977,7 @@ function EntryEditor({onClose, onSave, theme, lang, editEntry, initialDate, allE
       : tags;
     // Save immediately; completion screen stays until user taps Done
     onSave({
-      id:        editEntry?.id        || 'new-' + Date.now(),
+      id:        editEntry?.id        || window.crypto?.randomUUID?.() || `00000000-0000-4000-8000-${String(Date.now()).padStart(12,'0').slice(-12)}`,
       date:      entryDate,
       createdAt: editEntry?.createdAt || Date.now(),
       lucky:     lucky.trim(),
@@ -9072,6 +9072,7 @@ function mergeEntries(local, cloud) {
 
 
 function App() {
+  const accountVaultMode = window.__cloverySyncMode === 'accountVault';
   // Fade out and remove the CSS loading cover as soon as React renders
   React.useEffect(() => {
     const el = document.getElementById('css-loading');
@@ -9297,6 +9298,7 @@ function App() {
   // refs, not legacy base64, before CloudKit can read them off disk).
   const ckMigratedRef = React.useRef(false);
   React.useEffect(() => {
+    if (accountVaultMode) return;
     if (ckMigratedRef.current) return;
     if (localStorage.getItem('clovery_ck_migrated')) { ckMigratedRef.current = true; return; }
     const stillLegacy = entries.some(e => Array.isArray(e.photos) && e.photos.some(isLegacyPhoto));
@@ -9308,12 +9310,13 @@ function App() {
         try { window.webkit?.messageHandlers?.cloudkit?.postMessage({action:'push', entry: JSON.stringify(e)}); } catch(err) {}
       }
     }
-  }, [entries]);
+  }, [entries, accountVaultMode]);
 
   // Pull from CloudKit whenever the app comes back to the foreground, so
   // entries written elsewhere while this device was backgrounded show up
   // without waiting on a silent push.
   React.useEffect(() => {
+    if (accountVaultMode) return;
     const onVisible = () => {
       if (document.visibilityState === 'visible') {
         try { window.webkit?.messageHandlers?.cloudkit?.postMessage({action:'pull'}); } catch(e) {}
@@ -9321,7 +9324,7 @@ function App() {
     };
     document.addEventListener('visibilitychange', onVisible);
     return () => document.removeEventListener('visibilitychange', onVisible);
-  }, []);
+  }, [accountVaultMode]);
 
   // Persist whenever entries change + sync to iCloud
   React.useEffect(() => {
@@ -9347,6 +9350,7 @@ function App() {
           // backup (recovery if localStorage is ever wiped). Never sent to
           // iCloud KV store (photos would blow past the 1MB cap).
           full_entries: JSON.stringify(entries),
+          deleted_ids: localStorage.getItem('clovery_deleted_ids') || '[]',
           lastModified: Date.now(),
         };
         if (profileName) msg.clovery_name = profileName;
@@ -9363,6 +9367,10 @@ function App() {
 
   // iCloud: register callback so Swift can push remote changes into React state
   React.useEffect(() => {
+    if (accountVaultMode) {
+      try { localStorage.removeItem('clovery_icloud_pending'); } catch(e) {}
+      return;
+    }
     // Check for data that was injected before React mounted (startup sync)
     try {
       const pending = localStorage.getItem('clovery_icloud_pending');
@@ -9392,7 +9400,24 @@ function App() {
       } catch(e) {}
     };
     return () => { delete window.__clovery_applyICloud; };
-  }, []);
+  }, [accountVaultMode]);
+
+  React.useEffect(() => {
+    if (!accountVaultMode) return;
+    window.__clovery_applyVault = (data) => {
+      if (!data || !Array.isArray(data.entries)) return;
+      try {
+        localStorage.setItem('clovery_entries', JSON.stringify(data.entries));
+        localStorage.setItem('clovery_deleted_ids', JSON.stringify(data.deleted_ids || []));
+        if (typeof data.name === 'string' && data.name) {
+          localStorage.setItem('clovery_name', data.name);
+          setProfileName(data.name);
+        }
+      } catch(e) {}
+      setEntries(data.entries);
+    };
+    return () => { delete window.__clovery_applyVault; };
+  }, [accountVaultMode]);
 
   const [editorOpen,setEditorOpen]= React.useState(false);
   const [editorInitialDate, setEditorInitialDate] = React.useState(null);
@@ -9475,7 +9500,7 @@ function App() {
     // Editing can drop photos from an entry — sweep any now-orphaned files.
     if (isEdit) photoGC(allPhotoFilenames(updated));
     // Push this one entry to CloudKit (text + photos) for cross-device sync.
-    if (!entry.isWelcome) {
+    if (!entry.isWelcome && !accountVaultMode) {
       try { window.webkit?.messageHandlers?.cloudkit?.postMessage({action:'push', entry: JSON.stringify(entry)}); } catch(e) {}
     }
     setEditorOpen(false);

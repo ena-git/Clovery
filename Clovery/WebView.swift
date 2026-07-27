@@ -7,13 +7,30 @@ import StoreKit
 import WidgetKit
 import OSLog
 
+enum WebViewSyncMode {
+    case legacyCloud
+    case accountVault
+}
+
+struct AccountVaultWebContext {
+    let namespace: VaultSyncNamespace
+    let coordinator: VaultSyncCoordinator
+    let localStore: VaultLocalStoring
+}
+
 struct WebView: UIViewRepresentable {
     private let boardStore: BoardStore
     private let fontStore: AppFontStore?
+    private let vaultContext: AccountVaultWebContext?
 
-    init(boardStore: BoardStore, fontStore: AppFontStore? = nil) {
+    init(
+        boardStore: BoardStore,
+        fontStore: AppFontStore? = nil,
+        vaultContext: AccountVaultWebContext? = nil
+    ) {
         self.boardStore = boardStore
         self.fontStore = fontStore
+        self.vaultContext = vaultContext
     }
 
     // MARK: – Message handler (haptic + notifications + iCloud)
@@ -39,17 +56,24 @@ struct WebView: UIViewRepresentable {
         private let photoStore: PhotoStoring
         private let imageExporter: ImageExporting
         private let fontStore: AppFontStore?
+        private let vaultContext: AccountVaultWebContext?
+        private var vaultSyncTask: Task<Void, Never>?
+        var syncMode: WebViewSyncMode {
+            vaultContext == nil ? .legacyCloud : .accountVault
+        }
 
         init(
             photoStore: PhotoStoring = PhotoStore(),
             imageExporter: ImageExporting = ImageExportService(),
             boardStore: BoardStore,
-            fontStore: AppFontStore? = nil
+            fontStore: AppFontStore? = nil,
+            vaultContext: AccountVaultWebContext? = nil
         ) {
             self.photoStore = photoStore
             self.imageExporter = imageExporter
             self.boardStore = boardStore
             self.fontStore = fontStore
+            self.vaultContext = vaultContext
             super.init()
         }
 
@@ -116,7 +140,7 @@ struct WebView: UIViewRepresentable {
                       let action = body["action"] as? String else { return }
                 if action == "save" {
                     // Save immediately (not async) to ensure data persists before app could be killed
-                    self.saveToICloud(payload: body)
+                    self.saveBridgePayload(body)
                 }
             } else if message.name == "shareImage" {
                 guard let body = message.body as? [String: Any],
@@ -196,6 +220,7 @@ struct WebView: UIViewRepresentable {
                     else        { self.removeBoardProtection() }
                 }
             } else if message.name == "cloudkit" {
+                guard syncMode == .legacyCloud else { return }
                 guard let body = message.body as? [String: Any],
                       let action = body["action"] as? String else { return }
                 if action == "push", let entryStr = body["entry"] as? String {
@@ -214,6 +239,10 @@ struct WebView: UIViewRepresentable {
 
         // MARK: WKNavigationDelegate
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+            guard syncMode == .legacyCloud else {
+                refreshAccountVault()
+                return
+            }
             // Force iCloud pull before injecting
             NSUbiquitousKeyValueStore.default.synchronize()
             // Page fully loaded — push any iCloud data into localStorage
@@ -366,6 +395,7 @@ struct WebView: UIViewRepresentable {
         // MARK: iCloud Key-Value Sync
 
         func startObservingICloud() {
+            guard syncMode == .legacyCloud else { return }
             let store = NSUbiquitousKeyValueStore.default
             store.synchronize()
 
@@ -530,7 +560,56 @@ struct WebView: UIViewRepresentable {
             }
         }
 
-        private func saveToICloud(payload: [String: Any]) {
+        private func saveBridgePayload(_ payload: [String: Any]) {
+            if syncMode == .accountVault {
+                saveToAccountVault(payload)
+                writeWidgetSnapshot(payload)
+                return
+            }
+            saveToLegacyCloud(payload: payload)
+        }
+
+        private func saveToAccountVault(_ payload: [String: Any]) {
+            guard let vaultContext,
+                  let fullEntries = payload["full_entries"] as? String,
+                  let entriesData = fullEntries.data(using: .utf8),
+                  let entries = try? JSONDecoder().decode(
+                    [[String: JSONValue]].self,
+                    from: entriesData
+                  ) else { return }
+            let deletedIDsJSON = payload["deleted_ids"] as? String ?? "[]"
+            let deletedIDs = deletedIDsJSON.data(using: .utf8).flatMap {
+                try? JSONDecoder().decode([String].self, from: $0)
+            } ?? []
+            let snapshot = VaultDiarySnapshot(
+                entries: entries,
+                deletedIDs: deletedIDs,
+                name: payload["clovery_name"] as? String
+            )
+            do {
+                try vaultContext.localStore.save(snapshot)
+            } catch {
+                return
+            }
+            let previousTask = vaultSyncTask
+            vaultSyncTask = Task { @MainActor [weak self] in
+                await previousTask?.value
+                guard !Task.isCancelled else { return }
+                do {
+                    let resolved = try await vaultContext.coordinator.sync(
+                        snapshot,
+                        for: vaultContext.namespace
+                    )
+                    self?.injectVaultSnapshot(resolved)
+                } catch is CancellationError {
+                    return
+                } catch {
+                    return
+                }
+            }
+        }
+
+        private func saveToLegacyCloud(payload: [String: Any]) {
             let store = NSUbiquitousKeyValueStore.default
             if let entries = payload["clovery_entries"] as? String {
                 // Compress and save to KV store (slim — photos already stripped by JS)
@@ -576,7 +655,10 @@ struct WebView: UIViewRepresentable {
             }
             store.synchronize()
 
-            // ── Write to App Groups shared container for Widget Extension ──
+            writeWidgetSnapshot(payload)
+        }
+
+        private func writeWidgetSnapshot(_ payload: [String: Any]) {
             if let shared = UserDefaults(suiteName: "group.com.clovery.app") {
                 if let entries = payload["clovery_entries"] as? String {
                     shared.set(entries, forKey: "widget_entries")
@@ -604,6 +686,64 @@ struct WebView: UIViewRepresentable {
                     WidgetCenter.shared.reloadAllTimelines()
                 }
             }
+        }
+
+        func refreshAccountVault() {
+            guard let vaultContext else { return }
+            let previousTask = vaultSyncTask
+            vaultSyncTask = Task { @MainActor [weak self] in
+                await previousTask?.value
+                guard !Task.isCancelled else { return }
+                do {
+                    let snapshot = try await vaultContext.coordinator.pull(
+                        for: vaultContext.namespace
+                    )
+                    self?.injectVaultSnapshot(snapshot)
+                } catch {
+                    return
+                }
+            }
+        }
+
+        private func injectVaultSnapshot(_ snapshot: VaultDiarySnapshot) {
+            let script = BridgeJavaScript.vaultData(snapshot)
+            guard !script.isEmpty else { return }
+            webView?.evaluateJavaScript(script, completionHandler: nil)
+        }
+
+        func accountVaultBootstrapScript() -> String? {
+            guard let vaultContext,
+                  let snapshot = try? vaultContext.localStore.load() else {
+                return nil
+            }
+            let encoder = JSONEncoder()
+            encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
+            guard let entriesData = try? encoder.encode(snapshot.entries),
+                  let entriesJSON = String(data: entriesData, encoding: .utf8),
+                  let deletedData = try? encoder.encode(snapshot.deletedIDs),
+                  let deletedJSON = String(data: deletedData, encoding: .utf8) else {
+                return nil
+            }
+            let nameJSON: String
+            if let name = snapshot.name,
+               let data = try? JSONSerialization.data(withJSONObject: [name]),
+               let array = String(data: data, encoding: .utf8) {
+                nameJSON = String(array.dropFirst().dropLast())
+            } else {
+                nameJSON = "null"
+            }
+            return """
+            Object.defineProperty(window, '__cloverySyncMode', {
+              value: 'accountVault', writable: false, configurable: false
+            });
+            localStorage.removeItem('clovery_entries');
+            localStorage.removeItem('clovery_icloud_pending');
+            if (\(entriesJSON).length > 0) {
+              localStorage.setItem('clovery_entries', JSON.stringify(\(entriesJSON)));
+            }
+            localStorage.setItem('clovery_deleted_ids', JSON.stringify(\(deletedJSON)));
+            if (\(nameJSON)) localStorage.setItem('clovery_name', \(nameJSON));
+            """
         }
 
         // Swift → JS: push iCloud/local data into the running WebView
@@ -728,13 +868,26 @@ struct WebView: UIViewRepresentable {
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(boardStore: boardStore, fontStore: fontStore)
+        Coordinator(
+            boardStore: boardStore,
+            fontStore: fontStore,
+            vaultContext: vaultContext
+        )
     }
 
     func makeUIView(context: Context) -> WKWebView {
         let config = WKWebViewConfiguration()
         config.allowsInlineMediaPlayback = true
         config.mediaTypesRequiringUserActionForPlayback = []
+        if let script = context.coordinator.accountVaultBootstrapScript() {
+            config.userContentController.addUserScript(
+                WKUserScript(
+                    source: script,
+                    injectionTime: .atDocumentStart,
+                    forMainFrameOnly: true
+                )
+            )
+        }
         // Register message handlers
         config.userContentController.add(context.coordinator, name: "haptic")
         config.userContentController.add(context.coordinator, name: "notifications")
@@ -773,7 +926,9 @@ struct WebView: UIViewRepresentable {
         // Wire up iCloud sync
         context.coordinator.webView = webView
         context.coordinator.startObservingBoardStore()
-        context.coordinator.startObservingICloud()
+        if context.coordinator.syncMode == .legacyCloud {
+            context.coordinator.startObservingICloud()
+        }
         WebViewCoordinatorBridge.shared.coordinator = context.coordinator
 
         if let url = Bundle.main.url(forResource: "Clover Diary", withExtension: "html") {
@@ -810,6 +965,14 @@ class WebViewCoordinatorBridge {
             completion()
             return
         }
+        guard coordinator.syncMode == .legacyCloud else {
+            completion()
+            return
+        }
         coordinator.pullCloudKitData(into: webView, completion: completion)
+    }
+
+    func refreshAccountVault() {
+        coordinator?.refreshAccountVault()
     }
 }

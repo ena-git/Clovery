@@ -121,6 +121,18 @@ final class WebBridgeContractTests: XCTestCase {
         XCTAssertTrue(html.contains("没有找到可恢复的购买记录"))
     }
 
+    func testAccountVaultModeKeepsLegacyCloudAsReadOnlyRecoveryEvidence() throws {
+        let webViewSource = try source("Clovery/WebView.swift")
+        let html = try source("Clovery/Clover Diary.html")
+
+        XCTAssertTrue(webViewSource.contains("case accountVault"))
+        XCTAssertTrue(webViewSource.contains("guard syncMode == .legacyCloud else"))
+        XCTAssertTrue(webViewSource.contains("VaultDiarySnapshot("))
+        XCTAssertTrue(html.contains("window.__cloverySyncMode === 'accountVault'"))
+        XCTAssertTrue(html.contains("deleted_ids: localStorage.getItem('clovery_deleted_ids') || '[]'"))
+        XCTAssertTrue(html.contains("window.crypto?.randomUUID?.()"))
+    }
+
     private func source(_ relativePath: String) throws -> String {
         try String(
             contentsOf: repositoryRoot.appendingPathComponent(relativePath),

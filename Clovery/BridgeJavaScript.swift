@@ -58,6 +58,23 @@ enum BridgeJavaScript {
         """
     }
 
+    static func vaultData(_ snapshot: VaultDiarySnapshot) -> String {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
+        guard let entriesData = try? encoder.encode(snapshot.entries),
+              let entries = try? JSONSerialization.jsonObject(with: entriesData) else {
+            return ""
+        }
+        return evaluateJSONCallback(
+            name: "window.__clovery_applyVault",
+            payload: [[
+                "entries": entries,
+                "deleted_ids": snapshot.deletedIDs,
+                "name": snapshot.name ?? NSNull()
+            ]]
+        )
+    }
+
     static func migrationExportResult(
         status: String,
         entryCount: Int = 0,

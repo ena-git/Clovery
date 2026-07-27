@@ -97,6 +97,15 @@
 		AABB00000000000000000150 /* AccountEntitlementAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000156 /* AccountEntitlementAPI.swift */; };
 		AABB00000000000000000151 /* AccountEntitlementCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000157 /* AccountEntitlementCache.swift */; };
 		AABB00000000000000000152 /* EntitlementReconciler.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000158 /* EntitlementReconciler.swift */; };
+		AABB00000000000000000160 /* VaultSyncAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000166 /* VaultSyncAPI.swift */; };
+		AABB00000000000000000161 /* VaultAssetAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000167 /* VaultAssetAPI.swift */; };
+		AABB00000000000000000162 /* VaultSyncCheckpointStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000168 /* VaultSyncCheckpointStore.swift */; };
+		AABB00000000000000000163 /* VaultLocalStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000169 /* VaultLocalStore.swift */; };
+		AABB00000000000000000164 /* InitialVaultPuller.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000016A /* InitialVaultPuller.swift */; };
+		AABB00000000000000000165 /* VaultAssetUploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000016B /* VaultAssetUploader.swift */; };
+		AABB00000000000000000170 /* VaultSyncCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000016C /* VaultSyncCoordinator.swift */; };
+		AABB00000000000000000171 /* VaultSyncConflictResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000172 /* VaultSyncConflictResolver.swift */; };
+		AABB00000000000000000173 /* VaultSnapshotMetadataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000174 /* VaultSnapshotMetadataStore.swift */; };
 		FCECDFE02FE92C7C0067AF51 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFDF2FE92C7C0067AF51 /* WidgetKit.framework */; };
 		FCECDFE22FE92C7C0067AF51 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFE12FE92C7C0067AF51 /* SwiftUI.framework */; };
 		FCECDFEF2FE92C7D0067AF51 /* CloveryWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -229,6 +238,15 @@
 		AABB00000000000000000156 /* AccountEntitlementAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Entitlements/Data/AccountEntitlementAPI.swift; sourceTree = "<group>"; };
 		AABB00000000000000000157 /* AccountEntitlementCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Entitlements/Data/AccountEntitlementCache.swift; sourceTree = "<group>"; };
 		AABB00000000000000000158 /* EntitlementReconciler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Entitlements/Domain/EntitlementReconciler.swift; sourceTree = "<group>"; };
+		AABB00000000000000000166 /* VaultSyncAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Sync/Data/VaultSyncAPI.swift; sourceTree = "<group>"; };
+		AABB00000000000000000167 /* VaultAssetAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Sync/Data/VaultAssetAPI.swift; sourceTree = "<group>"; };
+		AABB00000000000000000168 /* VaultSyncCheckpointStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Sync/Domain/VaultSyncCheckpointStore.swift; sourceTree = "<group>"; };
+		AABB00000000000000000169 /* VaultLocalStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Sync/Data/VaultLocalStore.swift; sourceTree = "<group>"; };
+		AABB0000000000000000016A /* InitialVaultPuller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Sync/Domain/InitialVaultPuller.swift; sourceTree = "<group>"; };
+		AABB0000000000000000016B /* VaultAssetUploader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Sync/Domain/VaultAssetUploader.swift; sourceTree = "<group>"; };
+		AABB0000000000000000016C /* VaultSyncCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Sync/Domain/VaultSyncCoordinator.swift; sourceTree = "<group>"; };
+		AABB00000000000000000172 /* VaultSyncConflictResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Sync/Domain/VaultSyncConflictResolver.swift; sourceTree = "<group>"; };
+		AABB00000000000000000174 /* VaultSnapshotMetadataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Sync/Domain/VaultSnapshotMetadataStore.swift; sourceTree = "<group>"; };
 		AACC00000000000000000001 /* CloveryTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CloveryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC889A182FD464C9002510AD /* Clovery.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Clovery.entitlements; sourceTree = "<group>"; };
 		FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CloveryWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -334,6 +352,15 @@
 				AABB00000000000000000156 /* AccountEntitlementAPI.swift */,
 				AABB00000000000000000157 /* AccountEntitlementCache.swift */,
 				AABB00000000000000000158 /* EntitlementReconciler.swift */,
+				AABB00000000000000000166 /* VaultSyncAPI.swift */,
+				AABB00000000000000000167 /* VaultAssetAPI.swift */,
+				AABB00000000000000000168 /* VaultSyncCheckpointStore.swift */,
+				AABB00000000000000000169 /* VaultLocalStore.swift */,
+				AABB0000000000000000016A /* InitialVaultPuller.swift */,
+				AABB0000000000000000016B /* VaultAssetUploader.swift */,
+				AABB0000000000000000016C /* VaultSyncCoordinator.swift */,
+				AABB00000000000000000172 /* VaultSyncConflictResolver.swift */,
+				AABB00000000000000000174 /* VaultSnapshotMetadataStore.swift */,
 				AABB00000000000000000096 /* KeychainStore.swift */,
 				AABB00000000000000000097 /* DeviceIdentityStore.swift */,
 				AABB00000000000000000098 /* AuthenticationSessionStore.swift */,
@@ -619,6 +646,15 @@
 				AABB00000000000000000150 /* AccountEntitlementAPI.swift in Sources */,
 				AABB00000000000000000151 /* AccountEntitlementCache.swift in Sources */,
 				AABB00000000000000000152 /* EntitlementReconciler.swift in Sources */,
+				AABB00000000000000000160 /* VaultSyncAPI.swift in Sources */,
+				AABB00000000000000000161 /* VaultAssetAPI.swift in Sources */,
+				AABB00000000000000000162 /* VaultSyncCheckpointStore.swift in Sources */,
+				AABB00000000000000000163 /* VaultLocalStore.swift in Sources */,
+				AABB00000000000000000164 /* InitialVaultPuller.swift in Sources */,
+				AABB00000000000000000165 /* VaultAssetUploader.swift in Sources */,
+				AABB00000000000000000170 /* VaultSyncCoordinator.swift in Sources */,
+				AABB00000000000000000171 /* VaultSyncConflictResolver.swift in Sources */,
+				AABB00000000000000000173 /* VaultSnapshotMetadataStore.swift in Sources */,
 				AABB00000000000000000086 /* KeychainStore.swift in Sources */,
 				AABB00000000000000000087 /* DeviceIdentityStore.swift in Sources */,
 				AABB00000000000000000088 /* AuthenticationSessionStore.swift in Sources */,
