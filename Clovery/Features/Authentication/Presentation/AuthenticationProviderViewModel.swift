@@ -5,6 +5,7 @@ import Foundation
 final class AuthenticationProviderViewModel: ObservableObject {
     @Published private(set) var message: String?
     @Published private(set) var isAuthenticating = false
+    @Published private(set) var pendingIdentityClaim: IdentityClaimContext?
 
     private let federatedCoordinator: FederatedLoginCoordinator
     private let passkeyCoordinator: PasskeyLoginCoordinator
@@ -55,6 +56,7 @@ final class AuthenticationProviderViewModel: ObservableObject {
             return
         }
         message = nil
+        pendingIdentityClaim = nil
         isAuthenticating = true
         defer { isAuthenticating = false }
 
@@ -91,10 +93,11 @@ final class AuthenticationProviderViewModel: ObservableObject {
         switch outcome {
         case .authenticated, .cancelled:
             message = nil
+        case let .identityClaim(claim):
+            pendingIdentityClaim = claim
+            message = nil
         case .unavailable:
             message = "该登录方式暂未配置，请稍后再试"
-        case .requiresExistingAccountBinding:
-            message = "该登录方式尚未绑定 Clovery 账户，请先登录已有账户后绑定"
         case .failed:
             message = "快捷登录失败，请稍后再试"
         }

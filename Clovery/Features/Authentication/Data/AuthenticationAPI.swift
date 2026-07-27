@@ -11,7 +11,7 @@ protocol FederatedAuthenticationAPIProtocol {
         nonce: String,
         authorizationCode: String,
         device: DeviceRegistration
-    ) async throws -> AuthSessionResponse
+    ) async throws -> FederatedLoginCompletion
 }
 
 protocol PasskeyAuthenticationAPIProtocol {
@@ -61,10 +61,16 @@ protocol AuthenticationAPIProtocol:
 final class AuthenticationAPI: AuthenticationAPIProtocol {
     private let client: APIClient
     private let encoder: JSONEncoder
+    private let now: () -> Date
 
-    init(client: APIClient, encoder: JSONEncoder = JSONEncoder()) {
+    init(
+        client: APIClient,
+        encoder: JSONEncoder = JSONEncoder(),
+        now: @escaping () -> Date = Date.init
+    ) {
         self.client = client
         self.encoder = encoder
+        self.now = now
     }
 
     func register(
@@ -121,7 +127,7 @@ final class AuthenticationAPI: AuthenticationAPIProtocol {
         nonce: String,
         authorizationCode: String,
         device: DeviceRegistration
-    ) async throws -> AuthSessionResponse {
+    ) async throws -> FederatedLoginCompletion {
         let body = try encoder.encode(
             FederatedLoginCompleteRequest(
                 intentID: intentID,
@@ -130,14 +136,28 @@ final class AuthenticationAPI: AuthenticationAPIProtocol {
                 device: device
             )
         )
-        return try await client.send(
+        let response = try await client.sendResponse(
             APIRequest(
                 method: "POST",
                 path: "/v1/auth/federated/\(provider.rawValue)/complete",
                 body: body
             ),
-            decoding: AuthSessionResponse.self
+            decoding: FederatedLoginWireResponse.self
         )
+        switch (response.statusCode, response.value) {
+        case let (200, .authenticated(session)):
+            return .authenticated(session)
+        case let (202, .identityClaim(claim)):
+            return .identityClaim(
+                IdentityClaimContext(
+                    provider: claim.provider,
+                    token: claim.identityClaimToken,
+                    expiresAt: now().addingTimeInterval(TimeInterval(claim.expiresIn))
+                )
+            )
+        default:
+            throw APIError.decoding("Federated login response does not match its HTTP status.")
+        }
     }
 
     func startPasskeyLogin() async throws -> PasskeyCeremonyResponse {
@@ -208,87 +228,5 @@ final class AuthenticationAPI: AuthenticationAPIProtocol {
                 body: body
             )
         )
-    }
-}
-
-private struct RegisterRequest: Encodable {
-    let loginID: String
-    let password: String
-    let recoveryMethod: String
-    let device: DeviceRegistration
-
-    enum CodingKeys: String, CodingKey {
-        case loginID = "login_id"
-        case password
-        case recoveryMethod = "recovery_method"
-        case device
-    }
-}
-
-private struct LoginRequest: Encodable {
-    let loginID: String
-    let password: String
-    let device: DeviceRegistration
-
-    enum CodingKeys: String, CodingKey {
-        case loginID = "login_id"
-        case password
-        case device
-    }
-}
-
-private struct RefreshRequest: Encodable {
-    let refreshToken: String
-
-    enum CodingKeys: String, CodingKey {
-        case refreshToken = "refresh_token"
-    }
-}
-
-private struct FederatedLoginCompleteRequest: Encodable {
-    let intentID: String
-    let nonce: String
-    let authorizationCode: String
-    let device: DeviceRegistration
-
-    enum CodingKeys: String, CodingKey {
-        case intentID = "intent_id"
-        case nonce
-        case authorizationCode = "authorization_code"
-        case device
-    }
-}
-
-private struct PasskeyLoginCompleteRequest: Encodable {
-    let challengeID: String
-    let response: [String: JSONValue]
-    let device: DeviceRegistration
-
-    enum CodingKeys: String, CodingKey {
-        case challengeID = "challenge_id"
-        case response
-        case device
-    }
-}
-
-private struct RecoveryCodeConsumeRequest: Encodable {
-    let loginID: String
-    let recoveryCode: String
-
-    enum CodingKeys: String, CodingKey {
-        case loginID = "login_id"
-        case recoveryCode = "recovery_code"
-    }
-}
-
-private struct PasswordResetCompleteRequest: Encodable {
-    let resetIntentID: String
-    let proof: String
-    let newPassword: String
-
-    enum CodingKeys: String, CodingKey {
-        case resetIntentID = "reset_intent_id"
-        case proof
-        case newPassword = "new_password"
     }
 }

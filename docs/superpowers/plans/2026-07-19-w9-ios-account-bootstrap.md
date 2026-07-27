@@ -121,7 +121,7 @@ The `CloveryTests` group is filesystem-synchronized. Every new application sourc
 - Create: `CloveryTests/IdentityClaimAPITests.swift`
 - Modify: `CloveryTests/TestSupport/AuthenticationAPISpy.swift`
 
-- [ ] **Step 1: Write federated union decoding tests**
+- [x] **Step 1: Write federated union decoding tests**
 
 Require decoding of both W7 responses:
 
@@ -148,7 +148,7 @@ session response without account/vault -> decoding failure
 claim token never appears in APIError.localizedDescription
 ```
 
-- [ ] **Step 2: Write access-token refresh tests**
+- [x] **Step 2: Write access-token refresh tests**
 
 `AuthenticatedAPIClient` must:
 
@@ -159,7 +159,7 @@ claim token never appears in APIError.localizedDescription
 - log out only on terminal refresh rejection, not transient transport errors;
 - never log access or refresh tokens.
 
-- [ ] **Step 3: Run focused tests and observe failures**
+- [x] **Step 3: Run focused tests and observe failures**
 
 ```bash
 cd /Users/huao/Downloads/Clovery-main/.worktrees/swift-auth-foundation
@@ -172,7 +172,7 @@ xcodebuild -project Clovery.xcodeproj -scheme Clovery \
 
 Expected: new tests fail to compile or old API expects only `AuthSessionResponse`.
 
-- [ ] **Step 4: Add status-preserving API responses**
+- [x] **Step 4: Add status-preserving API responses**
 
 Refactor `APIClient` so its private request execution returns status and data:
 
@@ -190,11 +190,11 @@ func sendResponse<Response: Decodable>(
 
 Keep the existing `send` method as a compatibility wrapper returning only `.value`.
 
-- [ ] **Step 5: Change the federation protocol to the union**
+- [x] **Step 5: Change the federation protocol to the union**
 
 `completeFederatedLogin` returns `FederatedLoginCompletion`. Decode by HTTP status and `status`, not by catching `identity_not_bound`. Remove `.requiresExistingAccountBinding` from `FederatedLoginOutcome`; add `.identityClaim(IdentityClaimContext)`.
 
-- [ ] **Step 6: Add claim-aware registration**
+- [x] **Step 6: Add claim-aware registration**
 
 Keep plain registration in `AuthenticationAPI`. Put claim registration in `IdentityClaimAPI`:
 
@@ -213,11 +213,11 @@ protocol IdentityClaimAPIProtocol {
 
 Send `recovery_method: bound_identity`. Generate `registrationRequestID` in the view model once and reuse it for every retry. Never persist the claim token to UserDefaults or Keychain.
 
-- [ ] **Step 7: Implement authenticated transport**
+- [x] **Step 7: Implement authenticated transport**
 
 Use an actor for refresh coalescing and a narrow session-controller protocol. `AuthenticatedAPIClient.send` asks for a valid token, copies the request with `bearerToken`, and retries exactly once after a `401` caused by token expiry. It never retries non-idempotent requests unless the caller supplies its stable request/migration ID.
 
-- [ ] **Step 8: Run focused tests**
+- [x] **Step 8: Run focused tests**
 
 ```bash
 xcodebuild -project Clovery.xcodeproj -scheme Clovery \
@@ -229,7 +229,7 @@ xcodebuild -project Clovery.xcodeproj -scheme Clovery \
 
 Expected: selected tests pass.
 
-- [ ] **Step 9: Register new sources and commit**
+- [x] **Step 9: Register new sources and commit**
 
 Add the new Swift files to `Clovery.xcodeproj/project.pbxproj`, then:
 

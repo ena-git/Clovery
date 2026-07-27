@@ -76,7 +76,7 @@ final class AuthenticationAPIClientTests: XCTestCase {
     }
 
     func testFederatedStartPreservesProviderAndDecodesNonce() async throws {
-        URLProtocolStub.responseData = try JSONEncoder().encode(
+        let responseData = try JSONEncoder().encode(
             FederationIntentResponse(
                 intentID: "intent",
                 provider: "apple",
@@ -85,6 +85,7 @@ final class AuthenticationAPIClientTests: XCTestCase {
             )
         )
         let api = makeAPI(response: makeSession())
+        URLProtocolStub.responseData = responseData
 
         let result = try await api.startFederatedLogin(provider: .apple)
 
@@ -96,7 +97,7 @@ final class AuthenticationAPIClientTests: XCTestCase {
     func testFederatedCompletePreservesIntentNonceAndAuthorizationCode() async throws {
         let api = makeAPI(response: makeSession())
 
-        _ = try await api.completeFederatedLogin(
+        let completion = try await api.completeFederatedLogin(
             provider: .apple,
             intentID: "server-intent",
             nonce: "server-nonce",
@@ -112,6 +113,60 @@ final class AuthenticationAPIClientTests: XCTestCase {
         XCTAssertEqual(URLProtocolStub.lastJSON?["intent_id"] as? String, "server-intent")
         XCTAssertEqual(URLProtocolStub.lastJSON?["nonce"] as? String, "server-nonce")
         XCTAssertEqual(URLProtocolStub.lastJSON?["authorization_code"] as? String, "provider-code")
+        guard case let .authenticated(session) = completion else {
+            return XCTFail("expected authenticated completion")
+        }
+        XCTAssertEqual(session.accountID, "account")
+    }
+
+    func testFederatedCompleteDecodesIdentityClaimResponseByHTTP202() async throws {
+        let api = makeAPI(response: makeSession())
+        URLProtocolStub.statusCode = 202
+        URLProtocolStub.responseData = Data(
+            #"{"status":"identity_claim_required","provider":"apple","identity_claim_token":"claim-secret","expires_in":300}"#.utf8
+        )
+
+        let completion = try await completeFederatedLogin(api: api)
+
+        guard case let .identityClaim(claim) = completion else {
+            return XCTFail("expected identity claim completion")
+        }
+        XCTAssertEqual(claim.provider, .apple)
+        XCTAssertEqual(claim.token, "claim-secret")
+        XCTAssertGreaterThan(claim.expiresAt, Date())
+    }
+
+    func testFederatedClaimRejectsAccountOrVaultFields() async throws {
+        let claimToken = "claim-secret-must-not-leak"
+        for forbiddenField in ["account_id", "vault_id"] {
+            let api = makeAPI(response: makeSession())
+            URLProtocolStub.statusCode = 202
+            URLProtocolStub.responseData = Data(
+                "{\"status\":\"identity_claim_required\",\"provider\":\"apple\",\"identity_claim_token\":\"\(claimToken)\",\"expires_in\":300,\"\(forbiddenField)\":\"forbidden\"}".utf8
+            )
+
+            do {
+                _ = try await completeFederatedLogin(api: api)
+                XCTFail("claim containing \(forbiddenField) should fail")
+            } catch let error as APIError {
+                XCTAssertFalse(error.localizedDescription.contains(claimToken))
+            }
+        }
+    }
+
+    func testFederatedSessionRequiresAccountAndVault() async throws {
+        let api = makeAPI(response: makeSession())
+        URLProtocolStub.statusCode = 200
+        URLProtocolStub.responseData = Data(
+            #"{"access_token":"access","access_token_expires_in":900,"refresh_token":"refresh"}"#.utf8
+        )
+
+        do {
+            _ = try await completeFederatedLogin(api: api)
+            XCTFail("session without account and vault should fail")
+        } catch let error as APIError {
+            XCTAssertEqual(error.code, nil)
+        }
     }
 
     func testRecoveryCodeResetConsumesCodeThenAcceptsNoContentCompletion() async throws {
@@ -150,9 +205,9 @@ final class AuthenticationAPIClientTests: XCTestCase {
     }
 
     func testAPIErrorEnvelopeMapsToTypedError() async throws {
+        let api = makeAPI(response: makeSession())
         URLProtocolStub.statusCode = 401
         URLProtocolStub.responseData = Data(#"{"code":"invalid_credentials","message":"Authentication failed."}"#.utf8)
-        let api = makeAPI(response: makeSession())
 
         do {
             _ = try await api.login(
@@ -184,6 +239,16 @@ final class AuthenticationAPIClientTests: XCTestCase {
         return AuthenticationAPI(client: client)
     }
 
+    private func completeFederatedLogin(api: AuthenticationAPI) async throws -> FederatedLoginCompletion {
+        try await api.completeFederatedLogin(
+            provider: .apple,
+            intentID: "server-intent",
+            nonce: "server-nonce",
+            authorizationCode: "provider-code",
+            device: DeviceRegistration(deviceID: "device", platform: "ios", displayName: "Test iPhone")
+        )
+    }
+
     private func makeSession(refreshToken: String = "refresh") -> AuthSessionResponse {
         AuthSessionResponse(
             accountID: "account",
@@ -213,7 +278,7 @@ private final class URLProtocolStub: URLProtocol {
 
     override func startLoading() {
         Self.lastRequest = request
-        if let body = request.httpBody {
+        if let body = request.capturedBodyData {
             Self.lastJSON = try? JSONSerialization.jsonObject(with: body) as? [String: Any]
         } else {
             Self.lastJSON = nil

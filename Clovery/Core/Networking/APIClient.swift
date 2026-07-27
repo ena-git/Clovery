@@ -1,5 +1,10 @@
 import Foundation
 
+struct APIResponse<Value> {
+    let statusCode: Int
+    let value: Value
+}
+
 final class APIClient {
     private let configuration: APIConfiguration
     private let session: URLSession
@@ -19,13 +24,23 @@ final class APIClient {
         _ request: APIRequest,
         decoding responseType: Response.Type
     ) async throws -> Response {
-        let data = try await perform(request)
-        guard !data.isEmpty else {
+        try await sendResponse(request, decoding: responseType).value
+    }
+
+    func sendResponse<Response: Decodable>(
+        _ request: APIRequest,
+        decoding responseType: Response.Type
+    ) async throws -> APIResponse<Response> {
+        let response = try await perform(request)
+        guard !response.data.isEmpty else {
             throw APIError.emptyResponse
         }
 
         do {
-            return try decoder.decode(responseType, from: data)
+            return APIResponse(
+                statusCode: response.statusCode,
+                value: try decoder.decode(responseType, from: response.data)
+            )
         } catch {
             throw APIError.decoding(error.localizedDescription)
         }
@@ -35,7 +50,7 @@ final class APIClient {
         _ = try await perform(request)
     }
 
-    private func perform(_ request: APIRequest) async throws -> Data {
+    private func perform(_ request: APIRequest) async throws -> (statusCode: Int, data: Data) {
         let urlRequest = try makeURLRequest(request)
         let data: Data
         let response: URLResponse
@@ -54,7 +69,7 @@ final class APIClient {
             throw makeServerError(data: data, statusCode: httpResponse.statusCode)
         }
 
-        return data
+        return (httpResponse.statusCode, data)
     }
 
     private func makeURLRequest(_ request: APIRequest) throws -> URLRequest {

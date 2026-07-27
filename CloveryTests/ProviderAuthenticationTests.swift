@@ -54,13 +54,14 @@ final class ProviderAuthenticationTests: XCTestCase {
         XCTAssertEqual(acceptedSession?.accountID, "account")
     }
 
-    func testIdentityNotBoundRequiresExistingAccountBinding() async {
+    func testUnboundIdentityRoutesToClaimRegistration() async {
         let api = FederatedAuthenticationAPISpy()
-        api.completeError = APIError.server(
-            code: "identity_not_bound",
-            message: "This login method is not bound.",
-            statusCode: 409
+        let claim = IdentityClaimContext(
+            provider: .google,
+            token: "claim-token",
+            expiresAt: Date().addingTimeInterval(300)
         )
+        api.completion = .identityClaim(claim)
         let coordinator = FederatedLoginCoordinator(
             api: api,
             deviceRegistration: { Self.device },
@@ -72,7 +73,7 @@ final class ProviderAuthenticationTests: XCTestCase {
             using: ProviderAuthorizationSpy(result: .authorized(code: "provider-code"))
         )
 
-        XCTAssertEqual(outcome, .requiresExistingAccountBinding)
+        XCTAssertEqual(outcome, .identityClaim(claim))
     }
 
     func testProviderCancellationSkipsBackendCompletion() async {
@@ -116,6 +117,16 @@ private final class ProviderAuthorizationSpy: ProviderAuthorizationProviding {
 @MainActor
 private final class FederatedAuthenticationAPISpy: FederatedAuthenticationAPIProtocol {
     var completeError: Error?
+    var completion: FederatedLoginCompletion = .authenticated(
+        AuthSessionResponse(
+            accountID: "account",
+            vaultID: "vault",
+            accessToken: "access",
+            accessTokenExpiresIn: 900,
+            refreshToken: "refresh",
+            recoveryCodes: nil
+        )
+    )
     private(set) var completeCallCount = 0
     private(set) var completedIntentID: String?
     private(set) var completedNonce: String?
@@ -138,7 +149,7 @@ private final class FederatedAuthenticationAPISpy: FederatedAuthenticationAPIPro
         nonce: String,
         authorizationCode: String,
         device: DeviceRegistration
-    ) async throws -> AuthSessionResponse {
+    ) async throws -> FederatedLoginCompletion {
         completeCallCount += 1
         completedIntentID = intentID
         completedNonce = nonce
@@ -146,13 +157,6 @@ private final class FederatedAuthenticationAPISpy: FederatedAuthenticationAPIPro
         if let completeError {
             throw completeError
         }
-        return AuthSessionResponse(
-            accountID: "account",
-            vaultID: "vault",
-            accessToken: "access",
-            accessTokenExpiresIn: 900,
-            refreshToken: "refresh",
-            recoveryCodes: nil
-        )
+        return completion
     }
 }

@@ -44,7 +44,24 @@ struct FederationIntentResponse: Codable, Equatable {
     }
 }
 
-enum IdentityProvider: String, Codable, CaseIterable {
+enum FederatedLoginCompletion: Equatable {
+    case authenticated(AuthSessionResponse)
+    case identityClaim(IdentityClaimContext)
+}
+
+struct IdentityClaimContext: Codable, Equatable, Hashable {
+    let provider: IdentityProvider
+    let token: String
+    let expiresAt: Date
+}
+
+enum BootstrapSourceKind: String, Codable, Equatable {
+    case legacyLocal = "legacy_local"
+    case legacyCloudKit = "legacy_cloudkit"
+    case newInstall = "new_install"
+}
+
+enum IdentityProvider: String, Codable, CaseIterable, Hashable {
     case apple
     case google
     case huawei

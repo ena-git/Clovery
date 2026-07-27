@@ -27,3 +27,18 @@ enum APIError: Error, Equatable {
         return statusCode
     }
 }
+
+extension APIError: LocalizedError {
+    var errorDescription: String? {
+        switch self {
+        case .invalidConfiguration:
+            return "Clovery 服务配置无效。"
+        case .invalidResponse, .emptyResponse, .decoding:
+            return "Clovery 服务响应无效。"
+        case .transport:
+            return "暂时无法连接 Clovery 服务。"
+        case .server:
+            return "Clovery 服务请求失败。"
+        }
+    }
+}

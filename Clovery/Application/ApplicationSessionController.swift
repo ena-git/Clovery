@@ -60,8 +60,26 @@ final class ApplicationSessionController: ObservableObject {
         }
     }
 
+    func authenticationSession() -> AuthenticationSession? {
+        state.session
+    }
+
+    func refreshAuthenticatedSession() async throws -> AuthenticationSession {
+        guard let refreshToken = try sessionStore.refreshToken() else {
+            throw AuthenticatedAPIClientError.authenticationRequired
+        }
+        let response = try await api.refresh(refreshToken: refreshToken)
+        try accept(response)
+        guard let session = state.session else {
+            throw AuthenticatedAPIClientError.authenticationRequired
+        }
+        return session
+    }
+
     func logout() {
         sessionStore.clear()
         state = .unauthenticated
     }
 }
+
+extension ApplicationSessionController: AuthenticatedSessionControlling {}

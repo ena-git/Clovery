@@ -15,6 +15,7 @@ final class AuthenticationAPISpy: AuthenticationAPIProtocol {
     var loginDelayNanoseconds: UInt64 = 0
     private(set) var registerCallCount = 0
     private(set) var loginCallCount = 0
+    private(set) var lastRefreshToken: String?
 
     func register(
         loginID: String,
@@ -44,7 +45,8 @@ final class AuthenticationAPISpy: AuthenticationAPIProtocol {
     }
 
     func refresh(refreshToken: String) async throws -> AuthSessionResponse {
-        registerResponse
+        lastRefreshToken = refreshToken
+        return registerResponse
     }
 
     func startFederatedLogin(provider: IdentityProvider) async throws -> FederationIntentResponse {
@@ -57,8 +59,8 @@ final class AuthenticationAPISpy: AuthenticationAPIProtocol {
         nonce: String,
         authorizationCode: String,
         device: DeviceRegistration
-    ) async throws -> AuthSessionResponse {
-        registerResponse
+    ) async throws -> FederatedLoginCompletion {
+        .authenticated(registerResponse)
     }
 
     func startPasskeyLogin() async throws -> PasskeyCeremonyResponse {

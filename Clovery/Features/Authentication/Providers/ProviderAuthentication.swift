@@ -15,9 +15,9 @@ protocol ProviderAuthorizationProviding: AnyObject {
 
 enum FederatedLoginOutcome: Equatable {
     case authenticated
+    case identityClaim(IdentityClaimContext)
     case cancelled
     case unavailable
-    case requiresExistingAccountBinding
     case failed
 }
 
@@ -49,15 +49,20 @@ final class FederatedLoginCoordinator {
             let intent = try await api.startFederatedLogin(provider: provider)
             switch await authorizer.authorize(nonce: intent.nonce) {
             case let .authorized(code):
-                let session = try await api.completeFederatedLogin(
+                let completion = try await api.completeFederatedLogin(
                     provider: provider,
                     intentID: intent.intentID,
                     nonce: intent.nonce,
                     authorizationCode: code,
                     device: try deviceRegistration()
                 )
-                try acceptSession(session)
-                return .authenticated
+                switch completion {
+                case let .authenticated(session):
+                    try acceptSession(session)
+                    return .authenticated
+                case let .identityClaim(claim):
+                    return .identityClaim(claim)
+                }
             case .cancelled:
                 return .cancelled
             case .unavailable:
@@ -66,9 +71,6 @@ final class FederatedLoginCoordinator {
                 return .failed
             }
         } catch let error as APIError {
-            if error.code == "identity_not_bound" {
-                return .requiresExistingAccountBinding
-            }
             if error.code == "identity_provider_unavailable" ||
                 error.code == "identity_provider_unsupported"
             {
