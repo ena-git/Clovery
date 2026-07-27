@@ -107,11 +107,12 @@ func (service *Service) Restore(
 	transactionIDs []string,
 	environment Environment,
 ) ([]Entitlement, error) {
-	if len(transactionIDs) == 0 || len(transactionIDs) > 100 {
+	if _, err := uuid.Parse(accountID); err != nil || !environment.Valid() || len(transactionIDs) > 100 {
 		return nil, ErrInvalidRequest
 	}
 	seen := make(map[string]struct{}, len(transactionIDs))
 	for _, transactionID := range transactionIDs {
+		transactionID = strings.TrimSpace(transactionID)
 		if _, duplicate := seen[transactionID]; duplicate {
 			continue
 		}

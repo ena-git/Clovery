@@ -7,7 +7,7 @@ import (
 	"time"
 )
 
-func TestServiceClaimsLegacyTransactionWithoutAccountToken(t *testing.T) {
+func TestServiceReservesAndAssignsLegacyPurchaseToCloveryAccountID(t *testing.T) {
 	proof := verifiedTransactionFixture()
 	proof.AppAccountToken = ""
 	assigned := proof
@@ -22,7 +22,8 @@ func TestServiceClaimsLegacyTransactionWithoutAccountToken(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ClaimLegacy() error = %v", err)
 	}
-	if repository.reserveCalls != 1 || verifier.assignCalls != 1 || repository.recordCalls != 1 {
+	if repository.reserveCalls != 1 || verifier.assignCalls != 1 || repository.recordCalls != 1 ||
+		verifier.assignedAccountID != billingAccountID {
 		t.Fatalf(
 			"claim calls: reserve=%d assign=%d record=%d",
 			repository.reserveCalls, verifier.assignCalls, repository.recordCalls,
@@ -30,6 +31,41 @@ func TestServiceClaimsLegacyTransactionWithoutAccountToken(t *testing.T) {
 	}
 	if entitlement.ProductID != assigned.ProductID || repository.recordedAccountID != billingAccountID {
 		t.Fatalf("ClaimLegacy() entitlement = %#v, account = %q", entitlement, repository.recordedAccountID)
+	}
+}
+
+func TestServiceReplaysLegacyTransactionAlreadyAssignedToSameAccount(t *testing.T) {
+	proof := verifiedTransactionFixture()
+	verifier := &stubVerifier{
+		legacyProof:  proof,
+		transactions: map[string]VerifiedTransaction{proof.TransactionID: proof},
+	}
+	repository := &stubRepository{}
+	service, _ := NewService(verifier, repository)
+
+	_, err := service.ClaimLegacy(
+		context.Background(), billingAccountID, "signed-legacy-transaction", EnvironmentSandbox,
+	)
+	if err != nil || repository.reserveCalls != 0 || verifier.assignCalls != 0 || repository.recordCalls != 1 {
+		t.Fatalf(
+			"ClaimLegacy(replay) reserve=%d assign=%d record=%d error=%v",
+			repository.reserveCalls, verifier.assignCalls, repository.recordCalls, err,
+		)
+	}
+}
+
+func TestServiceFailedAppleAssignmentDoesNotCreateEntitlement(t *testing.T) {
+	proof := verifiedTransactionFixture()
+	proof.AppAccountToken = ""
+	verifier := &stubVerifier{legacyProof: proof, assignErr: ErrVerificationUnavailable}
+	repository := &stubRepository{}
+	service, _ := NewService(verifier, repository)
+
+	_, err := service.ClaimLegacy(
+		context.Background(), billingAccountID, "signed-legacy-transaction", EnvironmentSandbox,
+	)
+	if !errors.Is(err, ErrVerificationUnavailable) || repository.recordCalls != 0 {
+		t.Fatalf("ClaimLegacy() record calls = %d, error = %v", repository.recordCalls, err)
 	}
 }
 

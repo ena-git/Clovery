@@ -67,7 +67,7 @@ func buildHandler(databaseHandle *sql.DB, applicationConfig config.Config) (http
 	if err != nil {
 		return nil, err
 	}
-	billingApplication, err := buildBillingApplication(databaseHandle, applicationConfig)
+	billingApplication, err := buildBillingApplication(databaseHandle, applicationConfig, bootstrapService)
 	if err != nil {
 		return nil, err
 	}

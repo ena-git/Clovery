@@ -3,7 +3,9 @@ package main
 import (
 	"database/sql"
 
+	"github.com/clovery/clovery/services/api/internal/application/billingflow"
 	"github.com/clovery/clovery/services/api/internal/billing"
+	"github.com/clovery/clovery/services/api/internal/bootstrapjob"
 	"github.com/clovery/clovery/services/api/internal/config"
 	httpapi "github.com/clovery/clovery/services/api/internal/http"
 )
@@ -11,6 +13,7 @@ import (
 func buildBillingApplication(
 	databaseHandle *sql.DB,
 	applicationConfig config.Config,
+	bootstrap *bootstrapjob.Service,
 ) (httpapi.BillingHTTPApplication, error) {
 	if !applicationConfig.AppleIAP.Enabled() {
 		return nil, nil
@@ -26,5 +29,9 @@ func buildBillingApplication(
 	if err != nil {
 		return nil, err
 	}
-	return billing.NewService(verifier, billing.NewPostgresRepository(databaseHandle))
+	domain, err := billing.NewService(verifier, billing.NewPostgresRepository(databaseHandle))
+	if err != nil {
+		return nil, err
+	}
+	return billingflow.NewService(domain, bootstrap)
 }

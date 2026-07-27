@@ -552,7 +552,7 @@ paths:
   /v1/billing/apple/restore:
     post:
       operationId: restoreAppleTransactions
-      summary: Reverify Apple transactions and return root-account entitlements
+      summary: Complete StoreKit inventory reconciliation and return root-account entitlements
       security:
         - bearerAuth: []
       requestBody:
@@ -563,7 +563,7 @@ paths:
               $ref: "#/components/schemas/AppleRestoreRequest"
       responses:
         "200":
-          description: Current root-account entitlements after restore.
+          description: Current root-account entitlements after a complete StoreKit inventory scan, including an empty inventory.
           content:
             application/json:
               schema:
@@ -1919,8 +1919,9 @@ components:
       properties:
         transaction_ids:
           type: array
-          minItems: 1
+          minItems: 0
           maxItems: 100
+          description: Complete StoreKit transaction inventory. An empty array confirms enumeration completed with no current transactions and does not remove server entitlements.
           items:
             type: string
             minLength: 1
