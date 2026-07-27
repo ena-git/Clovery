@@ -95,6 +95,25 @@ func TestBootstrapJobAttentionResumePreservesProgressAndMigration(t *testing.T) 
 	}
 }
 
+func TestBootstrapJobRetryableErrorPreservesPendingMigration(t *testing.T) {
+	databaseHandle, service := openBootstrapJobDatabase(t)
+	accountID, vaultID := seedBootstrapAccount(t, databaseHandle, "25000000-0000-4000-8000-000000000001", "25000000-0000-4000-8000-000000000002")
+	if _, err := service.Resume(context.Background(), accountID, vaultID, SourceLegacyLocal); err != nil {
+		t.Fatalf("Resume() error = %v", err)
+	}
+	if err := service.RecordRetryableError(
+		context.Background(), accountID, "migration_temporarily_unavailable",
+	); err != nil {
+		t.Fatalf("RecordRetryableError() error = %v", err)
+	}
+
+	job := getBootstrapJob(t, service, accountID)
+	if job.MigrationState != StagePending || job.Status != StatusRunning || job.RetryCount != 1 ||
+		job.LastErrorCode == nil || *job.LastErrorCode != "migration_temporarily_unavailable" {
+		t.Fatalf("retryable job = %#v", job)
+	}
+}
+
 func TestBootstrapJobRejectsCrossAccountAccessAndInvalidErrors(t *testing.T) {
 	databaseHandle, service := openBootstrapJobDatabase(t)
 	accountA, vaultA := seedBootstrapAccount(t, databaseHandle, "30000000-0000-4000-8000-000000000001", "30000000-0000-4000-8000-000000000002")

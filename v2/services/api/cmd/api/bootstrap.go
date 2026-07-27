@@ -63,7 +63,7 @@ func buildHandler(databaseHandle *sql.DB, applicationConfig config.Config) (http
 	if err != nil {
 		return nil, err
 	}
-	migrationApplication, err := buildMigrationApplication(databaseHandle, assetApplication)
+	migrationApplication, err := buildMigrationApplication(databaseHandle, assetApplication, bootstrapService)
 	if err != nil {
 		return nil, err
 	}

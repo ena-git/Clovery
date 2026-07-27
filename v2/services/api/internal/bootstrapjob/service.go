@@ -39,6 +39,7 @@ type repository interface {
 		state StageState,
 		errorCode *string,
 	) error
+	RecordRetryableErrorByAccountID(ctx context.Context, accountID string, errorCode string) error
 }
 
 type Service struct {
@@ -124,6 +125,17 @@ func (service *Service) MarkVault(
 	return service.repository.MarkVaultByAccountID(ctx, accountID, state, errorCode)
 }
 
+func (service *Service) RecordRetryableError(
+	ctx context.Context,
+	accountID string,
+	errorCode string,
+) error {
+	if accountID == "" || !stableErrorCodePattern.MatchString(errorCode) {
+		return errors.Join(ErrInvalidRequest, ErrInvalidErrorCode)
+	}
+	return service.repository.RecordRetryableErrorByAccountID(ctx, accountID, errorCode)
+}
+
 func validateStageEvent(state StageState, errorCode *string) error {
 	if !state.Valid() {
 		return errors.Join(ErrInvalidRequest, ErrInvalidStageState)
@@ -199,6 +211,15 @@ func markStage(job *Job, current *StageState, next StageState, errorCode *string
 	}
 	*current = next
 	return recalculate(job, errorCode)
+}
+
+func recordRetryableError(job *Job, errorCode string) {
+	if job.Status == StatusComplete || job.Status == StatusNeedsAttention {
+		return
+	}
+	job.Status = StatusRunning
+	job.LastErrorCode = &errorCode
+	job.RetryCount++
 }
 
 func recalculate(job *Job, eventErrorCode *string) error {

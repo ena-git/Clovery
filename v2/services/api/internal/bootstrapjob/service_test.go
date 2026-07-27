@@ -26,6 +26,9 @@ func TestServiceValidatesBootstrapCommandsBeforeRepositoryAccess(t *testing.T) {
 	if err := service.MarkMigration(context.Background(), "account", "not-a-uuid", StageComplete, nil); !errors.Is(err, ErrInvalidRequest) {
 		t.Fatalf("MarkMigration() error = %v, want ErrInvalidRequest", err)
 	}
+	if err := service.RecordRetryableError(context.Background(), "account", "Contains Spaces"); !errors.Is(err, ErrInvalidErrorCode) {
+		t.Fatalf("RecordRetryableError() error = %v, want ErrInvalidErrorCode", err)
+	}
 	if store.calls != 0 {
 		t.Fatalf("repository calls = %d, want 0", store.calls)
 	}
@@ -106,6 +109,11 @@ func (repository *stubRepository) MarkEntitlementByAccountID(context.Context, st
 }
 
 func (repository *stubRepository) MarkVaultByAccountID(context.Context, string, StageState, *string) error {
+	repository.calls++
+	return repository.err
+}
+
+func (repository *stubRepository) RecordRetryableErrorByAccountID(context.Context, string, string) error {
 	repository.calls++
 	return repository.err
 }

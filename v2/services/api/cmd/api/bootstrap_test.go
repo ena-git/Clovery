@@ -115,6 +115,7 @@ func TestBuildHandlerRegistersProtectedManagementRoutes(t *testing.T) {
 		httptest.NewRequest(http.MethodPost, "/v1/vault/migrations", nil),
 		httptest.NewRequest(http.MethodPost, "/v1/vault/migrations/id/entries", nil),
 		httptest.NewRequest(http.MethodPost, "/v1/vault/migrations/id/assets", nil),
+		httptest.NewRequest(http.MethodGet, "/v1/vault/migrations/id/assets", nil),
 		httptest.NewRequest(http.MethodPost, "/v1/vault/migrations/id/verify", nil),
 		httptest.NewRequest(http.MethodGet, "/v1/vault/migrations/id/report", nil),
 	} {

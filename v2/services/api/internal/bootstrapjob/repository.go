@@ -161,6 +161,17 @@ func (repository *PostgresRepository) MarkVaultByAccountID(
 	})
 }
 
+func (repository *PostgresRepository) RecordRetryableErrorByAccountID(
+	ctx context.Context,
+	accountID string,
+	errorCode string,
+) error {
+	return repository.updateByAccountID(ctx, accountID, func(job *Job) error {
+		recordRetryableError(job, errorCode)
+		return nil
+	})
+}
+
 func (repository *PostgresRepository) updateByAccountID(
 	ctx context.Context,
 	accountID string,
