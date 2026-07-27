@@ -1749,6 +1749,9 @@ components:
         - status
         - expected_entries
         - imported_entries
+        - inserted_entries
+        - duplicate_entries
+        - conflict_copies
         - expected_deleted_entries
         - imported_deleted_entries
         - expected_assets
@@ -1769,6 +1772,19 @@ components:
         imported_entries:
           type: integer
           minimum: 0
+          description: Number of entries uploaded into migration staging.
+        inserted_entries:
+          type: integer
+          minimum: 0
+          description: Number of journal rows added to the Vault after reconciliation.
+        duplicate_entries:
+          type: integer
+          minimum: 0
+          description: Number of staged entries resolved to an existing or earlier canonical entry.
+        conflict_copies:
+          type: integer
+          minimum: 0
+          description: Number of staged entries preserved under deterministic conflict IDs.
         expected_deleted_entries:
           type: integer
           minimum: 0
