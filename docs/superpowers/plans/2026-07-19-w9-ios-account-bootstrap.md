@@ -1083,7 +1083,7 @@ git diff --check
 
 Expected: all XCTest cases pass, Release simulator build exits `0`, and `git diff --check` prints nothing. If existing test-infrastructure failures remain, fix them in W10 before claiming release readiness; do not suppress tests.
 
-- [ ] **Step 8: Commit integrated iOS bootstrap**
+- [x] **Step 8: Commit integrated iOS bootstrap**
 
 ```bash
 git add Clovery CloveryTests Clovery.xcodeproj/project.pbxproj

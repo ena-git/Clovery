@@ -59,6 +59,18 @@ struct WebView: UIViewRepresentable {
         private let fontStore: AppFontStore?
         private let vaultContext: AccountVaultWebContext?
         private var vaultSyncTask: Task<Void, Never>?
+#if DEBUG
+        private var isVerificationFixture: Bool {
+            ProcessInfo.processInfo.arguments.contains("-CloveryVerificationFixture")
+        }
+#endif
+        var registersNotificationHandler: Bool {
+#if DEBUG
+            !isVerificationFixture
+#else
+            true
+#endif
+        }
         var syncMode: WebViewSyncMode {
             vaultContext == nil ? .legacyCloud : .accountVault
         }
@@ -792,6 +804,9 @@ struct WebView: UIViewRepresentable {
 
         // MARK: Notifications
         private func handleNotification(action: String, payload: [String: Any]) {
+#if DEBUG
+            if isVerificationFixture { return }
+#endif
             let center = UNUserNotificationCenter.current()
             center.delegate = self
 
@@ -895,7 +910,9 @@ struct WebView: UIViewRepresentable {
         }
         // Register message handlers
         config.userContentController.add(context.coordinator, name: "haptic")
-        config.userContentController.add(context.coordinator, name: "notifications")
+        if context.coordinator.registersNotificationHandler {
+            config.userContentController.add(context.coordinator, name: "notifications")
+        }
         config.userContentController.add(context.coordinator, name: "review")
         config.userContentController.add(context.coordinator, name: "icloud")
         config.userContentController.add(context.coordinator, name: "shareImage")
