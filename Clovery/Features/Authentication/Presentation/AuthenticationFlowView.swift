@@ -4,6 +4,7 @@ enum AuthenticationRoute: Hashable {
     case login
     case signUp
     case recovery
+    case identityClaim(IdentityClaimContext)
 }
 
 struct AuthenticationFlowView: View {
@@ -11,13 +12,19 @@ struct AuthenticationFlowView: View {
     @StateObject private var providerViewModel: AuthenticationProviderViewModel
     private let providerPolicy = ProviderVisibilityPolicy()
     let api: AuthenticationAPIProtocol
+    let identityClaimAPI: IdentityClaimAPIProtocol
+    let sourceKind: BootstrapSourceKind
     @ObservedObject var sessionController: ApplicationSessionController
 
     init(
         api: AuthenticationAPIProtocol,
+        identityClaimAPI: IdentityClaimAPIProtocol,
+        sourceKind: BootstrapSourceKind,
         sessionController: ApplicationSessionController
     ) {
         self.api = api
+        self.identityClaimAPI = identityClaimAPI
+        self.sourceKind = sourceKind
         self.sessionController = sessionController
         _providerViewModel = StateObject(
             wrappedValue: AuthenticationProviderViewModel(
@@ -56,10 +63,24 @@ struct AuthenticationFlowView: View {
                     )
                 case .recovery:
                     AccountRecoveryView(api: api)
+                case let .identityClaim(claim):
+                    IdentityClaimRegistrationView(
+                        api: identityClaimAPI,
+                        sessionHandler: sessionController,
+                        claim: claim,
+                        sourceKind: sourceKind,
+                        reauthorize: reauthorize
+                    )
                 }
             }
         }
         .tint(.authInk)
+        .onChange(of: providerViewModel.pendingIdentityClaim) { pendingClaim in
+            guard let claim = providerViewModel.consumePendingIdentityClaim() else {
+                return
+            }
+            path.append(.identityClaim(claim))
+        }
     }
 
     private var quickProviders: [AuthenticationProviderKind] {
@@ -69,6 +90,20 @@ struct AuthenticationFlowView: View {
     private func authenticate(_ provider: AuthenticationProviderKind) {
         Task {
             await providerViewModel.authenticate(provider)
+        }
+    }
+
+    private func reauthorize(_ provider: IdentityProvider) {
+        if case .identityClaim = path.last {
+            path.removeLast()
+        }
+        switch provider {
+        case .apple:
+            authenticate(.apple)
+        case .google:
+            authenticate(.google)
+        case .huawei:
+            authenticate(.huawei)
         }
     }
 }

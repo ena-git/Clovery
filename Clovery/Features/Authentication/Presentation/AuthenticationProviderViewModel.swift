@@ -89,6 +89,11 @@ final class AuthenticationProviderViewModel: ObservableObject {
         }
     }
 
+    func consumePendingIdentityClaim() -> IdentityClaimContext? {
+        defer { pendingIdentityClaim = nil }
+        return pendingIdentityClaim
+    }
+
     private func present(_ outcome: FederatedLoginOutcome) async {
         switch outcome {
         case .authenticated, .cancelled:

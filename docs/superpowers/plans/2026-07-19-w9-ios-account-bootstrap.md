@@ -295,7 +295,7 @@ Hide unavailable buttons instead of showing disabled placeholders. Keep provider
 
 Remove `.wechat` and `.qq` from `IdentityProvider` because they are not part of the approved or implemented federation contract. CloveryID remains password authentication and is not represented as an external identity provider.
 
-- [ ] **Step 4: Route unbound providers to claim registration**
+- [x] **Step 4: Route unbound providers to claim registration**
 
 `AuthenticationProviderViewModel` publishes a one-shot `identityClaim` event. `AuthenticationFlowView` appends `.identityClaim(context)` and clears the event after navigation. Successful bound login still accepts the session and exits auth.
 
@@ -328,7 +328,7 @@ git commit -m "feat(ios): adapt quick login providers"
 - Create: `CloveryTests/IdentityClaimRegistrationViewModelTests.swift`
 - Modify: `CloveryTests/AuthenticationRoutingTests.swift`
 
-- [ ] **Step 1: Write view-model behavior tests**
+- [x] **Step 1: Write view-model behavior tests**
 
 Require:
 
@@ -343,7 +343,7 @@ success accepts exactly the returned account/vault session
 claim token is cleared from memory when flow exits
 ```
 
-- [ ] **Step 2: Run focused tests and observe missing types**
+- [x] **Step 2: Run focused tests and observe missing types**
 
 ```bash
 xcodebuild -project Clovery.xcodeproj -scheme Clovery \
@@ -354,11 +354,11 @@ xcodebuild -project Clovery.xcodeproj -scheme Clovery \
 
 Expected: failure because claim registration UI is absent.
 
-- [ ] **Step 3: Implement the modular view model**
+- [x] **Step 3: Implement the modular view model**
 
 The view model owns fields, validation, one registration request UUID, loading state, and safe Chinese error copy. It delegates API, device registration, and session acceptance through injected protocols. It must not own navigation or bootstrap orchestration.
 
-- [ ] **Step 4: Reuse the existing Figma visual language**
+- [x] **Step 4: Reuse the existing Figma visual language**
 
 Build the view from existing:
 
@@ -383,11 +383,11 @@ Clovery ID...
 
 Provider name is dynamic. Do not show the claim token, Apple email, or subject. Keep all typography responsive to `AppFontStore` through the environment.
 
-- [ ] **Step 5: Integrate navigation**
+- [x] **Step 5: Integrate navigation**
 
 Add `AuthenticationRoute.identityClaim(IdentityClaimContext)`. On success, `ApplicationSessionController` changes to authenticated and the root bootstrap coordinator takes over. On expiry, pop to the previous auth screen with “登录验证已过期，请重新授权”.
 
-- [ ] **Step 6: Run selected tests and a build**
+- [x] **Step 6: Run selected tests and a build**
 
 ```bash
 xcodebuild -project Clovery.xcodeproj -scheme Clovery \
@@ -400,7 +400,7 @@ xcodebuild -project Clovery.xcodeproj -scheme Clovery \
 
 Expected: tests and simulator build pass.
 
-- [ ] **Step 7: Commit claim registration UI**
+- [x] **Step 7: Commit claim registration UI**
 
 ```bash
 git add Clovery/Features/Authentication CloveryTests \

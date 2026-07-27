@@ -2,6 +2,7 @@ import SwiftUI
 
 struct ApplicationRootView: View {
     let api: AuthenticationAPIProtocol
+    let identityClaimAPI: IdentityClaimAPIProtocol
     @StateObject private var sessionController: ApplicationSessionController
     @StateObject private var upgradeController: LegacyUpgradeController
     @StateObject private var fontStore: AppFontStore
@@ -10,6 +11,7 @@ struct ApplicationRootView: View {
 
     init(
         api: AuthenticationAPIProtocol? = nil,
+        identityClaimAPI: IdentityClaimAPIProtocol? = nil,
         sessionController: ApplicationSessionController? = nil,
         fontStore: AppFontStore? = nil,
         detector: LegacyDataDetecting? = nil,
@@ -17,6 +19,7 @@ struct ApplicationRootView: View {
         currentVersion: String? = nil
     ) {
         let resolvedAPI = api ?? Self.makeAPI()
+        let resolvedIdentityClaimAPI = identityClaimAPI ?? Self.makeIdentityClaimAPI()
         let resolvedSessionController = sessionController ??
             ApplicationSessionController(api: resolvedAPI)
         let resolvedDetector = detector ?? LegacyDataDetector(userDefaults: userDefaults)
@@ -26,6 +29,7 @@ struct ApplicationRootView: View {
             ) as? String ?? "0.0.0")
 
         self.api = resolvedAPI
+        self.identityClaimAPI = resolvedIdentityClaimAPI
         _sessionController = StateObject(wrappedValue: resolvedSessionController)
         _fontStore = StateObject(wrappedValue: fontStore ?? AppFontStore())
         _upgradeController = StateObject(
@@ -53,6 +57,8 @@ struct ApplicationRootView: View {
                 NavigationStack {
                     AuthenticationFlowView(
                         api: api,
+                        identityClaimAPI: identityClaimAPI,
+                        sourceKind: bootstrapSourceKind,
                         sessionController: sessionController
                     )
                 }
@@ -68,6 +74,8 @@ struct ApplicationRootView: View {
         case .authentication:
             AuthenticationFlowView(
                 api: api,
+                identityClaimAPI: identityClaimAPI,
+                sourceKind: bootstrapSourceKind,
                 sessionController: sessionController
             )
         case .diary:
@@ -88,7 +96,19 @@ struct ApplicationRootView: View {
             .ignoresSafeArea()
     }
 
+    private var bootstrapSourceKind: BootstrapSourceKind {
+        upgradeController.hasLegacyData ? .legacyLocal : .newInstall
+    }
+
     private static func makeAPI() -> AuthenticationAPI {
+        AuthenticationAPI(client: makeAPIClient())
+    }
+
+    private static func makeIdentityClaimAPI() -> IdentityClaimAPI {
+        IdentityClaimAPI(client: makeAPIClient())
+    }
+
+    private static func makeAPIClient() -> APIClient {
         let buildConfiguration: BuildConfiguration
         #if DEBUG
             buildConfiguration = .debug
@@ -106,6 +126,6 @@ struct ApplicationRootView: View {
                 baseURL: URL(string: "https://invalid.clovery.local")!
             )
         }
-        return AuthenticationAPI(client: APIClient(configuration: configuration))
+        return APIClient(configuration: configuration)
     }
 }

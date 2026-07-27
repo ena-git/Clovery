@@ -14,4 +14,14 @@ final class AuthenticationRoutingTests: XCTestCase {
         XCTAssertEqual(AuthenticationProviderKind.huawei.accessibilityLabel, "使用华为账号登录")
         XCTAssertEqual(AuthenticationProviderKind.passkey.accessibilityLabel, "使用 Clovery 通行密钥登录")
     }
+
+    func testIdentityClaimRoutePreservesVerifiedProviderContext() {
+        let claim = IdentityClaimContext(
+            provider: .apple,
+            token: "claim-secret",
+            expiresAt: Date(timeIntervalSince1970: 200)
+        )
+
+        XCTAssertEqual(AuthenticationRoute.identityClaim(claim), .identityClaim(claim))
+    }
 }
