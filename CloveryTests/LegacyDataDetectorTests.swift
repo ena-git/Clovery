@@ -45,4 +45,21 @@ final class LegacyDataDetectorTests: XCTestCase {
 
         XCTAssertTrue(detector.hasLegacyData)
     }
+
+    func testDetectsDeletedIDMarkerEvenWhenEntriesAreAbsent() {
+        let suiteName = "com.clovery.tests.\(UUID().uuidString)"
+        let defaults = UserDefaults(suiteName: suiteName)!
+        defer {
+            defaults.removePersistentDomain(forName: suiteName)
+        }
+        defaults.set(#"["deleted-entry"]"#, forKey: "clovery_deleted_ids")
+
+        let detector = LegacyDataDetector(
+            userDefaults: defaults,
+            documentsDirectory: FileManager.default.temporaryDirectory,
+            cloudKitMarkerProvider: { false }
+        )
+
+        XCTAssertTrue(detector.hasLegacyData)
+    }
 }

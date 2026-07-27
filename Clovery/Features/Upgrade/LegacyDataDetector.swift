@@ -10,6 +10,7 @@ final class LegacyDataDetector: LegacyDataDetecting {
     private static let userDefaultsMarkers = [
         "clovery_entries",
         "clovery_entries_z",
+        "clovery_deleted_ids",
         "clovery_name"
     ]
     private static let backupFiles = [

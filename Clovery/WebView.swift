@@ -447,6 +447,7 @@ struct WebView: UIViewRepresentable {
                 guard let self else { return }
                 do {
                     let result = try MigrationBundleExporter().export(
+                        migrationID: UUID(),
                         entriesJSON: entriesJSON,
                         deletedIDsJSON: deletedIDsJSON
                     )
@@ -595,93 +596,22 @@ struct WebView: UIViewRepresentable {
             }
         }
 
-        // Merges two entries-JSON strings by id: every entry in `base` is kept as-is
-        // (so `base`'s photos are never dropped), and any entry present in
-        // `additions` but missing from `base` gets appended. Used to combine the
-        // FULL local backup (has photos, but only this device's own writes) with
-        // the iCloud KV store (no photos, but reflects writes from OTHER devices)
-        // without either source blocking the other.
-        private func mergeEntriesJSON(base: String?, additions: String?) -> String? {
-            guard let baseStr = base,
-                  let baseData = baseStr.data(using: .utf8),
-                  let baseArr = (try? JSONSerialization.jsonObject(with: baseData)) as? [[String: Any]] else {
-                return additions ?? base
-            }
-            guard let addStr = additions,
-                  let addData = addStr.data(using: .utf8),
-                  let addArr = (try? JSONSerialization.jsonObject(with: addData)) as? [[String: Any]] else {
-                return base
-            }
-            var seenIds = Set<String>()
-            for e in baseArr { if let id = e["id"] as? String { seenIds.insert(id) } }
-            var merged = baseArr
-            for e in addArr {
-                guard let id = e["id"] as? String, !seenIds.contains(id) else { continue }
-                merged.append(e)
-                seenIds.insert(id)
-            }
-            guard merged.count > baseArr.count,
-                  let mergedData = try? JSONSerialization.data(withJSONObject: merged),
-                  let mergedStr = String(data: mergedData, encoding: .utf8) else { return base }
-            return mergedStr
-        }
-
         // Swift → JS: push iCloud/local data into the running WebView
         private func injectICloudData(into webView: WKWebView) {
-            let store = NSUbiquitousKeyValueStore.default
-            var name: String? = store.string(forKey: "clovery_name")
-
-            // A. FULL local backup (has photos, but only reflects THIS device's own
-            // writes) — used as the base so photos are never dropped, and as the
-            // recovery source if localStorage on this device is ever wiped.
-            var fullBackupEntries: String? = nil
-            if let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
-                let fullBackupURL = dir.appendingPathComponent("clovery_full_backup.json")
-                if let data = try? Data(contentsOf: fullBackupURL),
-                   let backup = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                    fullBackupEntries = backup["entries"] as? String
-                    if name == nil { name = backup["name"] as? String }
-                }
+            guard let documentsDirectory = FileManager.default.urls(
+                for: .documentDirectory,
+                in: .userDomainMask
+            ).first else {
+                return
             }
+            let sources = LegacySnapshotSources(
+                documentsDirectory: documentsDirectory
+            ).readLocalSources()
+            let snapshot = LegacySnapshotMerger().merge(sources)
+            guard snapshot.entriesJSON != "[]" else { return }
 
-            // B. iCloud KV store (slim, no photos) — the actual cross-device sync
-            // channel. Reflects entries written by OTHER devices.
-            var kvEntries: String? = nil
-            if let compressed = store.data(forKey: "clovery_entries_z") {
-                if let decompressed = try? (compressed as NSData).decompressed(using: .zlib) as Data,
-                   let str = String(data: decompressed, encoding: .utf8) {
-                    kvEntries = str
-                    print("[Clovery iCloud] loaded compressed: \(compressed.count) → \(decompressed.count) bytes")
-                }
-            }
-            if kvEntries == nil {
-                kvEntries = store.string(forKey: "clovery_entries")
-                if kvEntries != nil { print("[Clovery iCloud] loaded uncompressed") }
-            }
-
-            // Merge: full backup stays the base (keeps photos), KV store only adds
-            // entries this device doesn't have yet (cross-device sync), never
-            // overwrites or blocks it.
-            var entries = mergeEntriesJSON(base: fullBackupEntries, additions: kvEntries)
-            if entries != nil { print("[Clovery iCloud] merged local backup + KV store") }
-
-            // Fallback: legacy slim local backup (no photos), only if nothing else exists
-            if entries == nil {
-                if let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
-                    let backupURL = dir.appendingPathComponent("clovery_backup.json")
-                    if let data = try? Data(contentsOf: backupURL),
-                       let backup = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                        entries = backup["entries"] as? String
-                        if name == nil { name = backup["name"] as? String }
-                        if entries != nil { print("[Clovery iCloud] loaded from legacy local backup") }
-                    }
-                }
-            }
-
-            guard let entries = entries else { return }
-
-            var dataObj: [String: Any] = ["entries": entries]
-            if let name = name {
+            var dataObj: [String: Any] = ["entries": snapshot.entriesJSON]
+            if let name = snapshot.name {
                 dataObj["clovery_name"] = name
             }
 

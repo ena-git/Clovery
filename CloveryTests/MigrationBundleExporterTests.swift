@@ -21,6 +21,8 @@ final class MigrationBundleExporterTests: XCTestCase {
     }
 
     func testExportCreatesValidatedZipAndPreservesPreviousExport() throws {
+        let firstID = UUID()
+        let secondID = UUID()
         let photoData = Data([0xFF, 0xD8, 0x01, 0x02, 0xFF, 0xD9])
         try photoData.write(
             to: documentsDirectory.appendingPathComponent("photos/photo-0001.jpg")
@@ -32,6 +34,7 @@ final class MigrationBundleExporterTests: XCTestCase {
         let entriesJSON = #"[{"id":"entry-1","photos":["photo-0001.jpg"]}]"#
 
         let first = try exporter.export(
+            migrationID: firstID,
             entriesJSON: entriesJSON,
             deletedIDsJSON: #"["deleted-entry"]"#
         )
@@ -74,10 +77,13 @@ final class MigrationBundleExporterTests: XCTestCase {
         XCTAssertEqual(first.archiveURL.lastPathComponent, "migration_bundle.zip")
         XCTAssertEqual(
             first.archiveURL.deletingLastPathComponent().lastPathComponent,
-            first.migrationID
+            firstID.uuidString.lowercased()
         )
 
-        let second = try exporter.export(entriesJSON: entriesJSON)
+        let second = try exporter.export(
+            migrationID: secondID,
+            entriesJSON: entriesJSON
+        )
         XCTAssertNotEqual(first.archiveURL, second.archiveURL)
         XCTAssertTrue(FileManager.default.fileExists(atPath: first.archiveURL.path))
         XCTAssertTrue(FileManager.default.fileExists(atPath: second.archiveURL.path))
@@ -85,20 +91,34 @@ final class MigrationBundleExporterTests: XCTestCase {
 
     func testExportRejectsMissingPhotoWithoutDeletingPreviousBundle() throws {
         let validEntries = #"[{"id":"entry-1","photos":[]}]"#
-        let previous = try exporter.export(entriesJSON: validEntries)
+        let previous = try exporter.export(
+            migrationID: UUID(),
+            entriesJSON: validEntries
+        )
         let missingPhotoEntries = #"[{"id":"entry-2","photos":["missing.jpg"]}]"#
 
-        XCTAssertThrowsError(try exporter.export(entriesJSON: missingPhotoEntries))
+        XCTAssertThrowsError(
+            try exporter.export(
+                migrationID: UUID(),
+                entriesJSON: missingPhotoEntries
+            )
+        )
         XCTAssertTrue(FileManager.default.fileExists(atPath: previous.archiveURL.path))
     }
 
     func testExportRejectsNonArrayJSON() {
-        XCTAssertThrowsError(try exporter.export(entriesJSON: #"{"id":"entry-1"}"#))
+        XCTAssertThrowsError(
+            try exporter.export(
+                migrationID: UUID(),
+                entriesJSON: #"{"id":"entry-1"}"#
+            )
+        )
     }
 
     func testExportRejectsInvalidDeletedIDsJSON() {
         XCTAssertThrowsError(
             try exporter.export(
+                migrationID: UUID(),
                 entriesJSON: "[]",
                 deletedIDsJSON: #"{"id":"deleted-entry"}"#
             )
@@ -109,6 +129,7 @@ final class MigrationBundleExporterTests: XCTestCase {
         let photoURL = documentsDirectory.appendingPathComponent("photos/photo-0001.jpg")
         try Data([1, 2, 3]).write(to: photoURL)
         let result = try exporter.export(
+            migrationID: UUID(),
             entriesJSON: #"[{"id":"entry-1","photos":["photo-0001.jpg"]}]"#
         )
         var files = try MigrationBundleArchive.read(from: result.archiveURL)
@@ -121,6 +142,7 @@ final class MigrationBundleExporterTests: XCTestCase {
 
     func testValidationRejectsTamperedEntryContentWithSameCount() throws {
         let result = try exporter.export(
+            migrationID: UUID(),
             entriesJSON: #"[{"id":"new-1720000000000","text":"original"}]"#
         )
         var files = try MigrationBundleArchive.read(from: result.archiveURL)
@@ -135,6 +157,7 @@ final class MigrationBundleExporterTests: XCTestCase {
     func testExportRejectsDuplicateEntryIDs() {
         XCTAssertThrowsError(
             try exporter.export(
+                migrationID: UUID(),
                 entriesJSON: #"[{"id":"new-1"},{"id":"new-1"}]"#
             )
         )
@@ -143,6 +166,7 @@ final class MigrationBundleExporterTests: XCTestCase {
     func testExportRejectsDeletedIDThatIsStillActive() {
         XCTAssertThrowsError(
             try exporter.export(
+                migrationID: UUID(),
                 entriesJSON: #"[{"id":"new-1"}]"#,
                 deletedIDsJSON: #"["new-1"]"#
             )
@@ -151,7 +175,45 @@ final class MigrationBundleExporterTests: XCTestCase {
 
     func testExportRejectsEmptySources() {
         XCTAssertThrowsError(
-            try exporter.export(entriesJSON: "[]", sources: [])
+            try exporter.export(migrationID: UUID(), entriesJSON: "[]", sources: [])
         )
+    }
+
+    func testRetryWithSameMigrationIDReusesMatchingArchive() throws {
+        let migrationID = UUID()
+        let entriesJSON = #"[{"id":"entry-1","text":"same"}]"#
+        let first = try exporter.export(
+            migrationID: migrationID,
+            entriesJSON: entriesJSON
+        )
+        let firstData = try Data(contentsOf: first.archiveURL)
+
+        let second = try exporter.export(
+            migrationID: migrationID,
+            entriesJSON: entriesJSON
+        )
+
+        XCTAssertEqual(second.archiveURL, first.archiveURL)
+        XCTAssertEqual(try Data(contentsOf: second.archiveURL), firstData)
+    }
+
+    func testRetryWithSameMigrationIDRejectsContentMismatch() throws {
+        let migrationID = UUID()
+        let first = try exporter.export(
+            migrationID: migrationID,
+            entriesJSON: #"[{"id":"entry-1","text":"first"}]"#
+        )
+
+        XCTAssertThrowsError(
+            try exporter.export(
+                migrationID: migrationID,
+                entriesJSON: #"[{"id":"entry-1","text":"changed"}]"#
+            )
+        ) { error in
+            guard case MigrationBundleError.archiveContentMismatch = error else {
+                return XCTFail("Expected archiveContentMismatch, got \(error)")
+            }
+        }
+        XCTAssertNoThrow(try exporter.validateArchive(at: first.archiveURL))
     }
 }

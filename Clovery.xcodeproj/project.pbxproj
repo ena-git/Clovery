@@ -82,6 +82,11 @@
 		AABB0000000000000000010A /* AccountBootstrapCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000011A /* AccountBootstrapCoordinator.swift */; };
 		AABB0000000000000000010B /* BootstrapDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000011B /* BootstrapDependencies.swift */; };
 		AABB0000000000000000010C /* ApplicationLoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000011C /* ApplicationLoadingView.swift */; };
+		AABB0000000000000000010D /* LegacySnapshotSources.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000121 /* LegacySnapshotSources.swift */; };
+		AABB0000000000000000010E /* LegacySnapshotReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000122 /* LegacySnapshotReader.swift */; };
+		AABB0000000000000000010F /* LegacySnapshotMerger.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000123 /* LegacySnapshotMerger.swift */; };
+		AABB00000000000000000110 /* MigrationBundleContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000124 /* MigrationBundleContent.swift */; };
+		AABB00000000000000000130 /* MigrationBundleContentValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000131 /* MigrationBundleContentValidator.swift */; };
 		FCECDFE02FE92C7C0067AF51 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFDF2FE92C7C0067AF51 /* WidgetKit.framework */; };
 		FCECDFE22FE92C7C0067AF51 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFE12FE92C7C0067AF51 /* SwiftUI.framework */; };
 		FCECDFEF2FE92C7D0067AF51 /* CloveryWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -199,6 +204,11 @@
 		AABB0000000000000000011A /* AccountBootstrapCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/Bootstrap/AccountBootstrapCoordinator.swift; sourceTree = "<group>"; };
 		AABB0000000000000000011B /* BootstrapDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/Bootstrap/BootstrapDependencies.swift; sourceTree = "<group>"; };
 		AABB0000000000000000011C /* ApplicationLoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/ApplicationLoadingView.swift; sourceTree = "<group>"; };
+		AABB00000000000000000121 /* LegacySnapshotSources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Migration/Data/LegacySnapshotSources.swift; sourceTree = "<group>"; };
+		AABB00000000000000000122 /* LegacySnapshotReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Migration/Data/LegacySnapshotReader.swift; sourceTree = "<group>"; };
+		AABB00000000000000000123 /* LegacySnapshotMerger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Migration/Domain/LegacySnapshotMerger.swift; sourceTree = "<group>"; };
+		AABB00000000000000000124 /* MigrationBundleContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationBundleContent.swift; sourceTree = "<group>"; };
+		AABB00000000000000000131 /* MigrationBundleContentValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationBundleContentValidator.swift; sourceTree = "<group>"; };
 		AACC00000000000000000001 /* CloveryTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CloveryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC889A182FD464C9002510AD /* Clovery.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Clovery.entitlements; sourceTree = "<group>"; };
 		FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CloveryWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -289,6 +299,11 @@
 				AABB0000000000000000011A /* AccountBootstrapCoordinator.swift */,
 				AABB0000000000000000011B /* BootstrapDependencies.swift */,
 				AABB0000000000000000011C /* ApplicationLoadingView.swift */,
+				AABB00000000000000000121 /* LegacySnapshotSources.swift */,
+				AABB00000000000000000122 /* LegacySnapshotReader.swift */,
+				AABB00000000000000000123 /* LegacySnapshotMerger.swift */,
+				AABB00000000000000000124 /* MigrationBundleContent.swift */,
+				AABB00000000000000000131 /* MigrationBundleContentValidator.swift */,
 				AABB00000000000000000096 /* KeychainStore.swift */,
 				AABB00000000000000000097 /* DeviceIdentityStore.swift */,
 				AABB00000000000000000098 /* AuthenticationSessionStore.swift */,
@@ -559,6 +574,11 @@
 				AABB0000000000000000010A /* AccountBootstrapCoordinator.swift in Sources */,
 				AABB0000000000000000010B /* BootstrapDependencies.swift in Sources */,
 				AABB0000000000000000010C /* ApplicationLoadingView.swift in Sources */,
+				AABB0000000000000000010D /* LegacySnapshotSources.swift in Sources */,
+				AABB0000000000000000010E /* LegacySnapshotReader.swift in Sources */,
+				AABB0000000000000000010F /* LegacySnapshotMerger.swift in Sources */,
+				AABB00000000000000000110 /* MigrationBundleContent.swift in Sources */,
+				AABB00000000000000000130 /* MigrationBundleContentValidator.swift in Sources */,
 				AABB00000000000000000086 /* KeychainStore.swift in Sources */,
 				AABB00000000000000000087 /* DeviceIdentityStore.swift in Sources */,
 				AABB00000000000000000088 /* AuthenticationSessionStore.swift in Sources */,

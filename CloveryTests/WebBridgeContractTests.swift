@@ -93,6 +93,18 @@ final class WebBridgeContractTests: XCTestCase {
         XCTAssertTrue(html.contains("deletedIDs: localStorage.getItem('clovery_deleted_ids') || '[]'"))
     }
 
+    func testLegacyCollectionIsExtractedFromWebViewAndUsesPersistentWebDataStore() throws {
+        let webViewSource = try source("Clovery/WebView.swift")
+        let readerSource = try source(
+            "Clovery/Features/Migration/Data/LegacySnapshotReader.swift"
+        )
+
+        XCTAssertFalse(webViewSource.contains("func mergeEntriesJSON"))
+        XCTAssertTrue(webViewSource.contains("LegacySnapshotSources("))
+        XCTAssertTrue(readerSource.contains("configuration.websiteDataStore = .default()"))
+        XCTAssertFalse(readerSource.contains("print("))
+    }
+
     func testBoardEntitlementLifecycleAndRestoreFeedbackContract() throws {
         let webViewSource = try source("Clovery/WebView.swift")
         let appSource = try source("Clovery/CloveryApp.swift")

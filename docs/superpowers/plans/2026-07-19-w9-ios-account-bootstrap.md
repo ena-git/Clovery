@@ -532,7 +532,7 @@ git commit -m "feat(ios): gate launch on account bootstrap"
 - Modify: `CloveryTests/MigrationBundleExporterTests.swift`
 - Modify: `CloveryTests/WebBridgeContractTests.swift`
 
-- [ ] **Step 1: Write source and merge tests first**
+- [x] **Step 1: Write source and merge tests first**
 
 Provide deterministic fixtures for:
 
@@ -556,7 +556,7 @@ full backup photo arrays are never replaced by slim cloud copies
 deleted IDs never remove an active conflicting record during collection
 ```
 
-- [ ] **Step 2: Run focused tests and observe missing collector**
+- [x] **Step 2: Run focused tests and observe missing collector**
 
 ```bash
 xcodebuild -project Clovery.xcodeproj -scheme Clovery \
@@ -569,7 +569,7 @@ xcodebuild -project Clovery.xcodeproj -scheme Clovery \
 
 Expected: new source/merger tests fail.
 
-- [ ] **Step 3: Extract legacy source loading from `WebView`**
+- [x] **Step 3: Extract legacy source loading from `WebView`**
 
 Move backup/KVS decompression and merge helpers out of `WebView.Coordinator`. Keep `WebView` as a consumer. `LegacySnapshotReader` loads the app's existing HTML in an offscreen `WKWebView` using the default website data store, waits for navigation completion, and evaluates only:
 
@@ -582,11 +582,11 @@ JSON.stringify({
 
 Do not log returned JavaScript or diary JSON.
 
-- [ ] **Step 4: Pull CloudKit before freezing the snapshot**
+- [x] **Step 4: Pull CloudKit before freezing the snapshot**
 
 Wrap `CloudKitSync.pullAll` behind an async protocol. Download records/photos into the existing documents photos directory, merge them with local/KVS/backup snapshots, then freeze one immutable snapshot for export. A CloudKit network failure preserves local data and reports a retryable bootstrap error; it must not substitute an empty snapshot and mark migration complete.
 
-- [ ] **Step 5: Preserve source-ID content conflicts locally**
+- [x] **Step 5: Preserve source-ID content conflicts locally**
 
 The manifest currently requires unique entry IDs. When two sources contain the same ID with different canonical content, keep the canonical winner's ID and assign the other a stable synthetic ID:
 
@@ -598,7 +598,7 @@ Update that copy's payload `id` to the synthetic ID and add a private `clovery_l
 
 For duplicate comparison, remove only `id` and `clovery_legacy_source_id` before canonicalization. Keep dates, text, tags, photos, ordering, language, and all other user fields so superficially similar but distinct diary records are not collapsed.
 
-- [ ] **Step 6: Let the exporter reuse a checkpoint migration ID**
+- [x] **Step 6: Let the exporter reuse a checkpoint migration ID**
 
 Change:
 
@@ -613,7 +613,7 @@ func export(
 
 The coordinator creates and persists the UUID before export. Retrying uses the same archive directory and validates existing content before reuse. A content mismatch creates a needs-attention error instead of overwriting the prior archive.
 
-- [ ] **Step 7: Run source, export, and bridge tests**
+- [x] **Step 7: Run source, export, and bridge tests**
 
 ```bash
 xcodebuild -project Clovery.xcodeproj -scheme Clovery \
@@ -626,7 +626,7 @@ xcodebuild -project Clovery.xcodeproj -scheme Clovery \
 
 Expected: all selected tests pass and previous export archives remain present.
 
-- [ ] **Step 8: Commit snapshot collection**
+- [x] **Step 8: Commit snapshot collection**
 
 ```bash
 git add Clovery/Features/Migration Clovery/Features/Upgrade \
