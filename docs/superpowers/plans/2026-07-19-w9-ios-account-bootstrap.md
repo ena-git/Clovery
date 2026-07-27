@@ -424,7 +424,7 @@ git commit -m "feat(ios): create CloveryID from identity claim"
 - Create: `CloveryTests/AccountBootstrapCoordinatorTests.swift`
 - Create: `CloveryTests/AccountBootstrapAPITests.swift`
 
-- [ ] **Step 1: Write pure route transition tests**
+- [x] **Step 1: Write pure route transition tests**
 
 Cover the complete matrix:
 
@@ -442,11 +442,11 @@ logout -> authentication without clearing legacy data
 app restart resumes stored bootstrap job
 ```
 
-- [ ] **Step 2: Update the old routing test to fail safely**
+- [x] **Step 2: Update the old routing test to fail safely**
 
 Replace `testLegacyInstallationWithoutSessionStillStartsDiary` with an assertion that legacy users cannot reach diary before authentication. Keep the existing assertion that notice acknowledgement does not delete data.
 
-- [ ] **Step 3: Run focused tests and observe old direct-diary behavior**
+- [x] **Step 3: Run focused tests and observe old direct-diary behavior**
 
 ```bash
 xcodebuild -project Clovery.xcodeproj -scheme Clovery \
@@ -458,11 +458,11 @@ xcodebuild -project Clovery.xcodeproj -scheme Clovery \
 
 Expected: old route returns `.legacyDiaryWithUpgradeNotice` or `.diary`.
 
-- [ ] **Step 4: Keep notice persistence separate from routing**
+- [x] **Step 4: Keep notice persistence separate from routing**
 
 Reduce `LegacyUpgradeController` to notice detection/acknowledgement or rename its role internally without deleting compatibility keys. The bootstrap coordinator owns routes. Persist an explicit notice schema version, not only the marketing version, so a hotfix does not unnecessarily repeat the same announcement.
 
-- [ ] **Step 5: Make the notice mandatory and Chinese**
+- [x] **Step 5: Make the notice mandatory and Chinese**
 
 `UpgradeNoticeView` has one action:
 
@@ -476,7 +476,7 @@ Remove “稍后” and the old optional sheet. Apply `.cloveryFont` to all text
 
 Render the notice over `ApplicationLoadingView`, which reproduces the existing V1 splash/background rather than exposing the diary underneath. The loading view is noninteractive, hidden from VoiceOver behind the notice, and never initializes diary data access before authentication.
 
-- [ ] **Step 6: Implement `AccountBootstrapAPI`**
+- [x] **Step 6: Implement `AccountBootstrapAPI`**
 
 Typed methods:
 
@@ -487,15 +487,15 @@ func resume(sourceKind: BootstrapSourceKind, vaultCheckpoint: VaultCheckpoint?) 
 
 Use authenticated transport. Decode all four stage states and stable error codes. Unknown enum values become a safe `.needsAttention("bootstrap_contract_unknown")`, never `.complete`.
 
-- [ ] **Step 7: Implement coordinator lifecycle**
+- [x] **Step 7: Implement coordinator lifecycle**
 
 The coordinator is `@MainActor`, publishes one `BootstrapRoute`, and delegates work to protocols. It cancels previous tasks on logout/account change, ignores stale completions using an account/vault generation token, and never stores refresh or claim tokens in checkpoints.
 
-- [ ] **Step 8: Integrate root view without a large switch body**
+- [x] **Step 8: Integrate root view without a large switch body**
 
 Move dependency creation into `BootstrapDependencies`. `ApplicationRootView` renders small route views and no longer decides legacy/session combinations itself. The diary is rendered only for `.diary(accountID:vaultID:)` after coordinator completion.
 
-- [ ] **Step 9: Run routing tests and build**
+- [x] **Step 9: Run routing tests and build**
 
 ```bash
 xcodebuild -project Clovery.xcodeproj -scheme Clovery \
@@ -509,7 +509,7 @@ xcodebuild -project Clovery.xcodeproj -scheme Clovery \
 
 Expected: selected tests and build pass.
 
-- [ ] **Step 10: Commit the state machine**
+- [x] **Step 10: Commit the state machine**
 
 ```bash
 git add Clovery/Application Clovery/Features/Bootstrap Clovery/Features/Upgrade \

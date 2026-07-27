@@ -6,26 +6,14 @@ import XCTest
 final class LegacyUpgradeControllerTests: XCTestCase {
     func testFreshInstallationWithoutSessionStartsAuthentication() {
         let controller = makeController(hasLegacyData: false)
-
-        let route = controller.route(
-            hasSession: false,
-            hasLegacyData: false,
-            hasAcknowledgedCurrentVersion: false
-        )
-
-        XCTAssertEqual(route, .authentication)
+        XCTAssertFalse(controller.hasLegacyData)
+        XCTAssertFalse(controller.hasAcknowledgedNotice)
     }
 
-    func testLegacyInstallationWithoutSessionStillStartsDiary() {
+    func testLegacyInstallationWithoutSessionCannotReachDiary() {
         let controller = makeController(hasLegacyData: true)
-
-        let route = controller.route(
-            hasSession: false,
-            hasLegacyData: true,
-            hasAcknowledgedCurrentVersion: false
-        )
-
-        XCTAssertEqual(route, .legacyDiaryWithUpgradeNotice)
+        XCTAssertTrue(controller.hasLegacyData)
+        XCTAssertFalse(controller.hasAcknowledgedNotice)
     }
 
     func testDismissingNoticeDoesNotDeleteLegacyData() {
@@ -40,6 +28,29 @@ final class LegacyUpgradeControllerTests: XCTestCase {
 
         XCTAssertTrue(detector.hasLegacyData)
         XCTAssertTrue(controller.hasAcknowledgedCurrentVersion)
+    }
+
+    func testNoticeAcknowledgementUsesSchemaInsteadOfMarketingVersion() {
+        let defaults = makeDefaults()
+        let detector = LegacyDataDetectorSpy(hasLegacyData: true)
+        let firstController = LegacyUpgradeController(
+            detector: detector,
+            currentVersion: "1.1.0",
+            userDefaults: defaults
+        )
+        firstController.acknowledgeNotice()
+
+        let hotfixController = LegacyUpgradeController(
+            detector: detector,
+            currentVersion: "1.1.1",
+            userDefaults: defaults
+        )
+
+        XCTAssertTrue(hotfixController.hasAcknowledgedNotice)
+        XCTAssertEqual(
+            defaults.string(forKey: LegacyUpgradeController.acknowledgementKey),
+            "1.1.0"
+        )
     }
 
     private func makeController(hasLegacyData: Bool) -> LegacyUpgradeController {

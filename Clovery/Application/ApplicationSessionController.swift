@@ -54,8 +54,10 @@ final class ApplicationSessionController: ObservableObject {
         do {
             let response = try await api.refresh(refreshToken: refreshToken)
             try accept(response)
-        } catch {
+        } catch let error as APIError where error.isTerminalAuthenticationRejection {
             sessionStore.clear()
+            state = .unauthenticated
+        } catch {
             state = .unauthenticated
         }
     }

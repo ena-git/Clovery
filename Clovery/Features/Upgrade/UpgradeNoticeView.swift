@@ -1,49 +1,44 @@
 import SwiftUI
 
 struct UpgradeNoticeView: View {
-    let later: () -> Void
-    let bindAccount: () -> Void
+    let acknowledge: () -> Void
 
     var body: some View {
-        VStack(spacing: 18) {
-            Text("Clovery 小更新")
+        VStack(spacing: 20) {
+            Text("欢迎升级 Clovery")
                 .cloveryFont(.action)
                 .foregroundColor(.authInk)
 
-            Text("你的日记仍然完整保留。你可以继续像以前一样使用，也可以绑定 Clovery 账户，为安全的跨设备同步做好准备。")
+            Text("为了安全地保存并同步你的日记、照片和已购权益，本次更新需要创建或登录 Clovery 账户。你的现有内容仍保留在设备中，完成绑定前不会删除或覆盖。")
                 .cloveryFont(.caption)
                 .foregroundColor(.authInk)
                 .multilineTextAlignment(.center)
                 .fixedSize(horizontal: false, vertical: true)
 
-            HStack(spacing: 16) {
-                Button("稍后", action: later)
-                    .cloveryFont(.action)
-                    .foregroundColor(.authInk)
-                    .buttonStyle(.plain)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 56)
-                    .background(Color.authBackground, in: Capsule())
-
-                Button("绑定 Clovery 账户", action: bindAccount)
-                    .cloveryFont(.caption)
-                    .foregroundColor(.authBackground)
-                    .buttonStyle(.plain)
-                    .frame(maxWidth: .infinity)
-                    .frame(height: 56)
-                    .background(Color.authInk, in: Capsule())
-            }
+            Button("我已知晓", action: acknowledge)
+                .cloveryFont(.action)
+                .foregroundColor(.authBackground)
+                .buttonStyle(.plain)
+                .frame(maxWidth: .infinity)
+                .frame(height: 56)
+                .background(Color.authInk, in: Capsule())
         }
         .padding(.horizontal, 24)
-        .padding(.vertical, 26)
-        .background(Color.authSurface, in: RoundedRectangle(cornerRadius: 28, style: .continuous))
-        .overlay(
-            RoundedRectangle(cornerRadius: 28, style: .continuous)
-                .stroke(Color.authDashedBorder, style: StrokeStyle(lineWidth: 1, dash: [5, 5]))
+        .padding(.vertical, 28)
+        .background(
+            Color.authSurface,
+            in: RoundedRectangle(cornerRadius: 28, style: .continuous)
         )
-        .padding(.horizontal, 14)
-        .padding(.bottom, 18)
+        .overlay {
+            RoundedRectangle(cornerRadius: 28, style: .continuous)
+                .stroke(
+                    Color.authDashedBorder,
+                    style: StrokeStyle(lineWidth: 1, dash: [5, 5])
+                )
+        }
+        .padding(.horizontal, 18)
         .shadow(color: .black.opacity(0.08), radius: 18, y: 8)
         .accessibilityElement(children: .contain)
+        .interactiveDismissDisabled()
     }
 }

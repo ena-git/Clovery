@@ -1,15 +1,11 @@
 import Combine
 import Foundation
 
-enum ApplicationRoute: Equatable {
-    case authentication
-    case diary
-    case legacyDiaryWithUpgradeNotice
-}
-
 @MainActor
 final class LegacyUpgradeController: ObservableObject {
     static let acknowledgementKey = "clovery_last_upgrade_notice_version"
+    static let noticeSchemaKey = "clovery_upgrade_notice_schema_version"
+    static let noticeSchemaVersion = 1
 
     let detector: LegacyDataDetecting
     let currentVersion: String
@@ -29,35 +25,22 @@ final class LegacyUpgradeController: ObservableObject {
         detector.hasLegacyData
     }
 
+    var hasAcknowledgedNotice: Bool {
+        userDefaults.integer(forKey: Self.noticeSchemaKey) >= Self.noticeSchemaVersion
+    }
+
     var hasAcknowledgedCurrentVersion: Bool {
-        userDefaults.string(forKey: Self.acknowledgementKey) == currentVersion
+        hasAcknowledgedNotice
     }
 
-    func route(
-        hasSession: Bool,
-        hasLegacyData: Bool,
-        hasAcknowledgedCurrentVersion: Bool
-    ) -> ApplicationRoute {
-        if hasSession {
-            return .diary
-        }
-        if hasLegacyData {
-            return hasAcknowledgedCurrentVersion
-                ? .diary
-                : .legacyDiaryWithUpgradeNotice
-        }
-        return .authentication
-    }
-
-    func currentRoute(hasSession: Bool) -> ApplicationRoute {
-        route(
-            hasSession: hasSession,
-            hasLegacyData: hasLegacyData,
-            hasAcknowledgedCurrentVersion: hasAcknowledgedCurrentVersion
-        )
+    func acknowledgeNotice() {
+        userDefaults.set(Self.noticeSchemaVersion, forKey: Self.noticeSchemaKey)
+        userDefaults.set(currentVersion, forKey: Self.acknowledgementKey)
     }
 
     func dismissNotice() {
-        userDefaults.set(currentVersion, forKey: Self.acknowledgementKey)
+        acknowledgeNotice()
     }
 }
+
+extension LegacyUpgradeController: BootstrapNoticeControlling {}

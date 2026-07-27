@@ -76,6 +76,12 @@
 		AABB00000000000000000104 /* ProviderVisibilityPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000114 /* ProviderVisibilityPolicy.swift */; };
 		AABB00000000000000000105 /* IdentityClaimRegistrationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000115 /* IdentityClaimRegistrationViewModel.swift */; };
 		AABB00000000000000000106 /* IdentityClaimRegistrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000116 /* IdentityClaimRegistrationView.swift */; };
+		AABB00000000000000000107 /* BootstrapRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000117 /* BootstrapRoute.swift */; };
+		AABB00000000000000000108 /* AccountBootstrapAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000118 /* AccountBootstrapAPI.swift */; };
+		AABB00000000000000000109 /* BootstrapCheckpointStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000119 /* BootstrapCheckpointStore.swift */; };
+		AABB0000000000000000010A /* AccountBootstrapCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000011A /* AccountBootstrapCoordinator.swift */; };
+		AABB0000000000000000010B /* BootstrapDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000011B /* BootstrapDependencies.swift */; };
+		AABB0000000000000000010C /* ApplicationLoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000011C /* ApplicationLoadingView.swift */; };
 		FCECDFE02FE92C7C0067AF51 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFDF2FE92C7C0067AF51 /* WidgetKit.framework */; };
 		FCECDFE22FE92C7C0067AF51 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFE12FE92C7C0067AF51 /* SwiftUI.framework */; };
 		FCECDFEF2FE92C7D0067AF51 /* CloveryWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -187,6 +193,12 @@
 		AABB00000000000000000114 /* ProviderVisibilityPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Domain/ProviderVisibilityPolicy.swift; sourceTree = "<group>"; };
 		AABB00000000000000000115 /* IdentityClaimRegistrationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/IdentityClaimRegistrationViewModel.swift; sourceTree = "<group>"; };
 		AABB00000000000000000116 /* IdentityClaimRegistrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/IdentityClaimRegistrationView.swift; sourceTree = "<group>"; };
+		AABB00000000000000000117 /* BootstrapRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/Bootstrap/BootstrapRoute.swift; sourceTree = "<group>"; };
+		AABB00000000000000000118 /* AccountBootstrapAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Bootstrap/Data/AccountBootstrapAPI.swift; sourceTree = "<group>"; };
+		AABB00000000000000000119 /* BootstrapCheckpointStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/Bootstrap/BootstrapCheckpointStore.swift; sourceTree = "<group>"; };
+		AABB0000000000000000011A /* AccountBootstrapCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/Bootstrap/AccountBootstrapCoordinator.swift; sourceTree = "<group>"; };
+		AABB0000000000000000011B /* BootstrapDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/Bootstrap/BootstrapDependencies.swift; sourceTree = "<group>"; };
+		AABB0000000000000000011C /* ApplicationLoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/ApplicationLoadingView.swift; sourceTree = "<group>"; };
 		AACC00000000000000000001 /* CloveryTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CloveryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC889A182FD464C9002510AD /* Clovery.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Clovery.entitlements; sourceTree = "<group>"; };
 		FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CloveryWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -271,6 +283,12 @@
 				AABB00000000000000000114 /* ProviderVisibilityPolicy.swift */,
 				AABB00000000000000000115 /* IdentityClaimRegistrationViewModel.swift */,
 				AABB00000000000000000116 /* IdentityClaimRegistrationView.swift */,
+				AABB00000000000000000117 /* BootstrapRoute.swift */,
+				AABB00000000000000000118 /* AccountBootstrapAPI.swift */,
+				AABB00000000000000000119 /* BootstrapCheckpointStore.swift */,
+				AABB0000000000000000011A /* AccountBootstrapCoordinator.swift */,
+				AABB0000000000000000011B /* BootstrapDependencies.swift */,
+				AABB0000000000000000011C /* ApplicationLoadingView.swift */,
 				AABB00000000000000000096 /* KeychainStore.swift */,
 				AABB00000000000000000097 /* DeviceIdentityStore.swift */,
 				AABB00000000000000000098 /* AuthenticationSessionStore.swift */,
@@ -535,6 +553,12 @@
 				AABB00000000000000000104 /* ProviderVisibilityPolicy.swift in Sources */,
 				AABB00000000000000000105 /* IdentityClaimRegistrationViewModel.swift in Sources */,
 				AABB00000000000000000106 /* IdentityClaimRegistrationView.swift in Sources */,
+				AABB00000000000000000107 /* BootstrapRoute.swift in Sources */,
+				AABB00000000000000000108 /* AccountBootstrapAPI.swift in Sources */,
+				AABB00000000000000000109 /* BootstrapCheckpointStore.swift in Sources */,
+				AABB0000000000000000010A /* AccountBootstrapCoordinator.swift in Sources */,
+				AABB0000000000000000010B /* BootstrapDependencies.swift in Sources */,
+				AABB0000000000000000010C /* ApplicationLoadingView.swift in Sources */,
 				AABB00000000000000000086 /* KeychainStore.swift in Sources */,
 				AABB00000000000000000087 /* DeviceIdentityStore.swift in Sources */,
 				AABB00000000000000000088 /* AuthenticationSessionStore.swift in Sources */,

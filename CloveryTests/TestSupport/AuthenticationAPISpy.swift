@@ -12,6 +12,7 @@ final class AuthenticationAPISpy: AuthenticationAPIProtocol {
     )
     var registerError: Error?
     var loginError: APIError?
+    var refreshError: Error?
     var loginDelayNanoseconds: UInt64 = 0
     private(set) var registerCallCount = 0
     private(set) var loginCallCount = 0
@@ -46,6 +47,9 @@ final class AuthenticationAPISpy: AuthenticationAPIProtocol {
 
     func refresh(refreshToken: String) async throws -> AuthSessionResponse {
         lastRefreshToken = refreshToken
+        if let refreshError {
+            throw refreshError
+        }
         return registerResponse
     }
 

@@ -26,6 +26,10 @@ enum APIError: Error, Equatable {
         }
         return statusCode
     }
+
+    var isTerminalAuthenticationRejection: Bool {
+        statusCode == 401 || code == "invalid_refresh_token"
+    }
 }
 
 extension APIError: LocalizedError {

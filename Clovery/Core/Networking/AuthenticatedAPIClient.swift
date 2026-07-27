@@ -89,7 +89,7 @@ actor AuthenticatedAPIClient {
             return session
         } catch {
             refreshTask = nil
-            if isTerminalRefreshRejection(error) {
+            if (error as? APIError)?.isTerminalAuthenticationRejection == true {
                 await controller.logout()
             }
             throw error
@@ -102,13 +102,6 @@ actor AuthenticatedAPIClient {
         alreadyRefreshed: Bool
     ) -> Bool {
         error.statusCode == 401 && request.allowsAuthenticationRetry && !alreadyRefreshed
-    }
-
-    private func isTerminalRefreshRejection(_ error: Error) -> Bool {
-        guard let apiError = error as? APIError else {
-            return false
-        }
-        return apiError.statusCode == 401 || apiError.code == "invalid_refresh_token"
     }
 }
 
