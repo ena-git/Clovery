@@ -1,5 +1,22 @@
 import Foundation
 
+struct InitialVaultPullResult: Equatable {
+    let checkpoint: VaultCheckpoint
+    let status: AccountBootstrapStatus
+
+    var cursor: Int64 { checkpoint.cursor }
+    var hasMore: Bool { checkpoint.hasMore }
+}
+
+@MainActor
+protocol InitialVaultPulling: AnyObject {
+    func pull(
+        namespace: VaultSyncNamespace,
+        migrationID: UUID?,
+        sourceKind: BootstrapSourceKind
+    ) async throws -> InitialVaultPullResult
+}
+
 @MainActor
 protocol VaultAssetRestoring: AnyObject {
     func restoreMigrationAssets(
@@ -13,11 +30,11 @@ protocol VaultAssetRestoring: AnyObject {
 }
 
 @MainActor
-final class InitialVaultPuller {
+final class InitialVaultPuller: InitialVaultPulling {
     private let api: VaultSyncAPIProtocol
-    private let localStore: VaultLocalStoring
+    private let localStoreProvider: (VaultSyncNamespace) -> VaultLocalStoring
     private let checkpointStore: VaultSyncCheckpointStoring
-    private let assetRestorer: VaultAssetRestoring
+    private let assetRestorerProvider: (VaultSyncNamespace) -> VaultAssetRestoring
     private let bootstrapAPI: AccountBootstrapAPIProtocol
     private let pageLimit: Int
 
@@ -30,9 +47,25 @@ final class InitialVaultPuller {
         pageLimit: Int = 100
     ) {
         self.api = api
-        self.localStore = localStore
+        self.localStoreProvider = { _ in localStore }
         self.checkpointStore = checkpointStore
-        self.assetRestorer = assetRestorer
+        self.assetRestorerProvider = { _ in assetRestorer }
+        self.bootstrapAPI = bootstrapAPI
+        self.pageLimit = pageLimit
+    }
+
+    init(
+        api: VaultSyncAPIProtocol,
+        localStoreProvider: @escaping (VaultSyncNamespace) -> VaultLocalStoring,
+        checkpointStore: VaultSyncCheckpointStoring,
+        assetRestorerProvider: @escaping (VaultSyncNamespace) -> VaultAssetRestoring,
+        bootstrapAPI: AccountBootstrapAPIProtocol,
+        pageLimit: Int = 100
+    ) {
+        self.api = api
+        self.localStoreProvider = localStoreProvider
+        self.checkpointStore = checkpointStore
+        self.assetRestorerProvider = assetRestorerProvider
         self.bootstrapAPI = bootstrapAPI
         self.pageLimit = pageLimit
     }
@@ -41,7 +74,9 @@ final class InitialVaultPuller {
         namespace: VaultSyncNamespace,
         migrationID: UUID?,
         sourceKind: BootstrapSourceKind
-    ) async throws -> VaultCheckpoint {
+    ) async throws -> InitialVaultPullResult {
+        let localStore = localStoreProvider(namespace)
+        let assetRestorer = assetRestorerProvider(namespace)
         var state = try checkpointStore.load(for: namespace)
         if let migrationID, state.restoredMigrationID != migrationID {
             try await assetRestorer.restoreMigrationAssets(
@@ -75,11 +110,11 @@ final class InitialVaultPuller {
         }
 
         let checkpoint = VaultCheckpoint(cursor: state.cursor, hasMore: false)
-        _ = try await bootstrapAPI.resume(
+        let status = try await bootstrapAPI.resume(
             sourceKind: sourceKind,
             vaultCheckpoint: checkpoint
         )
-        return checkpoint
+        return InitialVaultPullResult(checkpoint: checkpoint, status: status)
     }
 
     private func uniqueChanges(

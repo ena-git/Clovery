@@ -106,6 +106,9 @@
 		AABB00000000000000000170 /* VaultSyncCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000016C /* VaultSyncCoordinator.swift */; };
 		AABB00000000000000000171 /* VaultSyncConflictResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000172 /* VaultSyncConflictResolver.swift */; };
 		AABB00000000000000000173 /* VaultSnapshotMetadataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000174 /* VaultSnapshotMetadataStore.swift */; };
+		AABB00000000000000000175 /* AccountBootstrapPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000176 /* AccountBootstrapPipeline.swift */; };
+		AABB00000000000000000177 /* AccountVaultRuntimeRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000178 /* AccountVaultRuntimeRegistry.swift */; };
+		AABB00000000000000000179 /* AccountReconciliationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000017A /* AccountReconciliationView.swift */; };
 		FCECDFE02FE92C7C0067AF51 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFDF2FE92C7C0067AF51 /* WidgetKit.framework */; };
 		FCECDFE22FE92C7C0067AF51 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFE12FE92C7C0067AF51 /* SwiftUI.framework */; };
 		FCECDFEF2FE92C7D0067AF51 /* CloveryWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
@@ -247,6 +250,9 @@
 		AABB0000000000000000016C /* VaultSyncCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Sync/Domain/VaultSyncCoordinator.swift; sourceTree = "<group>"; };
 		AABB00000000000000000172 /* VaultSyncConflictResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Sync/Domain/VaultSyncConflictResolver.swift; sourceTree = "<group>"; };
 		AABB00000000000000000174 /* VaultSnapshotMetadataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Sync/Domain/VaultSnapshotMetadataStore.swift; sourceTree = "<group>"; };
+		AABB00000000000000000176 /* AccountBootstrapPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/Bootstrap/AccountBootstrapPipeline.swift; sourceTree = "<group>"; };
+		AABB00000000000000000178 /* AccountVaultRuntimeRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Sync/Domain/AccountVaultRuntimeRegistry.swift; sourceTree = "<group>"; };
+		AABB0000000000000000017A /* AccountReconciliationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Bootstrap/Presentation/AccountReconciliationView.swift; sourceTree = "<group>"; };
 		AACC00000000000000000001 /* CloveryTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CloveryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC889A182FD464C9002510AD /* Clovery.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Clovery.entitlements; sourceTree = "<group>"; };
 		FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CloveryWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
@@ -361,6 +367,9 @@
 				AABB0000000000000000016C /* VaultSyncCoordinator.swift */,
 				AABB00000000000000000172 /* VaultSyncConflictResolver.swift */,
 				AABB00000000000000000174 /* VaultSnapshotMetadataStore.swift */,
+				AABB00000000000000000176 /* AccountBootstrapPipeline.swift */,
+				AABB00000000000000000178 /* AccountVaultRuntimeRegistry.swift */,
+				AABB0000000000000000017A /* AccountReconciliationView.swift */,
 				AABB00000000000000000096 /* KeychainStore.swift */,
 				AABB00000000000000000097 /* DeviceIdentityStore.swift */,
 				AABB00000000000000000098 /* AuthenticationSessionStore.swift */,
@@ -655,6 +664,9 @@
 				AABB00000000000000000170 /* VaultSyncCoordinator.swift in Sources */,
 				AABB00000000000000000171 /* VaultSyncConflictResolver.swift in Sources */,
 				AABB00000000000000000173 /* VaultSnapshotMetadataStore.swift in Sources */,
+				AABB00000000000000000175 /* AccountBootstrapPipeline.swift in Sources */,
+				AABB00000000000000000177 /* AccountVaultRuntimeRegistry.swift in Sources */,
+				AABB00000000000000000179 /* AccountReconciliationView.swift in Sources */,
 				AABB00000000000000000086 /* KeychainStore.swift in Sources */,
 				AABB00000000000000000087 /* DeviceIdentityStore.swift in Sources */,
 				AABB00000000000000000088 /* AuthenticationSessionStore.swift in Sources */,

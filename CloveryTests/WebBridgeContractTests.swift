@@ -111,11 +111,12 @@ final class WebBridgeContractTests: XCTestCase {
 
     func testBoardEntitlementLifecycleAndRestoreFeedbackContract() throws {
         let webViewSource = try source("Clovery/WebView.swift")
-        let appSource = try source("Clovery/CloveryApp.swift")
+        let rootSource = try source("Clovery/Application/ApplicationRootView.swift")
         let html = try source("Clovery/Clover Diary.html")
 
         XCTAssertTrue(webViewSource.contains("startObservingBoardStore()"))
-        XCTAssertTrue(appSource.contains("refreshBoardEntitlement()"))
+        XCTAssertTrue(rootSource.contains("await boardStore.refresh()"))
+        XCTAssertTrue(rootSource.contains("refreshAccountVault()"))
         XCTAssertTrue(html.contains("window._boardRestoreResult = (outcome) =>"))
         XCTAssertTrue(html.contains("购买请求正在等待批准"))
         XCTAssertTrue(html.contains("没有找到可恢复的购买记录"))

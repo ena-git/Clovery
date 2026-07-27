@@ -14,6 +14,7 @@ enum WebViewSyncMode {
 
 struct AccountVaultWebContext {
     let namespace: VaultSyncNamespace
+    let accountDirectory: URL
     let coordinator: VaultSyncCoordinator
     let localStore: VaultLocalStoring
 }
@@ -387,11 +388,6 @@ struct WebView: UIViewRepresentable {
                 }
         }
 
-        @MainActor
-        func refreshBoardEntitlement() async {
-            await boardStore.refresh()
-        }
-
         // MARK: iCloud Key-Value Sync
 
         func startObservingICloud() {
@@ -586,8 +582,12 @@ struct WebView: UIViewRepresentable {
                 deletedIDs: deletedIDs,
                 name: payload["clovery_name"] as? String
             )
+            let durableSnapshot: VaultDiarySnapshot
             do {
-                try vaultContext.localStore.save(snapshot)
+                durableSnapshot = try VaultSnapshotMetadataStore(
+                    localStore: vaultContext.localStore
+                ).preservingPrivateMetadata(in: snapshot)
+                try vaultContext.localStore.save(durableSnapshot)
             } catch {
                 return
             }
@@ -597,7 +597,7 @@ struct WebView: UIViewRepresentable {
                 guard !Task.isCancelled else { return }
                 do {
                     let resolved = try await vaultContext.coordinator.sync(
-                        snapshot,
+                        durableSnapshot,
                         for: vaultContext.namespace
                     )
                     self?.injectVaultSnapshot(resolved)
@@ -738,6 +738,7 @@ struct WebView: UIViewRepresentable {
             });
             localStorage.removeItem('clovery_entries');
             localStorage.removeItem('clovery_icloud_pending');
+            localStorage.removeItem('clovery_name');
             if (\(entriesJSON).length > 0) {
               localStorage.setItem('clovery_entries', JSON.stringify(\(entriesJSON)));
             }
@@ -868,7 +869,11 @@ struct WebView: UIViewRepresentable {
     }
 
     func makeCoordinator() -> Coordinator {
-        Coordinator(
+        let photoStore = vaultContext.map {
+            PhotoStore(baseDirectory: $0.accountDirectory)
+        } ?? PhotoStore()
+        return Coordinator(
+            photoStore: photoStore,
             boardStore: boardStore,
             fontStore: fontStore,
             vaultContext: vaultContext
@@ -947,18 +952,11 @@ struct WebView: UIViewRepresentable {
     func updateUIView(_ uiView: WKWebView, context: Context) {}
 }
 
-// Lets AppDelegate reach the running WebView's Coordinator (which it has no
-// direct reference to) when a CloudKit silent push notification arrives.
+// Gives the app lifecycle a narrow path to refresh the active account vault.
 @MainActor
 class WebViewCoordinatorBridge {
     static let shared = WebViewCoordinatorBridge()
     weak var coordinator: WebView.Coordinator?
-
-    func refreshBoardEntitlement() {
-        Task { @MainActor in
-            await coordinator?.refreshBoardEntitlement()
-        }
-    }
 
     func handleRemoteCloudKitNotification(completion: @escaping () -> Void) {
         guard let coordinator = coordinator, let webView = coordinator.webView else {

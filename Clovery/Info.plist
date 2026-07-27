@@ -6,6 +6,8 @@
 	<string>$(CLOVERY_SOURCE_COMMIT)</string>
 	<key>CloveryAPIBaseURL</key>
 	<string>$(CLOVERY_API_BASE_URL)</string>
+	<key>CloveryReleaseAPIBaseURL</key>
+	<string>$(CLOVERY_RELEASE_API_BASE_URL)</string>
 	<key>CloveryGoogleAuthorizationURL</key>
 	<string>$(CLOVERY_GOOGLE_AUTHORIZATION_URL)</string>
 	<key>CloveryGoogleClientID</key>

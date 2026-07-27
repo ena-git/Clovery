@@ -1,9 +1,11 @@
 import SwiftUI
 
 struct ApplicationRootView: View {
+    @Environment(\.scenePhase) private var scenePhase
     private let authenticationAPI: AuthenticationAPIProtocol
     private let identityClaimAPI: IdentityClaimAPIProtocol
     private let sourceKind: BootstrapSourceKind
+    private let vaultRegistry: AccountVaultRuntimeRegistry
     @StateObject private var sessionController: ApplicationSessionController
     @StateObject private var bootstrapCoordinator: AccountBootstrapCoordinator
     @StateObject private var boardStore: BoardStore
@@ -18,6 +20,7 @@ struct ApplicationRootView: View {
         authenticationAPI = resolved.authenticationAPI
         identityClaimAPI = resolved.identityClaimAPI
         sourceKind = resolved.sourceKind
+        vaultRegistry = resolved.vaultRegistry
         _sessionController = StateObject(wrappedValue: resolved.sessionController)
         _bootstrapCoordinator = StateObject(wrappedValue: resolved.coordinator)
         _boardStore = StateObject(wrappedValue: resolved.boardStore)
@@ -32,7 +35,13 @@ struct ApplicationRootView: View {
             }
             .onChange(of: authenticatedAccountKey) { _ in
                 boardStore.accountDidChange()
+                vaultRegistry.accountDidChange(to: authenticatedNamespace)
                 bootstrapCoordinator.sessionDidChange()
+            }
+            .onChange(of: scenePhase) { phase in
+                guard phase == .active else { return }
+                Task { await boardStore.refresh() }
+                WebViewCoordinatorBridge.shared.refreshAccountVault()
             }
             .environment(\.appFontSelection, fontStore.selection)
     }
@@ -58,13 +67,19 @@ struct ApplicationRootView: View {
                 sessionController: sessionController
             )
         case let .reconciling(state):
-            BootstrapHoldingView(
+            AccountReconciliationView(
                 state: state,
                 retry: bootstrapCoordinator.retry,
                 logout: bootstrapCoordinator.logout
             )
-        case .diary:
-            WebView(boardStore: boardStore, fontStore: fontStore)
+        case let .diary(accountID, vaultID):
+            let namespace = VaultSyncNamespace(accountID: accountID, vaultID: vaultID)
+            WebView(
+                boardStore: boardStore,
+                fontStore: fontStore,
+                vaultContext: vaultRegistry.context(for: namespace)
+            )
+                .id("\(accountID):\(vaultID)")
                 .ignoresSafeArea()
         }
     }
@@ -72,6 +87,12 @@ struct ApplicationRootView: View {
     private var authenticatedAccountKey: String? {
         sessionController.authenticationSession().map {
             "\($0.accountID):\($0.vaultID)"
+        }
+    }
+
+    private var authenticatedNamespace: VaultSyncNamespace? {
+        sessionController.authenticationSession().map {
+            VaultSyncNamespace(accountID: $0.accountID, vaultID: $0.vaultID)
         }
     }
 }

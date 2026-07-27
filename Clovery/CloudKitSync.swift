@@ -175,6 +175,10 @@ class CloudKitSync {
                     do {
                         try FileManager.default.copyItem(at: sourceURL, to: destURL)
                     } catch {
+                        print(
+                            "[Clovery CloudKit] photo copy failed for \(record.recordID.recordName): " +
+                                error.localizedDescription
+                        )
                         continue
                     }
                 }

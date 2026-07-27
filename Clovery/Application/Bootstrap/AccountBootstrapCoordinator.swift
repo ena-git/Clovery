@@ -23,6 +23,7 @@ final class AccountBootstrapCoordinator: ObservableObject {
     private let noticeController: BootstrapNoticeControlling
     private let api: AccountBootstrapAPIProtocol
     private let checkpointStore: BootstrapCheckpointStoring
+    private let pipeline: AccountBootstrapPipelining?
     private var operationTask: Task<Void, Never>?
     private var generation = UUID()
 
@@ -30,12 +31,14 @@ final class AccountBootstrapCoordinator: ObservableObject {
         sessionController: BootstrapSessionControlling,
         noticeController: BootstrapNoticeControlling,
         api: AccountBootstrapAPIProtocol,
-        checkpointStore: BootstrapCheckpointStoring
+        checkpointStore: BootstrapCheckpointStoring,
+        pipeline: AccountBootstrapPipelining? = nil
     ) {
         self.sessionController = sessionController
         self.noticeController = noticeController
         self.api = api
         self.checkpointStore = checkpointStore
+        self.pipeline = pipeline
     }
 
     func start() {
@@ -124,6 +127,22 @@ final class AccountBootstrapCoordinator: ObservableObject {
                 return
             }
 
+            if let pipeline {
+                let completedStatus = try await pipeline.run(
+                    initialStatus: currentStatus,
+                    session: session,
+                    sourceKind: sourceKind
+                ) { [weak self] status in
+                    guard let self, self.isCurrent(token: token, session: session) else {
+                        return
+                    }
+                    self.route = .reconciling(.working(status))
+                }
+                guard isCurrent(token: token, session: session) else { return }
+                _ = apply(completedStatus, session: session)
+                return
+            }
+
             let resumedStatus = try await api.resume(
                 sourceKind: sourceKind,
                 vaultCheckpoint: nil
@@ -132,6 +151,14 @@ final class AccountBootstrapCoordinator: ObservableObject {
             _ = apply(resumedStatus, session: session)
         } catch is CancellationError {
             return
+        } catch let error as AccountBootstrapPipelineError {
+            guard isCurrent(token: token, session: session) else { return }
+            switch error {
+            case let .retryable(code):
+                route = .reconciling(.retryable(code))
+            case let .needsAttention(code):
+                route = .reconciling(.needsAttention(code))
+            }
         } catch let error as APIError {
             guard isCurrent(token: token, session: session) else { return }
             if error.code == "bootstrap_conflict" || error.statusCode == 409 {

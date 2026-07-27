@@ -78,18 +78,13 @@ final class VaultLocalStore: VaultLocalStoring {
 
     func materialize(_ changes: [VaultSyncChange]) throws -> VaultDiarySnapshot {
         var snapshot = try load()
-        var entriesByID = Dictionary(
-            uniqueKeysWithValues: snapshot.entries.compactMap { entry in
-                entry.stringValue(for: "id").map { ($0, entry) }
-            }
-        )
-        var anonymousEntries = snapshot.entries.filter { $0.stringValue(for: "id") == nil }
+        var entries = snapshot.entries
         var deletedIDs = Set(snapshot.deletedIDs)
 
         for change in changes.sorted(by: { $0.cursor < $1.cursor })
         where change.entityType == "journal_entry" {
             if change.deleted {
-                entriesByID.removeValue(forKey: change.entityID)
+                entries.removeAll { $0.stringValue(for: "id") == change.entityID }
                 deletedIDs.insert(change.entityID)
                 continue
             }
@@ -98,14 +93,21 @@ final class VaultLocalStore: VaultLocalStoring {
             }
             var payload = rawPayload
             payload["id"] = .string(change.entityID)
-            if entriesByID[change.entityID] == nil {
-                removeLegacyDuplicate(of: payload, from: &entriesByID, anonymousEntries: &anonymousEntries)
+            if let index = entries.firstIndex(where: {
+                $0.stringValue(for: "id") == change.entityID
+            }) {
+                entries[index] = payload
+            } else if let duplicateIndex = entries.firstIndex(where: {
+                Self.legacySignature($0) == Self.legacySignature(payload)
+            }) {
+                entries[duplicateIndex] = payload
+            } else {
+                entries.append(payload)
             }
-            entriesByID[change.entityID] = payload
             deletedIDs.remove(change.entityID)
         }
 
-        snapshot.entries = entriesByID.values.sorted(by: Self.entryOrder) + anonymousEntries
+        snapshot.entries = entries
         snapshot.deletedIDs = deletedIDs.sorted()
         try save(snapshot)
         return snapshot
@@ -141,23 +143,6 @@ final class VaultLocalStore: VaultLocalStoring {
         return try JSONSerialization.data(withJSONObject: value)
     }
 
-    private func removeLegacyDuplicate(
-        of payload: [String: JSONValue],
-        from entriesByID: inout [String: [String: JSONValue]],
-        anonymousEntries: inout [[String: JSONValue]]
-    ) {
-        let signature = Self.legacySignature(payload)
-        if let duplicateID = entriesByID.first(where: {
-            $0.key != payload.stringValue(for: "id") && Self.legacySignature($0.value) == signature
-        })?.key {
-            entriesByID.removeValue(forKey: duplicateID)
-            return
-        }
-        if let index = anonymousEntries.firstIndex(where: { Self.legacySignature($0) == signature }) {
-            anonymousEntries.remove(at: index)
-        }
-    }
-
     private static func legacySignature(_ entry: [String: JSONValue]) -> String {
         var normalized = entry
         normalized.removeValue(forKey: "id")
@@ -165,12 +150,6 @@ final class VaultLocalStore: VaultLocalStoring {
         return (try? VaultPayloadHash.make(.object(normalized))) ?? ""
     }
 
-    private static func entryOrder(
-        _ lhs: [String: JSONValue],
-        _ rhs: [String: JSONValue]
-    ) -> Bool {
-        (lhs.stringValue(for: "id") ?? "") < (rhs.stringValue(for: "id") ?? "")
-    }
 }
 
 private struct VaultBackupEnvelope: Encodable {

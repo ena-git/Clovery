@@ -11,6 +11,14 @@ final class AuthenticationReleaseConfigurationTests: XCTestCase {
         XCTAssertNoThrow(try configuration.validate(for: .debug))
     }
 
+    func testDebugBuildEmbedsCompleteAPIURL() throws {
+        let rawURL = try XCTUnwrap(
+            Bundle.main.object(forInfoDictionaryKey: "CloveryAPIBaseURL") as? String
+        )
+
+        XCTAssertEqual(rawURL, "http://127.0.0.1:8080")
+    }
+
     func testReleaseRejectsNonHTTPSAPI() {
         let configuration = APIConfiguration(
             baseURL: URL(string: "http://127.0.0.1:8080")!
@@ -28,7 +36,8 @@ final class AuthenticationReleaseConfigurationTests: XCTestCase {
     }
 
     func testReleaseEnvironmentProvidesVerifiedAPIURL() throws {
-        let rawURL = ProcessInfo.processInfo.environment["CLOVERY_RELEASE_API_BASE_URL"] ?? ""
+        let rawURL = ProcessInfo.processInfo.environment["CLOVERY_RELEASE_API_BASE_URL"] ??
+            (Bundle.main.object(forInfoDictionaryKey: "CloveryReleaseAPIBaseURL") as? String ?? "")
         XCTAssertFalse(
             rawURL.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty,
             "Release verification requires CLOVERY_RELEASE_API_BASE_URL."

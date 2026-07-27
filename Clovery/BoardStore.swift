@@ -49,6 +49,15 @@ final class BoardStore: ObservableObject {
         _ = await refreshOutcome()
     }
 
+    func reconcileForBootstrap(
+        accountID: String
+    ) async -> EntitlementReconciliationOutcome {
+        guard currentAccount()?.id == UUID(uuidString: accountID)?.uuidString.lowercased() else {
+            return .needsAttention("bootstrap_account_mismatch")
+        }
+        return await refreshOutcome()
+    }
+
     func purchase() async -> BoardPurchaseOutcome {
         guard let account = currentAccount() else { return .failed }
         let token = beginOperation()

@@ -10,11 +10,12 @@ struct VaultSnapshotMetadataStore {
     func preservingPrivateMetadata(
         in snapshot: VaultDiarySnapshot
     ) throws -> VaultDiarySnapshot {
-        let storedEntries = Dictionary(
-            uniqueKeysWithValues: try localStore.load().entries.compactMap { entry in
-                entry.stringValue(for: "id").map { ($0, entry) }
+        var storedEntries: [String: [String: JSONValue]] = [:]
+        for entry in try localStore.load().entries {
+            if let entryID = entry.stringValue(for: "id") {
+                storedEntries[entryID] = entry
             }
-        )
+        }
         var result = snapshot
         result.entries = snapshot.entries.map { entry in
             guard let entryID = entry.stringValue(for: "id"),

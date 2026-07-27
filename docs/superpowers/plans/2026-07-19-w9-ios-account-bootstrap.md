@@ -861,7 +861,7 @@ git commit -m "feat(ios): bind purchases to Clovery accounts"
 - Create: `CloveryTests/VaultSyncCheckpointStoreTests.swift`
 - Create: `CloveryTests/VaultSyncCoordinatorTests.swift`
 
-- [ ] **Step 1: Write pagination and materialization tests**
+- [x] **Step 1: Write pagination and materialization tests**
 
 Require:
 
@@ -877,7 +877,7 @@ account/vault change uses separate cursor namespace
 final cursor is submitted as bootstrap vault checkpoint
 ```
 
-- [ ] **Step 2: Write legacy asset restore tests**
+- [x] **Step 2: Write legacy asset restore tests**
 
 Using W8's verified migration asset listing:
 
@@ -890,7 +890,7 @@ failed photo download leaves prior file and bootstrap pending
 path traversal or invalid filename is rejected
 ```
 
-- [ ] **Step 3: Write ongoing push, conflict, and retry tests**
+- [x] **Step 3: Write ongoing push, conflict, and retry tests**
 
 Extend the Web bridge save payload with `deleted_ids`. The coordinator diffs each full local snapshot against an account/vault-scoped mirror and tests:
 
@@ -909,7 +909,7 @@ logout/account change cancels work and changes checkpoint namespace
 
 No conflict handler may discard either the local payload or server snapshot.
 
-- [ ] **Step 4: Write ongoing photo upload tests**
+- [x] **Step 4: Write ongoing photo upload tests**
 
 Before pushing an entry, upload every referenced local photo that lacks an account-vault asset checkpoint. Use a stable generated asset UUID and persist filename, SHA, bytes, and asset ID. Add a private payload object:
 
@@ -927,7 +927,7 @@ Before pushing an entry, upload every referenced local photo that lacks an accou
 
 The visible `photos` array remains filenames for WebView compatibility. Another device verifies and downloads refs before materialization. Failed photo upload blocks that entry push and never strips the local photo.
 
-- [ ] **Step 5: Run focused tests and observe missing implementation**
+- [x] **Step 5: Run focused tests and observe missing implementation**
 
 ```bash
 xcodebuild -project Clovery.xcodeproj -scheme Clovery \
@@ -942,15 +942,15 @@ xcodebuild -project Clovery.xcodeproj -scheme Clovery \
 
 Expected: new tests fail.
 
-- [ ] **Step 6: Implement typed push, pull, and asset clients**
+- [x] **Step 6: Implement typed push, pull, and asset clients**
 
 Use authenticated Clovery API requests for `/v1/vault/sync/push`, sync pages, asset mappings, upload tickets, upload completion, and download tickets. Download/upload object bytes without Clovery bearer credentials, copy only required object-storage headers, then verify SHA-256 and expected size locally.
 
-- [ ] **Step 7: Materialize into the existing diary store**
+- [x] **Step 7: Materialize into the existing diary store**
 
 Extract the full-backup merge/write logic from `WebView` into a shared atomic store. The puller treats `sync_changes.entity_id` as authoritative and overwrites each materialized payload's `id` with that entity ID before writing `clovery_full_backup.json`; this makes server conflict copies editable in the existing WebView without changing their stored legacy comparison payload. It downloads `clovery_asset_refs`, removes no local-only entry until its operation is applied, then injects the merged result into WebView. Do not write diary content to logs or UserDefaults.
 
-- [ ] **Step 8: Stop old cloud channels from becoming a second data root**
+- [x] **Step 8: Stop old cloud channels from becoming a second data root**
 
 After account bootstrap starts, configure WebView in `accountVault` mode:
 
@@ -962,15 +962,15 @@ After account bootstrap starts, configure WebView in `accountVault` mode:
 
 The HTML receives this mode through a native bridge value, not a user-editable localStorage flag. Tests prove logging into another Clovery account on the same Apple device cannot import the previous account's old CloudKit data.
 
-- [ ] **Step 9: Confirm the initial server checkpoint**
+- [x] **Step 9: Confirm the initial server checkpoint**
 
 After the last page and asset verification, call bootstrap `resume` with `vault_checkpoint.cursor` and `has_more=false`. Enter diary only when the returned overall bootstrap status is `complete`.
 
-- [ ] **Step 10: Start durable ongoing sync after diary entry**
+- [x] **Step 10: Start durable ongoing sync after diary entry**
 
 After `.diary(accountID:vaultID:)`, keep one coordinator alive for that account/vault. It serializes local diffs, asset uploads, push decisions, and pulls. A bootstrap-complete job stays complete, but sync errors show the existing non-destructive sync status and retry automatically; they never silently fall back to CloudKit as the account data source.
 
-- [ ] **Step 11: Run sync tests**
+- [x] **Step 11: Run sync tests**
 
 ```bash
 xcodebuild -project Clovery.xcodeproj -scheme Clovery \
@@ -986,7 +986,7 @@ xcodebuild -project Clovery.xcodeproj -scheme Clovery \
 
 Expected: selected tests pass.
 
-- [ ] **Step 12: Commit account-vault synchronization**
+- [x] **Step 12: Commit account-vault synchronization**
 
 ```bash
 git add Clovery/Features/Sync Clovery/WebView.swift 'Clovery/Clover Diary.html' CloveryTests \
@@ -1007,7 +1007,7 @@ git commit -m "feat(ios): synchronize the account vault"
 - Modify: `CloveryTests/AccountBootstrapCoordinatorTests.swift`
 - Modify: `CloveryTests/AuthenticationResourcesTests.swift`
 
-- [ ] **Step 1: Write end-to-end coordinator tests with fakes**
+- [x] **Step 1: Write end-to-end coordinator tests with fakes**
 
 Test sequences:
 
@@ -1024,7 +1024,7 @@ new diary after bootstrap pushes to Vault and returns on a second client pull
 same Apple iCloud with a different Clovery account does not import old CloudKit data
 ```
 
-- [ ] **Step 2: Build the reconciliation view in existing style**
+- [x] **Step 2: Build the reconciliation view in existing style**
 
 Chinese copy and stages:
 
@@ -1046,19 +1046,19 @@ Use `Color.authBackground`, `Color.authSurface`, dashed rounded borders, the clo
 
 No stage can be skipped. Dynamic Type, VoiceOver labels, Reduce Motion, and small-screen scrolling must work.
 
-- [ ] **Step 3: Integrate dependencies**
+- [x] **Step 3: Integrate dependencies**
 
 `BootstrapDependencies` creates one shared base `APIClient`, authenticated client, auth APIs, bootstrap API, migration coordinator, entitlement reconciler, and vault puller. Do not instantiate duplicate `BoardStore`, session stores, or migration checkpoint stores in child views.
 
-- [ ] **Step 4: Remove old direct entitlement refresh hooks**
+- [x] **Step 4: Remove old direct entitlement refresh hooks**
 
 Replace `CloveryApp` scene activation calls that directly read local StoreKit with account-aware reconciliation/update handling. Keep transaction update observation, but route updates through the authenticated entitlement reconciler.
 
-- [ ] **Step 5: Verify global font propagation**
+- [x] **Step 5: Verify global font propagation**
 
 Ensure authentication, identity claim, update notice, reconciliation, and diary overlays all inherit `fontStore.selection`. Add presentation tests or source contract assertions that no new screen uses hard-coded custom fonts outside `.cloveryFont`/environment.
 
-- [ ] **Step 6: Register all sources and run focused integration tests**
+- [x] **Step 6: Register all sources and run focused integration tests**
 
 ```bash
 xcodebuild -project Clovery.xcodeproj -scheme Clovery \
@@ -1070,7 +1070,7 @@ xcodebuild -project Clovery.xcodeproj -scheme Clovery \
 
 Expected: selected tests pass.
 
-- [ ] **Step 7: Run the complete simulator test suite and build**
+- [x] **Step 7: Run the complete simulator test suite and build**
 
 ```bash
 xcodebuild -project Clovery.xcodeproj -scheme Clovery \

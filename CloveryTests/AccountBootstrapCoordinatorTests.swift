@@ -153,13 +153,32 @@ final class AccountBootstrapCoordinatorTests: XCTestCase {
         XCTAssertEqual(fixture.api.statusCalls, 0)
     }
 
+    func testConfiguredPipelineMustCompleteBeforeDiaryRoute() async {
+        let pipeline = AccountBootstrapPipelineSpy(result: Self.completeStatus)
+        let fixture = makeFixture(
+            session: Self.session,
+            statuses: [Self.pendingStatus],
+            pipeline: pipeline
+        )
+
+        fixture.coordinator.start()
+        await fixture.coordinator.waitForIdle()
+
+        XCTAssertEqual(pipeline.calls, 1)
+        XCTAssertEqual(
+            fixture.coordinator.route,
+            .diary(accountID: "account", vaultID: "vault")
+        )
+    }
+
     private func makeFixture(
         hasLegacyData: Bool = false,
         noticeAcknowledged: Bool = true,
         session: AuthenticationSession? = nil,
         statuses: [AccountBootstrapStatus] = [],
         responseDelayNanoseconds: UInt64 = 0,
-        ignoresCancellation: Bool = false
+        ignoresCancellation: Bool = false,
+        pipeline: AccountBootstrapPipelining? = nil
     ) -> CoordinatorFixture {
         let sessionController = BootstrapSessionSpy(session: session)
         let notice = BootstrapNoticeSpy(
@@ -176,7 +195,8 @@ final class AccountBootstrapCoordinatorTests: XCTestCase {
             sessionController: sessionController,
             noticeController: notice,
             api: api,
-            checkpointStore: checkpoint
+            checkpointStore: checkpoint,
+            pipeline: pipeline
         )
         return CoordinatorFixture(
             coordinator: coordinator,
@@ -231,6 +251,27 @@ final class AccountBootstrapCoordinatorTests: XCTestCase {
         retryCount: 1,
         updatedAt: Date(timeIntervalSince1970: 100)
     )
+}
+
+@MainActor
+private final class AccountBootstrapPipelineSpy: AccountBootstrapPipelining {
+    let result: AccountBootstrapStatus
+    private(set) var calls = 0
+
+    init(result: AccountBootstrapStatus) {
+        self.result = result
+    }
+
+    func run(
+        initialStatus: AccountBootstrapStatus,
+        session: AuthenticationSession,
+        sourceKind: BootstrapSourceKind,
+        progress: (AccountBootstrapStatus) -> Void
+    ) async throws -> AccountBootstrapStatus {
+        calls += 1
+        progress(initialStatus)
+        return result
+    }
 }
 
 private struct CoordinatorFixture {
