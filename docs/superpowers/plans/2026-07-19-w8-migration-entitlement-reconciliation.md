@@ -70,7 +70,7 @@ If that deterministic ID already exists with different content, append `\x00<cou
 - Create: `v2/services/api/internal/database/migration_resolution_migration_test.go`
 - Modify: `v2/contracts/openapi/openapi.yaml`
 
-- [ ] **Step 1: Write the migration contract test**
+- [x] **Step 1: Write the migration contract test**
 
 Require these schema fragments:
 
@@ -91,7 +91,7 @@ for _, fragment := range []string{
 
 Also assert the down migration drops the partial index and added columns.
 
-- [ ] **Step 2: Run the focused test and observe the missing migration**
+- [x] **Step 2: Run the focused test and observe the missing migration**
 
 ```bash
 cd /Users/huao/Downloads/Clovery-main/.worktrees/swift-auth-foundation/v2/services/api
@@ -100,7 +100,7 @@ GOCACHE=/private/tmp/clovery-go-build go test ./internal/database -run Migration
 
 Expected: failure because migration `000017` does not exist.
 
-- [ ] **Step 3: Add forward-compatible resolution columns**
+- [x] **Step 3: Add forward-compatible resolution columns**
 
 Use:
 
@@ -137,7 +137,7 @@ CREATE INDEX journal_entries_vault_dedup_sha_idx
 
 Existing journal rows remain nullable. Resolution loads active target rows with missing hashes, computes exact and identity-stripped canonical JSON in Go, and backfills both hashes inside the verification transaction before candidate lookup. Do not add `pgcrypto` or calculate a digest from PostgreSQL text rendering.
 
-- [ ] **Step 4: Expose resolution counts in migration reports**
+- [x] **Step 4: Expose resolution counts in migration reports**
 
 Extend the OpenAPI report with:
 
@@ -152,7 +152,7 @@ conflict_copies:
 
 Keep existing expected/imported fields for compatibility. Define `imported_entries` as uploaded staging entries and `inserted_entries` as rows actually added to the vault.
 
-- [ ] **Step 5: Run migration and contract tests**
+- [x] **Step 5: Run migration and contract tests**
 
 ```bash
 GOCACHE=/private/tmp/clovery-go-build go test ./internal/database ./internal/contract
@@ -160,7 +160,7 @@ GOCACHE=/private/tmp/clovery-go-build go test ./internal/database ./internal/con
 
 Expected: both packages pass.
 
-- [ ] **Step 6: Commit the resolution schema**
+- [x] **Step 6: Commit the resolution schema**
 
 ```bash
 git add v2/services/api/migrations/000017_migration_resolution.* \
@@ -177,7 +177,7 @@ git commit -m "feat(migration): add deterministic resolution metadata"
 - Modify: `v2/services/api/internal/migration/entry_identity.go`
 - Modify: `v2/services/api/internal/migration/manifest.go`
 
-- [ ] **Step 1: Write table-driven resolution tests**
+- [x] **Step 1: Write table-driven resolution tests**
 
 Model staged and existing entries without SQL:
 
@@ -217,7 +217,7 @@ two staged active duplicates -> first source ID is canonical
 pre-existing deterministic conflict ID with other content -> salted stable fallback
 ```
 
-- [ ] **Step 2: Run focused tests and observe failure**
+- [x] **Step 2: Run focused tests and observe failure**
 
 ```bash
 GOCACHE=/private/tmp/clovery-go-build go test ./internal/migration -run Resolution
@@ -225,7 +225,7 @@ GOCACHE=/private/tmp/clovery-go-build go test ./internal/migration -run Resoluti
 
 Expected: missing resolution engine.
 
-- [ ] **Step 3: Implement exact and identity-stripped canonical forms**
+- [x] **Step 3: Implement exact and identity-stripped canonical forms**
 
 Reuse `canonicalJSON` for integrity. Add `canonicalDedupJSON` that requires an object payload, copies it, removes only `id` and `clovery_legacy_source_id`, then serializes with stable key ordering. Equality requires:
 
@@ -239,11 +239,11 @@ func sameCanonicalContent(left, right ResolutionCandidate) bool {
 
 Use `ContentSHA256` plus exact canonical payload for same-source equality. Use explicit deleted-state comparison for exact source matches. Do not remove dates, text, tags, photo lists, or user metadata from dedup JSON; do not use timestamps outside the payload to merge active entries; and do not collapse tombstones across different source IDs.
 
-- [ ] **Step 4: Implement stable conflict IDs**
+- [x] **Step 4: Implement stable conflict IDs**
 
 Create a dedicated namespace UUID constant. The function takes vault ID, original source ID, digest, and optional collision counter. It must not use migration ID, current time, or randomness.
 
-- [ ] **Step 5: Run focused and race tests**
+- [x] **Step 5: Run focused and race tests**
 
 ```bash
 GOCACHE=/private/tmp/clovery-go-build go test -race ./internal/migration -run 'Resolution|EntryIdentity|Manifest'
@@ -251,7 +251,7 @@ GOCACHE=/private/tmp/clovery-go-build go test -race ./internal/migration -run 'R
 
 Expected: all pure resolution tests pass.
 
-- [ ] **Step 6: Commit the resolution engine**
+- [x] **Step 6: Commit the resolution engine**
 
 ```bash
 git add v2/services/api/internal/migration/resolution.go \
@@ -276,7 +276,7 @@ git commit -m "feat(migration): resolve duplicate legacy entries"
 - Modify: `v2/services/api/internal/http/migration_handler_test.go`
 - Modify: `v2/contracts/openapi/openapi.yaml`
 
-- [ ] **Step 1: Write PostgreSQL acceptance cases before changing verification**
+- [x] **Step 1: Write PostgreSQL acceptance cases before changing verification**
 
 Seed one vault per case and assert both `journal_entries` and `sync_changes` counts:
 
@@ -293,7 +293,7 @@ concurrent verify -> one committed resolution set
 
 For each accepted migration, assert every staging row has non-`pending` resolution and non-null `resolved_entry_id`.
 
-- [ ] **Step 2: Run the focused database tests and verify current collision behavior fails**
+- [x] **Step 2: Run the focused database tests and verify current collision behavior fails**
 
 ```bash
 DATABASE_URL='postgres://clovery:clovery@localhost:5432/clovery_test?sslmode=disable' \
@@ -303,7 +303,7 @@ DATABASE_URL='postgres://clovery:clovery@localhost:5432/clovery_test?sslmode=dis
 
 Expected: ID-conflict cases return `ErrEntryCollision` or insert counts differ.
 
-- [ ] **Step 3: Resolve all staging rows while holding the migration lock**
+- [x] **Step 3: Resolve all staging rows while holding the migration lock**
 
 Refactor `Verify` into small transaction-scoped helpers:
 
@@ -323,7 +323,7 @@ Do not place the resolver, SQL loading, insertion, sync publishing, report updat
 
 `AddEntry` computes and stores both hashes after canonical validation. Deleted entries keep the exact empty-object `sha256` and leave `dedup_sha256` null because cross-source tombstone deduplication is prohibited.
 
-- [ ] **Step 4: Insert only `insert` and `id_conflict_copy` rows**
+- [x] **Step 4: Insert only `insert` and `id_conflict_copy` rows**
 
 Use `resolved_entry_id`, set `content_sha256`, and preserve `deleted_at`:
 
@@ -342,15 +342,15 @@ Treat any unexpected conflict at this point as transaction failure. Never `ON CO
 
 `journal_entries.id` and `sync_changes.entity_id` are authoritative. A conflict copy may retain the original legacy `payload.id` so exact source content remains comparable; W9 must overwrite `payload.id` with `entity_id` only while materializing the local WebView model.
 
-- [ ] **Step 5: Publish sync changes only for inserted rows**
+- [x] **Step 5: Publish sync changes only for inserted rows**
 
 Use `resolved_entry_id` as `entity_id`. Duplicate aliases must not create sync changes. Repeated `Verify` returns the stored report without publishing again.
 
-- [ ] **Step 6: Preserve and verify assets**
+- [x] **Step 6: Preserve and verify assets**
 
 Keep the existing manifest byte/hash and completed-asset checks. Add a test proving two photos with equal SHA but distinct filenames remain available until a later storage compaction workflow; W8 must not delete or re-point uploaded objects because legacy payload references may still use filenames.
 
-- [ ] **Step 7: Expose verified migration asset mappings for another device**
+- [x] **Step 7: Expose verified migration asset mappings for another device**
 
 Register this protected route:
 
@@ -375,7 +375,7 @@ Return only assets owned by the authenticated vault and only after the migration
 
 The response supplies the stable filename-to-asset mapping needed by W9. The client obtains download tickets through the existing protected `/v1/vault/assets/{assetId}/download` route. The mapping endpoint never returns object keys, presigned URLs, another vault's assets, or unverified uploads. Add service/repository/handler/OpenAPI tests for ownership, not-found, uploading-state rejection, and deterministic filename ordering.
 
-- [ ] **Step 8: Return detailed report counts**
+- [x] **Step 8: Return detailed report counts**
 
 Calculate:
 
@@ -387,11 +387,11 @@ COUNT(*) FILTER (WHERE resolution = 'id_conflict_copy') AS conflict_copies
 
 No report field may include diary text, photo filenames, or complete hashes.
 
-- [ ] **Step 9: Remove collision as a normal user-facing failure**
+- [x] **Step 9: Remove collision as a normal user-facing failure**
 
 Delete `ErrEntryCollision` from normal verification and remove the HTTP `entry_collision` mapping. Retain a new internal `ErrResolutionRace` mapped to generic `migration_verification_failed`; it indicates a server race, not user data loss.
 
-- [ ] **Step 10: Run migration tests**
+- [x] **Step 10: Run migration tests**
 
 ```bash
 GOCACHE=/private/tmp/clovery-go-build go test -race ./internal/migration ./internal/http -run 'Migration|Resolution'
@@ -399,7 +399,7 @@ GOCACHE=/private/tmp/clovery-go-build go test -race ./internal/migration ./inter
 
 Expected: all unit tests pass; database tests pass when `DATABASE_URL` is set.
 
-- [ ] **Step 11: Commit non-destructive migration**
+- [x] **Step 11: Commit non-destructive migration**
 
 ```bash
 git add v2/services/api/internal/migration v2/services/api/internal/http \
@@ -416,7 +416,7 @@ git commit -m "feat(migration): preserve and deduplicate legacy data"
 - Modify: `v2/services/api/cmd/api/bootstrap.go`
 - Modify: `v2/services/api/cmd/api/bootstrap_test.go`
 
-- [ ] **Step 1: Write orchestration tests with spies**
+- [x] **Step 1: Write orchestration tests with spies**
 
 Require:
 
@@ -429,7 +429,7 @@ repeated successful Verify remains complete
 another account's migration cannot update the job
 ```
 
-- [ ] **Step 2: Run the focused tests and observe missing flow**
+- [x] **Step 2: Run the focused tests and observe missing flow**
 
 ```bash
 GOCACHE=/private/tmp/clovery-go-build go test ./internal/application/migrationflow
@@ -437,7 +437,7 @@ GOCACHE=/private/tmp/clovery-go-build go test ./internal/application/migrationfl
 
 Expected: package does not exist.
 
-- [ ] **Step 3: Implement a thin application wrapper**
+- [x] **Step 3: Implement a thin application wrapper**
 
 The wrapper implements the existing `httpapi.MigrationHTTPApplication` contract and delegates content logic to `migration.Service`. It updates `bootstrapjob.Service` only after domain calls return. It never contains SQL.
 
@@ -455,11 +455,11 @@ default:
 }
 ```
 
-- [ ] **Step 4: Wire the wrapper in `cmd/api`**
+- [x] **Step 4: Wire the wrapper in `cmd/api`**
 
 Construct migration domain service, bootstrap job service, then migration flow. Do not create a second bootstrap repository for each request.
 
-- [ ] **Step 5: Run affected tests**
+- [x] **Step 5: Run affected tests**
 
 ```bash
 GOCACHE=/private/tmp/clovery-go-build go test ./internal/application/migrationflow ./cmd/api ./internal/http
@@ -467,7 +467,7 @@ GOCACHE=/private/tmp/clovery-go-build go test ./internal/application/migrationfl
 
 Expected: all packages pass.
 
-- [ ] **Step 6: Commit bootstrap migration tracking**
+- [x] **Step 6: Commit bootstrap migration tracking**
 
 ```bash
 git add v2/services/api/internal/application/migrationflow v2/services/api/cmd/api
@@ -487,7 +487,7 @@ git commit -m "feat(bootstrap): track legacy migration completion"
 - Modify: `v2/services/api/internal/http/billing_handler_test.go`
 - Modify: `v2/contracts/openapi/openapi.yaml`
 
-- [ ] **Step 1: Preserve existing purchase-chain security tests**
+- [x] **Step 1: Preserve existing purchase-chain security tests**
 
 Add explicit regression names for:
 
@@ -501,13 +501,13 @@ failed Apple assignment does not create an active entitlement
 
 Do not weaken `appAccountToken == clovery_account_id` validation.
 
-- [ ] **Step 2: Add an empty inventory restore test**
+- [x] **Step 2: Add an empty inventory restore test**
 
 Change `billing.Service.Restore` so a valid account and environment with `transaction_ids: []` returns the account's current server entitlements. This is the explicit client assertion that StoreKit enumeration completed and found no current transactions; it never grants an entitlement.
 
 The test must prove malformed account IDs, invalid environments, and more than 100 IDs remain rejected.
 
-- [ ] **Step 3: Run billing tests and observe the empty inventory failure**
+- [x] **Step 3: Run billing tests and observe the empty inventory failure**
 
 ```bash
 GOCACHE=/private/tmp/clovery-go-build go test ./internal/billing -run 'Legacy|Restore'
@@ -515,11 +515,11 @@ GOCACHE=/private/tmp/clovery-go-build go test ./internal/billing -run 'Legacy|Re
 
 Expected: empty restore currently returns `ErrInvalidRequest`.
 
-- [ ] **Step 4: Implement the minimal restore change**
+- [x] **Step 4: Implement the minimal restore change**
 
 Validate account UUID and environment before the list loop. Accept zero through 100 IDs. Deduplicate IDs before verification. If any transaction verification fails, return the error and do not declare reconciliation complete.
 
-- [ ] **Step 5: Write billing-flow bootstrap tests**
+- [x] **Step 5: Write billing-flow bootstrap tests**
 
 Require:
 
@@ -532,15 +532,15 @@ Apple verification unavailable keeps pending and records retryable error
 list alone does not mark reconciliation complete
 ```
 
-- [ ] **Step 6: Implement `application/billingflow`**
+- [x] **Step 6: Implement `application/billingflow`**
 
 Delegate all billing verification to `billing.Service`. Only `Restore` finalizes the bootstrap entitlement stage. Map `ErrTransactionClaimed` and `ErrAccountMismatch` to `needs_attention`; map `ErrVerificationUnavailable` to pending. Do not accept account IDs from the request body.
 
-- [ ] **Step 7: Update OpenAPI wording**
+- [x] **Step 7: Update OpenAPI wording**
 
 Document that an empty `transaction_ids` array is valid and means “StoreKit enumeration completed with no current verified transactions.” It does not remove existing server entitlements; server notifications and revocation state remain authoritative.
 
-- [ ] **Step 8: Run billing, flow, handler, and contract tests**
+- [x] **Step 8: Run billing, flow, handler, and contract tests**
 
 ```bash
 GOCACHE=/private/tmp/clovery-go-build go test -race \
@@ -553,7 +553,7 @@ GOCACHE=/private/tmp/clovery-go-build go test -race \
 
 Expected: all packages pass.
 
-- [ ] **Step 9: Commit entitlement reconciliation**
+- [x] **Step 9: Commit entitlement reconciliation**
 
 ```bash
 git add v2/services/api/internal/billing \
@@ -577,7 +577,7 @@ git commit -m "feat(billing): reconcile Apple rights to accounts"
 - Modify: `v2/services/api/internal/sync/repository.go`
 - Modify: `v2/contracts/openapi/openapi.yaml`
 
-- [ ] **Step 1: Add failing vault checkpoint tests**
+- [x] **Step 1: Add failing vault checkpoint tests**
 
 Extend `POST /v1/account/bootstrap/resume` with optional:
 
@@ -602,7 +602,7 @@ all four stages complete changes overall status to complete
 later sync changes do not reopen the one-time bootstrap job
 ```
 
-- [ ] **Step 2: Expose a maximum cursor query**
+- [x] **Step 2: Expose a maximum cursor query**
 
 Add a small repository method:
 
@@ -616,11 +616,11 @@ Its SQL is:
 SELECT COALESCE(MAX(cursor), 0) FROM sync_changes WHERE vault_id = $1;
 ```
 
-- [ ] **Step 3: Validate checkpoint in bootstrap service**
+- [x] **Step 3: Validate checkpoint in bootstrap service**
 
 Do not trust `has_more=false` by itself. Mark vault complete only after the submitted cursor covers the server cursor observed in the same request. The checkpoint does not permit migration or entitlement stages to be client-completed.
 
-- [ ] **Step 4: Run bootstrap and sync tests**
+- [x] **Step 4: Run bootstrap and sync tests**
 
 ```bash
 GOCACHE=/private/tmp/clovery-go-build go test -race ./internal/bootstrapjob ./internal/sync ./internal/http -run 'Bootstrap|Cursor'
@@ -628,7 +628,7 @@ GOCACHE=/private/tmp/clovery-go-build go test -race ./internal/bootstrapjob ./in
 
 Expected: all tests pass.
 
-- [ ] **Step 5: Commit vault confirmation**
+- [x] **Step 5: Commit vault confirmation**
 
 ```bash
 git add v2/services/api/internal/bootstrapjob \
@@ -643,7 +643,7 @@ git commit -m "feat(bootstrap): verify initial vault pull"
 **Files:**
 - Create: `docs/superpowers/verification/2026-07-19-w8-migration-entitlement.md`
 
-- [ ] **Step 1: Run migrations and PostgreSQL integration suites**
+- [x] **Step 1: Run migrations and PostgreSQL integration suites**
 
 ```bash
 cd /Users/huao/Downloads/Clovery-main/.worktrees/swift-auth-foundation/v2
@@ -656,7 +656,7 @@ DATABASE_URL='postgres://clovery:clovery@localhost:5432/clovery_test?sslmode=dis
 
 Expected: all enabled tests pass.
 
-- [ ] **Step 2: Run the full backend gate**
+- [x] **Step 2: Run the full backend gate**
 
 ```bash
 GOCACHE=/private/tmp/clovery-go-build go test ./...
@@ -668,7 +668,7 @@ git diff --check
 
 Expected: tests/build exit `0`; no formatting diff or whitespace error.
 
-- [ ] **Step 3: Record acceptance evidence**
+- [x] **Step 3: Record acceptance evidence**
 
 The verification document must include:
 
@@ -681,7 +681,7 @@ The verification document must include:
 - final bootstrap stage transitions;
 - full commands and exit codes.
 
-- [ ] **Step 4: Commit and push W8**
+- [x] **Step 4: Commit and push W8**
 
 ```bash
 git add docs/superpowers/verification/2026-07-19-w8-migration-entitlement.md
