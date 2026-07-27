@@ -1142,7 +1142,7 @@ The verification document must include:
 - source-file size check confirming modular boundaries;
 - confirmation that local legacy sources and archives still exist after success.
 
-- [ ] **Step 4: Commit and push W9**
+- [x] **Step 4: Commit and push W9**
 
 ```bash
 git add docs/superpowers/verification/2026-07-19-w9-ios-account-bootstrap.md
