@@ -1095,7 +1095,7 @@ git commit -m "feat(ios): complete account inheritance bootstrap"
 **Files:**
 - Create: `docs/superpowers/verification/2026-07-19-w9-ios-account-bootstrap.md`
 
-- [ ] **Step 1: Install and launch a clean simulator build**
+- [x] **Step 1: Install and launch a clean simulator build**
 
 ```bash
 xcrun simctl boot 'iPhone 16 Pro' || true
@@ -1109,7 +1109,7 @@ xcrun simctl launch --console booted com.clovery.app
 
 Expected: app remains running and shows Chinese authentication after loading on clean install.
 
-- [ ] **Step 2: Run simulator fixture matrix**
+- [x] **Step 2: Run simulator fixture matrix**
 
 Use debug-only launch fixtures or injected test dependencies, never production flags, to capture:
 
@@ -1126,7 +1126,7 @@ final diary route
 
 Repeat at default and largest accessibility text sizes and with each available Clovery font selection.
 
-- [ ] **Step 3: Record acceptance evidence**
+- [x] **Step 3: Record acceptance evidence**
 
 The verification document must include:
 
