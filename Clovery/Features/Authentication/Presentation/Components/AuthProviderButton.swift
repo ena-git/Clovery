@@ -1,11 +1,6 @@
 import SwiftUI
 
-enum AuthenticationProviderKind: CaseIterable, Hashable {
-    case apple
-    case google
-    case huawei
-    case passkey
-
+extension AuthenticationProviderKind {
     var asset: AuthenticationAsset {
         switch self {
         case .apple:
@@ -35,7 +30,6 @@ enum AuthenticationProviderKind: CaseIterable, Hashable {
 
 struct AuthProviderButton: View {
     let provider: AuthenticationProviderKind
-    var isEnabled = true
     let action: () -> Void
 
     var body: some View {
@@ -49,9 +43,6 @@ struct AuthProviderButton: View {
                 .clipShape(RoundedRectangle(cornerRadius: 20, style: .continuous))
         }
         .buttonStyle(.plain)
-        .disabled(!isEnabled)
-        .opacity(isEnabled ? 1 : 0.45)
         .accessibilityLabel(provider.accessibilityLabel)
-        .accessibilityHint(isEnabled ? "" : "此版本尚未配置该登录方式")
     }
 }

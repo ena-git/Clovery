@@ -253,7 +253,7 @@ git commit -m "feat(ios): support federated identity claims"
 - Create: `CloveryTests/ProviderVisibilityPolicyTests.swift`
 - Modify: `CloveryTests/ProviderAuthenticationTests.swift`
 
-- [ ] **Step 1: Write the full cross-platform policy matrix test**
+- [x] **Step 1: Write the full cross-platform policy matrix test**
 
 Even though W9 ships only iOS UI, encode the agreed shared contract:
 
@@ -271,7 +271,7 @@ XCTAssertEqual(policy.quickProviders(for: .androidOther), [.google])
 
 Also assert `.passkey` is absent from every first-screen list and CloveryID remains the default method.
 
-- [ ] **Step 2: Run focused tests and observe failure**
+- [x] **Step 2: Run focused tests and observe failure**
 
 ```bash
 xcodebuild -project Clovery.xcodeproj -scheme Clovery \
@@ -282,7 +282,7 @@ xcodebuild -project Clovery.xcodeproj -scheme Clovery \
 
 Expected: policy does not exist and provider outcome still uses the old binding case.
 
-- [ ] **Step 3: Implement pure policy plus runtime availability**
+- [x] **Step 3: Implement pure policy plus runtime availability**
 
 The visible list is:
 
@@ -299,7 +299,7 @@ Remove `.wechat` and `.qq` from `IdentityProvider` because they are not part of 
 
 `AuthenticationProviderViewModel` publishes a one-shot `identityClaim` event. `AuthenticationFlowView` appends `.identityClaim(context)` and clears the event after navigation. Successful bound login still accepts the session and exits auth.
 
-- [ ] **Step 5: Run provider tests**
+- [x] **Step 5: Run provider tests**
 
 ```bash
 xcodebuild -project Clovery.xcodeproj -scheme Clovery \
@@ -310,7 +310,7 @@ xcodebuild -project Clovery.xcodeproj -scheme Clovery \
 
 Expected: all selected tests pass.
 
-- [ ] **Step 6: Commit provider policy**
+- [x] **Step 6: Commit provider policy**
 
 ```bash
 git add Clovery/Features/Authentication CloveryTests/ProviderVisibilityPolicyTests.swift \

@@ -5,7 +5,7 @@ struct SignUpView: View {
     @StateObject private var viewModel: SignUpViewModel
     let showLogin: () -> Void
     var authenticateWithProvider: (AuthenticationProviderKind) -> Void = { _ in }
-    var providerAvailability: (AuthenticationProviderKind) -> Bool = { _ in true }
+    var quickProviders: [AuthenticationProviderKind] = []
     var providerMessage: String?
 
     init(
@@ -13,7 +13,7 @@ struct SignUpView: View {
         sessionController: ApplicationSessionController,
         showLogin: @escaping () -> Void,
         authenticateWithProvider: @escaping (AuthenticationProviderKind) -> Void = { _ in },
-        providerAvailability: @escaping (AuthenticationProviderKind) -> Bool = { _ in true },
+        quickProviders: [AuthenticationProviderKind] = [],
         providerMessage: String? = nil
     ) {
         _viewModel = StateObject(
@@ -21,7 +21,7 @@ struct SignUpView: View {
         )
         self.showLogin = showLogin
         self.authenticateWithProvider = authenticateWithProvider
-        self.providerAvailability = providerAvailability
+        self.quickProviders = quickProviders
         self.providerMessage = providerMessage
     }
 
@@ -168,10 +168,9 @@ struct SignUpView: View {
 
     private var providerRow: some View {
         HStack(spacing: 10) {
-            ForEach(AuthenticationProviderKind.allCases, id: \.self) { provider in
+            ForEach(quickProviders, id: \.self) { provider in
                 AuthProviderButton(
                     provider: provider,
-                    isEnabled: providerAvailability(provider),
                     action: { authenticateWithProvider(provider) }
                 )
             }

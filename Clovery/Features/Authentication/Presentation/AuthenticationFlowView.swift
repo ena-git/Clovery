@@ -9,6 +9,7 @@ enum AuthenticationRoute: Hashable {
 struct AuthenticationFlowView: View {
     @State private var path: [AuthenticationRoute] = []
     @StateObject private var providerViewModel: AuthenticationProviderViewModel
+    private let providerPolicy = ProviderVisibilityPolicy()
     let api: AuthenticationAPIProtocol
     @ObservedObject var sessionController: ApplicationSessionController
 
@@ -41,7 +42,7 @@ struct AuthenticationFlowView: View {
                         showSignUp: { path.append(.signUp) },
                         recoverAccount: { path.append(.recovery) },
                         authenticateWithProvider: authenticate,
-                        providerAvailability: providerViewModel.isAvailable,
+                        quickProviders: quickProviders,
                         providerMessage: providerViewModel.message
                     )
                 case .signUp:
@@ -50,7 +51,7 @@ struct AuthenticationFlowView: View {
                         sessionController: sessionController,
                         showLogin: { path.append(.login) },
                         authenticateWithProvider: authenticate,
-                        providerAvailability: providerViewModel.isAvailable,
+                        quickProviders: quickProviders,
                         providerMessage: providerViewModel.message
                     )
                 case .recovery:
@@ -59,6 +60,10 @@ struct AuthenticationFlowView: View {
             }
         }
         .tint(.authInk)
+    }
+
+    private var quickProviders: [AuthenticationProviderKind] {
+        providerPolicy.quickProviders(for: .iOS).filter(providerViewModel.isAvailable)
     }
 
     private func authenticate(_ provider: AuthenticationProviderKind) {

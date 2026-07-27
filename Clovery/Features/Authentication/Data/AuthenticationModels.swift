@@ -65,8 +65,6 @@ enum IdentityProvider: String, Codable, CaseIterable, Hashable {
     case apple
     case google
     case huawei
-    case wechat
-    case qq
 }
 
 struct PasswordResetStartResponse: Codable, Equatable {
