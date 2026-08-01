@@ -15,6 +15,30 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthResponse"
+  /v1/legal/privacy:
+    get:
+      operationId: getPrivacyPolicy
+      summary: Read the public Simplified Chinese privacy policy
+      security: []
+      responses:
+        "200":
+          description: Current public privacy policy.
+          content:
+            text/html:
+              schema:
+                type: string
+  /v1/legal/terms:
+    get:
+      operationId: getTermsOfService
+      summary: Read the public Simplified Chinese terms of service
+      security: []
+      responses:
+        "200":
+          description: Current public terms of service.
+          content:
+            text/html:
+              schema:
+                type: string
   /v1/auth/accounts:
     post:
       operationId: createCloveryAccount

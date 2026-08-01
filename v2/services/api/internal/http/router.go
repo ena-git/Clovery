@@ -31,6 +31,7 @@ func NewRouter(dependencies ...RouterDependencies) http.Handler {
 		router.Use(operationalMetricsMiddleware(dependencies[0].Metrics))
 	}
 	router.Get("/v1/health", healthHandler)
+	registerLegalRoutes(router)
 	if len(dependencies) > 0 && dependencies[0].Metrics != nil && dependencies[0].MetricsBearerToken != "" {
 		router.Handle("/internal/metrics", dependencies[0].Metrics.ProtectedHandler(dependencies[0].MetricsBearerToken))
 	}

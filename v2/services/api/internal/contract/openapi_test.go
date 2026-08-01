@@ -32,6 +32,16 @@ func TestOpenAPIContractIsValid(t *testing.T) {
 	if document.Paths.Find("/v1/health") == nil {
 		t.Fatal("missing GET /v1/health contract")
 	}
+	for _, path := range []string{"/v1/legal/privacy", "/v1/legal/terms"} {
+		pathItem := document.Paths.Find(path)
+		if pathItem == nil || pathItem.Get == nil {
+			t.Fatalf("missing GET %s contract", path)
+		}
+		response := pathItem.Get.Responses.Value("200")
+		if response == nil || response.Value == nil || response.Value.Content["text/html"] == nil {
+			t.Fatalf("GET %s must document a text/html response", path)
+		}
+	}
 
 	for _, schemaName := range []string{"CloveryAccountId", "VaultId", "CloveryLoginId"} {
 		if document.Components.Schemas[schemaName] == nil {
