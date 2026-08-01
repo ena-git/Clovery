@@ -23,6 +23,17 @@ if grep -Eq '^[[:space:]]+paths:' "$workflow"; then
   echo "native iOS CI must validate every pull request head" >&2
   exit 1
 fi
+for required_step in \
+  'name: Verify Clovery iOS 1.1.0 Account Upgrade' \
+  'name: Verify repository hygiene' \
+  'name: Verify Go API and OpenAPI' \
+  'name: Verify iOS 1.1.0 account upgrade'
+do
+  if ! grep -Fq "$required_step" "$workflow"; then
+    echo "native iOS CI is missing required step: $required_step" >&2
+    exit 1
+  fi
+done
 
 "$repository_root/Tests/IOSReleaseIdentityNegativeTests.sh"
 "$checker"

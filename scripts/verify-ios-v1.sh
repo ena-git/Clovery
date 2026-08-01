@@ -6,6 +6,7 @@ cd "$repository_root"
 
 destination=$(scripts/select-ios-simulator.sh)
 
+scripts/verify-repository-hygiene.sh
 node scripts/validate-v1-html.cjs
 scripts/test-v1-p0-contract.sh
 scripts/test-v1-bridge.sh

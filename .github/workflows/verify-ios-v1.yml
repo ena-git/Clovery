@@ -1,4 +1,4 @@
-name: Verify Clovery Native iOS
+name: Verify Clovery iOS 1.1.0 Account Upgrade
 
 "on":
   pull_request:
@@ -10,7 +10,7 @@ permissions:
   contents: read
 
 concurrency:
-  group: verify-ios-v1-${{ github.ref }}
+  group: verify-ios-1.1.0-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -18,11 +18,23 @@ jobs:
     runs-on: macos-15
     env:
       DEVELOPER_DIR: /Applications/Xcode_26.0.1.app/Contents/Developer
+      CLOVERY_RELEASE_API_BASE_URL: https://api.clovery.cn
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
           node-version: "22"
+      - uses: actions/setup-go@v6
+        with:
+          go-version-file: v2/services/api/go.mod
+          cache-dependency-path: v2/services/api/go.sum
+      - name: Verify repository hygiene
+        run: scripts/verify-repository-hygiene.sh
+      - name: Verify Go API and OpenAPI
+        working-directory: v2/services/api
+        run: |
+          go test ./...
+          go build -o /tmp/clovery-api ./cmd/api
       - name: Reject beta Xcode
         run: |
           xcode_version=$(xcodebuild -version)
@@ -33,5 +45,5 @@ jobs:
             echo "Beta Xcode is not allowed for native iOS verification." >&2
             exit 1
           fi
-      - name: Verify native iOS
+      - name: Verify iOS 1.1.0 account upgrade
         run: scripts/verify-ios-v1.sh

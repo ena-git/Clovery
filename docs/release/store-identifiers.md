@@ -17,9 +17,9 @@ The iOS V2 app is an upgrade of the existing App Store application.
 | App Group | `group.com.clovery.app` |
 | iCloud KVS suffix | `com.clovery.app` |
 
-Current App Store baseline: `1.0.2 (13)`.
+Current App Store baseline: `1.0.3 (14)`.
 
-Next native iOS release candidate: `1.0.3 (14)`. The main app and widget
+Next native iOS release candidate: `1.1.0 (15)`. The main app and widget
 extension must use the same marketing version and build number.
 
 Changing any value above would break the existing App Store upgrade path or V1

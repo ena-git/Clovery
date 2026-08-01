@@ -25,11 +25,18 @@ mkdir -p \
   "$fixture_bin" \
   "$fixture_root/Clovery.xcodeproj" \
   "$fixture_root/Clovery" \
+  "$fixture_root/Clovery/Features/Legal" \
   "$fixture_root/scripts"
 cp "$checker" "$fixture_checker"
 cp "$selector" "$fixture_selector"
 chmod +x "$fixture_checker" "$fixture_selector"
-printf '%s\n' 'INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription' > "$fixture_root/Clovery.xcodeproj/project.pbxproj"
+printf '%s\n' \
+  'INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription' \
+  'PrivacyInfo.xcprivacy in Resources' \
+  'PrivacyInfo.xcprivacy in Resources' \
+  'PrivacyInfo.xcprivacy in Resources' \
+  'PrivacyInfo.xcprivacy in Resources' \
+  > "$fixture_root/Clovery.xcodeproj/project.pbxproj"
 
 cat > "$fixture_bin/xcodebuild" <<'EOF'
 #!/bin/sh
@@ -82,21 +89,25 @@ case "$target" in
   Clovery)
     cat <<SETTINGS
 Build settings for action build and target Clovery:
-    MARKETING_VERSION = 1.0.3
-    CURRENT_PROJECT_VERSION = 14
+    MARKETING_VERSION = ${APP_MARKETING_VERSION-1.1.0}
+    CURRENT_PROJECT_VERSION = ${APP_BUILD_NUMBER-15}
     PRODUCT_BUNDLE_IDENTIFIER = com.clovery.app
     CLOVERY_SOURCE_COMMIT = ${APP_SOURCE_COMMIT-NOT_SET}
+    CLOVERY_API_BASE_URL = ${APP_API_BASE_URL-https://api.clovery.cn}
     INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription = ${APP_PHOTO_USAGE-Clovery saves your lucky moment cards to Photos.}
     CODE_SIGN_ENTITLEMENTS = ${APP_CODE_SIGN_ENTITLEMENTS-Clovery/Clovery.entitlements}
+    CODE_SIGN_IDENTITY = ${APP_CODE_SIGN_IDENTITY-Apple Distribution}
+    APS_ENVIRONMENT = ${APP_APS_ENVIRONMENT-production}
 SETTINGS
     ;;
   CloveryWidgetExtension)
     cat <<SETTINGS
 Build settings for action build and target CloveryWidgetExtension:
-    MARKETING_VERSION = 1.0.3
-    CURRENT_PROJECT_VERSION = 14
+    MARKETING_VERSION = ${WIDGET_MARKETING_VERSION-1.1.0}
+    CURRENT_PROJECT_VERSION = ${WIDGET_BUILD_NUMBER-15}
     PRODUCT_BUNDLE_IDENTIFIER = com.clovery.app.CloveryWidget
     CODE_SIGN_ENTITLEMENTS = ${WIDGET_CODE_SIGN_ENTITLEMENTS-CloveryWidgetExtension.entitlements}
+    CODE_SIGN_IDENTITY = ${WIDGET_CODE_SIGN_IDENTITY-Apple Distribution}
 SETTINGS
     ;;
   *)
@@ -144,6 +155,10 @@ write_app_entitlements() {
   <key>$icloud_key</key>
   <array>
     <string>$icloud_value</string>
+  </array>
+  <key>com.apple.developer.applesignin</key>
+  <array>
+    <string>Default</string>
   </array>
 </dict>
 </plist>
@@ -214,6 +229,50 @@ expect_success() {
 
 reset_entitlements
 write_app_info '$(CLOVERY_SOURCE_COMMIT)'
+
+cat > "$fixture_root/Clovery/PrivacyInfo.xcprivacy" <<'EOF'
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0"><dict>
+<key>NSPrivacyTracking</key><false/>
+<key>NSPrivacyCollectedDataTypes</key><array>
+<dict><key>NSPrivacyCollectedDataType</key><string>NSPrivacyCollectedDataTypeUserID</string><key>NSPrivacyCollectedDataTypeLinked</key><true/><key>NSPrivacyCollectedDataTypeTracking</key><false/><key>NSPrivacyCollectedDataTypePurposes</key><array><string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string></array></dict>
+<dict><key>NSPrivacyCollectedDataType</key><string>NSPrivacyCollectedDataTypeDeviceID</string><key>NSPrivacyCollectedDataTypeLinked</key><true/><key>NSPrivacyCollectedDataTypeTracking</key><false/><key>NSPrivacyCollectedDataTypePurposes</key><array><string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string></array></dict>
+<dict><key>NSPrivacyCollectedDataType</key><string>NSPrivacyCollectedDataTypeOtherUserContent</string><key>NSPrivacyCollectedDataTypeLinked</key><true/><key>NSPrivacyCollectedDataTypeTracking</key><false/><key>NSPrivacyCollectedDataTypePurposes</key><array><string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string></array></dict>
+<dict><key>NSPrivacyCollectedDataType</key><string>NSPrivacyCollectedDataTypePhotosorVideos</string><key>NSPrivacyCollectedDataTypeLinked</key><true/><key>NSPrivacyCollectedDataTypeTracking</key><false/><key>NSPrivacyCollectedDataTypePurposes</key><array><string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string></array></dict>
+<dict><key>NSPrivacyCollectedDataType</key><string>NSPrivacyCollectedDataTypePurchaseHistory</string><key>NSPrivacyCollectedDataTypeLinked</key><true/><key>NSPrivacyCollectedDataTypeTracking</key><false/><key>NSPrivacyCollectedDataTypePurposes</key><array><string>NSPrivacyCollectedDataTypePurposeAppFunctionality</string></array></dict>
+</array>
+<key>NSPrivacyAccessedAPITypes</key><array><dict>
+<key>NSPrivacyAccessedAPIType</key><string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+<key>NSPrivacyAccessedAPITypeReasons</key><array><string>CA92.1</string><string>1C8F.1</string></array>
+</dict></array>
+</dict></plist>
+EOF
+
+cat > "$fixture_root/Clovery/Features/Legal/LegalDocument.swift" <<'EOF'
+let privacy = "https://api.clovery.cn/v1/legal/privacy"
+let terms = "https://api.clovery.cn/v1/legal/terms"
+EOF
+
+mkdir -p "$fixture_root/Clovery.xcodeproj/xcshareddata/xcschemes"
+cat > "$fixture_root/Clovery.xcodeproj/xcshareddata/xcschemes/Clovery.xcscheme" <<'EOF'
+<Scheme>
+<TestAction><StoreKitConfigurationFileReference identifier="Clovery.storekit"/></TestAction>
+<LaunchAction><StoreKitConfigurationFileReference identifier="Clovery.storekit"/></LaunchAction>
+<ProfileAction buildConfiguration="Release"></ProfileAction>
+<ArchiveAction buildConfiguration="Release"></ArchiveAction>
+</Scheme>
+EOF
+
+privacy_backup="$temporary_directory/PrivacyInfo.xcprivacy"
+legal_backup="$temporary_directory/LegalDocument.swift"
+scheme_backup="$temporary_directory/Clovery.xcscheme"
+project_backup="$temporary_directory/project.pbxproj"
+cp "$fixture_root/Clovery/PrivacyInfo.xcprivacy" "$privacy_backup"
+cp "$fixture_root/Clovery/Features/Legal/LegalDocument.swift" "$legal_backup"
+cp "$fixture_root/Clovery.xcodeproj/xcshareddata/xcschemes/Clovery.xcscheme" "$scheme_backup"
+cp "$fixture_root/Clovery.xcodeproj/project.pbxproj" "$project_backup"
+
 expect_failure "empty photo-library usage description" \
   env PATH="$fixture_bin:$PATH" APP_PHOTO_USAGE= "$fixture_checker"
 expect_failure "wrong source commit build default" \
@@ -281,6 +340,73 @@ reset_entitlements
 expect_failure "additional widget group value" env PATH="$fixture_bin:$PATH" "$fixture_checker"
 
 reset_entitlements
+expect_failure "old app marketing version" \
+  env PATH="$fixture_bin:$PATH" APP_MARKETING_VERSION=1.0.3 "$fixture_checker"
+expect_failure "old app build number" \
+  env PATH="$fixture_bin:$PATH" APP_BUILD_NUMBER=14 "$fixture_checker"
+expect_failure "old widget marketing version" \
+  env PATH="$fixture_bin:$PATH" WIDGET_MARKETING_VERSION=1.0.3 "$fixture_checker"
+expect_failure "old widget build number" \
+  env PATH="$fixture_bin:$PATH" WIDGET_BUILD_NUMBER=14 "$fixture_checker"
+expect_failure "staging API URL" \
+  env PATH="$fixture_bin:$PATH" APP_API_BASE_URL=https://api.staging.clovery.cn "$fixture_checker"
+expect_failure "HTTP production API URL" \
+  env PATH="$fixture_bin:$PATH" APP_API_BASE_URL=http://api.clovery.cn "$fixture_checker"
+expect_failure "development Release signing" \
+  env PATH="$fixture_bin:$PATH" APP_CODE_SIGN_IDENTITY='Apple Development' "$fixture_checker"
+expect_failure "development Release push environment" \
+  env PATH="$fixture_bin:$PATH" APP_APS_ENVIRONMENT=development "$fixture_checker"
+expect_failure "development widget Release signing" \
+  env PATH="$fixture_bin:$PATH" WIDGET_CODE_SIGN_IDENTITY='Apple Development' "$fixture_checker"
+
+/usr/libexec/PlistBuddy \
+  -c 'Set :com.apple.developer.applesignin:0 Wrong' \
+  "$fixture_root/Clovery/Clovery.entitlements"
+expect_failure "wrong Sign in with Apple entitlement" \
+  env PATH="$fixture_bin:$PATH" "$fixture_checker"
+reset_entitlements
+
+/usr/libexec/PlistBuddy \
+  -c 'Set :NSPrivacyTracking true' \
+  "$fixture_root/Clovery/PrivacyInfo.xcprivacy"
+expect_failure "privacy tracking enabled" env PATH="$fixture_bin:$PATH" "$fixture_checker"
+cp "$privacy_backup" "$fixture_root/Clovery/PrivacyInfo.xcprivacy"
+
+/usr/libexec/PlistBuddy \
+  -c 'Delete :NSPrivacyCollectedDataTypes:0:NSPrivacyCollectedDataTypePurposes' \
+  "$fixture_root/Clovery/PrivacyInfo.xcprivacy"
+expect_failure "missing privacy purpose" env PATH="$fixture_bin:$PATH" "$fixture_checker"
+cp "$privacy_backup" "$fixture_root/Clovery/PrivacyInfo.xcprivacy"
+
+/usr/libexec/PlistBuddy \
+  -c 'Delete :NSPrivacyAccessedAPITypes:0:NSPrivacyAccessedAPITypeReasons:1' \
+  "$fixture_root/Clovery/PrivacyInfo.xcprivacy"
+expect_failure "missing App Group UserDefaults reason" \
+  env PATH="$fixture_bin:$PATH" "$fixture_checker"
+cp "$privacy_backup" "$fixture_root/Clovery/PrivacyInfo.xcprivacy"
+
+printf '%s\n' 'INFOPLIST_KEY_NSPhotoLibraryAddUsageDescription' \
+  > "$fixture_root/Clovery.xcodeproj/project.pbxproj"
+expect_failure "privacy manifest missing from resources" \
+  env PATH="$fixture_bin:$PATH" "$fixture_checker"
+cp "$project_backup" "$fixture_root/Clovery.xcodeproj/project.pbxproj"
+
+printf '%s\n' 'let privacy = "https://example.invalid/privacy"' \
+  'let terms = "https://api.clovery.cn/v1/legal/terms"' \
+  > "$fixture_root/Clovery/Features/Legal/LegalDocument.swift"
+expect_failure "wrong production privacy URL" env PATH="$fixture_bin:$PATH" "$fixture_checker"
+cp "$legal_backup" "$fixture_root/Clovery/Features/Legal/LegalDocument.swift"
+
+cat > "$fixture_root/Clovery.xcodeproj/xcshareddata/xcschemes/Clovery.xcscheme" <<'EOF'
+<Scheme>
+<ProfileAction buildConfiguration="Release"><StoreKitConfigurationFileReference identifier="Clovery.storekit"/></ProfileAction>
+<ArchiveAction buildConfiguration="Release"></ArchiveAction>
+</Scheme>
+EOF
+expect_failure "Release action uses local StoreKit configuration" \
+  env PATH="$fixture_bin:$PATH" "$fixture_checker"
+cp "$scheme_backup" "$fixture_root/Clovery.xcodeproj/xcshareddata/xcschemes/Clovery.xcscheme"
+
 expect_success "exact release identity fixture" env PATH="$fixture_bin:$PATH" "$fixture_checker"
 
 discovered_destination=$(PATH="$fixture_bin:$PATH" "$fixture_selector")

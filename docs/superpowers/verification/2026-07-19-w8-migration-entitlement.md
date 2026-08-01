@@ -1,6 +1,6 @@
 # W8 Legacy Migration and Entitlement Reconciliation Verification
 
-**Verified code commit:** `e82af8de4d7d61cea1bb6186e6ef4b1d64e9938d`  
+**Verified code commit:** `e82af8d`
 **Verification date:** 2026-07-27  
 **Database:** PostgreSQL 16.13  
 **Applied migration range:** `000001` through `000017_migration_resolution`
