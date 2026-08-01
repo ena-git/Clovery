@@ -56,7 +56,8 @@ final class WebBridgeContractTests: XCTestCase {
         XCTAssertTrue(webViewSource.contains("BridgeJavaScript.photoSaveFailed(filename: filename, code: code)"))
         XCTAssertTrue(bridgeSource.contains("window.__cloveryPhotoLoaded"))
         XCTAssertTrue(bridgeSource.contains("window.__cloveryPhotoSaveFailed"))
-        XCTAssertTrue(bridgeSource.contains("JSONSerialization.data(withJSONObject:"))
+        XCTAssertTrue(bridgeSource.contains("withJSONObject: payload"))
+        XCTAssertTrue(bridgeSource.contains("options: [.sortedKeys, .withoutEscapingSlashes]"))
     }
 
     func testHTMLRollsBackFailedPhotoAndOffersLoadRetry() throws {

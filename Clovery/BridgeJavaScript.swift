@@ -41,7 +41,10 @@ enum BridgeJavaScript {
 
     static func iCloudData(_ payload: [String: Any]) -> String {
         guard JSONSerialization.isValidJSONObject(payload),
-              let data = try? JSONSerialization.data(withJSONObject: payload),
+              let data = try? JSONSerialization.data(
+                withJSONObject: payload,
+                options: [.sortedKeys, .withoutEscapingSlashes]
+              ),
               let json = String(data: data, encoding: .utf8) else {
             return ""
         }
@@ -97,7 +100,10 @@ enum BridgeJavaScript {
 
     private static func evaluateJSONCallback(name: String, payload: [Any]) -> String {
         guard JSONSerialization.isValidJSONObject(payload),
-              let data = try? JSONSerialization.data(withJSONObject: payload),
+              let data = try? JSONSerialization.data(
+                withJSONObject: payload,
+                options: [.sortedKeys, .withoutEscapingSlashes]
+              ),
               let json = String(data: data, encoding: .utf8),
               json.first == "[",
               json.last == "]" else {

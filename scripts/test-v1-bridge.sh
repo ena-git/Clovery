@@ -9,6 +9,7 @@ module_cache="/private/tmp/clovery-swift-module-cache"
 swiftc \
   -module-cache-path "$module_cache" \
   "$repository_root/Clovery/NativeBridgeModels.swift" \
+  "$repository_root/Tests/VaultDiarySnapshotBridgeFixture.swift" \
   "$repository_root/Clovery/BridgeJavaScript.swift" \
   "$repository_root/Tests/V1BridgeRegressionTests.swift" \
   -o "$test_binary"

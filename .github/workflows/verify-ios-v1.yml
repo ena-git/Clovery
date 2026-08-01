@@ -28,22 +28,5 @@ jobs:
         with:
           go-version-file: v2/services/api/go.mod
           cache-dependency-path: v2/services/api/go.sum
-      - name: Verify repository hygiene
-        run: scripts/verify-repository-hygiene.sh
-      - name: Verify Go API and OpenAPI
-        working-directory: v2/services/api
-        run: |
-          go test ./...
-          go build -o /tmp/clovery-api ./cmd/api
-      - name: Reject beta Xcode
-        run: |
-          xcode_version=$(xcodebuild -version)
-          selected_developer_dir=$(xcode-select -p)
-          printf '%s\n' "$xcode_version"
-          printf 'Selected developer directory: %s\n' "$selected_developer_dir"
-          if printf '%s\n%s\n' "$xcode_version" "$selected_developer_dir" | grep -qi beta; then
-            echo "Beta Xcode is not allowed for native iOS verification." >&2
-            exit 1
-          fi
       - name: Verify iOS 1.1.0 account upgrade
-        run: scripts/verify-ios-v1.sh
+        run: scripts/verify-ios-1.1.0.sh

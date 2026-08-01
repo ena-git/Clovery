@@ -23,6 +23,7 @@ struct MigrationBundleZipSmoke {
         let result = try MigrationBundleExporter(
             documentsDirectory: documentsDirectory
         ).export(
+            migrationID: UUID(uuidString: "a1000000-0000-4000-8000-000000000001")!,
             entriesJSON: #"[{"id":"smoke","photos":["photo-smoke.jpg"]}]"#
         )
         print(result.archiveURL.path)
