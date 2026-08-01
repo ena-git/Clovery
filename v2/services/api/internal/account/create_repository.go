@@ -27,6 +27,9 @@ func (repository *Repository) CreateAccount(ctx context.Context, params CreateAc
 	if err := insertAccountRows(ctx, transaction, params, normalizedID); err != nil {
 		return err
 	}
+	if err := insertBootstrapJob(ctx, transaction, params.AccountID, params.VaultID, "new_install"); err != nil {
+		return err
+	}
 	if err := transaction.Commit(); err != nil {
 		return fmt.Errorf("commit account transaction: %w", err)
 	}

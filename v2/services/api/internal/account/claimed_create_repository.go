@@ -105,22 +105,14 @@ func (repository *Repository) CreateClaimedAccount(
 		}
 		return CreateClaimedAccountResult{}, fmt.Errorf("insert claimed external identity: %w", err)
 	}
-	migrationState := "pending"
-	if params.SourceKind == "new_install" {
-		migrationState = "complete"
-	}
-	if _, err := transaction.ExecContext(
+	if err := insertBootstrapJob(
 		ctx,
-		`INSERT INTO account_bootstrap_jobs (
-			account_id, vault_id, source_kind,
-			identity_state, migration_state, entitlement_state, vault_state
-		) VALUES ($1, $2, $3, 'complete', $4, 'pending', 'pending')`,
+		transaction,
 		params.AccountID,
 		params.VaultID,
 		params.SourceKind,
-		migrationState,
 	); err != nil {
-		return CreateClaimedAccountResult{}, fmt.Errorf("insert account bootstrap job: %w", err)
+		return CreateClaimedAccountResult{}, err
 	}
 	if err := claimRepository.MarkConsumed(
 		ctx,
