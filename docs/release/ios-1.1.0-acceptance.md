@@ -4,8 +4,8 @@
 **生产基线：** `1.0.3 (14)`  
 **候选版本：** `1.1.0 (15)`  
 **候选分支：** `codex/swift-auth-foundation`  
-**当前代码节点：** `91d5ed8` 之后  
-**总体状态：** `BLOCKED — 等待数据库、全量自动化、真机、Sandbox、TestFlight 与 App Store Connect 验收`
+**当前代码节点：** `57b830e`
+**总体状态：** `BLOCKED — 自动化与模拟器已通过，等待真实预发、真机、Sandbox、TestFlight 与 App Store Connect 验收`
 
 本文件只记录不含用户内容、账户标识、设备 UDID、交易凭证或完整提交 SHA 的聚合结果。任何 `NOT_RUN`、`FAIL` 或未关闭的 P0/P1 都阻止提交审核和 GitHub Release。
 
@@ -34,6 +34,10 @@
 - [x] 隐私清单申报账户 ID、设备 ID、日记、照片和购买历史 — PASS
 - [x] `UserDefaults` 与 App Group required-reason API 声明 — PASS
 - [x] 仓库密钥、用户证据、大文件和生成物负向门禁 — PASS
+- [x] Go race、全量 XCTest 与无签名 Release 构建 — PASS（`234/234`）
+- [x] iPhone SE/mini/Pro/Pro Max 模拟器矩阵 — PASS（iOS 26.0.1）
+- [x] 最大辅助字号、四种字体、深色系统外观与 Reduce Motion — PASS
+- [x] 认领/迁移/权益/日记重启、后台恢复和离线重试 UI — PASS
 
 ## 隐私与 App Store Connect 答案
 
@@ -59,11 +63,13 @@ App Store Connect 中必须与 `Clovery/PrivacyInfo.xcprivacy` 和线上隐私�
 | --- | --- | --- |
 | 法律文本负责人确认 | NOT_RUN | 负责人确认运营主体、留存期限与联系方式 |
 | 客服邮箱收发测试 | NOT_RUN | 必须能接收并回复测试邮件 |
-| PostgreSQL 备份/恢复/升级演练 | NOT_RUN | 必须从加密备份恢复且数据关系一致 |
+| 本地 PostgreSQL 迁移往返演练 | PASS | 自动化覆盖升级、回滚和重新应用；不替代真实预发备份恢复 |
+| 预发 PostgreSQL 备份/恢复/升级 | NOT_RUN | 必须从加密备份恢复且数据关系一致 |
 | 预发账户继承与权益 smoke | NOT_RUN | 所有命名场景必须 PASS |
-| Go race/full build | NOT_RUN | 任一失败阻断 |
-| 完整 XCTest 与 Release 模拟器 build | NOT_RUN | 任一失败或跳过阻断 |
-| iOS 16/小屏/Dynamic Type/中断矩阵 | NOT_RUN | 崩溃、遮挡或不可恢复阻断 |
+| Go race/full build | PASS | 提交 `57b830e` 权威脚本退出 `0` |
+| 完整 XCTest 与 Release 模拟器 build | PASS | `234` 通过、`0` 失败、`0` 跳过 |
+| 小屏/Dynamic Type/字体/中断模拟器矩阵 | PASS | 四尺寸均通过；详见模拟器矩阵文档 |
+| iOS 16 运行时/旧款真机 | NOT_RUN | 当前未安装 iOS 16 模拟器运行时，必须由 Task 7 真机补齐 |
 | 两台真机升级与跨设备同步 | NOT_RUN | 数据、照片、字体或权益不一致阻断 |
 | 真机 Photos 保存/拒绝/设置恢复 | NOT_RUN | 任一保存失败阻断 |
 | App Store Connect 商品配置 | NOT_RUN | 商品、协议、税务、银行或地区不完整阻断 |
