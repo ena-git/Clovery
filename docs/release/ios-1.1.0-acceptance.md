@@ -9,6 +9,14 @@
 
 本文件只记录不含用户内容、账户标识、设备 UDID、交易凭证或完整提交 SHA 的聚合结果。任何 `NOT_RUN`、`FAIL` 或未关闭的 P0/P1 都阻止提交审核和 GitHub Release。
 
+## 执行手册
+
+- 模拟器证据：`docs/release/ios-1.1.0-simulator-matrix.md`
+- 真机升级：`docs/release/ios-1.1.0-device-acceptance.md`
+- StoreKit/TestFlight：`docs/release/ios-1.1.0-storekit-acceptance.md`
+- 生产发布：`docs/release/ios-1.1.0-production-checklist.md`
+- 发布监控：`docs/release/ios-1.1.0-monitoring.md`
+
 ## 固定发布身份
 
 | 项目 | 固定值 | 状态 |
@@ -72,6 +80,7 @@ App Store Connect 中必须与 `Clovery/PrivacyInfo.xcprivacy` 和线上隐私�
 | iOS 16 运行时/旧款真机 | NOT_RUN | 当前未安装 iOS 16 模拟器运行时，必须由 Task 7 真机补齐 |
 | 两台真机升级与跨设备同步 | NOT_RUN | 数据、照片、字体或权益不一致阻断 |
 | 真机 Photos 保存/拒绝/设置恢复 | NOT_RUN | 任一保存失败阻断 |
+| 签名 archive 身份与权限审计 | NOT_RUN | `scripts/verify-ios-1.1.0-archive.sh` 必须 PASS |
 | App Store Connect 商品配置 | NOT_RUN | 商品、协议、税务、银行或地区不完整阻断 |
 | Sandbox 购买/取消/pending/恢复/撤销 | NOT_RUN | 付费用户未解锁或跨账户串权阻断 |
 | TestFlight 升级与冷安装 | NOT_RUN | P0/P1 阻断 |
