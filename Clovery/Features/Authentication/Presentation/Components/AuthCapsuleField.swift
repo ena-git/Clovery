@@ -7,8 +7,9 @@ struct AuthCapsuleField<Content: View>: View {
     var body: some View {
         content()
             .padding(.horizontal, 36)
+            .padding(.vertical, 14)
             .frame(maxWidth: .infinity)
-            .frame(height: 78)
+            .frame(minHeight: 78)
             .background(Color.authSurface, in: Capsule())
     }
 }
@@ -40,6 +41,8 @@ struct AuthTextField: View {
             }
             .cloveryFont(.body)
             .foregroundColor(.authInk)
+            .padding(.vertical, 8)
+            .frame(minHeight: 44)
             .textContentType(contentType)
             .textInputAutocapitalization(.never)
             .autocorrectionDisabled()

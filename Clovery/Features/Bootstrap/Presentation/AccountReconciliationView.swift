@@ -2,12 +2,26 @@ import CryptoKit
 import SwiftUI
 
 struct AccountReconciliationView: View {
-    @Environment(\.accessibilityReduceMotion) private var reduceMotion
+    @Environment(\.accessibilityReduceMotion) private var systemReduceMotion
+    @Environment(\.dynamicTypeSize) private var dynamicTypeSize
     @Environment(\.openURL) private var openURL
 
     let state: BootstrapReconciliationState
     let retry: () -> Void
     let logout: () -> Void
+    let reduceMotionOverride: Bool?
+
+    init(
+        state: BootstrapReconciliationState,
+        retry: @escaping () -> Void,
+        logout: @escaping () -> Void,
+        reduceMotionOverride: Bool? = nil
+    ) {
+        self.state = state
+        self.retry = retry
+        self.logout = logout
+        self.reduceMotionOverride = reduceMotionOverride
+    }
 
     var body: some View {
         ScrollView {
@@ -15,7 +29,7 @@ struct AccountReconciliationView: View {
                 Image(AuthenticationAsset.cloverHero.rawValue)
                     .resizable()
                     .scaledToFit()
-                    .frame(maxWidth: 180)
+                    .frame(maxWidth: dynamicTypeSize.isAccessibilitySize ? 112 : 180)
                     .accessibilityHidden(true)
 
                 Text(title)
@@ -65,6 +79,10 @@ struct AccountReconciliationView: View {
         .background(Color.authBackground.ignoresSafeArea())
         .animation(reduceMotion ? nil : .easeInOut(duration: 0.2), value: stageStates)
         .interactiveDismissDisabled()
+    }
+
+    private var reduceMotion: Bool {
+        reduceMotionOverride ?? systemReduceMotion
     }
 
     private var actionButtons: some View {

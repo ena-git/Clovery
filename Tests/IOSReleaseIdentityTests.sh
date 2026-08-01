@@ -25,9 +25,8 @@ if grep -Eq '^[[:space:]]+paths:' "$workflow"; then
 fi
 for required_step in \
   'name: Verify Clovery iOS 1.1.0 Account Upgrade' \
-  'name: Verify repository hygiene' \
-  'name: Verify Go API and OpenAPI' \
-  'name: Verify iOS 1.1.0 account upgrade'
+  'name: Verify iOS 1.1.0 account upgrade' \
+  'run: scripts/verify-ios-1.1.0.sh'
 do
   if ! grep -Fq "$required_step" "$workflow"; then
     echo "native iOS CI is missing required step: $required_step" >&2

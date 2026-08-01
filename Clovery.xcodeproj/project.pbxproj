@@ -110,6 +110,7 @@
 		AABB00000000000000000177 /* AccountVaultRuntimeRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000178 /* AccountVaultRuntimeRegistry.swift */; };
 		AABB00000000000000000179 /* AccountReconciliationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000017A /* AccountReconciliationView.swift */; };
 		AABB0000000000000000017B /* IOSVerificationFixture.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000017C /* IOSVerificationFixture.swift */; };
+		AABB0000000000000000018D /* IOSVerificationAccountDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000018E /* IOSVerificationAccountDependencies.swift */; };
 		AABB00000000000000000180 /* AccountManagementAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000181 /* AccountManagementAPI.swift */; };
 		AABB00000000000000000182 /* AccountSecurityViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000183 /* AccountSecurityViewModel.swift */; };
 		AABB00000000000000000184 /* LegalDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000185 /* LegalDocument.swift */; };
@@ -125,6 +126,13 @@
 
 /* Begin PBXContainerItemProxy section */
 		AACC0000000000000000000A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AABB00000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AABB00000000000000000031;
+			remoteInfo = Clovery;
+		};
+		AADD0000000000000000000A /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = AABB00000000000000000001 /* Project object */;
 			proxyType = 1;
@@ -262,6 +270,7 @@
 		AABB00000000000000000178 /* AccountVaultRuntimeRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Sync/Domain/AccountVaultRuntimeRegistry.swift; sourceTree = "<group>"; };
 		AABB0000000000000000017A /* AccountReconciliationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Bootstrap/Presentation/AccountReconciliationView.swift; sourceTree = "<group>"; };
 		AABB0000000000000000017C /* IOSVerificationFixture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/Verification/IOSVerificationFixture.swift; sourceTree = "<group>"; };
+		AABB0000000000000000018E /* IOSVerificationAccountDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/Verification/IOSVerificationAccountDependencies.swift; sourceTree = "<group>"; };
 		AABB00000000000000000181 /* AccountManagementAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Account/Data/AccountManagementAPI.swift; sourceTree = "<group>"; };
 		AABB00000000000000000183 /* AccountSecurityViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Account/Presentation/AccountSecurityViewModel.swift; sourceTree = "<group>"; };
 		AABB00000000000000000185 /* LegalDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Legal/LegalDocument.swift; sourceTree = "<group>"; };
@@ -269,6 +278,7 @@
 		AABB00000000000000000189 /* AccountSecurityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Account/Presentation/AccountSecurityView.swift; sourceTree = "<group>"; };
 		AABB0000000000000000018B /* DeleteAccountConfirmationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Account/Presentation/DeleteAccountConfirmationView.swift; sourceTree = "<group>"; };
 		AACC00000000000000000001 /* CloveryTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CloveryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		AADD00000000000000000001 /* CloveryUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CloveryUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		FC889A182FD464C9002510AD /* Clovery.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Clovery.entitlements; sourceTree = "<group>"; };
 		FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CloveryWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		FCECDFDF2FE92C7C0067AF51 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
@@ -288,11 +298,19 @@
 
 /* Begin PBXFileSystemSynchronizedRootGroup section */
 		AACC00000000000000000002 /* CloveryTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = CloveryTests; sourceTree = "<group>"; };
+		AADD00000000000000000002 /* CloveryUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = CloveryUITests; sourceTree = "<group>"; };
 		FCECDFE32FE92C7C0067AF51 /* CloveryWidget */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (FCECDFF32FE92C7D0067AF51 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = CloveryWidget; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
 		AACC00000000000000000005 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AADD00000000000000000005 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -324,6 +342,7 @@
 				FCECDFF52FE92CA80067AF51 /* CloveryWidgetExtension.entitlements */,
 				AABB00000000000000000003 /* Clovery */,
 				AACC00000000000000000002 /* CloveryTests */,
+				AADD00000000000000000002 /* CloveryUITests */,
 				FCECDFE32FE92C7C0067AF51 /* CloveryWidget */,
 				AABB000000000000000000E2 /* Config */,
 				FCECDFDE2FE92C7C0067AF51 /* Frameworks */,
@@ -386,6 +405,7 @@
 				AABB00000000000000000178 /* AccountVaultRuntimeRegistry.swift */,
 				AABB0000000000000000017A /* AccountReconciliationView.swift */,
 				AABB0000000000000000017C /* IOSVerificationFixture.swift */,
+				AABB0000000000000000018E /* IOSVerificationAccountDependencies.swift */,
 				AABB00000000000000000181 /* AccountManagementAPI.swift */,
 				AABB00000000000000000183 /* AccountSecurityViewModel.swift */,
 				AABB00000000000000000185 /* LegalDocument.swift */,
@@ -455,6 +475,7 @@
 				AABB00000000000000000006 /* Clovery.app */,
 				FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */,
 				AACC00000000000000000001 /* CloveryTests.xctest */,
+				AADD00000000000000000001 /* CloveryUITests.xctest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -500,6 +521,27 @@
 			productName = CloveryTests;
 			productReference = AACC00000000000000000001 /* CloveryTests.xctest */;
 			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		AADD00000000000000000003 /* CloveryUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AADD00000000000000000007 /* Build configuration list for PBXNativeTarget "CloveryUITests" */;
+			buildPhases = (
+				AADD00000000000000000004 /* Sources */,
+				AADD00000000000000000005 /* Frameworks */,
+				AADD00000000000000000006 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				AADD0000000000000000000B /* PBXTargetDependency */,
+			);
+			fileSystemSynchronizedGroups = (
+				AADD00000000000000000002 /* CloveryUITests */,
+			);
+			name = CloveryUITests;
+			productName = CloveryUITests;
+			productReference = AADD00000000000000000001 /* CloveryUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
 		};
 		AABB00000000000000000031 /* Clovery */ = {
 			isa = PBXNativeTarget;
@@ -559,6 +601,10 @@
 						CreatedOnToolsVersion = 26.0;
 						TestTargetID = AABB00000000000000000031;
 					};
+					AADD00000000000000000003 = {
+						CreatedOnToolsVersion = 26.0;
+						TestTargetID = AABB00000000000000000031;
+					};
 					FCECDFDC2FE92C7C0067AF51 = {
 						CreatedOnToolsVersion = 26.4.1;
 					};
@@ -581,12 +627,20 @@
 				AABB00000000000000000031 /* Clovery */,
 				FCECDFDC2FE92C7C0067AF51 /* CloveryWidgetExtension */,
 				AACC00000000000000000003 /* CloveryTests */,
+				AADD00000000000000000003 /* CloveryUITests */,
 			);
 		};
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
 		AACC00000000000000000006 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AADD00000000000000000006 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -621,6 +675,13 @@
 
 /* Begin PBXSourcesBuildPhase section */
 		AACC00000000000000000004 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AADD00000000000000000004 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -691,6 +752,7 @@
 				AABB00000000000000000177 /* AccountVaultRuntimeRegistry.swift in Sources */,
 				AABB00000000000000000179 /* AccountReconciliationView.swift in Sources */,
 				AABB0000000000000000017B /* IOSVerificationFixture.swift in Sources */,
+				AABB0000000000000000018D /* IOSVerificationAccountDependencies.swift in Sources */,
 				AABB00000000000000000180 /* AccountManagementAPI.swift in Sources */,
 				AABB00000000000000000182 /* AccountSecurityViewModel.swift in Sources */,
 				AABB00000000000000000184 /* LegalDocument.swift in Sources */,
@@ -750,6 +812,11 @@
 			target = AABB00000000000000000031 /* Clovery */;
 			targetProxy = AACC0000000000000000000A /* PBXContainerItemProxy */;
 		};
+		AADD0000000000000000000B /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AABB00000000000000000031 /* Clovery */;
+			targetProxy = AADD0000000000000000000A /* PBXContainerItemProxy */;
+		};
 		FCECDFEE2FE92C7D0067AF51 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
 			target = FCECDFDC2FE92C7C0067AF51 /* CloveryWidgetExtension */;
@@ -804,6 +871,42 @@
 				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Clovery.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Clovery";
+			};
+			name = Release;
+		};
+		AADD00000000000000000008 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = M92TBSSR2R;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.clovery.app.UITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = Clovery;
+			};
+			name = Debug;
+		};
+		AADD00000000000000000009 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = M92TBSSR2R;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.clovery.app.UITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = Clovery;
 			};
 			name = Release;
 		};
@@ -1088,6 +1191,15 @@
 			buildConfigurations = (
 				AACC00000000000000000008 /* Debug */,
 				AACC00000000000000000009 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AADD00000000000000000007 /* Build configuration list for PBXNativeTarget "CloveryUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AADD00000000000000000008 /* Debug */,
+				AADD00000000000000000009 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

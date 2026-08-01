@@ -11,6 +11,7 @@ enum IOSVerificationFixture: String, CaseIterable {
     case entitlement
     case needsAttention = "needs-attention"
     case diary
+    case accountSecurity = "account-security"
 
     static func resolve(arguments: [String] = ProcessInfo.processInfo.arguments) -> Self? {
         argumentValue(for: "-CloveryVerificationFixture", in: arguments).flatMap(Self.init)
@@ -22,6 +23,20 @@ enum IOSVerificationFixture: String, CaseIterable {
         AppFontSelection(
             storedValue: argumentValue(for: "-CloveryVerificationFont", in: arguments)
         )
+    }
+
+    static func dynamicTypeSize(
+        arguments: [String] = ProcessInfo.processInfo.arguments
+    ) -> DynamicTypeSize {
+        argumentValue(for: "-CloveryVerificationDynamicType", in: arguments) == "accessibility"
+            ? .accessibility5
+            : .large
+    }
+
+    static func reduceMotion(
+        arguments: [String] = ProcessInfo.processInfo.arguments
+    ) -> Bool {
+        argumentValue(for: "-CloveryVerificationReduceMotion", in: arguments) == "true"
     }
 
     private static func argumentValue(for key: String, in arguments: [String]) -> String? {
@@ -39,6 +54,9 @@ struct IOSVerificationFixtureView: View {
     private let authenticationAPI: AuthenticationAPIProtocol
     private let identityClaimAPI: IdentityClaimAPIProtocol
     private let vaultRegistry: AccountVaultRuntimeRegistry
+    private let verificationAccount: IOSVerificationAccountDependencies
+    private let dynamicTypeSize: DynamicTypeSize
+    private let reduceMotion: Bool
     @StateObject private var sessionController: ApplicationSessionController
     @StateObject private var boardStore: BoardStore
     @StateObject private var fontStore: AppFontStore
@@ -52,6 +70,9 @@ struct IOSVerificationFixtureView: View {
         authenticationAPI = dependencies.authenticationAPI
         identityClaimAPI = dependencies.identityClaimAPI
         vaultRegistry = dependencies.vaultRegistry
+        verificationAccount = IOSVerificationAccountDependencies()
+        dynamicTypeSize = IOSVerificationFixture.dynamicTypeSize(arguments: arguments)
+        reduceMotion = IOSVerificationFixture.reduceMotion(arguments: arguments)
         _sessionController = StateObject(wrappedValue: dependencies.sessionController)
         _boardStore = StateObject(wrappedValue: dependencies.boardStore)
 
@@ -64,6 +85,7 @@ struct IOSVerificationFixtureView: View {
     var body: some View {
         fixtureView
             .environment(\.appFontSelection, fontStore.selection)
+            .environment(\.dynamicTypeSize, dynamicTypeSize)
     }
 
     @ViewBuilder
@@ -76,7 +98,7 @@ struct IOSVerificationFixtureView: View {
             .tint(.authInk)
         case .notice:
             ZStack {
-                ApplicationLoadingView()
+                ApplicationLoadingView(showsTitle: false)
                     .accessibilityHidden(true)
                 UpgradeNoticeView(acknowledge: {})
             }
@@ -109,19 +131,19 @@ struct IOSVerificationFixtureView: View {
             AccountReconciliationView(
                 state: .working(status(activeStage: .migration)),
                 retry: {},
-                logout: {}
+                logout: {},
+                reduceMotionOverride: reduceMotion
             )
         case .entitlement:
             AccountReconciliationView(
                 state: .working(status(activeStage: .entitlement)),
                 retry: {},
-                logout: {}
+                logout: {},
+                reduceMotionOverride: reduceMotion
             )
         case .needsAttention:
-            AccountReconciliationView(
-                state: .needsAttention("verification_fixture"),
-                retry: {},
-                logout: {}
+            IOSVerificationRetryRecoveryView(
+                reduceMotion: reduceMotion
             )
         case .diary:
             let namespace = VaultSyncNamespace(
@@ -135,6 +157,13 @@ struct IOSVerificationFixtureView: View {
             )
             .id(namespace.storageKey)
             .ignoresSafeArea()
+        case .accountSecurity:
+            AccountSecurityView(
+                api: verificationAccount.api,
+                session: verificationAccount.session,
+                entitlementCache: verificationAccount.entitlementCache,
+                entitlementState: verificationAccount.entitlementState
+            )
         }
     }
 
@@ -159,5 +188,21 @@ struct IOSVerificationFixtureView: View {
 private enum VerificationBootstrapStage {
     case migration
     case entitlement
+}
+
+@MainActor
+private struct IOSVerificationRetryRecoveryView: View {
+    let reduceMotion: Bool
+
+    @State private var recovered = false
+
+    var body: some View {
+        AccountReconciliationView(
+            state: recovered ? .working(nil) : .needsAttention("verification_offline"),
+            retry: { recovered = true },
+            logout: {},
+            reduceMotionOverride: reduceMotion
+        )
+    }
 }
 #endif

@@ -1,6 +1,8 @@
 import SwiftUI
 
 struct ApplicationLoadingView: View {
+    var showsTitle = true
+
     var body: some View {
         VStack(spacing: 14) {
             Spacer()
@@ -8,9 +10,11 @@ struct ApplicationLoadingView: View {
                 .resizable()
                 .scaledToFit()
                 .frame(width: 220, height: 220)
-            Text("Clovery")
-                .cloveryFont(.title)
-                .foregroundColor(.authInk)
+            if showsTitle {
+                Text("Clovery")
+                    .cloveryFont(.title)
+                    .foregroundColor(.authInk)
+            }
             Spacer()
         }
         .frame(maxWidth: .infinity, maxHeight: .infinity)

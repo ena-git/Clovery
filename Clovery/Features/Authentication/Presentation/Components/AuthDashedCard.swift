@@ -8,7 +8,7 @@ struct AuthDashedCard<Content: View>: View {
         content()
             .padding(.horizontal, 25)
             .frame(maxWidth: .infinity)
-            .frame(height: height)
+            .frame(minHeight: height)
             .background(Color.white)
             .overlay {
                 RoundedRectangle(cornerRadius: 60, style: .continuous)

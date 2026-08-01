@@ -16,6 +16,7 @@ routes=(
   entitlement
   needs-attention
   diary
+  account-security
 )
 if [[ -n "${CLOVERY_SCREENSHOT_ROUTE:-}" ]]; then
   routes=("$CLOVERY_SCREENSHOT_ROUTE")
@@ -41,13 +42,13 @@ for font in "${fonts[@]}"; do
       )
       if [[ "$size" == "accessibility" ]]; then
         launch_arguments+=(
-          -UIPreferredContentSizeCategoryName
-          UICTContentSizeCategoryAccessibilityExtraExtraExtraLarge
+          -CloveryVerificationDynamicType
+          accessibility
         )
       else
         launch_arguments+=(
-          -UIPreferredContentSizeCategoryName
-          UICTContentSizeCategoryLarge
+          -CloveryVerificationDynamicType
+          default
         )
       fi
 

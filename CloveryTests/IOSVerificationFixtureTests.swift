@@ -29,7 +29,8 @@ final class IOSVerificationFixtureTests: XCTestCase {
                 "migration",
                 "entitlement",
                 "needs-attention",
-                "diary"
+                "diary",
+                "account-security"
             ])
         )
         XCTAssertEqual(
@@ -39,6 +40,23 @@ final class IOSVerificationFixtureTests: XCTestCase {
             .notoSerifSC
         )
         XCTAssertEqual(IOSVerificationFixture.fontSelection(arguments: []), .handwriting)
+        XCTAssertEqual(
+            IOSVerificationFixture.dynamicTypeSize(
+                arguments: [
+                    "Clovery",
+                    "-CloveryVerificationDynamicType",
+                    "accessibility"
+                ]
+            ),
+            .accessibility5
+        )
+        XCTAssertEqual(IOSVerificationFixture.dynamicTypeSize(arguments: []), .large)
+        XCTAssertTrue(
+            IOSVerificationFixture.reduceMotion(
+                arguments: ["Clovery", "-CloveryVerificationReduceMotion", "true"]
+            )
+        )
+        XCTAssertFalse(IOSVerificationFixture.reduceMotion(arguments: []))
     }
 
     func testFixtureImplementationIsExcludedFromReleaseCompilation() throws {
@@ -64,6 +82,15 @@ final class IOSVerificationFixtureTests: XCTestCase {
         XCTAssertTrue(webView.contains("isVerificationFixture"))
         XCTAssertTrue(webView.contains("registersNotificationHandler"))
         XCTAssertTrue(webView.contains("#if DEBUG"))
+
+        let accountDependencies = try String(
+            contentsOf: repositoryRoot.appendingPathComponent(
+                "Clovery/Application/Verification/IOSVerificationAccountDependencies.swift"
+            ),
+            encoding: .utf8
+        )
+        XCTAssertTrue(accountDependencies.hasPrefix("#if DEBUG"))
+        XCTAssertTrue(accountDependencies.hasSuffix("#endif\n"))
     }
 
     private var repositoryRoot: URL {

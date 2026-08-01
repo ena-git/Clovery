@@ -40,7 +40,7 @@ struct AuthenticationEntryView: View {
                 .cloveryFont(.action)
                 .foregroundColor(.authInk)
                 .frame(maxWidth: .infinity)
-                .frame(height: 78)
+                .frame(minHeight: 78)
                 .background(Color.authSurface, in: Capsule())
         }
         .buttonStyle(.plain)

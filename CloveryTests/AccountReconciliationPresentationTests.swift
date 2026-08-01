@@ -33,6 +33,7 @@ final class AccountReconciliationPresentationTests: XCTestCase {
             XCTAssertTrue(source.contains(text))
         }
         XCTAssertTrue(source.contains("@Environment(\\.accessibilityReduceMotion)"))
+        XCTAssertTrue(source.contains("reduceMotionOverride ?? systemReduceMotion"))
         XCTAssertTrue(source.contains(".cloveryFont("))
         XCTAssertTrue(source.contains(".accessibilityLabel("))
         XCTAssertTrue(source.contains("ScrollView"))

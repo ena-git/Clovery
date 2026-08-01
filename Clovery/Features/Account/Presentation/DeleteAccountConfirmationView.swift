@@ -30,6 +30,7 @@ struct DeleteAccountConfirmationView: View {
                             .cloveryFont(.caption)
                             .foregroundColor(.authInk)
                         TextField("完整输入 Clovery ID", text: $confirmation)
+                            .accessibilityIdentifier("account-deletion-confirmation-field")
                             .textInputAutocapitalization(.never)
                             .autocorrectionDisabled()
                             .textContentType(.username)
@@ -64,6 +65,7 @@ struct DeleteAccountConfirmationView: View {
                         }
                         .frame(maxWidth: .infinity, minHeight: 52)
                     }
+                    .accessibilityIdentifier("account-deletion-confirm-button")
                     .buttonStyle(.plain)
                     .foregroundColor(.white)
                     .background(Color.red, in: Capsule())
@@ -89,6 +91,7 @@ struct DeleteAccountConfirmationView: View {
                 }
             }
         }
+        .accessibilityIdentifier("account-deletion-screen")
         .interactiveDismissDisabled(viewModel.isDeleting)
     }
 }

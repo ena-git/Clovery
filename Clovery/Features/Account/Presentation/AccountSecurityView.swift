@@ -42,6 +42,7 @@ struct AccountSecurityView: View {
                 }
             }
         }
+        .accessibilityIdentifier("account-security-screen")
         .task { await viewModel.load() }
         .sheet(isPresented: $showsDeletionConfirmation) {
             if let cloveryID = viewModel.cloveryID {
@@ -125,6 +126,7 @@ struct AccountSecurityView: View {
                 Button("继续删除账户") {
                     showsDeletionConfirmation = true
                 }
+                .accessibilityIdentifier("account-deletion-entry")
                 .cloveryFont(.caption)
                 .foregroundColor(.red)
                 .frame(minWidth: 160, minHeight: 44)

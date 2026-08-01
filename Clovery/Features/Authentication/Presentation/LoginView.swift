@@ -79,6 +79,8 @@ struct LoginView: View {
                         .cloveryFont(.caption)
                         .foregroundColor(.authInk)
                         .buttonStyle(.plain)
+                        .frame(minWidth: 100, minHeight: 44)
+                        .contentShape(Rectangle())
                         .padding(.top, 2)
 
                     AuthDivider()
@@ -95,6 +97,8 @@ struct LoginView: View {
                         Button("注册", action: showSignUp)
                             .foregroundColor(.authInk)
                             .buttonStyle(.plain)
+                            .frame(minHeight: 44)
+                            .contentShape(Rectangle())
                     }
                     .cloveryFont(.caption)
                     .padding(.bottom, 34)

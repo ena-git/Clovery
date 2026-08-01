@@ -58,7 +58,7 @@ struct ApplicationRootView: View {
             ApplicationLoadingView()
         case .upgradeNotice:
             ZStack {
-                ApplicationLoadingView()
+                ApplicationLoadingView(showsTitle: false)
                     .accessibilityHidden(true)
                 UpgradeNoticeView(
                     acknowledge: bootstrapCoordinator.acknowledgeNotice
