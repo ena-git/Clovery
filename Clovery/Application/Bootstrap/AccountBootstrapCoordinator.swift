@@ -111,44 +111,58 @@ final class AccountBootstrapCoordinator: ObservableObject {
     ) async {
         guard isCurrent(token: token, session: session) else { return }
 
-        let sourceKind: BootstrapSourceKind
+        let localSourceKind: BootstrapSourceKind
         do {
-            sourceKind = try resolveSourceKind(for: session)
+            localSourceKind = try resolveSourceKind(for: session)
         } catch {
             route = .reconciling(.needsAttention("bootstrap_account_mismatch"))
             return
         }
 
-        route = .reconciling(.working(nil))
+        route = .loading
         do {
-            let currentStatus = try await api.status()
+            let bootstrap = try await loadOrCreateStatus(localSourceKind: localSourceKind)
             guard isCurrent(token: token, session: session) else { return }
-            if apply(currentStatus, session: session) {
+            if apply(
+                bootstrap.status,
+                session: session,
+                sourceKind: bootstrap.sourceKind
+            ) {
                 return
             }
 
             if let pipeline {
                 let completedStatus = try await pipeline.run(
-                    initialStatus: currentStatus,
+                    initialStatus: bootstrap.status,
                     session: session,
-                    sourceKind: sourceKind
+                    sourceKind: bootstrap.sourceKind
                 ) { [weak self] status in
                     guard let self, self.isCurrent(token: token, session: session) else {
                         return
                     }
-                    self.route = .reconciling(.working(status))
+                    if bootstrap.sourceKind != .newInstall {
+                        self.route = .reconciling(.working(status))
+                    }
                 }
                 guard isCurrent(token: token, session: session) else { return }
-                _ = apply(completedStatus, session: session)
+                _ = apply(
+                    completedStatus,
+                    session: session,
+                    sourceKind: bootstrap.sourceKind
+                )
                 return
             }
 
             let resumedStatus = try await api.resume(
-                sourceKind: sourceKind,
+                sourceKind: bootstrap.sourceKind,
                 vaultCheckpoint: nil
             )
             guard isCurrent(token: token, session: session) else { return }
-            _ = apply(resumedStatus, session: session)
+            _ = apply(
+                resumedStatus,
+                session: session,
+                sourceKind: bootstrap.sourceKind
+            )
         } catch is CancellationError {
             return
         } catch let error as AccountBootstrapPipelineError {
@@ -172,14 +186,30 @@ final class AccountBootstrapCoordinator: ObservableObject {
         }
     }
 
+    private func loadOrCreateStatus(
+        localSourceKind: BootstrapSourceKind
+    ) async throws -> (status: AccountBootstrapStatus, sourceKind: BootstrapSourceKind) {
+        do {
+            let status = try await api.status()
+            return (status, status.sourceKind)
+        } catch let error as APIError where error.code == "bootstrap_not_found" {
+            let status = try await api.resume(
+                sourceKind: localSourceKind,
+                vaultCheckpoint: nil
+            )
+            return (status, status.sourceKind)
+        }
+    }
+
     private func apply(
         _ status: AccountBootstrapStatus,
-        session: AuthenticationSession
+        session: AuthenticationSession,
+        sourceKind: BootstrapSourceKind
     ) -> Bool {
         let checkpoint = BootstrapCheckpoint(
             accountID: session.accountID,
             vaultID: session.vaultID,
-            sourceKind: status.sourceKind,
+            sourceKind: sourceKind,
             updatedAt: status.updatedAt
         )
         try? checkpointStore.save(checkpoint)
@@ -192,7 +222,7 @@ final class AccountBootstrapCoordinator: ObservableObject {
             route = .reconciling(.needsAttention(code))
             return true
         case .pending, .running:
-            route = .reconciling(.working(status))
+            route = sourceKind == .newInstall ? .loading : .reconciling(.working(status))
             return false
         }
     }

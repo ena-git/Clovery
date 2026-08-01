@@ -56,6 +56,31 @@ final class AccountBootstrapCoordinatorTests: XCTestCase {
         )
     }
 
+    func testNewInstallUsesLoadingScreenInsteadOfLegacyReconciliationUI() async {
+        let pipeline = AccountBootstrapPipelineSpy(
+            result: Self.completeStatus,
+            responseDelayNanoseconds: 200_000_000
+        )
+        let fixture = makeFixture(
+            session: Self.session,
+            statuses: [Self.newInstallPendingStatus],
+            pipeline: pipeline
+        )
+
+        fixture.coordinator.start()
+        try? await Task.sleep(nanoseconds: 10_000_000)
+
+        XCTAssertEqual(fixture.coordinator.route, .loading)
+        XCTAssertEqual(pipeline.calls, 1)
+        XCTAssertEqual(pipeline.sourceKinds, [.newInstall])
+
+        await fixture.coordinator.waitForIdle()
+        XCTAssertEqual(
+            fixture.coordinator.route,
+            .diary(accountID: "account", vaultID: "vault")
+        )
+    }
+
     func testNeedsAttentionRemainsGatedWithStableCode() async {
         let fixture = makeFixture(session: Self.session, statuses: [Self.attentionStatus])
 
@@ -171,6 +196,72 @@ final class AccountBootstrapCoordinatorTests: XCTestCase {
         )
     }
 
+    func testMissingBootstrapCreatesJobWithResolvedLegacySourceBeforePipeline() async {
+        let pipeline = AccountBootstrapPipelineSpy(result: Self.completeStatus)
+        let fixture = makeFixture(
+            hasLegacyData: true,
+            session: Self.session,
+            statuses: [Self.pendingStatus],
+            statusError: APIError.server(
+                code: "bootstrap_not_found",
+                message: "Bootstrap state was not found.",
+                statusCode: 404
+            ),
+            pipeline: pipeline
+        )
+
+        fixture.coordinator.start()
+        await fixture.coordinator.waitForIdle()
+
+        XCTAssertEqual(fixture.api.statusCalls, 1)
+        XCTAssertEqual(fixture.api.resumeSourceKinds, [.legacyLocal])
+        XCTAssertEqual(pipeline.calls, 1)
+        XCTAssertEqual(
+            fixture.coordinator.route,
+            .diary(accountID: "account", vaultID: "vault")
+        )
+    }
+
+    func testExistingLegacyJobOverridesLocallyInferredNewInstallSource() async {
+        let pipeline = AccountBootstrapPipelineSpy(result: Self.pendingStatus)
+        let fixture = makeFixture(
+            session: Self.session,
+            statuses: [Self.pendingStatus],
+            pipeline: pipeline
+        )
+
+        fixture.coordinator.start()
+        await fixture.coordinator.waitForIdle()
+
+        XCTAssertEqual(fixture.api.statusCalls, 1)
+        XCTAssertEqual(fixture.api.resumeCalls, 0)
+        XCTAssertEqual(pipeline.sourceKinds, [.legacyLocal])
+        XCTAssertEqual(fixture.coordinator.route, .reconciling(.working(Self.pendingStatus)))
+    }
+
+    func testCreatedJobUsesSourceKindReturnedByResume() async {
+        let pipeline = AccountBootstrapPipelineSpy(result: Self.pendingStatus)
+        let fixture = makeFixture(
+            session: Self.session,
+            statuses: [Self.pendingStatus],
+            statusError: APIError.server(
+                code: "bootstrap_not_found",
+                message: "Bootstrap state was not found.",
+                statusCode: 404
+            ),
+            pipeline: pipeline
+        )
+
+        fixture.coordinator.start()
+        await fixture.coordinator.waitForIdle()
+
+        XCTAssertEqual(fixture.api.statusCalls, 1)
+        XCTAssertEqual(fixture.api.resumeCalls, 1)
+        XCTAssertEqual(fixture.api.resumeSourceKinds, [.newInstall])
+        XCTAssertEqual(pipeline.sourceKinds, [.legacyLocal])
+        XCTAssertEqual(fixture.coordinator.route, .reconciling(.working(Self.pendingStatus)))
+    }
+
     private func makeFixture(
         hasLegacyData: Bool = false,
         noticeAcknowledged: Bool = true,
@@ -178,6 +269,7 @@ final class AccountBootstrapCoordinatorTests: XCTestCase {
         statuses: [AccountBootstrapStatus] = [],
         responseDelayNanoseconds: UInt64 = 0,
         ignoresCancellation: Bool = false,
+        statusError: Error? = nil,
         pipeline: AccountBootstrapPipelining? = nil
     ) -> CoordinatorFixture {
         let sessionController = BootstrapSessionSpy(session: session)
@@ -188,7 +280,8 @@ final class AccountBootstrapCoordinatorTests: XCTestCase {
         let api = AccountBootstrapAPISpy(
             statuses: statuses,
             responseDelayNanoseconds: responseDelayNanoseconds,
-            ignoresCancellation: ignoresCancellation
+            ignoresCancellation: ignoresCancellation,
+            statusError: statusError
         )
         let checkpoint = BootstrapCheckpointStoreSpy()
         let coordinator = AccountBootstrapCoordinator(
@@ -228,6 +321,20 @@ final class AccountBootstrapCoordinatorTests: XCTestCase {
         retryCount: 0,
         updatedAt: Date(timeIntervalSince1970: 100)
     )
+    private static let newInstallPendingStatus = AccountBootstrapStatus(
+        overall: .pending,
+        sourceKind: .newInstall,
+        migrationID: nil,
+        stages: AccountBootstrapStages(
+            identity: .complete,
+            migration: .complete,
+            entitlement: .pending,
+            vault: .pending
+        ),
+        lastErrorCode: nil,
+        retryCount: 0,
+        updatedAt: Date(timeIntervalSince1970: 100)
+    )
     private static let completeStatus = AccountBootstrapStatus(
         overall: .complete,
         sourceKind: .newInstall,
@@ -256,10 +363,16 @@ final class AccountBootstrapCoordinatorTests: XCTestCase {
 @MainActor
 private final class AccountBootstrapPipelineSpy: AccountBootstrapPipelining {
     let result: AccountBootstrapStatus
+    private let responseDelayNanoseconds: UInt64
     private(set) var calls = 0
+    private(set) var sourceKinds: [BootstrapSourceKind] = []
 
-    init(result: AccountBootstrapStatus) {
+    init(
+        result: AccountBootstrapStatus,
+        responseDelayNanoseconds: UInt64 = 0
+    ) {
         self.result = result
+        self.responseDelayNanoseconds = responseDelayNanoseconds
     }
 
     func run(
@@ -269,7 +382,11 @@ private final class AccountBootstrapPipelineSpy: AccountBootstrapPipelining {
         progress: (AccountBootstrapStatus) -> Void
     ) async throws -> AccountBootstrapStatus {
         calls += 1
+        sourceKinds.append(sourceKind)
         progress(initialStatus)
+        if responseDelayNanoseconds > 0 {
+            try await Task.sleep(nanoseconds: responseDelayNanoseconds)
+        }
         return result
     }
 }
@@ -319,6 +436,7 @@ private final class AccountBootstrapAPISpy: AccountBootstrapAPIProtocol {
     private var statuses: [AccountBootstrapStatus]
     private let responseDelayNanoseconds: UInt64
     private let ignoresCancellation: Bool
+    private var statusError: Error?
     private(set) var statusCalls = 0
     private(set) var resumeCalls = 0
     private(set) var resumeSourceKinds: [BootstrapSourceKind] = []
@@ -326,15 +444,21 @@ private final class AccountBootstrapAPISpy: AccountBootstrapAPIProtocol {
     init(
         statuses: [AccountBootstrapStatus],
         responseDelayNanoseconds: UInt64,
-        ignoresCancellation: Bool
+        ignoresCancellation: Bool,
+        statusError: Error?
     ) {
         self.statuses = statuses
         self.responseDelayNanoseconds = responseDelayNanoseconds
         self.ignoresCancellation = ignoresCancellation
+        self.statusError = statusError
     }
 
     func status() async throws -> AccountBootstrapStatus {
         statusCalls += 1
+        if let error = statusError {
+            statusError = nil
+            throw error
+        }
         return try await nextStatus()
     }
 

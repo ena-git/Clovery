@@ -19,16 +19,56 @@ import (
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
+func TestNewInstallResumeCreatesPendingJobIdempotently(t *testing.T) {
+	databaseHandle, service := openBootstrapJobDatabase(t)
+	accountID, vaultID := seedBootstrapAccount(t, databaseHandle, "05000000-0000-4000-8000-000000000001", "05000000-0000-4000-8000-000000000002")
+
+	created, err := service.Resume(context.Background(), accountID, vaultID, SourceNewInstall)
+	if err != nil {
+		t.Fatalf("Resume() create error = %v", err)
+	}
+	if created.SourceKind != SourceNewInstall || created.Status != StatusPending ||
+		created.IdentityState != StageComplete || created.MigrationState != StageComplete ||
+		created.EntitlementState != StagePending || created.VaultState != StagePending {
+		t.Fatalf("created new install job = %#v", created)
+	}
+
+	resumed, err := service.Resume(context.Background(), accountID, vaultID, SourceLegacyLocal)
+	if err != nil {
+		t.Fatalf("Resume() repeat error = %v", err)
+	}
+	if resumed.SourceKind != created.SourceKind || resumed.Status != created.Status ||
+		resumed.IdentityState != created.IdentityState || resumed.MigrationState != created.MigrationState ||
+		resumed.EntitlementState != created.EntitlementState || resumed.VaultState != created.VaultState {
+		t.Fatalf("repeated Resume() changed job: created = %#v, resumed = %#v", created, resumed)
+	}
+
+	var count int
+	if err := databaseHandle.QueryRow(
+		"SELECT COUNT(*) FROM account_bootstrap_jobs WHERE account_id = $1", accountID,
+	).Scan(&count); err != nil {
+		t.Fatalf("count bootstrap jobs: %v", err)
+	}
+	if count != 1 {
+		t.Fatalf("bootstrap job count = %d, want 1", count)
+	}
+}
+
 func TestBootstrapJobTransitionsRemainResumable(t *testing.T) {
 	databaseHandle, service := openBootstrapJobDatabase(t)
 	accountID, vaultID := seedBootstrapAccount(t, databaseHandle, "10000000-0000-4000-8000-000000000001", "10000000-0000-4000-8000-000000000002")
 
-	job, err := service.Resume(context.Background(), accountID, vaultID, SourceNewInstall)
+	job, err := service.Resume(context.Background(), accountID, vaultID, SourceLegacyLocal)
 	if err != nil {
 		t.Fatalf("Resume() create error = %v", err)
 	}
-	if job.Status != StatusPending || job.MigrationState != StageComplete || job.SourceKind != SourceNewInstall {
+	if job.Status != StatusPending || job.MigrationState != StagePending || job.SourceKind != SourceLegacyLocal {
 		t.Fatalf("created job = %#v", job)
+	}
+	migrationID := "10000000-0000-4000-8000-000000000003"
+	seedBootstrapMigration(t, databaseHandle, migrationID, vaultID)
+	if err := service.MarkMigration(context.Background(), accountID, migrationID, StageComplete, nil); err != nil {
+		t.Fatalf("MarkMigration(complete) error = %v", err)
 	}
 
 	if err := service.MarkEntitlement(context.Background(), accountID, StagePending, nil); err != nil {

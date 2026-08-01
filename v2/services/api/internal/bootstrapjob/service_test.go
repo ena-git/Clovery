@@ -72,6 +72,16 @@ func TestStageFailuresMoveOverallJobToNeedsAttention(t *testing.T) {
 	}
 }
 
+func TestNewInstallJobStartsPendingAfterSkippingMigration(t *testing.T) {
+	job := newJob("account", "vault", SourceNewInstall)
+
+	if job.Status != StatusPending || job.IdentityState != StageComplete ||
+		job.MigrationState != StageComplete || job.EntitlementState != StagePending ||
+		job.VaultState != StagePending {
+		t.Fatalf("new install job = %#v, want migration skipped with entitlement and vault pending", job)
+	}
+}
+
 func TestNewServiceRejectsNilRepository(t *testing.T) {
 	if _, err := NewService(nil); err == nil {
 		t.Fatal("NewService(nil) error = nil")
