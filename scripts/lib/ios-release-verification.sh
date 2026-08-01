@@ -63,6 +63,7 @@ verify_static_ios_contracts() {
 
 verify_release_contracts() {
   "$repository_root/Tests/IOS110VerificationScriptTests.sh"
+  "$repository_root/Tests/IOS110ArchiveVerificationScriptTests.sh"
   "$repository_root/Tests/IOSUITestTargetContractTests.sh"
   "$repository_root/Tests/IOSSimulatorMatrixScriptTests.sh"
   "$repository_root/Tests/IOSReleaseIdentityTests.sh"
