@@ -94,16 +94,15 @@ validate_optional_oidc() {
 validate_optional_apple_iap() {
   configured=0
   for key in APPLE_IAP_ISSUER_ID APPLE_IAP_KEY_ID APPLE_IAP_PRIVATE_KEY_BASE64 \
-    APPLE_IAP_BUNDLE_ID APPLE_IAP_APP_APPLE_ID APPLE_IAP_ROOT_CA_BASE64 \
-    APPLE_IAP_PRODUCT_IDS; do
+    APPLE_IAP_APP_APPLE_ID APPLE_IAP_ROOT_CA_BASE64; do
     value=$(value_for "$key")
     [ -z "$value" ] || configured=$((configured + 1))
   done
-  [ "$configured" -eq 0 ] || [ "$configured" -eq 7 ] || fail "APPLE_IAP configuration is incomplete"
-  if [ "$configured" -eq 7 ]; then
+  [ "$configured" -eq 0 ] || [ "$configured" -eq 5 ] || fail "APPLE_IAP configuration is incomplete"
+  if [ "$configured" -eq 5 ]; then
     for key in APPLE_IAP_ISSUER_ID APPLE_IAP_KEY_ID APPLE_IAP_PRIVATE_KEY_BASE64 \
-      APPLE_IAP_BUNDLE_ID APPLE_IAP_APP_APPLE_ID APPLE_IAP_ROOT_CA_BASE64 \
-      APPLE_IAP_PRODUCT_IDS; do
+      APPLE_BILLING_BUNDLE_ID APPLE_IAP_APP_APPLE_ID APPLE_IAP_ROOT_CA_BASE64 \
+      APPLE_BILLING_PRODUCT_IDS; do
       reject_placeholder "$key"
     done
     printf '%s\n' "$(value_for APPLE_IAP_APP_APPLE_ID)" | grep -Eq '^[1-9][0-9]+$' || fail "APPLE_IAP_APP_APPLE_ID must be numeric"
@@ -163,6 +162,15 @@ reject_placeholder METRICS_BEARER_TOKEN
 [ "$(require_value PORT)" = "8080" ] || fail "PORT must remain 8080 inside the container"
 require_boolean MIGRATION_WRITES_ENABLED
 require_boolean APPLE_IAP_ALLOW_SANDBOX
+require_https APPLE_SERVER_NOTIFICATION_URL >/dev/null
+[ "$(value_for APPLE_SERVER_NOTIFICATION_URL)" = "https://api.staging.clovery.cn/v1/billing/apple/notifications" ] || \
+  fail "APPLE_SERVER_NOTIFICATION_URL must target the staging V2 notification endpoint"
+[ "$(require_value APPLE_BILLING_BUNDLE_ID)" = "com.clovery.app" ] || \
+  fail "APPLE_BILLING_BUNDLE_ID must preserve com.clovery.app"
+case "$(require_value APPLE_BILLING_PRODUCT_IDS)" in
+  *com.clovery.app.board.lifetime*) ;;
+  *) fail "APPLE_BILLING_PRODUCT_IDS must include the existing lifetime product" ;;
+esac
 
 for provider in APPLE GOOGLE HUAWEI; do
   validate_optional_oidc "$provider"
@@ -179,11 +187,6 @@ case "$phase" in
       [ -n "$(value_for "${provider}_OIDC_CLIENT_ID")" ] || fail "${provider}_OIDC is required for acceptance"
     done
     [ -n "$(value_for APPLE_IAP_ISSUER_ID)" ] || fail "APPLE_IAP is required for acceptance"
-    [ "$(value_for APPLE_IAP_BUNDLE_ID)" = "com.clovery.app" ] || fail "APPLE_IAP_BUNDLE_ID must preserve com.clovery.app"
-    case "$(value_for APPLE_IAP_PRODUCT_IDS)" in
-      *com.clovery.app.board.lifetime*) ;;
-      *) fail "APPLE_IAP_PRODUCT_IDS must include the existing lifetime product" ;;
-    esac
     [ "$(value_for APPLE_IAP_ALLOW_SANDBOX)" = "true" ] || fail "staging acceptance requires Apple sandbox validation"
     ;;
 esac

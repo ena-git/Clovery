@@ -46,10 +46,10 @@ sed \
   -e 's|^APPLE_IAP_ISSUER_ID=$|APPLE_IAP_ISSUER_ID=issuer-id|' \
   -e 's|^APPLE_IAP_KEY_ID=$|APPLE_IAP_KEY_ID=key-id|' \
   -e 's|^APPLE_IAP_PRIVATE_KEY_BASE64=$|APPLE_IAP_PRIVATE_KEY_BASE64=cHJpdmF0ZS1rZXk=|' \
-  -e 's|^APPLE_IAP_BUNDLE_ID=$|APPLE_IAP_BUNDLE_ID=com.clovery.app|' \
+  -e 's|^APPLE_BILLING_BUNDLE_ID=$|APPLE_BILLING_BUNDLE_ID=com.clovery.app|' \
   -e 's|^APPLE_IAP_APP_APPLE_ID=$|APPLE_IAP_APP_APPLE_ID=1234567890|' \
   -e 's|^APPLE_IAP_ROOT_CA_BASE64=$|APPLE_IAP_ROOT_CA_BASE64=cm9vdC1jYQ==|' \
-  -e 's|^APPLE_IAP_PRODUCT_IDS=$|APPLE_IAP_PRODUCT_IDS=com.clovery.app.board.lifetime|' \
+  -e 's|^APPLE_BILLING_PRODUCT_IDS=$|APPLE_BILLING_PRODUCT_IDS=com.clovery.app.board.lifetime|' \
   -e 's|^MIGRATION_WRITES_ENABLED=false$|MIGRATION_WRITES_ENABLED=true|' \
   "$valid_environment" >"$acceptance_environment"
 sed "s|^CLOVERY_ENV_FILE=.*$|CLOVERY_ENV_FILE=$acceptance_environment|" \
