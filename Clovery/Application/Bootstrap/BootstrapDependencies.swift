@@ -7,6 +7,8 @@ struct BootstrapDependencies {
     let sessionController: ApplicationSessionController
     let coordinator: AccountBootstrapCoordinator
     let boardStore: BoardStore
+    let accountManagementAPI: AccountManagementAPI
+    let entitlementCache: AccountEntitlementCache
     let vaultRegistry: AccountVaultRuntimeRegistry
     let sourceKind: BootstrapSourceKind
 
@@ -33,9 +35,11 @@ struct BootstrapDependencies {
             : .newInstall
         let bootstrapAPI = AccountBootstrapAPI(client: authenticatedClient)
         let entitlementAPI = AccountEntitlementAPI(client: authenticatedClient)
+        let accountManagementAPI = AccountManagementAPI(client: authenticatedClient)
+        let entitlementCache = AccountEntitlementCache()
         let entitlementReconciler = EntitlementReconciler(
             api: entitlementAPI,
-            cache: AccountEntitlementCache(),
+            cache: entitlementCache,
             defaultEnvironment: entitlementEnvironment
         )
         let boardStore = BoardStore(
@@ -107,6 +111,8 @@ struct BootstrapDependencies {
             sessionController: sessionController,
             coordinator: coordinator,
             boardStore: boardStore,
+            accountManagementAPI: accountManagementAPI,
+            entitlementCache: entitlementCache,
             vaultRegistry: vaultRegistry,
             sourceKind: sourceKind
         )

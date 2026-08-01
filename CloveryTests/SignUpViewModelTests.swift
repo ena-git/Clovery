@@ -3,6 +3,20 @@ import XCTest
 
 @MainActor
 final class SignUpViewModelTests: XCTestCase {
+    func testRegistrationRequiresExplicitLegalAcceptance() async {
+        let api = AuthenticationAPISpy()
+        let controller = makeController(api: api)
+        let viewModel = SignUpViewModel(api: api, sessionController: controller)
+        viewModel.loginID = "clovery_user"
+        viewModel.password = "eight888"
+        viewModel.confirmPassword = "eight888"
+
+        await viewModel.submit()
+
+        XCTAssertEqual(viewModel.validationError, .legalTermsNotAccepted)
+        XCTAssertEqual(api.registerCallCount, 0)
+    }
+
     func testMismatchedConfirmationBlocksRegistration() async {
         let api = AuthenticationAPISpy()
         let controller = makeController(api: api)
@@ -32,6 +46,7 @@ final class SignUpViewModelTests: XCTestCase {
         viewModel.loginID = "Clovery_User"
         viewModel.password = "eight888"
         viewModel.confirmPassword = "eight888"
+        viewModel.hasAcceptedLegalTerms = true
 
         await viewModel.submit()
 

@@ -23,15 +23,18 @@ struct WebView: UIViewRepresentable {
     private let boardStore: BoardStore
     private let fontStore: AppFontStore?
     private let vaultContext: AccountVaultWebContext?
+    private let onAccountSecurity: () -> Void
 
     init(
         boardStore: BoardStore,
         fontStore: AppFontStore? = nil,
-        vaultContext: AccountVaultWebContext? = nil
+        vaultContext: AccountVaultWebContext? = nil,
+        onAccountSecurity: @escaping () -> Void = {}
     ) {
         self.boardStore = boardStore
         self.fontStore = fontStore
         self.vaultContext = vaultContext
+        self.onAccountSecurity = onAccountSecurity
     }
 
     // MARK: – Message handler (haptic + notifications + iCloud)
@@ -58,6 +61,7 @@ struct WebView: UIViewRepresentable {
         private let imageExporter: ImageExporting
         private let fontStore: AppFontStore?
         private let vaultContext: AccountVaultWebContext?
+        private let onAccountSecurity: () -> Void
         private var vaultSyncTask: Task<Void, Never>?
 #if DEBUG
         private var isVerificationFixture: Bool {
@@ -80,13 +84,15 @@ struct WebView: UIViewRepresentable {
             imageExporter: ImageExporting = ImageExportService(),
             boardStore: BoardStore,
             fontStore: AppFontStore? = nil,
-            vaultContext: AccountVaultWebContext? = nil
+            vaultContext: AccountVaultWebContext? = nil,
+            onAccountSecurity: @escaping () -> Void = {}
         ) {
             self.photoStore = photoStore
             self.imageExporter = imageExporter
             self.boardStore = boardStore
             self.fontStore = fontStore
             self.vaultContext = vaultContext
+            self.onAccountSecurity = onAccountSecurity
             super.init()
         }
 
@@ -164,6 +170,8 @@ struct WebView: UIViewRepresentable {
                 }
             } else if message.name == "openAppSettings" {
                 handleOpenAppSettings()
+            } else if message.name == "accountSecurity" {
+                DispatchQueue.main.async { self.handleAccountSecurity() }
             } else if message.name == "checkBoardUnlocked" {
                 Task { @MainActor in
                     await self.boardStore.refresh()
@@ -248,6 +256,11 @@ struct WebView: UIViewRepresentable {
                     pullCloudKitData(into: wv)
                 }
             }
+        }
+
+        @MainActor
+        func handleAccountSecurity() {
+            onAccountSecurity()
         }
 
         // MARK: WKNavigationDelegate
@@ -891,7 +904,8 @@ struct WebView: UIViewRepresentable {
             photoStore: photoStore,
             boardStore: boardStore,
             fontStore: fontStore,
-            vaultContext: vaultContext
+            vaultContext: vaultContext,
+            onAccountSecurity: onAccountSecurity
         )
     }
 
@@ -917,6 +931,7 @@ struct WebView: UIViewRepresentable {
         config.userContentController.add(context.coordinator, name: "icloud")
         config.userContentController.add(context.coordinator, name: "shareImage")
         config.userContentController.add(context.coordinator, name: "openAppSettings")
+        config.userContentController.add(context.coordinator, name: "accountSecurity")
         config.userContentController.add(context.coordinator, name: "checkBoardUnlocked")
         config.userContentController.add(context.coordinator, name: "purchaseBoard")
         config.userContentController.add(context.coordinator, name: "fetchBoardPrice")

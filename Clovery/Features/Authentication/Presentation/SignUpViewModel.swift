@@ -6,6 +6,7 @@ final class SignUpViewModel: ObservableObject {
     @Published var loginID = ""
     @Published var password = ""
     @Published var confirmPassword = ""
+    @Published var hasAcceptedLegalTerms = false
     @Published private(set) var validationError: AuthenticationValidationIssue?
     @Published private(set) var errorMessage: String?
     @Published private(set) var recoveryCodes: [String]?
@@ -41,6 +42,10 @@ final class SignUpViewModel: ObservableObject {
         }
         guard password == confirmPassword else {
             validationError = .passwordsDoNotMatch
+            return
+        }
+        guard hasAcceptedLegalTerms else {
+            validationError = .legalTermsNotAccepted
             return
         }
 

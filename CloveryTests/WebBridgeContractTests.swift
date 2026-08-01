@@ -14,13 +14,38 @@ final class WebBridgeContractTests: XCTestCase {
 
         for handler in [
             "photoSave", "photoLoad", "photoGC", "icloud", "cloudkit", "migrationExport",
-            "openAppSettings"
+            "openAppSettings", "accountSecurity"
         ] {
             XCTAssertTrue(
                 webViewSource.contains("config.userContentController.add(context.coordinator, name: \"\(handler)\")"),
                 "Missing registered handler: \(handler)"
             )
         }
+    }
+
+    func testSettingsRoutesAccountSecurityToNativeSheet() throws {
+        let webViewSource = try source("Clovery/WebView.swift")
+        let rootSource = try source("Clovery/Application/ApplicationRootView.swift")
+        let html = try source("Clovery/Clover Diary.html")
+
+        XCTAssertTrue(webViewSource.contains("message.name == \"accountSecurity\""))
+        XCTAssertTrue(webViewSource.contains("onAccountSecurity()"))
+        XCTAssertTrue(rootSource.contains("AccountSecurityView("))
+        XCTAssertTrue(html.contains("账户与安全"))
+        XCTAssertTrue(html.contains("messageHandlers?.accountSecurity?.postMessage"))
+    }
+
+    @MainActor
+    func testAccountSecurityHandlerForwardsOnce() {
+        var callCount = 0
+        let coordinator = WebView.Coordinator(
+            boardStore: makeTestBoardStore(),
+            onAccountSecurity: { callCount += 1 }
+        )
+
+        coordinator.handleAccountSecurity()
+
+        XCTAssertEqual(callCount, 1)
     }
 
     func testPhotoCallbacksUseStructuredBridgeJavaScript() throws {

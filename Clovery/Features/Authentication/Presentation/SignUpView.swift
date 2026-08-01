@@ -75,8 +75,14 @@ struct SignUpView: View {
                         .frame(minWidth: 140, minHeight: 44)
                     }
                     .buttonStyle(.plain)
-                    .disabled(viewModel.isSubmitting)
+                    .disabled(viewModel.isSubmitting || !viewModel.hasAcceptedLegalTerms)
                     .padding(.top, 10)
+
+                    LegalAcknowledgementView(
+                        isAccepted: $viewModel.hasAcceptedLegalTerms
+                    )
+                    .frame(maxWidth: 310, alignment: .leading)
+                    .padding(.top, 4)
 
                     AuthDivider()
                         .padding(.top, 12)
@@ -161,6 +167,8 @@ struct SignUpView: View {
             return "密码至少需要 8 位"
         case .passwordsDoNotMatch:
             return "两次输入的密码不一致"
+        case .legalTermsNotAccepted:
+            return "请先阅读并同意用户协议和隐私政策"
         case nil:
             return nil
         }

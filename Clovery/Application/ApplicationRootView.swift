@@ -6,10 +6,13 @@ struct ApplicationRootView: View {
     private let identityClaimAPI: IdentityClaimAPIProtocol
     private let sourceKind: BootstrapSourceKind
     private let vaultRegistry: AccountVaultRuntimeRegistry
+    private let accountManagementAPI: AccountManagementAPI
+    private let entitlementCache: AccountEntitlementCache
     @StateObject private var sessionController: ApplicationSessionController
     @StateObject private var bootstrapCoordinator: AccountBootstrapCoordinator
     @StateObject private var boardStore: BoardStore
     @StateObject private var fontStore: AppFontStore
+    @State private var showsAccountSecurity = false
 
     @MainActor
     init(
@@ -21,6 +24,8 @@ struct ApplicationRootView: View {
         identityClaimAPI = resolved.identityClaimAPI
         sourceKind = resolved.sourceKind
         vaultRegistry = resolved.vaultRegistry
+        accountManagementAPI = resolved.accountManagementAPI
+        entitlementCache = resolved.entitlementCache
         _sessionController = StateObject(wrappedValue: resolved.sessionController)
         _bootstrapCoordinator = StateObject(wrappedValue: resolved.coordinator)
         _boardStore = StateObject(wrappedValue: resolved.boardStore)
@@ -77,10 +82,19 @@ struct ApplicationRootView: View {
             WebView(
                 boardStore: boardStore,
                 fontStore: fontStore,
-                vaultContext: vaultRegistry.context(for: namespace)
+                vaultContext: vaultRegistry.context(for: namespace),
+                onAccountSecurity: { showsAccountSecurity = true }
             )
                 .id("\(accountID):\(vaultID)")
                 .ignoresSafeArea()
+                .sheet(isPresented: $showsAccountSecurity) {
+                    AccountSecurityView(
+                        api: accountManagementAPI,
+                        session: sessionController,
+                        entitlementCache: entitlementCache,
+                        entitlementState: boardStore
+                    )
+                }
         }
     }
 

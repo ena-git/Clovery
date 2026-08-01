@@ -3,8 +3,21 @@ import XCTest
 
 @MainActor
 final class IdentityClaimRegistrationViewModelTests: XCTestCase {
+    func testClaimRegistrationRequiresExplicitLegalAcceptance() async {
+        let fixture = makeFixture()
+        fixture.viewModel.loginID = "clovery_user"
+        fixture.viewModel.password = "eight888"
+        fixture.viewModel.confirmPassword = "eight888"
+
+        await fixture.viewModel.submit()
+
+        XCTAssertEqual(fixture.viewModel.validationError, .legalTermsNotAccepted)
+        XCTAssertEqual(fixture.api.calls.count, 0)
+    }
+
     func testCloveryIDUsesFourToTwentyFourCharacterValidation() async {
         let fixture = makeFixture()
+        fixture.viewModel.hasAcceptedLegalTerms = true
         fixture.viewModel.loginID = "abc"
         fixture.viewModel.password = "eight888"
         fixture.viewModel.confirmPassword = "eight888"
@@ -33,6 +46,7 @@ final class IdentityClaimRegistrationViewModelTests: XCTestCase {
 
     func testPasswordAcceptsEightAndRejectsSevenCharacters() async {
         let fixture = makeFixture()
+        fixture.viewModel.hasAcceptedLegalTerms = true
         fixture.viewModel.loginID = "clovery_user"
         fixture.viewModel.password = "seven77"
         fixture.viewModel.confirmPassword = "seven77"
@@ -166,6 +180,7 @@ final class IdentityClaimRegistrationViewModelTests: XCTestCase {
         viewModel.loginID = "clovery_user"
         viewModel.password = "eight888"
         viewModel.confirmPassword = "eight888"
+        viewModel.hasAcceptedLegalTerms = true
     }
 
     private static let sessionResponse = AuthSessionResponse(

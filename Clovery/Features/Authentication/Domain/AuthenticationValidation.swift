@@ -4,6 +4,7 @@ enum AuthenticationValidationIssue: Equatable {
     case invalidCloveryID
     case invalidPassword
     case passwordsDoNotMatch
+    case legalTermsNotAccepted
 }
 
 enum AuthenticationValidation {

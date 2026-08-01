@@ -4120,6 +4120,10 @@ function SettingsScreen({entries, theme, onReset, lang, onLangChange, palette, o
       {/* More */}
       <SettingGroup title="" theme={theme}>
         <SettingRow
+          label={lang==='zh'?'账户与安全':lang==='ja'?'アカウントとセキュリティ':lang==='ko'?'계정 및 보안':'Account & Security'}
+          theme={theme}
+          onTap={() => window.webkit?.messageHandlers?.accountSecurity?.postMessage({})}/>
+        <SettingRow
           label={lang==='zh'?'为迁移导出数据':lang==='ja'?'移行用データを書き出す':lang==='ko'?'마이그레이션 데이터 내보내기':'Export data for migration'}
           detail={migrationExport.status==='working' ? (lang==='zh'?'导出中…':'Exporting…') : null}
           theme={theme}
