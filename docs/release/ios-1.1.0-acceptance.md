@@ -4,7 +4,8 @@
 **生产基线：** `1.0.3 (14)`  
 **候选版本：** `1.1.0 (15)`  
 **候选分支：** `codex/swift-auth-foundation`  
-**当前代码节点：** `57b830e`
+**当前分支节点：** `2b85ea9`
+**模拟器验收节点：** `57b830e`
 **总体状态：** `BLOCKED — 自动化与模拟器已通过，等待真实预发、真机、Sandbox、TestFlight 与 App Store Connect 验收`
 
 本文件只记录不含用户内容、账户标识、设备 UDID、交易凭证或完整提交 SHA 的聚合结果。任何 `NOT_RUN`、`FAIL` 或未关闭的 P0/P1 都阻止提交审核和 GitHub Release。
