@@ -222,17 +222,13 @@ func TestIdentityClaimBootstrapMigrationEnforcesDatabaseContract(t *testing.T) {
 		}
 	})
 
-	t.Run("rollback removes migration 16 objects and supports reapply", func(t *testing.T) {
+	t.Run("rollback to version 15 removes account upgrade objects and supports reapply", func(t *testing.T) {
 		migrations := migrationDirectory(t)
-		if err := Apply(schemaURL, migrations, Down); err != nil {
-			t.Fatalf("roll back identity bootstrap migration: %v", err)
-		}
+		migrateTestSchemaToVersion(t, schemaURL, migrations, 15)
 		assertIdentityBootstrapTables(t, database, false)
 		assertSupportingConstraintCount(t, database, schemaName, 0)
 
-		if err := Apply(schemaURL, migrations, Up); err != nil {
-			t.Fatalf("reapply identity bootstrap migration: %v", err)
-		}
+		migrateTestSchemaToVersion(t, schemaURL, migrations, 17)
 		assertIdentityBootstrapTables(t, database, true)
 		assertSupportingConstraintCount(t, database, schemaName, 2)
 	})
