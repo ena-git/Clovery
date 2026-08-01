@@ -4,7 +4,9 @@ import (
 	"encoding/base64"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
+	"time"
 )
 
 type Config struct {
@@ -25,6 +27,7 @@ type Config struct {
 	GoogleOIDC                     OIDCProviderConfig
 	HuaweiOIDC                     OIDCProviderConfig
 	AppleIAP                       AppleBillingConfig
+	IdentityClaimTTL               time.Duration
 	MigrationWritesEnabled         bool
 	MetricsBearerToken             string
 	Port                           string
@@ -63,6 +66,7 @@ func Load() (Config, error) {
 		{name: "WEBAUTHN_RP_DISPLAY_NAME", value: config.WebAuthnRPDisplayName},
 		{name: "WEBAUTHN_RP_ORIGINS", value: strings.Join(config.WebAuthnOrigins, ",")},
 		{name: "PASSKEY_CREDENTIAL_ENCRYPTION_KEY", value: os.Getenv("PASSKEY_CREDENTIAL_ENCRYPTION_KEY")},
+		{name: "IDENTITY_CLAIM_TTL_SECONDS", value: os.Getenv("IDENTITY_CLAIM_TTL_SECONDS")},
 		{name: "MIGRATION_WRITES_ENABLED", value: os.Getenv("MIGRATION_WRITES_ENABLED")},
 		{name: "METRICS_BEARER_TOKEN", value: config.MetricsBearerToken},
 		{name: "PORT", value: config.Port},
@@ -91,6 +95,11 @@ func Load() (Config, error) {
 		return Config{}, err
 	}
 	config.MigrationWritesEnabled = migrationWritesEnabled
+	identityClaimTTLSeconds, err := strconv.Atoi(os.Getenv("IDENTITY_CLAIM_TTL_SECONDS"))
+	if err != nil || identityClaimTTLSeconds < 60 || identityClaimTTLSeconds > 3600 {
+		return Config{}, fmt.Errorf("IDENTITY_CLAIM_TTL_SECONDS must be between 60 and 3600")
+	}
+	config.IdentityClaimTTL = time.Duration(identityClaimTTLSeconds) * time.Second
 	passkeyKey, err := base64.StdEncoding.DecodeString(os.Getenv("PASSKEY_CREDENTIAL_ENCRYPTION_KEY"))
 	if err != nil || len(passkeyKey) != 32 {
 		return Config{}, fmt.Errorf("PASSKEY_CREDENTIAL_ENCRYPTION_KEY must be base64 for exactly 32 bytes")

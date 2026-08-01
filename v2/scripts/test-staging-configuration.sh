@@ -67,6 +67,13 @@ sed 's/MIGRATION_WRITES_ENABLED=false/MIGRATION_WRITES_ENABLED=true/' \
   "$valid_environment" >"$writes_environment"
 expect_failure "$preflight" "$writes_environment" migration
 
+unsafe_claim_ttl_environment="$temporary_directory/unsafe-claim-ttl.env"
+sed \
+  -e 's/IDENTITY_CLAIM_TTL_SECONDS=600/IDENTITY_CLAIM_TTL_SECONDS=3601/' \
+  -e "s|^CLOVERY_ENV_FILE=.*$|CLOVERY_ENV_FILE=$unsafe_claim_ttl_environment|" \
+  "$valid_environment" >"$unsafe_claim_ttl_environment"
+expect_failure "$preflight" "$unsafe_claim_ttl_environment" runtime
+
 tls_bypass_environment="$temporary_directory/tls-bypass.env"
 sed \
   -e 's/sslmode=verify-full/sslmode=disable\&note=sslmode=require/' \

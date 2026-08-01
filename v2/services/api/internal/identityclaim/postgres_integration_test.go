@@ -492,10 +492,11 @@ func integrationService(
 	claimID string,
 ) *Service {
 	return &Service{
-		repository:   repository,
-		randomSource: bytes.NewReader(randomBytes),
-		now:          func() time.Time { return now },
-		newID:        func() string { return claimID },
+		repository:    repository,
+		randomSource:  bytes.NewReader(randomBytes),
+		now:           func() time.Time { return now },
+		newID:         func() string { return claimID },
+		claimLifetime: claimLifetime,
 	}
 }
 

@@ -60,6 +60,38 @@ func TestIssuedClaimRedactsRawTokenFromFormattingLoggingAndJSON(t *testing.T) {
 	}
 }
 
+func TestServiceUsesConfiguredClaimLifetime(t *testing.T) {
+	repository := &recordingIssueRepository{}
+	service := NewServiceWithLifetime(repository, 3*time.Minute)
+	now := time.Date(2026, 8, 1, 0, 0, 0, 0, time.UTC)
+	service.now = func() time.Time { return now }
+	service.newID = func() string { return "91000000-0000-4000-8000-000000000001" }
+	service.randomSource = bytes.NewReader(bytes.Repeat([]byte{0x31}, tokenByteLength))
+
+	issued, err := service.Issue(context.Background(), Identity{
+		Provider: "apple",
+		Issuer:   "https://appleid.apple.com",
+		Subject:  "configured-lifetime-subject",
+		IntentID: "92000000-0000-4000-8000-000000000001",
+	})
+	if err != nil {
+		t.Fatalf("Issue() error = %v", err)
+	}
+	if issued.ExpiresIn != 3*time.Minute || !repository.claim.ExpiresAt.Equal(now.Add(3*time.Minute)) {
+		t.Fatalf("configured lifetime issued=%s stored=%s", issued.ExpiresIn, repository.claim.ExpiresAt)
+	}
+}
+
+func TestServiceRejectsNonPositiveClaimLifetime(t *testing.T) {
+	for _, lifetime := range []time.Duration{0, -time.Second} {
+		t.Run(lifetime.String(), func(t *testing.T) {
+			assertPanics(t, func() {
+				NewServiceWithLifetime(&recordingIssueRepository{}, lifetime)
+			})
+		})
+	}
+}
+
 func TestIssuedClaimTakeTokenSucceedsOnceAcrossCopies(t *testing.T) {
 	for _, firstTarget := range []string{"original", "copy"} {
 		t.Run(firstTarget+" first", func(t *testing.T) {
@@ -676,10 +708,11 @@ func newTestService(
 	now time.Time,
 ) *Service {
 	return &Service{
-		repository:   repository,
-		randomSource: bytes.NewReader(randomBytes),
-		now:          func() time.Time { return now },
-		newID:        func() string { return "20000000-0000-4000-8000-000000000001" },
+		repository:    repository,
+		randomSource:  bytes.NewReader(randomBytes),
+		now:           func() time.Time { return now },
+		newID:         func() string { return "20000000-0000-4000-8000-000000000001" },
+		claimLifetime: claimLifetime,
 	}
 }
 

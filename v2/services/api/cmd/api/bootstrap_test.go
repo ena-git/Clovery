@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/DATA-DOG/go-sqlmock"
 	"github.com/clovery/clovery/services/api/internal/application/identityflow"
@@ -140,6 +141,7 @@ func identityTestConfig() config.Config {
 		S3AccessKey:                    "test-access",
 		S3SecretKey:                    "test-secret",
 		S3AllowInsecure:                true,
+		IdentityClaimTTL:               10 * time.Minute,
 		MigrationWritesEnabled:         true,
 		MetricsBearerToken:             "0123456789abcdef0123456789abcdef",
 	}

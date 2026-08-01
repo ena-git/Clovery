@@ -154,6 +154,10 @@ passkey_key=$(require_value PASSKEY_CREDENTIAL_ENCRYPTION_KEY)
 printf '%s\n' "$passkey_key" | grep -Eq '^[A-Za-z0-9+/]{43}=$' || fail "PASSKEY_CREDENTIAL_ENCRYPTION_KEY must encode exactly 32 bytes"
 [ "$passkey_key" != "MDEyMzQ1Njc4OWFiY2RlZjAxMjM0NTY3ODlhYmNkZWY=" ] || fail "PASSKEY_CREDENTIAL_ENCRYPTION_KEY must not use the development key"
 
+identity_claim_ttl=$(require_value IDENTITY_CLAIM_TTL_SECONDS)
+printf '%s\n' "$identity_claim_ttl" | grep -Eq '^[0-9]+$' || fail "IDENTITY_CLAIM_TTL_SECONDS must be numeric"
+[ "$identity_claim_ttl" -eq 600 ] || fail "IDENTITY_CLAIM_TTL_SECONDS must remain 600 in staging"
+
 require_length METRICS_BEARER_TOKEN 32 >/dev/null
 reject_placeholder METRICS_BEARER_TOKEN
 [ "$(require_value PORT)" = "8080" ] || fail "PORT must remain 8080 inside the container"

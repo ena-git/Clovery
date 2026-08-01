@@ -14,21 +14,30 @@ import (
 const claimLifetime = 10 * time.Minute
 
 type Service struct {
-	repository   IssueRepository
-	randomSource io.Reader
-	now          func() time.Time
-	newID        func() string
+	repository    IssueRepository
+	randomSource  io.Reader
+	now           func() time.Time
+	newID         func() string
+	claimLifetime time.Duration
 }
 
 func NewService(repository IssueRepository) *Service {
+	return NewServiceWithLifetime(repository, claimLifetime)
+}
+
+func NewServiceWithLifetime(repository IssueRepository, lifetime time.Duration) *Service {
 	if nilDependency(repository) {
 		panic("identityclaim: nil issue repository")
 	}
+	if lifetime <= 0 {
+		panic("identityclaim: claim lifetime must be positive")
+	}
 	return &Service{
-		repository:   repository,
-		randomSource: rand.Reader,
-		now:          func() time.Time { return time.Now().UTC() },
-		newID:        uuid.NewString,
+		repository:    repository,
+		randomSource:  rand.Reader,
+		now:           func() time.Time { return time.Now().UTC() },
+		newID:         uuid.NewString,
+		claimLifetime: lifetime,
 	}
 }
 
@@ -45,7 +54,7 @@ func (service *Service) Issue(ctx context.Context, identity Identity) (IssuedCla
 		ID:          service.newID(),
 		TokenSHA256: digest,
 		Identity:    identity,
-		ExpiresAt:   issuedAt.Add(claimLifetime),
+		ExpiresAt:   issuedAt.Add(service.claimLifetime),
 		CreatedAt:   issuedAt,
 	}
 	if err := service.repository.Issue(ctx, claim); err != nil {
@@ -54,7 +63,7 @@ func (service *Service) Issue(ctx context.Context, identity Identity) (IssuedCla
 	return IssuedClaim{
 		secret:    &issuedClaimSecret{rawToken: rawToken},
 		Provider:  identity.Provider,
-		ExpiresIn: claimLifetime,
+		ExpiresIn: service.claimLifetime,
 	}, nil
 }
 
