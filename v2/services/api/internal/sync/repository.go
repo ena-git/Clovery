@@ -20,6 +20,18 @@ func NewPostgresRepository(database *sql.DB) *PostgresRepository {
 	return &PostgresRepository{database: database}
 }
 
+func (repository *PostgresRepository) LatestCursor(ctx context.Context, vaultID string) (int64, error) {
+	var cursor int64
+	if err := repository.database.QueryRowContext(
+		ctx,
+		"SELECT COALESCE(MAX(cursor), 0) FROM sync_changes WHERE vault_id = $1",
+		vaultID,
+	).Scan(&cursor); err != nil {
+		return 0, fmt.Errorf("load latest sync cursor: %w", err)
+	}
+	return cursor, nil
+}
+
 func (repository *PostgresRepository) Apply(
 	ctx context.Context,
 	vaultID string,

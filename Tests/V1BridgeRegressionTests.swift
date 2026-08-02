@@ -19,6 +19,14 @@ struct V1BridgeRegressionTests {
             BridgeJavaScript.photoSaveResult(.permissionDenied),
             #"window.__clovery_imageSaveResult?.("permissionDenied");"#
         )
+        expect(
+            BridgeJavaScript.vaultData(VaultDiarySnapshot(
+                entries: [["id": "entry-1", "text": "line\n'\\"]],
+                deletedIDs: ["deleted-1"],
+                name: "My Vault"
+            )),
+            #"window.__clovery_applyVault?.({"deleted_ids":["deleted-1"],"entries":[{"id":"entry-1","text":"line\n'\\"}],"name":"My Vault"});"#
+        )
         expect(BoardPurchaseOutcome.cancelled.rawValue, "cancelled")
         expect(BoardPurchaseOutcome.pending.rawValue, "pending")
         expect(BoardPurchaseOutcome.failed.rawValue, "failed")

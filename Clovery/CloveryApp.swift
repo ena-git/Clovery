@@ -4,17 +4,10 @@ import UIKit
 @main
 struct CloveryApp: App {
     @UIApplicationDelegateAdaptor(AppDelegate.self) var appDelegate
-    @Environment(\.scenePhase) private var scenePhase
 
     var body: some Scene {
         WindowGroup {
             ContentView()
-                .ignoresSafeArea()
-        }
-        .onChange(of: scenePhase) { phase in
-            if phase == .active {
-                WebViewCoordinatorBridge.shared.refreshBoardEntitlement()
-            }
         }
     }
 }
@@ -30,25 +23,6 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         guard ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil else {
             return true
         }
-        application.registerForRemoteNotifications()
-        CloudKitSync.shared.setupSubscriptionIfNeeded()
         return true
-    }
-
-    func application(
-        _ application: UIApplication,
-        didFailToRegisterForRemoteNotificationsWithError error: Error
-    ) {
-        print("[Clovery CloudKit] remote notification registration failed: \(error.localizedDescription)")
-    }
-
-    func application(
-        _ application: UIApplication,
-        didReceiveRemoteNotification userInfo: [AnyHashable: Any],
-        fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void
-    ) {
-        WebViewCoordinatorBridge.shared.handleRemoteCloudKitNotification {
-            completionHandler(.newData)
-        }
     }
 }

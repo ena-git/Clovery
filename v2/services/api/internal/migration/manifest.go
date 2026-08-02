@@ -142,3 +142,17 @@ func addManifestBytes(total *int64, value int64, maximum int64) bool {
 	*total += value
 	return true
 }
+
+func canonicalDedupJSON(payload json.RawMessage) (json.RawMessage, error) {
+	var object map[string]json.RawMessage
+	if len(payload) == 0 || json.Unmarshal(payload, &object) != nil || object == nil {
+		return nil, ErrInvalidBundle
+	}
+	delete(object, "id")
+	delete(object, "clovery_legacy_source_id")
+	canonical, err := json.Marshal(object)
+	if err != nil {
+		return nil, ErrInvalidBundle
+	}
+	return canonical, nil
+}

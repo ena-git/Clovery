@@ -27,9 +27,21 @@ class CloudKitSync {
     private let subscriptionID = "clovery-diary-entry-changes"
 
     init(isAvailable: @escaping () -> Bool = {
+#if targetEnvironment(simulator)
+        false
+#else
         ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil
+#endif
     }) {
         self.isAvailable = isAvailable
+    }
+
+    func hasLegacyKeyValueData() -> Bool {
+        let store = NSUbiquitousKeyValueStore.default
+        store.synchronize()
+        return store.data(forKey: "clovery_entries_z") != nil ||
+            store.string(forKey: "clovery_entries") != nil ||
+            store.string(forKey: "clovery_name") != nil
     }
 
     /// Registers a CKQuerySubscription (once) so other devices' writes trigger
@@ -101,25 +113,44 @@ class CloudKitSync {
     /// `photosDir` (skipping files that already exist locally), and returns
     /// plain JSON-compatible entry dicts ready to merge in on the JS side.
     func pullAll(photosDir: URL, completion: @escaping ([[String: Any]]) -> Void) {
+        pullAllResult(photosDir: photosDir) { result in
+            completion((try? result.get()) ?? [])
+        }
+    }
+
+    private func pullAllResult(
+        photosDir: URL,
+        completion: @escaping (Result<[[String: Any]], Error>) -> Void
+    ) {
         guard isAvailable() else {
-            completion([])
+            completion(.failure(CloudKitLegacyPullError.unavailable))
             return
         }
         let query = CKQuery(recordType: recordType, predicate: NSPredicate(value: true))
         var results: [[String: Any]] = []
+        let resultLock = NSLock()
 
         let operation = CKQueryOperation(query: query)
         operation.recordMatchedBlock = { _, result in
             if case .success(let record) = result,
                let entry = self.recordToEntry(record, photosDir: photosDir) {
+                resultLock.lock()
                 results.append(entry)
+                resultLock.unlock()
             }
         }
         operation.queryResultBlock = { result in
-            if case .failure(let error) = result {
-                print("[Clovery CloudKit] pull failed: \(error.localizedDescription)")
+            let resolved: Result<[[String: Any]], Error>
+            switch result {
+            case .success:
+                resultLock.lock()
+                let snapshot = results
+                resultLock.unlock()
+                resolved = .success(snapshot)
+            case let .failure(error):
+                resolved = .failure(error)
             }
-            DispatchQueue.main.async { completion(results) }
+            DispatchQueue.main.async { completion(resolved) }
         }
         db.add(operation)
     }
@@ -145,8 +176,8 @@ class CloudKitSync {
                         try FileManager.default.copyItem(at: sourceURL, to: destURL)
                     } catch {
                         print(
-                            "[Clovery CloudKit] photo copy failed for \(record.recordID.recordName) "
-                            + "(\(destName)): \(error.localizedDescription)"
+                            "[Clovery CloudKit] photo copy failed for \(record.recordID.recordName): " +
+                                error.localizedDescription
                         )
                         continue
                     }
@@ -157,4 +188,18 @@ class CloudKitSync {
         }
         return entry
     }
+}
+
+extension CloudKitSync: LegacyCloudSnapshotPulling {
+    func pullAllLegacyEntries(photosDirectory: URL) async throws -> [[String: Any]] {
+        try await withCheckedThrowingContinuation { continuation in
+            pullAllResult(photosDir: photosDirectory) { result in
+                continuation.resume(with: result)
+            }
+        }
+    }
+}
+
+private enum CloudKitLegacyPullError: Error {
+    case unavailable
 }

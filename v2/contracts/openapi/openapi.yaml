@@ -15,6 +15,30 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthResponse"
+  /v1/legal/privacy:
+    get:
+      operationId: getPrivacyPolicy
+      summary: Read the public Simplified Chinese privacy policy
+      security: []
+      responses:
+        "200":
+          description: Current public privacy policy.
+          content:
+            text/html:
+              schema:
+                type: string
+  /v1/legal/terms:
+    get:
+      operationId: getTermsOfService
+      summary: Read the public Simplified Chinese terms of service
+      security: []
+      responses:
+        "200":
+          description: Current public terms of service.
+          content:
+            text/html:
+              schema:
+                type: string
   /v1/auth/accounts:
     post:
       operationId: createCloveryAccount
@@ -34,6 +58,12 @@ paths:
                 $ref: "#/components/schemas/AuthSessionResponse"
         "400":
           $ref: "#/components/responses/BadRequest"
+        "401":
+          description: The expired identity claim requires reauthorization before account creation.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ErrorResponse"
         "409":
           $ref: "#/components/responses/Conflict"
         "429":
@@ -194,6 +224,12 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/AuthSessionResponse"
+        "202":
+          description: The verified identity is not bound and requires Clovery account registration.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/IdentityClaimRequiredResponse"
         "401":
           $ref: "#/components/responses/Unauthorized"
         "409":
@@ -334,6 +370,48 @@ paths:
                 $ref: "#/components/schemas/AccountResponse"
         "401":
           $ref: "#/components/responses/Unauthorized"
+  /v1/account/bootstrap:
+    get:
+      operationId: getCurrentAccountBootstrap
+      summary: Return resumable bootstrap state for the authenticated account
+      security:
+        - bearerAuth: []
+      responses:
+        "200":
+          description: Current account bootstrap state.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountBootstrapResponse"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "404":
+          $ref: "#/components/responses/NotFound"
+  /v1/account/bootstrap/resume:
+    post:
+      operationId: resumeCurrentAccountBootstrap
+      summary: Create or resume bootstrap state for the authenticated account
+      security:
+        - bearerAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AccountBootstrapResumeRequest"
+      responses:
+        "200":
+          description: Current account bootstrap state after resuming.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AccountBootstrapResponse"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "409":
+          $ref: "#/components/responses/Conflict"
   /v1/account/devices:
     get:
       operationId: listCurrentAccountDevices
@@ -498,7 +576,7 @@ paths:
   /v1/billing/apple/restore:
     post:
       operationId: restoreAppleTransactions
-      summary: Reverify Apple transactions and return root-account entitlements
+      summary: Complete StoreKit inventory reconciliation and return root-account entitlements
       security:
         - bearerAuth: []
       requestBody:
@@ -509,7 +587,7 @@ paths:
               $ref: "#/components/schemas/AppleRestoreRequest"
       responses:
         "200":
-          description: Current root-account entitlements after restore.
+          description: Current root-account entitlements after a complete StoreKit inventory scan, including an empty inventory.
           content:
             application/json:
               schema:
@@ -741,6 +819,30 @@ paths:
         "503":
           $ref: "#/components/responses/ServiceUnavailable"
   /v1/vault/migrations/{migrationId}/assets:
+    get:
+      operationId: listVaultMigrationAssets
+      summary: Return verified migration filename-to-asset mappings
+      security:
+        - bearerAuth: []
+      parameters:
+        - $ref: "#/components/parameters/MigrationId"
+      responses:
+        "200":
+          description: Verified migration asset mappings in filename order.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/MigrationAssetMappings"
+        "400":
+          $ref: "#/components/responses/BadRequest"
+        "401":
+          $ref: "#/components/responses/Unauthorized"
+        "403":
+          $ref: "#/components/responses/Forbidden"
+        "404":
+          $ref: "#/components/responses/NotFound"
+        "409":
+          $ref: "#/components/responses/Conflict"
     post:
       operationId: addVaultMigrationAsset
       summary: Register one migration photo and return a private upload ticket
@@ -923,11 +1025,19 @@ components:
     IdentityProvider:
       type: string
       enum: [apple, google, huawei, wechat, qq]
+    IdentityClaimProvider:
+      type: string
+      enum: [apple, google, huawei]
     CloveryLoginId:
       type: string
       pattern: "^[a-z][a-z0-9_]{3,23}$"
       description: User-selected, normalized Clovery login ID.
     CreateAccountRequest:
+      description: For claim registration, identity_claim_token and registration_request_id must be supplied together, and recovery_method must be bound_identity.
+      oneOf:
+        - $ref: "#/components/schemas/PlainCreateAccountRequest"
+        - $ref: "#/components/schemas/ClaimCreateAccountRequest"
+    PlainCreateAccountRequest:
       type: object
       additionalProperties: false
       required: [login_id, password, recovery_method, device]
@@ -936,12 +1046,39 @@ components:
           $ref: "#/components/schemas/CloveryLoginId"
         password:
           type: string
-          minLength: 12
+          minLength: 8
           maxLength: 256
           writeOnly: true
         recovery_method:
           type: string
           enum: [passkey, recovery_email, recovery_codes]
+        device:
+          $ref: "#/components/schemas/DeviceRegistration"
+    ClaimCreateAccountRequest:
+      type: object
+      additionalProperties: false
+      required:
+        [login_id, password, recovery_method, identity_claim_token, registration_request_id, source_kind, device]
+      properties:
+        login_id:
+          $ref: "#/components/schemas/CloveryLoginId"
+        password:
+          type: string
+          minLength: 8
+          maxLength: 256
+          writeOnly: true
+        recovery_method:
+          type: string
+          const: bound_identity
+        identity_claim_token:
+          type: string
+          writeOnly: true
+        registration_request_id:
+          type: string
+          format: uuid
+        source_kind:
+          type: string
+          enum: [legacy_local, legacy_cloudkit, new_install]
         device:
           $ref: "#/components/schemas/DeviceRegistration"
     PasswordLoginRequest:
@@ -996,6 +1133,83 @@ components:
           items:
             type: string
           writeOnly: true
+    IdentityClaimRequiredResponse:
+      type: object
+      additionalProperties: false
+      required: [status, provider, identity_claim_token, expires_in]
+      properties:
+        status:
+          type: string
+          const: identity_claim_required
+        provider:
+          $ref: "#/components/schemas/IdentityClaimProvider"
+        identity_claim_token:
+          type: string
+        expires_in:
+          type: integer
+          minimum: 1
+    AccountBootstrapResponse:
+      type: object
+      additionalProperties: false
+      required: [status, source_kind, migration_id, stages, last_error_code, retry_count, updated_at]
+      properties:
+        status:
+          type: string
+          enum: [pending, running, needs_attention, complete]
+        source_kind:
+          type: string
+          enum: [legacy_local, legacy_cloudkit, new_install]
+        migration_id:
+          type: [string, "null"]
+          format: uuid
+        stages:
+          type: object
+          additionalProperties: false
+          required: [identity, migration, entitlement, vault]
+          properties:
+            identity:
+              type: string
+              enum: [pending, complete, needs_attention]
+            migration:
+              type: string
+              enum: [pending, complete, needs_attention]
+            entitlement:
+              type: string
+              enum: [pending, complete, needs_attention]
+            vault:
+              type: string
+              enum: [pending, complete, needs_attention]
+        last_error_code:
+          type: [string, "null"]
+        retry_count:
+          type: integer
+          minimum: 0
+        updated_at:
+          type: string
+          format: date-time
+    AccountBootstrapResumeRequest:
+      type: object
+      additionalProperties: false
+      required: [source_kind]
+      properties:
+        source_kind:
+          type: string
+          enum: [legacy_local, legacy_cloudkit, new_install]
+        vault_checkpoint:
+          $ref: "#/components/schemas/AccountBootstrapVaultCheckpoint"
+    AccountBootstrapVaultCheckpoint:
+      type: object
+      additionalProperties: false
+      required: [cursor, has_more]
+      properties:
+        cursor:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Highest server sync cursor fully applied to the authenticated Vault.
+        has_more:
+          type: boolean
+          description: Whether the client still has another page from its current pull response.
     PasswordResetStartRequest:
       type: object
       additionalProperties: false
@@ -1036,7 +1250,7 @@ components:
           writeOnly: true
         new_password:
           type: string
-          minLength: 12
+          minLength: 8
           maxLength: 256
           writeOnly: true
     RecentReauthenticationRequest:
@@ -1590,6 +1804,32 @@ components:
         sha256:
           type: string
           pattern: "^[a-f0-9]{64}$"
+    MigrationAssetMapping:
+      type: object
+      additionalProperties: false
+      required: [source_filename, asset_id, byte_size, sha256]
+      properties:
+        source_filename:
+          type: string
+        asset_id:
+          type: string
+          format: uuid
+        byte_size:
+          type: integer
+          format: int64
+          minimum: 1
+        sha256:
+          type: string
+          pattern: "^[a-f0-9]{64}$"
+    MigrationAssetMappings:
+      type: object
+      additionalProperties: false
+      required: [assets]
+      properties:
+        assets:
+          type: array
+          items:
+            $ref: "#/components/schemas/MigrationAssetMapping"
     MigrationReport:
       type: object
       additionalProperties: false
@@ -1598,6 +1838,9 @@ components:
         - status
         - expected_entries
         - imported_entries
+        - inserted_entries
+        - duplicate_entries
+        - conflict_copies
         - expected_deleted_entries
         - imported_deleted_entries
         - expected_assets
@@ -1618,6 +1861,19 @@ components:
         imported_entries:
           type: integer
           minimum: 0
+          description: Number of entries uploaded into migration staging.
+        inserted_entries:
+          type: integer
+          minimum: 0
+          description: Number of journal rows added to the Vault after reconciliation.
+        duplicate_entries:
+          type: integer
+          minimum: 0
+          description: Number of staged entries resolved to an existing or earlier canonical entry.
+        conflict_copies:
+          type: integer
+          minimum: 0
+          description: Number of staged entries preserved under deterministic conflict IDs.
         expected_deleted_entries:
           type: integer
           minimum: 0
@@ -1660,7 +1916,6 @@ components:
             - asset_manifest_mismatch
             - manifest_sha256_mismatch
             - count_or_size_mismatch
-            - entry_collision
     AppleEnvironment:
       type: string
       enum: [production, sandbox]
@@ -1703,8 +1958,9 @@ components:
       properties:
         transaction_ids:
           type: array
-          minItems: 1
+          minItems: 0
           maxItems: 100
+          description: Complete StoreKit transaction inventory. An empty array confirms enumeration completed with no current transactions and does not remove server entitlements.
           items:
             type: string
             minLength: 1

@@ -4,6 +4,7 @@ import (
 	"context"
 	"crypto/sha256"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"io"
 	"strings"
@@ -47,11 +48,11 @@ func (service *FederationService) StartLogin(
 func (service *FederationService) CompleteLogin(
 	ctx context.Context,
 	command FederatedLoginCommand,
-) (FederatedAccount, error) {
+) (FederatedLoginResolution, error) {
 	providerName := strings.ToLower(strings.TrimSpace(command.Provider))
 	provider := service.providers[providerName]
 	if provider == nil {
-		return FederatedAccount{}, ErrUnsupportedIdentityProvider
+		return FederatedLoginResolution{}, ErrUnsupportedIdentityProvider
 	}
 	nonceHash := sha256.Sum256([]byte(command.Nonce))
 	if err := service.store.ConsumeLoginIntent(ctx, ConsumeFederatedLoginIntent{
@@ -60,24 +61,28 @@ func (service *FederationService) CompleteLogin(
 		NonceHash: nonceHash[:],
 		UsedAt:    service.now(),
 	}); err != nil {
-		return FederatedAccount{}, ErrFederatedAuthentication
+		return FederatedLoginResolution{}, ErrFederatedAuthentication
 	}
 	identity, err := provider.Verify(ctx, command.AuthorizationCode, command.Nonce)
 	if err != nil {
-		return FederatedAccount{}, ErrFederatedAuthentication
+		return FederatedLoginResolution{}, ErrFederatedAuthentication
 	}
 	issuer := strings.TrimSpace(identity.Issuer)
 	subject := strings.TrimSpace(identity.Subject)
 	if issuer == "" || subject == "" {
-		return FederatedAccount{}, ErrFederatedAuthentication
+		return FederatedLoginResolution{}, ErrFederatedAuthentication
 	}
-	account, err := service.store.FindAccountByIdentity(ctx, FederatedIdentityKey{
+	key := FederatedIdentityKey{
 		Provider: providerName,
 		Issuer:   issuer,
 		Subject:  subject,
-	})
-	if err != nil {
-		return FederatedAccount{}, err
 	}
-	return account, nil
+	account, err := service.store.FindAccountByIdentity(ctx, key)
+	if errors.Is(err, ErrFederatedIdentityNotBound) {
+		return FederatedLoginResolution{Identity: key}, nil
+	}
+	if err != nil {
+		return FederatedLoginResolution{}, err
+	}
+	return FederatedLoginResolution{Identity: key, Account: &account}, nil
 }

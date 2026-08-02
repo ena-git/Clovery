@@ -31,26 +31,34 @@ func loadAppleBillingConfig(environment DeploymentEnvironment) (AppleBillingConf
 		"APPLE_IAP_ISSUER_ID",
 		"APPLE_IAP_KEY_ID",
 		"APPLE_IAP_PRIVATE_KEY_BASE64",
-		"APPLE_IAP_BUNDLE_ID",
+		"APPLE_BILLING_BUNDLE_ID",
 		"APPLE_IAP_APP_APPLE_ID",
 		"APPLE_IAP_ROOT_CA_BASE64",
-		"APPLE_IAP_PRODUCT_IDS",
+		"APPLE_BILLING_PRODUCT_IDS",
 	} {
 		values[key] = strings.TrimSpace(os.Getenv(key))
 	}
-	configured := 0
-	for _, value := range values {
-		if value != "" {
-			configured++
+	credentialKeys := []string{
+		"APPLE_IAP_ISSUER_ID",
+		"APPLE_IAP_KEY_ID",
+		"APPLE_IAP_PRIVATE_KEY_BASE64",
+		"APPLE_IAP_APP_APPLE_ID",
+		"APPLE_IAP_ROOT_CA_BASE64",
+	}
+	configuredCredentials := 0
+	for _, key := range credentialKeys {
+		if values[key] != "" {
+			configuredCredentials++
 		}
 	}
-	if configured == 0 {
+	if configuredCredentials == 0 {
 		if environment == DeploymentProduction {
 			return AppleBillingConfig{}, fmt.Errorf("APPLE_IAP configuration is required in production")
 		}
 		return AppleBillingConfig{}, nil
 	}
-	if configured != len(values) {
+	if configuredCredentials != len(credentialKeys) || values["APPLE_BILLING_BUNDLE_ID"] == "" ||
+		values["APPLE_BILLING_PRODUCT_IDS"] == "" {
 		return AppleBillingConfig{}, fmt.Errorf("APPLE_IAP configuration is incomplete")
 	}
 
@@ -62,9 +70,9 @@ func loadAppleBillingConfig(environment DeploymentEnvironment) (AppleBillingConf
 	if err != nil {
 		return AppleBillingConfig{}, err
 	}
-	productIDs := splitConfigurationList(values["APPLE_IAP_PRODUCT_IDS"])
+	productIDs := splitConfigurationList(values["APPLE_BILLING_PRODUCT_IDS"])
 	if len(productIDs) == 0 {
-		return AppleBillingConfig{}, fmt.Errorf("APPLE_IAP_PRODUCT_IDS must contain at least one product")
+		return AppleBillingConfig{}, fmt.Errorf("APPLE_BILLING_PRODUCT_IDS must contain at least one product")
 	}
 	appAppleID, err := strconv.ParseInt(values["APPLE_IAP_APP_APPLE_ID"], 10, 64)
 	if err != nil || appAppleID <= 0 {
@@ -82,7 +90,7 @@ func loadAppleBillingConfig(environment DeploymentEnvironment) (AppleBillingConf
 	}
 	return AppleBillingConfig{
 		IssuerID: values["APPLE_IAP_ISSUER_ID"], KeyID: values["APPLE_IAP_KEY_ID"],
-		PrivateKey: privateKey, BundleID: values["APPLE_IAP_BUNDLE_ID"], AppAppleID: appAppleID,
+		PrivateKey: privateKey, BundleID: values["APPLE_BILLING_BUNDLE_ID"], AppAppleID: appAppleID,
 		RootCA: rootCA, ProductIDs: productIDs, AllowSandbox: allowSandbox,
 	}, nil
 }

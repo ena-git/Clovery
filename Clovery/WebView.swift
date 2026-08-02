@@ -7,7 +7,35 @@ import StoreKit
 import WidgetKit
 import OSLog
 
+enum WebViewSyncMode {
+    case legacyCloud
+    case accountVault
+}
+
+struct AccountVaultWebContext {
+    let namespace: VaultSyncNamespace
+    let accountDirectory: URL
+    let coordinator: VaultSyncCoordinator
+    let localStore: VaultLocalStoring
+}
+
 struct WebView: UIViewRepresentable {
+    private let boardStore: BoardStore
+    private let fontStore: AppFontStore?
+    private let vaultContext: AccountVaultWebContext?
+    private let onAccountSecurity: () -> Void
+
+    init(
+        boardStore: BoardStore,
+        fontStore: AppFontStore? = nil,
+        vaultContext: AccountVaultWebContext? = nil,
+        onAccountSecurity: @escaping () -> Void = {}
+    ) {
+        self.boardStore = boardStore
+        self.fontStore = fontStore
+        self.vaultContext = vaultContext
+        self.onAccountSecurity = onAccountSecurity
+    }
 
     // MARK: – Message handler (haptic + notifications + iCloud)
     class Coordinator: NSObject, WKScriptMessageHandler, WKNavigationDelegate, UNUserNotificationCenterDelegate {
@@ -15,8 +43,9 @@ struct WebView: UIViewRepresentable {
         // Weak ref so we can push iCloud data into the running WebView
         weak var webView: WKWebView?
         private var boardEntitlementCancellable: AnyCancellable?
+        private let boardStore: BoardStore
         private lazy var boardEntitlementReporter = BoardEntitlementReporter(
-            currentEntitlement: { BoardStore.shared.isUnlocked },
+            currentEntitlement: { [weak boardStore] in boardStore?.isUnlocked ?? false },
             reportUnlock: { [weak self] unlocked in
                 self?.webView?.evaluateJavaScript(
                     BridgeJavaScript.boardUnlockStatus(unlocked),
@@ -30,14 +59,46 @@ struct WebView: UIViewRepresentable {
         )
         private let photoStore: PhotoStoring
         private let imageExporter: ImageExporting
+        private let fontStore: AppFontStore?
+        private let vaultContext: AccountVaultWebContext?
+        private let onAccountSecurity: () -> Void
+        private var vaultSyncTask: Task<Void, Never>?
+#if DEBUG
+        private var isVerificationFixture: Bool {
+            ProcessInfo.processInfo.arguments.contains("-CloveryVerificationFixture")
+        }
+#endif
+        var registersNotificationHandler: Bool {
+#if DEBUG
+            !isVerificationFixture
+#else
+            true
+#endif
+        }
+        var syncMode: WebViewSyncMode {
+            vaultContext == nil ? .legacyCloud : .accountVault
+        }
 
         init(
             photoStore: PhotoStoring = PhotoStore(),
-            imageExporter: ImageExporting = ImageExportService()
+            imageExporter: ImageExporting = ImageExportService(),
+            boardStore: BoardStore,
+            fontStore: AppFontStore? = nil,
+            vaultContext: AccountVaultWebContext? = nil,
+            onAccountSecurity: @escaping () -> Void = {}
         ) {
             self.photoStore = photoStore
             self.imageExporter = imageExporter
+            self.boardStore = boardStore
+            self.fontStore = fontStore
+            self.vaultContext = vaultContext
+            self.onAccountSecurity = onAccountSecurity
             super.init()
+        }
+
+        @MainActor
+        func handleFontPreference(_ rawValue: String) {
+            fontStore?.update(rawValue: rawValue)
         }
 
         // MARK: Screenshot protection (UITextField isSecureTextEntry trick)
@@ -98,7 +159,7 @@ struct WebView: UIViewRepresentable {
                       let action = body["action"] as? String else { return }
                 if action == "save" {
                     // Save immediately (not async) to ensure data persists before app could be killed
-                    self.saveToICloud(payload: body)
+                    self.saveBridgePayload(body)
                 }
             } else if message.name == "shareImage" {
                 guard let body = message.body as? [String: Any],
@@ -109,23 +170,25 @@ struct WebView: UIViewRepresentable {
                 }
             } else if message.name == "openAppSettings" {
                 handleOpenAppSettings()
+            } else if message.name == "accountSecurity" {
+                DispatchQueue.main.async { self.handleAccountSecurity() }
             } else if message.name == "checkBoardUnlocked" {
                 Task { @MainActor in
-                    await BoardStore.shared.refresh()
+                    await self.boardStore.refresh()
                     self.boardEntitlementReporter.reportObservedEntitlement(
-                        BoardStore.shared.isUnlocked
+                        self.boardStore.isUnlocked
                     )
                 }
             } else if message.name == "purchaseBoard" {
                 Task { @MainActor in
-                    let outcome = await BoardStore.shared.purchase()
+                    let outcome = await self.boardStore.purchase()
                     _ = try? await self.webView?.evaluateJavaScript(
                         BridgeJavaScript.boardPurchaseResult(outcome)
                     )
                 }
             } else if message.name == "fetchBoardPrice" {
                 Task { @MainActor in
-                    let price = await BoardStore.shared.fetchDisplayPrice() ?? ""
+                    let price = await self.boardStore.fetchDisplayPrice() ?? ""
                     _ = try? await self.webView?.evaluateJavaScript(
                         BridgeJavaScript.boardPriceResult(price)
                     )
@@ -133,7 +196,7 @@ struct WebView: UIViewRepresentable {
             } else if message.name == "restorePurchases" {
                 Task { @MainActor in
                     await self.boardEntitlementReporter.reportRestore(
-                        performRestore: { await BoardStore.shared.restore() },
+                        performRestore: { await self.boardStore.restore() },
                         reportOutcome: { outcome in
                             _ = try await self.webView?.evaluateJavaScript(
                                 BridgeJavaScript.boardRestoreResult(outcome)
@@ -178,6 +241,7 @@ struct WebView: UIViewRepresentable {
                     else        { self.removeBoardProtection() }
                 }
             } else if message.name == "cloudkit" {
+                guard syncMode == .legacyCloud else { return }
                 guard let body = message.body as? [String: Any],
                       let action = body["action"] as? String else { return }
                 if action == "push", let entryStr = body["entry"] as? String {
@@ -194,8 +258,17 @@ struct WebView: UIViewRepresentable {
             }
         }
 
+        @MainActor
+        func handleAccountSecurity() {
+            onAccountSecurity()
+        }
+
         // MARK: WKNavigationDelegate
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+            guard syncMode == .legacyCloud else {
+                refreshAccountVault()
+                return
+            }
             // Force iCloud pull before injecting
             NSUbiquitousKeyValueStore.default.synchronize()
             // Page fully loaded — push any iCloud data into localStorage
@@ -332,7 +405,7 @@ struct WebView: UIViewRepresentable {
         @MainActor
         func startObservingBoardStore() {
             guard boardEntitlementCancellable == nil else { return }
-            boardEntitlementCancellable = BoardStore.shared.$isUnlocked
+            boardEntitlementCancellable = boardStore.$isUnlocked
                 .removeDuplicates()
                 .receive(on: DispatchQueue.main)
                 .sink { [weak self] unlocked in
@@ -343,6 +416,7 @@ struct WebView: UIViewRepresentable {
         // MARK: iCloud Key-Value Sync
 
         func startObservingICloud() {
+            guard syncMode == .legacyCloud else { return }
             let store = NSUbiquitousKeyValueStore.default
             store.synchronize()
 
@@ -434,6 +508,7 @@ struct WebView: UIViewRepresentable {
                 guard let self else { return }
                 do {
                     let result = try MigrationBundleExporter().export(
+                        migrationID: UUID(),
                         entriesJSON: entriesJSON,
                         deletedIDsJSON: deletedIDsJSON
                     )
@@ -506,7 +581,60 @@ struct WebView: UIViewRepresentable {
             }
         }
 
-        private func saveToICloud(payload: [String: Any]) {
+        private func saveBridgePayload(_ payload: [String: Any]) {
+            if syncMode == .accountVault {
+                saveToAccountVault(payload)
+                writeWidgetSnapshot(payload)
+                return
+            }
+            saveToLegacyCloud(payload: payload)
+        }
+
+        private func saveToAccountVault(_ payload: [String: Any]) {
+            guard let vaultContext,
+                  let fullEntries = payload["full_entries"] as? String,
+                  let entriesData = fullEntries.data(using: .utf8),
+                  let entries = try? JSONDecoder().decode(
+                    [[String: JSONValue]].self,
+                    from: entriesData
+                  ) else { return }
+            let deletedIDsJSON = payload["deleted_ids"] as? String ?? "[]"
+            let deletedIDs = deletedIDsJSON.data(using: .utf8).flatMap {
+                try? JSONDecoder().decode([String].self, from: $0)
+            } ?? []
+            let snapshot = VaultDiarySnapshot(
+                entries: entries,
+                deletedIDs: deletedIDs,
+                name: payload["clovery_name"] as? String
+            )
+            let durableSnapshot: VaultDiarySnapshot
+            do {
+                durableSnapshot = try VaultSnapshotMetadataStore(
+                    localStore: vaultContext.localStore
+                ).preservingPrivateMetadata(in: snapshot)
+                try vaultContext.localStore.save(durableSnapshot)
+            } catch {
+                return
+            }
+            let previousTask = vaultSyncTask
+            vaultSyncTask = Task { @MainActor [weak self] in
+                await previousTask?.value
+                guard !Task.isCancelled else { return }
+                do {
+                    let resolved = try await vaultContext.coordinator.sync(
+                        durableSnapshot,
+                        for: vaultContext.namespace
+                    )
+                    self?.injectVaultSnapshot(resolved)
+                } catch is CancellationError {
+                    return
+                } catch {
+                    return
+                }
+            }
+        }
+
+        private func saveToLegacyCloud(payload: [String: Any]) {
             let store = NSUbiquitousKeyValueStore.default
             if let entries = payload["clovery_entries"] as? String {
                 // Compress and save to KV store (slim — photos already stripped by JS)
@@ -552,7 +680,10 @@ struct WebView: UIViewRepresentable {
             }
             store.synchronize()
 
-            // ── Write to App Groups shared container for Widget Extension ──
+            writeWidgetSnapshot(payload)
+        }
+
+        private func writeWidgetSnapshot(_ payload: [String: Any]) {
             if let shared = UserDefaults(suiteName: "group.com.clovery.app") {
                 if let entries = payload["clovery_entries"] as? String {
                     shared.set(entries, forKey: "widget_entries")
@@ -564,7 +695,10 @@ struct WebView: UIViewRepresentable {
                     shared.set(ts, forKey: "widget_lastModified")
                 }
                 if let font = payload["widget_font"] as? String {
-                    shared.set(font, forKey: "widget_font")
+                    shared.set(font, forKey: AppFontStorageKey.widgetCompatibility)
+                    Task { @MainActor [weak self] in
+                        self?.handleFontPreference(font)
+                    }
                 }
                 if let palette = payload["widget_palette"] as? String {
                     shared.set(palette, forKey: "widget_palette")
@@ -579,93 +713,81 @@ struct WebView: UIViewRepresentable {
             }
         }
 
-        // Merges two entries-JSON strings by id: every entry in `base` is kept as-is
-        // (so `base`'s photos are never dropped), and any entry present in
-        // `additions` but missing from `base` gets appended. Used to combine the
-        // FULL local backup (has photos, but only this device's own writes) with
-        // the iCloud KV store (no photos, but reflects writes from OTHER devices)
-        // without either source blocking the other.
-        private func mergeEntriesJSON(base: String?, additions: String?) -> String? {
-            guard let baseStr = base,
-                  let baseData = baseStr.data(using: .utf8),
-                  let baseArr = (try? JSONSerialization.jsonObject(with: baseData)) as? [[String: Any]] else {
-                return additions ?? base
+        func refreshAccountVault() {
+            guard let vaultContext else { return }
+            let previousTask = vaultSyncTask
+            vaultSyncTask = Task { @MainActor [weak self] in
+                await previousTask?.value
+                guard !Task.isCancelled else { return }
+                do {
+                    let snapshot = try await vaultContext.coordinator.pull(
+                        for: vaultContext.namespace
+                    )
+                    self?.injectVaultSnapshot(snapshot)
+                } catch {
+                    return
+                }
             }
-            guard let addStr = additions,
-                  let addData = addStr.data(using: .utf8),
-                  let addArr = (try? JSONSerialization.jsonObject(with: addData)) as? [[String: Any]] else {
-                return base
+        }
+
+        private func injectVaultSnapshot(_ snapshot: VaultDiarySnapshot) {
+            let script = BridgeJavaScript.vaultData(snapshot)
+            guard !script.isEmpty else { return }
+            webView?.evaluateJavaScript(script, completionHandler: nil)
+        }
+
+        func accountVaultBootstrapScript() -> String? {
+            guard let vaultContext,
+                  let snapshot = try? vaultContext.localStore.load() else {
+                return nil
             }
-            var seenIds = Set<String>()
-            for e in baseArr { if let id = e["id"] as? String { seenIds.insert(id) } }
-            var merged = baseArr
-            for e in addArr {
-                guard let id = e["id"] as? String, !seenIds.contains(id) else { continue }
-                merged.append(e)
-                seenIds.insert(id)
+            let encoder = JSONEncoder()
+            encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
+            guard let entriesData = try? encoder.encode(snapshot.entries),
+                  let entriesJSON = String(data: entriesData, encoding: .utf8),
+                  let deletedData = try? encoder.encode(snapshot.deletedIDs),
+                  let deletedJSON = String(data: deletedData, encoding: .utf8) else {
+                return nil
             }
-            guard merged.count > baseArr.count,
-                  let mergedData = try? JSONSerialization.data(withJSONObject: merged),
-                  let mergedStr = String(data: mergedData, encoding: .utf8) else { return base }
-            return mergedStr
+            let nameJSON: String
+            if let name = snapshot.name,
+               let data = try? JSONSerialization.data(withJSONObject: [name]),
+               let array = String(data: data, encoding: .utf8) {
+                nameJSON = String(array.dropFirst().dropLast())
+            } else {
+                nameJSON = "null"
+            }
+            return """
+            Object.defineProperty(window, '__cloverySyncMode', {
+              value: 'accountVault', writable: false, configurable: false
+            });
+            localStorage.removeItem('clovery_entries');
+            localStorage.removeItem('clovery_icloud_pending');
+            localStorage.removeItem('clovery_name');
+            if (\(entriesJSON).length > 0) {
+              localStorage.setItem('clovery_entries', JSON.stringify(\(entriesJSON)));
+            }
+            localStorage.setItem('clovery_deleted_ids', JSON.stringify(\(deletedJSON)));
+            if (\(nameJSON)) localStorage.setItem('clovery_name', \(nameJSON));
+            """
         }
 
         // Swift → JS: push iCloud/local data into the running WebView
         private func injectICloudData(into webView: WKWebView) {
-            let store = NSUbiquitousKeyValueStore.default
-            var name: String? = store.string(forKey: "clovery_name")
-
-            // A. FULL local backup (has photos, but only reflects THIS device's own
-            // writes) — used as the base so photos are never dropped, and as the
-            // recovery source if localStorage on this device is ever wiped.
-            var fullBackupEntries: String? = nil
-            if let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
-                let fullBackupURL = dir.appendingPathComponent("clovery_full_backup.json")
-                if let data = try? Data(contentsOf: fullBackupURL),
-                   let backup = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                    fullBackupEntries = backup["entries"] as? String
-                    if name == nil { name = backup["name"] as? String }
-                }
+            guard let documentsDirectory = FileManager.default.urls(
+                for: .documentDirectory,
+                in: .userDomainMask
+            ).first else {
+                return
             }
+            let sources = LegacySnapshotSources(
+                documentsDirectory: documentsDirectory
+            ).readLocalSources()
+            let snapshot = LegacySnapshotMerger().merge(sources)
+            guard snapshot.entriesJSON != "[]" else { return }
 
-            // B. iCloud KV store (slim, no photos) — the actual cross-device sync
-            // channel. Reflects entries written by OTHER devices.
-            var kvEntries: String? = nil
-            if let compressed = store.data(forKey: "clovery_entries_z") {
-                if let decompressed = try? (compressed as NSData).decompressed(using: .zlib) as Data,
-                   let str = String(data: decompressed, encoding: .utf8) {
-                    kvEntries = str
-                    print("[Clovery iCloud] loaded compressed: \(compressed.count) → \(decompressed.count) bytes")
-                }
-            }
-            if kvEntries == nil {
-                kvEntries = store.string(forKey: "clovery_entries")
-                if kvEntries != nil { print("[Clovery iCloud] loaded uncompressed") }
-            }
-
-            // Merge: full backup stays the base (keeps photos), KV store only adds
-            // entries this device doesn't have yet (cross-device sync), never
-            // overwrites or blocks it.
-            var entries = mergeEntriesJSON(base: fullBackupEntries, additions: kvEntries)
-            if entries != nil { print("[Clovery iCloud] merged local backup + KV store") }
-
-            // Fallback: legacy slim local backup (no photos), only if nothing else exists
-            if entries == nil {
-                if let dir = FileManager.default.urls(for: .documentDirectory, in: .userDomainMask).first {
-                    let backupURL = dir.appendingPathComponent("clovery_backup.json")
-                    if let data = try? Data(contentsOf: backupURL),
-                       let backup = try? JSONSerialization.jsonObject(with: data) as? [String: Any] {
-                        entries = backup["entries"] as? String
-                        if name == nil { name = backup["name"] as? String }
-                        if entries != nil { print("[Clovery iCloud] loaded from legacy local backup") }
-                    }
-                }
-            }
-
-            guard let entries = entries else { return }
-
-            var dataObj: [String: Any] = ["entries": entries]
-            if let name = name {
+            var dataObj: [String: Any] = ["entries": snapshot.entriesJSON]
+            if let name = snapshot.name {
                 dataObj["clovery_name"] = name
             }
 
@@ -695,6 +817,9 @@ struct WebView: UIViewRepresentable {
 
         // MARK: Notifications
         private func handleNotification(action: String, payload: [String: Any]) {
+#if DEBUG
+            if isVerificationFixture { return }
+#endif
             let center = UNUserNotificationCenter.current()
             center.delegate = self
 
@@ -771,19 +896,42 @@ struct WebView: UIViewRepresentable {
         }
     }
 
-    func makeCoordinator() -> Coordinator { Coordinator() }
+    func makeCoordinator() -> Coordinator {
+        let photoStore = vaultContext.map {
+            PhotoStore(baseDirectory: $0.accountDirectory)
+        } ?? PhotoStore()
+        return Coordinator(
+            photoStore: photoStore,
+            boardStore: boardStore,
+            fontStore: fontStore,
+            vaultContext: vaultContext,
+            onAccountSecurity: onAccountSecurity
+        )
+    }
 
     func makeUIView(context: Context) -> WKWebView {
         let config = WKWebViewConfiguration()
         config.allowsInlineMediaPlayback = true
         config.mediaTypesRequiringUserActionForPlayback = []
+        if let script = context.coordinator.accountVaultBootstrapScript() {
+            config.userContentController.addUserScript(
+                WKUserScript(
+                    source: script,
+                    injectionTime: .atDocumentStart,
+                    forMainFrameOnly: true
+                )
+            )
+        }
         // Register message handlers
         config.userContentController.add(context.coordinator, name: "haptic")
-        config.userContentController.add(context.coordinator, name: "notifications")
+        if context.coordinator.registersNotificationHandler {
+            config.userContentController.add(context.coordinator, name: "notifications")
+        }
         config.userContentController.add(context.coordinator, name: "review")
         config.userContentController.add(context.coordinator, name: "icloud")
         config.userContentController.add(context.coordinator, name: "shareImage")
         config.userContentController.add(context.coordinator, name: "openAppSettings")
+        config.userContentController.add(context.coordinator, name: "accountSecurity")
         config.userContentController.add(context.coordinator, name: "checkBoardUnlocked")
         config.userContentController.add(context.coordinator, name: "purchaseBoard")
         config.userContentController.add(context.coordinator, name: "fetchBoardPrice")
@@ -815,7 +963,9 @@ struct WebView: UIViewRepresentable {
         // Wire up iCloud sync
         context.coordinator.webView = webView
         context.coordinator.startObservingBoardStore()
-        context.coordinator.startObservingICloud()
+        if context.coordinator.syncMode == .legacyCloud {
+            context.coordinator.startObservingICloud()
+        }
         WebViewCoordinatorBridge.shared.coordinator = context.coordinator
 
         if let url = Bundle.main.url(forResource: "Clover Diary", withExtension: "html") {
@@ -834,24 +984,25 @@ struct WebView: UIViewRepresentable {
     func updateUIView(_ uiView: WKWebView, context: Context) {}
 }
 
-// Lets AppDelegate reach the running WebView's Coordinator (which it has no
-// direct reference to) when a CloudKit silent push notification arrives.
+// Gives the app lifecycle a narrow path to refresh the active account vault.
 @MainActor
 class WebViewCoordinatorBridge {
     static let shared = WebViewCoordinatorBridge()
     weak var coordinator: WebView.Coordinator?
-
-    func refreshBoardEntitlement() {
-        Task { @MainActor in
-            await BoardStore.shared.refresh()
-        }
-    }
 
     func handleRemoteCloudKitNotification(completion: @escaping () -> Void) {
         guard let coordinator = coordinator, let webView = coordinator.webView else {
             completion()
             return
         }
+        guard coordinator.syncMode == .legacyCloud else {
+            completion()
+            return
+        }
         coordinator.pullCloudKitData(into: webView, completion: completion)
+    }
+
+    func refreshAccountVault() {
+        coordinator?.refreshAccountVault()
     }
 }

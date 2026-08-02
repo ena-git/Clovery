@@ -13,6 +13,8 @@ trap cleanup EXIT
 
 xcrun swiftc \
   "$repository_root/Clovery/MigrationBundle.swift" \
+  "$repository_root/Clovery/MigrationBundleContentValidator.swift" \
+  "$repository_root/Clovery/MigrationBundleContent.swift" \
   "$repository_root/Clovery/MigrationBundleExporter.swift" \
   "$repository_root/Tests/MigrationBundleZipSmoke.swift" \
   -module-cache-path "$test_root/module-cache" \

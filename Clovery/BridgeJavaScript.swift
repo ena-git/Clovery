@@ -41,7 +41,10 @@ enum BridgeJavaScript {
 
     static func iCloudData(_ payload: [String: Any]) -> String {
         guard JSONSerialization.isValidJSONObject(payload),
-              let data = try? JSONSerialization.data(withJSONObject: payload),
+              let data = try? JSONSerialization.data(
+                withJSONObject: payload,
+                options: [.sortedKeys, .withoutEscapingSlashes]
+              ),
               let json = String(data: data, encoding: .utf8) else {
             return ""
         }
@@ -56,6 +59,23 @@ enum BridgeJavaScript {
           }
         })();
         """
+    }
+
+    static func vaultData(_ snapshot: VaultDiarySnapshot) -> String {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
+        guard let entriesData = try? encoder.encode(snapshot.entries),
+              let entries = try? JSONSerialization.jsonObject(with: entriesData) else {
+            return ""
+        }
+        return evaluateJSONCallback(
+            name: "window.__clovery_applyVault",
+            payload: [[
+                "entries": entries,
+                "deleted_ids": snapshot.deletedIDs,
+                "name": snapshot.name ?? NSNull()
+            ]]
+        )
     }
 
     static func migrationExportResult(
@@ -80,7 +100,10 @@ enum BridgeJavaScript {
 
     private static func evaluateJSONCallback(name: String, payload: [Any]) -> String {
         guard JSONSerialization.isValidJSONObject(payload),
-              let data = try? JSONSerialization.data(withJSONObject: payload),
+              let data = try? JSONSerialization.data(
+                withJSONObject: payload,
+                options: [.sortedKeys, .withoutEscapingSlashes]
+              ),
               let json = String(data: data, encoding: .utf8),
               json.first == "[",
               json.last == "]" else {

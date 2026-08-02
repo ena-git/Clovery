@@ -4,7 +4,7 @@
 
 1. Configure App Store Server Notifications V2 in App Store Connect with `POST https://<api-host>/v1/billing/apple/notifications` for production and the staging endpoint for sandbox tests.
 2. Set `DEPLOYMENT_ENVIRONMENT=production`; production startup rejects missing Apple billing configuration and rejects `APPLE_IAP_ALLOW_SANDBOX=true`.
-3. Configure `APPLE_IAP_BUNDLE_ID`, numeric `APPLE_IAP_APP_APPLE_ID`, and `APPLE_IAP_PRODUCT_IDS` from the released App Store record. A product absent from the allowlist cannot create an entitlement.
+3. Configure `APPLE_BILLING_BUNDLE_ID`, numeric `APPLE_IAP_APP_APPLE_ID`, and `APPLE_BILLING_PRODUCT_IDS` from the released App Store record. A product absent from the allowlist cannot create an entitlement.
 4. Load the App Store Connect API key and Apple root certificate through the deployment secret manager. Do not commit decoded keys or certificates.
 5. Send an App Store test notification before each billing release and require an HTTP `204` plus a successful notification record for a real signed transaction test.
 

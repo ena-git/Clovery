@@ -11,10 +11,10 @@ var appleIAPEnvironmentKeys = []string{
 	"APPLE_IAP_ISSUER_ID",
 	"APPLE_IAP_KEY_ID",
 	"APPLE_IAP_PRIVATE_KEY_BASE64",
-	"APPLE_IAP_BUNDLE_ID",
+	"APPLE_BILLING_BUNDLE_ID",
 	"APPLE_IAP_APP_APPLE_ID",
 	"APPLE_IAP_ROOT_CA_BASE64",
-	"APPLE_IAP_PRODUCT_IDS",
+	"APPLE_BILLING_PRODUCT_IDS",
 }
 
 func TestLoadAllowsAbsentAppleIAPConfiguration(t *testing.T) {
@@ -23,6 +23,21 @@ func TestLoadAllowsAbsentAppleIAPConfiguration(t *testing.T) {
 
 	if _, err := Load(); err != nil {
 		t.Fatalf("Load() rejected absent Apple IAP configuration: %v", err)
+	}
+}
+
+func TestLoadAllowsPublicAppleBillingIdentifiersWithoutCredentials(t *testing.T) {
+	setValidEnvironment(t)
+	clearAppleIAPEnvironment(t)
+	t.Setenv("APPLE_BILLING_BUNDLE_ID", "com.clovery.app")
+	t.Setenv("APPLE_BILLING_PRODUCT_IDS", "com.clovery.app.board.lifetime")
+
+	loaded, err := Load()
+	if err != nil {
+		t.Fatalf("Load() rejected public Apple billing identifiers: %v", err)
+	}
+	if loaded.AppleIAP.Enabled() {
+		t.Fatal("public identifiers enabled Apple billing without credentials")
 	}
 }
 
@@ -45,10 +60,10 @@ func TestLoadReturnsConfiguredAppleIAP(t *testing.T) {
 	t.Setenv("APPLE_IAP_ISSUER_ID", "issuer-id")
 	t.Setenv("APPLE_IAP_KEY_ID", "key-id")
 	t.Setenv("APPLE_IAP_PRIVATE_KEY_BASE64", base64.StdEncoding.EncodeToString(privateKey))
-	t.Setenv("APPLE_IAP_BUNDLE_ID", "com.clovery.app")
+	t.Setenv("APPLE_BILLING_BUNDLE_ID", "com.clovery.app")
 	t.Setenv("APPLE_IAP_APP_APPLE_ID", "1234567890")
 	t.Setenv("APPLE_IAP_ROOT_CA_BASE64", base64.StdEncoding.EncodeToString(rootCA))
-	t.Setenv("APPLE_IAP_PRODUCT_IDS", "com.clovery.pro.monthly, com.clovery.pro.yearly")
+	t.Setenv("APPLE_BILLING_PRODUCT_IDS", "com.clovery.pro.monthly, com.clovery.pro.yearly")
 
 	loaded, err := Load()
 	if err != nil {
@@ -116,8 +131,8 @@ func setCompleteAppleIAPEnvironment(t *testing.T) {
 	t.Setenv("APPLE_IAP_ISSUER_ID", "issuer-id")
 	t.Setenv("APPLE_IAP_KEY_ID", "key-id")
 	t.Setenv("APPLE_IAP_PRIVATE_KEY_BASE64", base64.StdEncoding.EncodeToString([]byte("private-key")))
-	t.Setenv("APPLE_IAP_BUNDLE_ID", "com.clovery.app")
+	t.Setenv("APPLE_BILLING_BUNDLE_ID", "com.clovery.app")
 	t.Setenv("APPLE_IAP_APP_APPLE_ID", "1234567890")
 	t.Setenv("APPLE_IAP_ROOT_CA_BASE64", base64.StdEncoding.EncodeToString([]byte("root-ca")))
-	t.Setenv("APPLE_IAP_PRODUCT_IDS", "com.clovery.pro.monthly")
+	t.Setenv("APPLE_BILLING_PRODUCT_IDS", "com.clovery.pro.monthly")
 }

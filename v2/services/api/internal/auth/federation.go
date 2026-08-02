@@ -116,3 +116,8 @@ type FederatedAccount struct {
 	AccountID string
 	VaultID   string
 }
+
+type FederatedLoginResolution struct {
+	Identity FederatedIdentityKey
+	Account  *FederatedAccount
+}

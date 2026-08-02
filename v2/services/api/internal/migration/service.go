@@ -21,7 +21,7 @@ var (
 	ErrIntegrityMismatch  = errors.New("migration item integrity mismatch")
 	ErrMigrationMismatch  = errors.New("migration ID content mismatch")
 	ErrVerificationFailed = errors.New("migration verification failed")
-	ErrEntryCollision     = errors.New("migration entry collides with existing Vault data")
+	ErrResolutionRace     = errors.New("migration resolution changed concurrently")
 )
 
 type repository interface {
@@ -30,6 +30,7 @@ type repository interface {
 	AddAsset(ctx context.Context, vaultID string, migrationID string, assetID string, sourceFilename string, byteSize int64, sha256 string) error
 	Verify(ctx context.Context, vaultID string, migrationID string) (Report, error)
 	GetReport(ctx context.Context, vaultID string, migrationID string) (Report, error)
+	GetAssetMappings(ctx context.Context, vaultID string, migrationID string) ([]AssetMapping, error)
 	RecordError(ctx context.Context, vaultID string, migrationID string, code string) error
 }
 
@@ -157,6 +158,17 @@ func (service *Service) AddEntry(
 	}
 	entry.Payload = canonical
 	entry.SHA256 = hex.EncodeToString(digest[:])
+	entry.DedupSHA256 = nil
+	if entry.DeletedAt == nil {
+		dedup, err := canonicalDedupJSON(canonical)
+		if err != nil {
+			_ = service.repository.RecordError(ctx, vaultID, migrationID, "entry_payload_invalid")
+			return ErrInvalidBundle
+		}
+		dedupDigest := sha256.Sum256(dedup)
+		encodedDedupDigest := hex.EncodeToString(dedupDigest[:])
+		entry.DedupSHA256 = &encodedDedupDigest
+	}
 	entry.SourceEntryID = sourceEntryID
 	entry.EntryID = internalEntryID
 	err = service.repository.AddEntry(ctx, vaultID, migrationID, entry)
@@ -178,6 +190,21 @@ func (service *Service) Report(ctx context.Context, accountID string, vaultID st
 		return Report{}, err
 	}
 	return service.repository.GetReport(ctx, vaultID, migrationID)
+}
+
+func (service *Service) Assets(
+	ctx context.Context,
+	accountID string,
+	vaultID string,
+	migrationID string,
+) ([]AssetMapping, error) {
+	if uuid.Validate(migrationID) != nil {
+		return nil, ErrInvalidBundle
+	}
+	if _, err := service.vaults.Get(ctx, accountID, vaultID); err != nil {
+		return nil, err
+	}
+	return service.repository.GetAssetMappings(ctx, vaultID, migrationID)
 }
 
 func canonicalJSON(payload json.RawMessage) (json.RawMessage, error) {

@@ -8,9 +8,12 @@ import (
 
 	"github.com/clovery/clovery/services/api/internal/application/authflow"
 	"github.com/clovery/clovery/services/api/internal/auth"
+	"github.com/clovery/clovery/services/api/internal/bootstrapjob"
 	"github.com/clovery/clovery/services/api/internal/config"
 	httpapi "github.com/clovery/clovery/services/api/internal/http"
+	"github.com/clovery/clovery/services/api/internal/identityclaim"
 	"github.com/clovery/clovery/services/api/internal/observability"
+	cloverysync "github.com/clovery/clovery/services/api/internal/sync"
 	_ "github.com/jackc/pgx/v5/stdlib"
 )
 
@@ -35,11 +38,20 @@ func buildHandler(databaseHandle *sql.DB, applicationConfig config.Config) (http
 		return nil, err
 	}
 	sessions := auth.NewSessionService(databaseHandle, signer)
-	authService, err := authflow.NewServiceWithSessions(databaseHandle, sessions)
+	claimRepository := identityclaim.NewPostgresRepository(databaseHandle)
+	claims := identityclaim.NewServiceWithLifetime(claimRepository, applicationConfig.IdentityClaimTTL)
+	authService, err := authflow.NewServiceWithIdentityClaims(databaseHandle, sessions, claimRepository, claims)
 	if err != nil {
 		return nil, err
 	}
-	federation, passkeys, err := buildIdentityApplications(databaseHandle, sessions, applicationConfig)
+	syncRepository := cloverysync.NewPostgresRepository(databaseHandle)
+	bootstrapService, err := bootstrapjob.NewService(
+		bootstrapjob.NewPostgresRepository(databaseHandle), syncRepository,
+	)
+	if err != nil {
+		return nil, err
+	}
+	federation, passkeys, err := buildIdentityApplications(databaseHandle, sessions, claims, applicationConfig)
 	if err != nil {
 		return nil, err
 	}
@@ -47,7 +59,7 @@ func buildHandler(databaseHandle *sql.DB, applicationConfig config.Config) (http
 	if err != nil {
 		return nil, err
 	}
-	syncApplication, err := buildSyncApplication(databaseHandle)
+	syncApplication, err := buildSyncApplication(databaseHandle, syncRepository)
 	if err != nil {
 		return nil, err
 	}
@@ -55,11 +67,11 @@ func buildHandler(databaseHandle *sql.DB, applicationConfig config.Config) (http
 	if err != nil {
 		return nil, err
 	}
-	migrationApplication, err := buildMigrationApplication(databaseHandle, assetApplication)
+	migrationApplication, err := buildMigrationApplication(databaseHandle, assetApplication, bootstrapService)
 	if err != nil {
 		return nil, err
 	}
-	billingApplication, err := buildBillingApplication(databaseHandle, applicationConfig)
+	billingApplication, err := buildBillingApplication(databaseHandle, applicationConfig, bootstrapService)
 	if err != nil {
 		return nil, err
 	}
@@ -70,6 +82,7 @@ func buildHandler(databaseHandle *sql.DB, applicationConfig config.Config) (http
 		Federation:             federation,
 		Passkeys:               passkeys,
 		Account:                accounts,
+		Bootstrap:              httpapi.NewBootstrapApplication(bootstrapService),
 		Devices:                devices,
 		Vault:                  vaults,
 		Sync:                   syncApplication,

@@ -4,6 +4,7 @@ import (
 	"encoding/base64"
 	"strings"
 	"testing"
+	"time"
 )
 
 func TestLoadReturnsExplicitConfiguration(t *testing.T) {
@@ -15,6 +16,7 @@ func TestLoadReturnsExplicitConfiguration(t *testing.T) {
 	t.Setenv("S3_SECRET_KEY", "clovery-secret")
 	t.Setenv("S3_ALLOW_INSECURE", "true")
 	t.Setenv("MIGRATION_WRITES_ENABLED", "true")
+	t.Setenv("IDENTITY_CLAIM_TTL_SECONDS", "600")
 	t.Setenv("METRICS_BEARER_TOKEN", "0123456789abcdef0123456789abcdef")
 	t.Setenv("JWT_ISSUER", "https://accounts.clovery.example")
 	t.Setenv("JWT_SIGNING_KEY", "0123456789abcdef0123456789abcdef")
@@ -53,6 +55,9 @@ func TestLoadReturnsExplicitConfiguration(t *testing.T) {
 	if !config.MigrationWritesEnabled || len(config.MetricsBearerToken) < 32 {
 		t.Fatal("operational controls were not loaded")
 	}
+	if config.IdentityClaimTTL != 10*time.Minute {
+		t.Fatalf("IdentityClaimTTL = %s", config.IdentityClaimTTL)
+	}
 	if config.JWTIssuer != "https://accounts.clovery.example" {
 		t.Fatalf("JWTIssuer = %q", config.JWTIssuer)
 	}
@@ -88,6 +93,7 @@ func TestLoadRejectsMissingRequiredConfiguration(t *testing.T) {
 		"WEBAUTHN_RP_ORIGINS",
 		"PASSKEY_CREDENTIAL_ENCRYPTION_KEY",
 		"MIGRATION_WRITES_ENABLED",
+		"IDENTITY_CLAIM_TTL_SECONDS",
 		"METRICS_BEARER_TOKEN",
 		"PORT",
 	}
@@ -115,6 +121,20 @@ func TestLoadRejectsShortJWTSigningKey(t *testing.T) {
 	_, err := Load()
 	if err == nil || !strings.Contains(err.Error(), "JWT_SIGNING_KEY") {
 		t.Fatalf("Load() short signing key error = %v", err)
+	}
+}
+
+func TestLoadRejectsUnsafeIdentityClaimTTL(t *testing.T) {
+	for _, value := range []string{"invalid", "0", "59", "3601"} {
+		t.Run(value, func(t *testing.T) {
+			setValidEnvironment(t)
+			t.Setenv("IDENTITY_CLAIM_TTL_SECONDS", value)
+
+			_, err := Load()
+			if err == nil || !strings.Contains(err.Error(), "IDENTITY_CLAIM_TTL_SECONDS") {
+				t.Fatalf("Load() TTL %q error = %v", value, err)
+			}
+		})
 	}
 }
 
@@ -178,6 +198,7 @@ func setValidEnvironment(t *testing.T) {
 	t.Setenv("S3_SECRET_KEY", "clovery-secret")
 	t.Setenv("S3_ALLOW_INSECURE", "true")
 	t.Setenv("MIGRATION_WRITES_ENABLED", "true")
+	t.Setenv("IDENTITY_CLAIM_TTL_SECONDS", "600")
 	t.Setenv("METRICS_BEARER_TOKEN", "0123456789abcdef0123456789abcdef")
 	t.Setenv("JWT_ISSUER", "https://accounts.clovery.example")
 	t.Setenv("JWT_SIGNING_KEY", "0123456789abcdef0123456789abcdef")

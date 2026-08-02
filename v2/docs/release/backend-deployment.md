@@ -51,6 +51,16 @@ BACKUP_DIRECTORY=$(./scripts/staging-backup.sh \
   /opt/clovery/staging/backups)
 ```
 
+For the iOS `1.1.0` account-upgrade boundary, also create the version-15 baseline required by the release-specific verification gate:
+
+```bash
+./scripts/backup-before-account-bootstrap.sh \
+  "$DATABASE_URL" \
+  /opt/clovery/staging/evidence/ios-1.1.0-database
+```
+
+Follow `docs/release/ios-1.1.0-database-runbook.md`. The script refuses repository paths, requires clean migration version `15`, records aggregate account/Vault/entitlement counts, and never records the database URL. Encrypt and upload the dump, checksum, and metadata using the approved external backup system.
+
 Prepare `/opt/clovery/staging/restore.env` with `RESTORE_DRILL_ENVIRONMENT=staging`, a TLS `RESTORE_DATABASE_URL` whose database name ends in `_restore` or `_restore_drill`, and `CLOVERY_ALLOW_RESTORE_DRILL=yes`. Build the migration binary from the same release image or source SHA, then prove the dump can be restored:
 
 ```bash
@@ -68,10 +78,13 @@ Run against the restored database first:
 ```bash
 cd v2/services/api
 DATABASE_URL="$RESTORE_DATABASE_URL" MIGRATIONS_PATH=./migrations go run ./cmd/migrate up
+./scripts/verify-account-bootstrap-migrations.sh \
+  "$RESTORE_DATABASE_URL" \
+  /opt/clovery/staging/evidence/ios-1.1.0-database/clovery-before-1.1.0.metadata.env
 DATABASE_URL="$RESTORE_DATABASE_URL" go test -count=1 ./internal/database ./internal/account ./internal/asset ./internal/sync ./internal/migration ./internal/billing ./internal/http ./internal/contract
 ```
 
-Confirm existing account, Vault, journal, asset, purchase-chain, transaction, entitlement, and notification row counts remain expected. The production migration command accepts only `up`; restore the snapshot or deploy a reviewed forward repair instead of applying destructive down migrations.
+Confirm existing account, Vault, journal, asset, purchase-chain, transaction, entitlement, and notification row counts remain expected. The production migration command accepts only `up`; restore the snapshot or deploy a reviewed forward repair instead of applying destructive down migrations. For iOS `1.1.0`, use `docs/release/ios-1.1.0-rollback-runbook.md`: first deploy the previous API with migration writes disabled while leaving additive migration version `17` in place.
 
 Run the object-store overwrite gate against a disposable integration bucket:
 

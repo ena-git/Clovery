@@ -49,7 +49,7 @@ struct MigrationPhotoManifest: Codable, Equatable {
 }
 
 struct MigrationBundleExportResult: Equatable {
-    let migrationID: String
+    let migrationID: UUID
     let archiveURL: URL
     let entryCount: Int
     let photoCount: Int
@@ -72,6 +72,7 @@ enum MigrationBundleError: Error {
     case photoHashMismatch(String)
     case invalidArchive
     case archiveEntryTooLarge(String)
+    case archiveContentMismatch
 }
 
 enum MigrationBundleArchive {

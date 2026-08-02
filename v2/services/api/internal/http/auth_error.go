@@ -7,6 +7,7 @@ import (
 	"github.com/clovery/clovery/services/api/internal/account"
 	"github.com/clovery/clovery/services/api/internal/application/authflow"
 	"github.com/clovery/clovery/services/api/internal/auth"
+	"github.com/clovery/clovery/services/api/internal/identityclaim"
 )
 
 func writeAuthError(responseWriter http.ResponseWriter, err error) {
@@ -18,6 +19,22 @@ func writeAuthError(responseWriter http.ResponseWriter, err error) {
 		writeAPIError(responseWriter, http.StatusTooManyRequests, "rate_limited", "Too many attempts. Try again later.")
 	case errors.Is(err, auth.ErrWeakPassword), errors.Is(err, account.ErrInvalidLoginID):
 		writeAPIError(responseWriter, http.StatusBadRequest, "invalid_request", "The request is invalid.")
+	case errors.Is(err, authflow.ErrInvalidAuthRequest), errors.Is(err, identityclaim.ErrInvalidClaim):
+		writeAPIError(responseWriter, http.StatusBadRequest, "invalid_auth_request", "The request is invalid.")
+	case errors.Is(err, identityclaim.ErrExpiredClaim):
+		writeAPIError(
+			responseWriter,
+			http.StatusUnauthorized,
+			"identity_claim_expired",
+			"The identity claim has expired. Reauthorize and try again.",
+		)
+	case errors.Is(err, identityclaim.ErrConsumedClaim), errors.Is(err, account.ErrIdentityAlreadyBound):
+		writeAPIError(
+			responseWriter,
+			http.StatusConflict,
+			"identity_claim_consumed",
+			"The identity claim has already been used.",
+		)
 	case errors.Is(err, authflow.ErrUnsupportedRecoveryMethod):
 		writeAPIError(responseWriter, http.StatusBadRequest, "recovery_method_unavailable", "The recovery method is not available.")
 	case errors.Is(err, authflow.ErrRecentAuthenticationRequired):

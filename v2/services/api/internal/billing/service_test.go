@@ -104,6 +104,56 @@ func TestServiceRestoreReturnsAuthenticatedAccountEntitlements(t *testing.T) {
 	}
 }
 
+func TestServiceRestoreAcceptsCompletedEmptyStoreKitInventory(t *testing.T) {
+	repository := &stubRepository{listed: []Entitlement{{
+		ProductID: "com.clovery.pro.monthly", State: StateActive,
+	}}}
+	verifier := &stubVerifier{}
+	service, _ := NewService(verifier, repository)
+
+	entitlements, err := service.Restore(
+		context.Background(), billingAccountID, []string{}, EnvironmentSandbox,
+	)
+	if err != nil || len(entitlements) != 1 || entitlements[0].State != StateActive || verifier.verifyCalls != 0 ||
+		repository.listedAccountID != billingAccountID {
+		t.Fatalf(
+			"Restore(empty) = %#v, verify calls = %d, list account = %q, error = %v",
+			entitlements, verifier.verifyCalls, repository.listedAccountID, err,
+		)
+	}
+}
+
+func TestServiceRestoreValidatesEnvelopeAndDeduplicatesTransactions(t *testing.T) {
+	transaction := verifiedTransactionFixture()
+	for _, test := range []struct {
+		name         string
+		accountID    string
+		environment  Environment
+		transactions []string
+	}{
+		{name: "invalid account", accountID: "not-a-uuid", environment: EnvironmentSandbox},
+		{name: "invalid environment", accountID: billingAccountID, environment: Environment("other")},
+		{name: "too many transactions", accountID: billingAccountID, environment: EnvironmentSandbox, transactions: make([]string, 101)},
+	} {
+		t.Run(test.name, func(t *testing.T) {
+			service, _ := NewService(&stubVerifier{}, &stubRepository{})
+			if _, err := service.Restore(
+				context.Background(), test.accountID, test.transactions, test.environment,
+			); !errors.Is(err, ErrInvalidRequest) {
+				t.Fatalf("Restore() error = %v", err)
+			}
+		})
+	}
+
+	verifier := &stubVerifier{transactions: map[string]VerifiedTransaction{"tx-1": transaction}}
+	service, _ := NewService(verifier, &stubRepository{})
+	if _, err := service.Restore(
+		context.Background(), billingAccountID, []string{"tx-1", "tx-1"}, EnvironmentSandbox,
+	); err != nil || verifier.verifyCalls != 1 {
+		t.Fatalf("Restore(duplicates) verify calls = %d, error = %v", verifier.verifyCalls, err)
+	}
+}
+
 func TestServiceListExpiresStoredEntitlementAtReadTime(t *testing.T) {
 	expiresAt := time.Date(2026, 7, 14, 12, 0, 0, 0, time.UTC)
 	repository := &stubRepository{listed: []Entitlement{{
@@ -200,12 +250,15 @@ func TestServicePersistsLegacyNotificationWithoutAccountMapping(t *testing.T) {
 }
 
 type stubVerifier struct {
-	transactions map[string]VerifiedTransaction
-	notification AppleNotification
-	legacyProof  VerifiedTransaction
-	assigned     VerifiedTransaction
-	assignCalls  int
-	err          error
+	transactions      map[string]VerifiedTransaction
+	notification      AppleNotification
+	legacyProof       VerifiedTransaction
+	assigned          VerifiedTransaction
+	assignCalls       int
+	verifyCalls       int
+	assignedAccountID string
+	err               error
+	assignErr         error
 }
 
 func (stub *stubVerifier) Verify(
@@ -213,6 +266,7 @@ func (stub *stubVerifier) Verify(
 	transactionID string,
 	_ Environment,
 ) (VerifiedTransaction, error) {
+	stub.verifyCalls++
 	if stub.err != nil {
 		return VerifiedTransaction{}, stub.err
 	}
@@ -238,13 +292,17 @@ func (stub *stubVerifier) VerifyLegacyProof(
 }
 
 func (stub *stubVerifier) AssignAccountToken(
-	context.Context,
-	string,
-	string,
-	string,
-	Environment,
+	_ context.Context,
+	_ string,
+	_ string,
+	accountID string,
+	_ Environment,
 ) (VerifiedTransaction, error) {
 	stub.assignCalls++
+	stub.assignedAccountID = accountID
+	if stub.assignErr != nil {
+		return VerifiedTransaction{}, stub.assignErr
+	}
 	if stub.err != nil {
 		return VerifiedTransaction{}, stub.err
 	}

@@ -4,6 +4,12 @@
 
 # Xcode
 DerivedData/
+*.xcresult
+*.xcarchive
+*.ipa
+*.mobileprovision
+*.p8
+*.p12
 *.xcuserstate
 xcuserdata/
 *.moved-aside
@@ -25,6 +31,8 @@ Pods/
 !.env.example
 coverage.out
 /build/
+build/release-evidence/
+Documents/CloveryMigration/
 .worktrees/
 
 # Claude

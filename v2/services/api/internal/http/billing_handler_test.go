@@ -69,6 +69,24 @@ func TestBillingVerifyRejectsClientSuppliedAccount(t *testing.T) {
 	}
 }
 
+func TestBillingRestoreAcceptsCompletedEmptyStoreKitInventory(t *testing.T) {
+	application := &stubBillingHTTPApplication{entitlements: []billing.Entitlement{}}
+	router := NewRouter(RouterDependencies{Sessions: managementSessions(), Billing: application})
+	response := authenticatedBillingRequest(
+		t, router, http.MethodPost, "/v1/billing/apple/restore",
+		`{"transaction_ids":[],"environment":"sandbox"}`,
+	)
+
+	if response.Code != http.StatusOK || application.transactionIDs == nil ||
+		application.accountID != managementSessions().claims.AccountID ||
+		!strings.Contains(response.Body.String(), `"entitlements":[]`) {
+		t.Fatalf(
+			"status = %d, account = %q, transactions = %#v, body = %s",
+			response.Code, application.accountID, application.transactionIDs, response.Body.String(),
+		)
+	}
+}
+
 func TestAppleNotificationRouteUsesSignedPayloadWithoutUserSession(t *testing.T) {
 	application := &stubBillingHTTPApplication{}
 	router := NewRouter(RouterDependencies{Sessions: managementSessions(), Billing: application})

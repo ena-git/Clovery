@@ -65,8 +65,9 @@ func (repository *PostgresRepository) AddEntry(
 	err = transaction.QueryRowContext(
 		ctx,
 		`INSERT INTO migration_entries (
-		 migration_id, entry_id, source_entry_id, operation_id, payload, deleted_at, sha256, byte_size
-		 ) SELECT migration.id, $3::uuid, $4, $5::uuid, $6::jsonb, $7::timestamptz, $8, $9
+		 migration_id, entry_id, source_entry_id, operation_id, payload, deleted_at,
+		 sha256, byte_size, dedup_sha256
+		 ) SELECT migration.id, $3::uuid, $4, $5::uuid, $6::jsonb, $7::timestamptz, $8, $9, $10
 		 FROM vault_migrations migration
 		 WHERE migration.id = $1 AND migration.vault_id = $2 AND migration.status = 'uploading'
 		   AND (
@@ -86,10 +87,11 @@ func (repository *PostgresRepository) AddEntry(
 		 ON CONFLICT (migration_id, source_entry_id) DO UPDATE SET source_entry_id = EXCLUDED.source_entry_id
 		 WHERE migration_entries.entry_id = EXCLUDED.entry_id
 		   AND migration_entries.sha256 = EXCLUDED.sha256
+		   AND migration_entries.dedup_sha256 IS NOT DISTINCT FROM EXCLUDED.dedup_sha256
 		   AND migration_entries.deleted_at IS NOT DISTINCT FROM EXCLUDED.deleted_at
 		 RETURNING entry_id`,
 		migrationID, vaultID, entry.EntryID, entry.SourceEntryID, uuid.NewString(), entry.Payload,
-		entry.DeletedAt, entry.SHA256, len(entry.Payload),
+		entry.DeletedAt, entry.SHA256, len(entry.Payload), entry.DedupSHA256,
 	).Scan(&entryID)
 	if errors.Is(err, sql.ErrNoRows) {
 		return ErrMigrationMismatch

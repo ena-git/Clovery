@@ -1,5 +1,7 @@
 package authflow
 
+import "github.com/clovery/clovery/services/api/internal/identityclaim"
+
 type Device struct {
 	ID          string
 	Platform    string
@@ -7,10 +9,13 @@ type Device struct {
 }
 
 type RegisterCommand struct {
-	LoginID        string
-	Password       string
-	RecoveryMethod string
-	Device         Device
+	LoginID               string
+	Password              string
+	RecoveryMethod        string
+	IdentityClaimToken    *identityclaim.RegistrationToken
+	RegistrationRequestID *string
+	SourceKind            *string
+	Device                Device
 }
 
 type LoginCommand struct {

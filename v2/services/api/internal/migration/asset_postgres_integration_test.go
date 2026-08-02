@@ -103,6 +103,83 @@ func TestPostgresVerifyRejectsMissingManifestPhoto(t *testing.T) {
 	}
 }
 
+func TestPostgresVerifiedMigrationPreservesEqualHashAssetsByFilename(t *testing.T) {
+	databaseHandle := openMigrationIntegrationDatabase(t)
+	const secondAssetID = "44444444-4444-4444-8444-444444444444"
+	manifest := []byte(`{"format_version":1,"exported_at":"2026-07-15T00:00:00Z","entries_file":"entries.json","entries_sha256":"4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945","entry_count":0,"entries":[],"deleted_ids_file":"deleted_ids.json","deleted_ids_sha256":"4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945","deleted_count":0,"deleted_ids":[],"photos":[{"filename":"photo-0002.jpg","sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","bytes":20},{"filename":"photo-0001.jpg","sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","bytes":20}],"sources":["localStorage"]}`)
+	manifestDigest := sha256.Sum256(manifest)
+	now := time.Now().UTC()
+
+	if _, err := databaseHandle.Exec(
+		"INSERT INTO clovery_accounts (id) VALUES ($1)", postgresAssetAccountID,
+	); err != nil {
+		t.Fatalf("seed mapping account: %v", err)
+	}
+	if _, err := databaseHandle.Exec(
+		"INSERT INTO vaults (id, owner_account_id, status) VALUES ($1, $2, 'active')",
+		postgresAssetVaultID, postgresAssetAccountID,
+	); err != nil {
+		t.Fatalf("seed mapping Vault: %v", err)
+	}
+	if _, err := databaseHandle.Exec(
+		`INSERT INTO vault_migrations (
+			id, vault_id, format_version, source, expected_entry_count, expected_deleted_count,
+			expected_asset_count, expected_total_bytes, manifest_sha256, manifest, manifest_bytes,
+			status, created_at
+		) VALUES ($1, $2, 1, 'v1_bundle', 0, 0, 2, 40, $3, $4::jsonb, $5, 'uploading', $6)`,
+		postgresAssetMigration, postgresAssetVaultID, hex.EncodeToString(manifestDigest[:]),
+		string(manifest), manifest, now,
+	); err != nil {
+		t.Fatalf("seed mapping migration: %v", err)
+	}
+	for index, item := range []struct {
+		assetID  string
+		filename string
+	}{
+		{assetID: postgresAssetID, filename: "photo-0002.jpg"},
+		{assetID: secondAssetID, filename: "photo-0001.jpg"},
+	} {
+		if _, err := databaseHandle.Exec(
+			`INSERT INTO vault_assets (
+				id, vault_id, object_key, content_type, byte_size, sha256,
+				status, created_at, completed_at
+			) VALUES ($1, $2, $3, 'image/jpeg', 20, $4, 'complete', $5, $5)`,
+			item.assetID, postgresAssetVaultID, "migration/object-"+item.assetID,
+			postgresAssetSHA256, now.Add(time.Duration(index)*time.Second),
+		); err != nil {
+			t.Fatalf("seed equal-hash asset: %v", err)
+		}
+		if _, err := databaseHandle.Exec(
+			`INSERT INTO migration_assets (migration_id, asset_id, source_filename, byte_size, sha256)
+			 VALUES ($1, $2, $3, 20, $4)`,
+			postgresAssetMigration, item.assetID, item.filename, postgresAssetSHA256,
+		); err != nil {
+			t.Fatalf("seed migration asset mapping: %v", err)
+		}
+	}
+
+	repository := NewPostgresRepository(databaseHandle)
+	if _, err := repository.Verify(
+		context.Background(), postgresAssetVaultID, postgresAssetMigration,
+	); err != nil {
+		t.Fatalf("Verify() error = %v", err)
+	}
+	mappings, err := repository.GetAssetMappings(
+		context.Background(), postgresAssetVaultID, postgresAssetMigration,
+	)
+	if err != nil || len(mappings) != 2 || mappings[0].SourceFilename != "photo-0001.jpg" ||
+		mappings[1].SourceFilename != "photo-0002.jpg" || mappings[0].AssetID == mappings[1].AssetID {
+		t.Fatalf("GetAssetMappings() = %#v, error = %v", mappings, err)
+	}
+	var assetCount int
+	if err := databaseHandle.QueryRow(
+		"SELECT COUNT(*) FROM vault_assets WHERE vault_id = $1 AND sha256 = $2",
+		postgresAssetVaultID, postgresAssetSHA256,
+	).Scan(&assetCount); err != nil || assetCount != 2 {
+		t.Fatalf("preserved equal-hash assets = %d, error = %v", assetCount, err)
+	}
+}
+
 func seedPostgresAssetMigration(t *testing.T, databaseHandle *sql.DB, includeCompletedAsset bool) {
 	t.Helper()
 	manifest := []byte(`{"format_version":1,"exported_at":"2026-07-15T00:00:00Z","entries_file":"entries.json","entries_sha256":"4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945","entry_count":0,"entries":[],"deleted_ids_file":"deleted_ids.json","deleted_ids_sha256":"4f53cda18c2baa0c0354bb5f9a3ecbe5ed12ab4d8e11ba873c2f11161202b945","deleted_count":0,"deleted_ids":[],"photos":[{"filename":"photo-1.jpg","sha256":"aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa","bytes":20}],"sources":["localStorage"]}`)

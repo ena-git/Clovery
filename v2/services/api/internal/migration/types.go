@@ -40,6 +40,7 @@ type EntryInput struct {
 	Payload       json.RawMessage `json:"payload"`
 	DeletedAt     *time.Time      `json:"deleted_at,omitempty"`
 	SHA256        string          `json:"sha256"`
+	DedupSHA256   *string         `json:"-"`
 }
 
 type AssetInput struct {
@@ -48,6 +49,17 @@ type AssetInput struct {
 	ContentType    string `json:"content_type"`
 	ByteSize       int64  `json:"byte_size"`
 	SHA256         string `json:"sha256"`
+}
+
+type AssetMapping struct {
+	SourceFilename string `json:"source_filename"`
+	AssetID        string `json:"asset_id"`
+	ByteSize       int64  `json:"byte_size"`
+	SHA256         string `json:"sha256"`
+}
+
+type AssetMappings struct {
+	Assets []AssetMapping `json:"assets"`
 }
 
 func (input AssetInput) uploadRequest() asset.UploadRequest {
@@ -62,6 +74,9 @@ type Report struct {
 	Status                 string          `json:"status"`
 	ExpectedEntries        int             `json:"expected_entries"`
 	ImportedEntries        int             `json:"imported_entries"`
+	InsertedEntries        int             `json:"inserted_entries"`
+	DuplicateEntries       int             `json:"duplicate_entries"`
+	ConflictCopies         int             `json:"conflict_copies"`
 	ExpectedDeletedEntries int             `json:"expected_deleted_entries"`
 	ImportedDeletedEntries int             `json:"imported_deleted_entries"`
 	ExpectedAssets         int             `json:"expected_assets"`

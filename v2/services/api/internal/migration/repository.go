@@ -5,7 +5,10 @@ import (
 	"errors"
 )
 
-var ErrMigrationNotFound = errors.New("migration not found")
+var (
+	ErrMigrationNotFound    = errors.New("migration not found")
+	ErrMigrationNotVerified = errors.New("migration not verified")
+)
 
 type PostgresRepository struct {
 	database *sql.DB

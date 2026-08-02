@@ -32,6 +32,16 @@ func TestOpenAPIContractIsValid(t *testing.T) {
 	if document.Paths.Find("/v1/health") == nil {
 		t.Fatal("missing GET /v1/health contract")
 	}
+	for _, path := range []string{"/v1/legal/privacy", "/v1/legal/terms"} {
+		pathItem := document.Paths.Find(path)
+		if pathItem == nil || pathItem.Get == nil {
+			t.Fatalf("missing GET %s contract", path)
+		}
+		response := pathItem.Get.Responses.Value("200")
+		if response == nil || response.Value == nil || response.Value.Content["text/html"] == nil {
+			t.Fatalf("GET %s must document a text/html response", path)
+		}
+	}
 
 	for _, schemaName := range []string{"CloveryAccountId", "VaultId", "CloveryLoginId"} {
 		if document.Components.Schemas[schemaName] == nil {
@@ -114,6 +124,7 @@ func TestOpenAPIContractIsValid(t *testing.T) {
 	for _, path := range []string{
 		"/v1/vault/sync/pull",
 		"/v1/vault/assets/{assetId}/download",
+		"/v1/vault/migrations/{migrationId}/assets",
 	} {
 		pathItem := document.Paths.Find(path)
 		if pathItem == nil || pathItem.Get == nil {
@@ -141,9 +152,12 @@ func TestOpenAPIContractIsValid(t *testing.T) {
 		t.Fatal("missing GET migration report contract")
 	}
 	for schemaName, properties := range map[string][]string{
-		"MigrationResponse":   {"deleted_count"},
-		"MigrationReport":     {"expected_deleted_entries", "imported_deleted_entries"},
-		"AssetUploadResponse": {"status"},
+		"AccountBootstrapResumeRequest":   {"vault_checkpoint"},
+		"AccountBootstrapVaultCheckpoint": {"cursor", "has_more"},
+		"MigrationResponse":               {"deleted_count"},
+		"MigrationReport":                 {"expected_deleted_entries", "imported_deleted_entries"},
+		"MigrationAssetMapping":           {"source_filename", "asset_id", "byte_size", "sha256"},
+		"AssetUploadResponse":             {"status"},
 	} {
 		schema := document.Components.Schemas[schemaName].Value
 		for _, property := range properties {

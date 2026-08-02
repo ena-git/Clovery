@@ -30,7 +30,7 @@ func TestFederationBindingRequiresRecentCloverySession(t *testing.T) {
 	}
 }
 
-func TestFederatedLoginDoesNotMergeAccountsByEmail(t *testing.T) {
+func TestFederatedLoginReturnsVerifiedUnboundIdentityWithoutMergingByEmail(t *testing.T) {
 	provider := &stubIdentityProvider{
 		name: "google",
 		identity: VerifiedIdentity{
@@ -49,19 +49,97 @@ func TestFederatedLoginDoesNotMergeAccountsByEmail(t *testing.T) {
 		t.Fatalf("create federation service: %v", err)
 	}
 
-	_, err = service.CompleteLogin(context.Background(), FederatedLoginCommand{
+	resolution, err := service.CompleteLogin(context.Background(), FederatedLoginCommand{
 		IntentID:          "11111111-1111-4111-8111-111111111111",
 		Provider:          "google",
 		AuthorizationCode: "authorization-code",
 		Nonce:             "federation-nonce",
 	})
-	if !errors.Is(err, ErrFederatedIdentityNotBound) {
-		t.Fatalf("complete login error = %v", err)
+	if err != nil {
+		t.Fatalf("complete login error = %v, want nil", err)
+	}
+	if resolution.Account != nil {
+		t.Fatalf("unbound account = %#v", resolution.Account)
+	}
+	if resolution.Identity != (FederatedIdentityKey{
+		Provider: "google",
+		Issuer:   provider.identity.Issuer,
+		Subject:  provider.identity.Subject,
+	}) {
+		t.Fatalf("verified identity = %#v", resolution.Identity)
 	}
 	if store.lookup.Provider != "google" ||
 		store.lookup.Issuer != provider.identity.Issuer ||
 		store.lookup.Subject != provider.identity.Subject {
 		t.Fatalf("identity lookup = %#v", store.lookup)
+	}
+}
+
+func TestFederatedLoginReturnsVerifiedIdentityAndBoundAccount(t *testing.T) {
+	provider := &stubIdentityProvider{
+		name: "apple",
+		identity: VerifiedIdentity{
+			Issuer:  "https://appleid.apple.com",
+			Subject: "stable-apple-subject",
+			Email:   "ignored@clovery.example",
+		},
+	}
+	store := &stubFederationStore{account: FederatedAccount{
+		AccountID: "22222222-2222-4222-8222-222222222222",
+		VaultID:   "33333333-3333-4333-8333-333333333333",
+	}}
+	service, err := NewFederationService(
+		stubRecentSessionAuthenticator{},
+		store,
+		[]IdentityProvider{provider},
+	)
+	if err != nil {
+		t.Fatalf("create federation service: %v", err)
+	}
+
+	resolution, err := service.CompleteLogin(context.Background(), FederatedLoginCommand{
+		IntentID:          "44444444-4444-4444-8444-444444444444",
+		Provider:          "apple",
+		AuthorizationCode: "authorization-code",
+		Nonce:             "federation-nonce",
+	})
+	if err != nil {
+		t.Fatalf("complete login error = %v", err)
+	}
+	if resolution.Account == nil || *resolution.Account != store.account {
+		t.Fatalf("bound account = %#v", resolution.Account)
+	}
+	if resolution.Identity != store.lookup {
+		t.Fatalf("verified identity = %#v, lookup = %#v", resolution.Identity, store.lookup)
+	}
+}
+
+func TestFederatedLoginPropagatesIdentityLookupFailure(t *testing.T) {
+	lookupErr := errors.New("lookup failed")
+	provider := &stubIdentityProvider{name: "huawei", identity: VerifiedIdentity{
+		Issuer:  "https://oauth-login.cloud.huawei.com",
+		Subject: "stable-huawei-subject",
+	}}
+	service, err := NewFederationService(
+		stubRecentSessionAuthenticator{},
+		&stubFederationStore{findErr: lookupErr},
+		[]IdentityProvider{provider},
+	)
+	if err != nil {
+		t.Fatalf("create federation service: %v", err)
+	}
+
+	resolution, err := service.CompleteLogin(context.Background(), FederatedLoginCommand{
+		IntentID:          "55555555-5555-4555-8555-555555555555",
+		Provider:          "huawei",
+		AuthorizationCode: "authorization-code",
+		Nonce:             "federation-nonce",
+	})
+	if !errors.Is(err, lookupErr) {
+		t.Fatalf("complete login error = %v, want lookup failure", err)
+	}
+	if resolution != (FederatedLoginResolution{}) {
+		t.Fatalf("complete login resolution = %#v", resolution)
 	}
 }
 
@@ -196,6 +274,7 @@ type stubFederationStore struct {
 	unbindErr       error
 	unboundProvider string
 	loginIntent     FederatedLoginIntentRecord
+	account         FederatedAccount
 }
 
 func (store *stubFederationStore) CreateBindingIntent(
@@ -226,7 +305,7 @@ func (store *stubFederationStore) FindAccountByIdentity(
 	key FederatedIdentityKey,
 ) (FederatedAccount, error) {
 	store.lookup = key
-	return FederatedAccount{}, store.findErr
+	return store.account, store.findErr
 }
 
 func (store *stubFederationStore) ConsumeBindingIntent(

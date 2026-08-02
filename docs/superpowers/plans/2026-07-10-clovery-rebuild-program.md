@@ -17,7 +17,7 @@
 - OpenAPI 是供应商中立的接口描述文件，不调用 OpenAI 或其他 AI 服务；它不承载、不转发任何用户日记、图片或账户数据。
 - Flutter 使用 Drift 维护本地 SQLite，Riverpod 管理应用状态，Pigeon 定义 Dart 与 Swift/Kotlin 的类型化平台接口。
 - PostgreSQL 保存账户、Vault、日记元数据、同步游标与权益；图片保存到私有 S3 兼容对象存储；开发环境使用 MinIO。
-- V2 首发支持 iOS 17+；Android 在 iOS Beta 验收后接入；鸿蒙先执行可行性 PoC，不进入 V2 首发承诺。
+- 原生升级版继续支持 iOS 16+；Android 在原生 iOS `1.1.0` 发布验收后接入；鸿蒙先执行可行性 PoC，不进入第一批跨端发布承诺。
 
 ## 工作流与验收依赖
 
@@ -26,20 +26,24 @@
 | W0 | 平台基础与契约 | 可启动的 Flutter 壳、Go 健康服务、Postgres/MinIO、CI 与 OpenAPI 校验 | 无 |
 | W1 | V1 数据保护与导出 | 修复照片落盘、导出可校验 `migration_bundle` 的 V1 维护版本 | W0 的契约版本号规则 |
 | W2 | Clovery 账户与 Vault | 可在 staging 注册自定义 Clovery ID、密码/Passkey、绑定第三方身份、撤销设备 | W0 |
-| W3 | Flutter iOS 核心体验 | iOS TestFlight 垂直切片：账户、离线日记、照片、同步状态、原生扩展 | W0、W2 |
+| W7 | 外部身份认领与账户 Bootstrap 后端 | 未绑定 Apple/Google/Huawei 签发一次性 claim；原子创建账户、Vault、密码和登录绑定 | W2 |
+| W8 | 旧数据与 Apple 权益继承后端 | 非破坏去重迁移、冲突副本、照片映射、账户级权益与可恢复阶段状态 | W7 |
+| W9 | 原生 iOS 账户接入与继承 | 中文公告/认证/claim UI、动态 provider、日记照片迁移、权益恢复、Vault 拉取 | W7、W8 |
+| W10 | 原生 iOS 1.1.0 发布闭环 | 数据库演练、合规、模拟器、真机、Sandbox、TestFlight、App Store 和 GitHub Release | W9 |
+| W3 | Flutter iOS 核心体验 | 在已发布原生 iOS 行为与 OpenAPI 契约之上重构 Flutter iOS 垂直切片 | W0、W2、W10 |
 | W4 | 迁移、同步与运营 Beta | V1→V2 校验迁移、冲突处理、删除传播、支付权益、监控与回滚演练 | W1、W2、W3 |
 | W5 | Android 接入与鸿蒙 PoC | Android Flutter 版本；鸿蒙运行时/原生能力结论与可发布路径 | W0、W2、W4 |
 | W6 | 上线后体验扩展 | 锁屏组件、繁体中文、Watch 与新玩法的独立增量版本 | W3、W4 |
 
 ## 执行规则
 
-1. 严格按 W0→W1/W2→W3→W4→W5→W6 的工作流边界实施；同步冲突、删除传播和服务端权益属于 W4，不提前塞入 W1 维护版。
-2. 原生 iOS 1.0.3 (14) 的自动化、升级数据、相册、迁移、StoreKit、TestFlight 和 App Store 发布门禁必须在 Flutter W3 开始前完成。旧文档中 W3/W4 后再完成 W1 真机验收的排期由 2026-07-15 已批准方案 A 替代。
+1. 严格按 W0→W1/W2→W7→W8→W9→W10→W3→W4→W5→W6 的工作流边界实施；W7–W10 是当前原生 iOS 安全升级的强制插入工作流。
+2. 原生 iOS `1.1.0 (15)` 的自动化、升级数据、相册、迁移、StoreKit、TestFlight 和 App Store 发布门禁必须在 Flutter W3 开始前完成；真机测试只在 W9 功能完成后由 W10 执行。
 3. 每个工作流单独建立 Issue、验收清单和发布记录；一个工作流失败不能通过临时绕过影响另一个工作流。
 4. 所有身份、同步、支付和迁移变更必须先编写测试，再改实现；协议先变更 OpenAPI，再生成客户端。
 5. 不允许 V2 代码写入 V1 `localStorage` 或覆盖 V1 Documents 备份；迁移只复制、校验、可重试。
 6. 不允许在客户端硬编码第三方密钥、支付密钥、对象存储密钥或生产 URL。
-7. 当前目录无 Git 历史。W0 首先建立受保护的新 Git 仓库与远端备份；计划不要求在此归档副本上直接提交。
+7. GitHub 远端为 `ena-git/Clovery`；每个可验收工作流完成后提交并推送，构建产物、数据库备份、用户内容和签名材料不得进入 Git。
 
 ## 计划文件
 
@@ -50,6 +54,10 @@
 - `2026-07-10-w4-migration-sync-operations.md`
 - `2026-07-10-w5-android-harmony.md`
 - `2026-07-10-w6-post-launch-experience.md`
+- `2026-07-19-w7-identity-claim-backend.md`
+- `2026-07-19-w8-migration-entitlement-reconciliation.md`
+- `2026-07-19-w9-ios-account-bootstrap.md`
+- `2026-07-19-w10-ios-release-closure.md`
 
 ## 全局上线门槛
 

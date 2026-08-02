@@ -25,6 +25,7 @@ func registerMigrationRoutes(
 		protected.Post("/v1/vault/migrations", handler.create)
 		protected.Post("/v1/vault/migrations/{migrationId}/entries", handler.addEntry)
 		protected.Post("/v1/vault/migrations/{migrationId}/assets", handler.addAsset)
+		protected.Get("/v1/vault/migrations/{migrationId}/assets", handler.assets)
 		protected.Post("/v1/vault/migrations/{migrationId}/verify", handler.verify)
 		protected.Get("/v1/vault/migrations/{migrationId}/report", handler.report)
 	})
@@ -89,6 +90,22 @@ func (handler migrationHandler) addAsset(responseWriter http.ResponseWriter, req
 		return
 	}
 	writeJSON(responseWriter, http.StatusCreated, ticket)
+}
+
+func (handler migrationHandler) assets(responseWriter http.ResponseWriter, request *http.Request) {
+	claims, migrationID, ok := migrationRequestScope(request)
+	if !ok {
+		writeAPIError(responseWriter, http.StatusBadRequest, "invalid_request", "The request is invalid.")
+		return
+	}
+	mappings, err := handler.application.Assets(
+		request.Context(), claims.AccountID, claims.VaultID, migrationID,
+	)
+	if err != nil {
+		writeMigrationError(responseWriter, err)
+		return
+	}
+	writeJSON(responseWriter, http.StatusOK, cloverymigration.AssetMappings{Assets: mappings})
 }
 
 func (handler migrationHandler) verify(responseWriter http.ResponseWriter, request *http.Request) {

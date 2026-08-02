@@ -6,7 +6,7 @@ repository_root=$(CDPATH= cd -- "$(dirname "$0")/.." && pwd)
 web_view="$repository_root/Clovery/WebView.swift"
 board_entitlement_reporter="$repository_root/Clovery/BoardEntitlementReporter.swift"
 bridge_javascript="$repository_root/Clovery/BridgeJavaScript.swift"
-app_source="$repository_root/Clovery/CloveryApp.swift"
+app_source="$repository_root/Clovery/Application/ApplicationRootView.swift"
 photo_library_saver="$repository_root/Clovery/PhotoLibrarySaver.swift"
 board_store="$repository_root/Clovery/BoardStore.swift"
 board_store_client="$repository_root/Clovery/BoardStoreClient.swift"
@@ -56,7 +56,7 @@ require_text "$web_view" ".receive(on: DispatchQueue.main)"
 require_text "$web_view" "BridgeJavaScript.boardRestoreResult(outcome)"
 require_text "$bridge_javascript" 'evaluateJSONCallback(name: "window._boardRestoreResult", payload: [outcome.rawValue])'
 require_text "$app_source" "@Environment(\.scenePhase)"
-require_text "$app_source" "WebViewCoordinatorBridge.shared.refreshBoardEntitlement()"
+require_text "$app_source" "Task { await boardStore.refresh() }"
 require_text "$photo_library_saver" "PHAssetCreationRequest.forAsset()"
 
 require_text "$board_store" "func purchase() async -> BoardPurchaseOutcome"
@@ -91,7 +91,7 @@ const restoreHandlerStart = webViewSource.indexOf('message.name == "restorePurch
 const restoreHandlerEnd = webViewSource.indexOf('message.name == "photoSave"', restoreHandlerStart);
 const restoreHandler = webViewSource.slice(restoreHandlerStart, restoreHandlerEnd);
 const reporterCall = restoreHandler.indexOf('boardEntitlementReporter.reportRestore(');
-const restoreCall = restoreHandler.indexOf('performRestore: { await BoardStore.shared.restore() }');
+const restoreCall = restoreHandler.indexOf('performRestore: { await self.boardStore.restore() }');
 const restoreCallback = restoreHandler.indexOf('BridgeJavaScript.boardRestoreResult(outcome)');
 assert(reporterCall >= 0, 'the entitlement reporter owns the complete restore lifecycle');
 assert(reporterCall < restoreCall && restoreCall < restoreCallback, 'restore and outcome reporting both run inside the entitlement reporter');
@@ -114,10 +114,10 @@ assert(/@MainActor\s+func startObservingBoardStore\(\)/.test(webViewSource), 'bo
 assert(webViewSource.includes('[weak self] unlocked in'), 'board entitlement subscription weakly captures the coordinator');
 assert(webViewSource.includes('boardEntitlementReporter.reportObservedEntitlement(unlocked)'), 'board entitlement publications flow through the replaying reporter');
 assert(!webViewSource.includes('!self.isReportingBoardRestore else { return }'), 'restore no longer permanently drops entitlement publications in the Combine sink');
-assert(/Task\s*\{\s*@MainActor in\s*await BoardStore\.shared\.refresh\(\)/s.test(webViewSource), 'entitlement refresh awaits BoardStore on the main actor');
+assert(/Task\s*\{\s*@MainActor in\s*await self\.boardStore\.refresh\(\)/s.test(webViewSource), 'entitlement refresh awaits the injected BoardStore on the main actor');
 
-const sceneActive = appSource => appSource.includes('if phase == .active {')
-  && appSource.includes('WebViewCoordinatorBridge.shared.refreshBoardEntitlement()');
+const sceneActive = appSource => appSource.includes('guard phase == .active else { return }')
+  && appSource.includes('Task { await boardStore.refresh() }');
 assert(sceneActive(fs.readFileSync(process.argv[4], 'utf8')), 'active scenes refresh board entitlements');
 
 function extractArrowBody(source, marker) {

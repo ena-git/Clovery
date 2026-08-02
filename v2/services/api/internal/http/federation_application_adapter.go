@@ -2,6 +2,8 @@ package httpapi
 
 import (
 	"context"
+	"strings"
+	"time"
 
 	"github.com/clovery/clovery/services/api/internal/application/identityflow"
 )
@@ -11,7 +13,7 @@ type federatedFlowApplication interface {
 	CompleteFederatedLogin(
 		ctx context.Context,
 		command identityflow.FederatedLoginCommand,
-	) (identityflow.SessionResult, error)
+	) (identityflow.FederatedCompletion, error)
 	StartBinding(ctx context.Context, accessToken string, provider string) (identityflow.FederationIntent, error)
 	CompleteBinding(ctx context.Context, command identityflow.FederatedBindingCommand) error
 	Unbind(ctx context.Context, accessToken string, provider string) error
@@ -44,15 +46,48 @@ func (adapter *federatedApplicationAdapter) StartFederatedLogin(
 func (adapter *federatedApplicationAdapter) CompleteFederatedLogin(
 	ctx context.Context,
 	command FederatedLoginHTTPCommand,
-) (AuthSession, error) {
-	session, err := adapter.flow.CompleteFederatedLogin(ctx, identityflow.FederatedLoginCommand{
+) (FederatedHTTPCompletion, error) {
+	completion, err := adapter.flow.CompleteFederatedLogin(ctx, identityflow.FederatedLoginCommand{
 		IntentID:          command.IntentID,
 		Provider:          command.Provider,
 		AuthorizationCode: command.AuthorizationCode,
 		Nonce:             command.Nonce,
 		Device:            identityflowDevice(command.Device),
 	})
-	return authSessionFromIdentityFlow(session), err
+	if err != nil {
+		return FederatedHTTPCompletion{}, err
+	}
+	if (completion.Session == nil) == (completion.Claim == nil) {
+		return FederatedHTTPCompletion{}, errInvalidFederatedCompletion
+	}
+	if completion.Session != nil {
+		session := authSessionFromIdentityFlow(*completion.Session)
+		return FederatedHTTPCompletion{Session: &session}, nil
+	}
+	issued := &completion.Claim.Issued
+	provider := strings.ToLower(strings.TrimSpace(command.Provider))
+	if !supportedFederatedClaimProvider(issued.Provider) ||
+		issued.Provider != provider || issued.ExpiresIn != 10*time.Minute {
+		return FederatedHTTPCompletion{}, errInvalidIdentityClaimMetadata
+	}
+	rawToken, ok := issued.TakeToken()
+	if !ok || rawToken == "" {
+		return FederatedHTTPCompletion{}, errIdentityClaimTokenUnavailable
+	}
+	return FederatedHTTPCompletion{Claim: newIdentityClaimHTTPResult(
+		issued.Provider,
+		int(issued.ExpiresIn.Seconds()),
+		rawToken,
+	)}, nil
+}
+
+func supportedFederatedClaimProvider(provider string) bool {
+	switch provider {
+	case "apple", "google", "huawei":
+		return true
+	default:
+		return false
+	}
 }
 
 func (adapter *federatedApplicationAdapter) StartBinding(

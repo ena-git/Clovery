@@ -14,13 +14,38 @@ final class WebBridgeContractTests: XCTestCase {
 
         for handler in [
             "photoSave", "photoLoad", "photoGC", "icloud", "cloudkit", "migrationExport",
-            "openAppSettings"
+            "openAppSettings", "accountSecurity"
         ] {
             XCTAssertTrue(
                 webViewSource.contains("config.userContentController.add(context.coordinator, name: \"\(handler)\")"),
                 "Missing registered handler: \(handler)"
             )
         }
+    }
+
+    func testSettingsRoutesAccountSecurityToNativeSheet() throws {
+        let webViewSource = try source("Clovery/WebView.swift")
+        let rootSource = try source("Clovery/Application/ApplicationRootView.swift")
+        let html = try source("Clovery/Clover Diary.html")
+
+        XCTAssertTrue(webViewSource.contains("message.name == \"accountSecurity\""))
+        XCTAssertTrue(webViewSource.contains("onAccountSecurity()"))
+        XCTAssertTrue(rootSource.contains("AccountSecurityView("))
+        XCTAssertTrue(html.contains("账户与安全"))
+        XCTAssertTrue(html.contains("messageHandlers?.accountSecurity?.postMessage"))
+    }
+
+    @MainActor
+    func testAccountSecurityHandlerForwardsOnce() {
+        var callCount = 0
+        let coordinator = WebView.Coordinator(
+            boardStore: makeTestBoardStore(),
+            onAccountSecurity: { callCount += 1 }
+        )
+
+        coordinator.handleAccountSecurity()
+
+        XCTAssertEqual(callCount, 1)
     }
 
     func testPhotoCallbacksUseStructuredBridgeJavaScript() throws {
@@ -31,7 +56,8 @@ final class WebBridgeContractTests: XCTestCase {
         XCTAssertTrue(webViewSource.contains("BridgeJavaScript.photoSaveFailed(filename: filename, code: code)"))
         XCTAssertTrue(bridgeSource.contains("window.__cloveryPhotoLoaded"))
         XCTAssertTrue(bridgeSource.contains("window.__cloveryPhotoSaveFailed"))
-        XCTAssertTrue(bridgeSource.contains("JSONSerialization.data(withJSONObject:"))
+        XCTAssertTrue(bridgeSource.contains("withJSONObject: payload"))
+        XCTAssertTrue(bridgeSource.contains("options: [.sortedKeys, .withoutEscapingSlashes]"))
     }
 
     func testHTMLRollsBackFailedPhotoAndOffersLoadRetry() throws {
@@ -54,9 +80,13 @@ final class WebBridgeContractTests: XCTestCase {
         XCTAssertFalse(webViewSource.contains("PHPhotoLibrary.shared().performChanges"))
     }
 
+    @MainActor
     func testOpenAppSettingsRoutesToImageExporter() {
         let imageExporter = ImageExportingSpy()
-        let coordinator = WebView.Coordinator(imageExporter: imageExporter)
+        let coordinator = WebView.Coordinator(
+            imageExporter: imageExporter,
+            boardStore: makeTestBoardStore()
+        )
 
         coordinator.handleOpenAppSettings()
 
@@ -93,16 +123,41 @@ final class WebBridgeContractTests: XCTestCase {
         XCTAssertTrue(html.contains("deletedIDs: localStorage.getItem('clovery_deleted_ids') || '[]'"))
     }
 
+    func testLegacyCollectionIsExtractedFromWebViewAndUsesPersistentWebDataStore() throws {
+        let webViewSource = try source("Clovery/WebView.swift")
+        let readerSource = try source(
+            "Clovery/Features/Migration/Data/LegacySnapshotReader.swift"
+        )
+
+        XCTAssertFalse(webViewSource.contains("func mergeEntriesJSON"))
+        XCTAssertTrue(webViewSource.contains("LegacySnapshotSources("))
+        XCTAssertTrue(readerSource.contains("configuration.websiteDataStore = .default()"))
+        XCTAssertFalse(readerSource.contains("print("))
+    }
+
     func testBoardEntitlementLifecycleAndRestoreFeedbackContract() throws {
         let webViewSource = try source("Clovery/WebView.swift")
-        let appSource = try source("Clovery/CloveryApp.swift")
+        let rootSource = try source("Clovery/Application/ApplicationRootView.swift")
         let html = try source("Clovery/Clover Diary.html")
 
         XCTAssertTrue(webViewSource.contains("startObservingBoardStore()"))
-        XCTAssertTrue(appSource.contains("refreshBoardEntitlement()"))
+        XCTAssertTrue(rootSource.contains("await boardStore.refresh()"))
+        XCTAssertTrue(rootSource.contains("refreshAccountVault()"))
         XCTAssertTrue(html.contains("window._boardRestoreResult = (outcome) =>"))
         XCTAssertTrue(html.contains("购买请求正在等待批准"))
         XCTAssertTrue(html.contains("没有找到可恢复的购买记录"))
+    }
+
+    func testAccountVaultModeKeepsLegacyCloudAsReadOnlyRecoveryEvidence() throws {
+        let webViewSource = try source("Clovery/WebView.swift")
+        let html = try source("Clovery/Clover Diary.html")
+
+        XCTAssertTrue(webViewSource.contains("case accountVault"))
+        XCTAssertTrue(webViewSource.contains("guard syncMode == .legacyCloud else"))
+        XCTAssertTrue(webViewSource.contains("VaultDiarySnapshot("))
+        XCTAssertTrue(html.contains("window.__cloverySyncMode === 'accountVault'"))
+        XCTAssertTrue(html.contains("deleted_ids: localStorage.getItem('clovery_deleted_ids') || '[]'"))
+        XCTAssertTrue(html.contains("window.crypto?.randomUUID?.()"))
     }
 
     private func source(_ relativePath: String) throws -> String {
