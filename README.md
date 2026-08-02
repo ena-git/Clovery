@@ -5,11 +5,11 @@ Clovery 是一款记录日常幸运瞬间的日记应用。仓库包含已上架
 ## 公开查看与下载
 
 - GitHub 仓库：<https://github.com/ena-git/Clovery>
-- 当前完整开发分支：<https://github.com/ena-git/Clovery/tree/codex/swift-auth-foundation>
-- 当前分支 ZIP：<https://github.com/ena-git/Clovery/archive/refs/heads/codex/swift-auth-foundation.zip>
-- Git 克隆：`git clone --branch codex/swift-auth-foundation --single-branch https://github.com/ena-git/Clovery.git`
+- 当前完整开发分支：<https://github.com/ena-git/Clovery/tree/release/ios-1.1.0>
+- 当前分支 ZIP：<https://github.com/ena-git/Clovery/archive/refs/heads/release/ios-1.1.0.zip>
+- Git 克隆：`git clone --branch release/ios-1.1.0 --single-branch https://github.com/ena-git/Clovery.git`
 
-> 当前默认分支 `main` 保留已发布基线。完整升级代码位于 `codex/swift-auth-foundation`，在真机、Sandbox、TestFlight 和 App Store Connect 门禁全部通过前不会误标为正式 Release。
+> 当前默认分支 `main` 保留已发布基线。完整升级代码位于 `release/ios-1.1.0`，在真机、Sandbox、TestFlight 和 App Store Connect 门禁全部通过前不会误标为正式 Release。
 
 ## 当前状态
 

@@ -5,11 +5,11 @@
 推荐克隆当前完整开发分支：
 
 ```bash
-git clone --branch codex/swift-auth-foundation --single-branch https://github.com/ena-git/Clovery.git
+git clone --branch release/ios-1.1.0 --single-branch https://github.com/ena-git/Clovery.git
 cd Clovery
 ```
 
-不使用 Git 时可下载：<https://github.com/ena-git/Clovery/archive/refs/heads/codex/swift-auth-foundation.zip>
+不使用 Git 时可下载：<https://github.com/ena-git/Clovery/archive/refs/heads/release/ios-1.1.0.zip>
 
 ## 2. 开发依赖
 

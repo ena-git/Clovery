@@ -836,7 +836,7 @@ Never record passwords, tokens, recovery codes, authorization codes, diary text,
 ```bash
 git add Clovery CloveryTests Config Clovery.xcodeproj/project.pbxproj docs/superpowers/plans
 git commit -m "feat: complete native Swift authentication flow"
-git push -u origin codex/swift-auth-foundation
+git push -u origin release/ios-1.1.0
 ```
 
 ## Acceptance Checklist
@@ -851,5 +851,5 @@ git push -u origin codex/swift-auth-foundation
 - [ ] Existing users see the main diary first, then the update notice and binding prompt.
 - [ ] Dismissal, logout, provider failure, or binding failure never deletes legacy data.
 - [ ] Existing V1 bridge, photo export, StoreKit, CloudKit, migration, and release tests remain green.
-- [ ] The implementation is pushed to `codex/swift-auth-foundation`.
+- [ ] The implementation is pushed to `release/ios-1.1.0`.
 - [ ] Real-device testing remains the next gate before Flutter work begins.

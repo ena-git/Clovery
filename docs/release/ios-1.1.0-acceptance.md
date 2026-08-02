@@ -3,7 +3,7 @@
 **发布类型：** 已上架 iOS 应用升级  
 **生产基线：** `1.0.3 (14)`  
 **候选版本：** `1.1.0 (15)`  
-**候选分支：** `codex/swift-auth-foundation`  
+**候选分支：** `release/ios-1.1.0`
 **外部验收准备节点：** `2b85ea9`
 **模拟器验收节点：** `57b830e`
 **总体状态：** `BLOCKED — 自动化与模拟器已通过，等待真实预发、真机、Sandbox、TestFlight 与 App Store Connect 验收`

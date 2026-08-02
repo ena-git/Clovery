@@ -706,7 +706,7 @@ The verification document must include:
 ```bash
 git add docs/superpowers/verification/2026-07-19-w7-identity-claim-backend.md
 git commit -m "test(auth): verify identity claim workflow"
-git push origin codex/swift-auth-foundation
+git push origin release/ios-1.1.0
 ```
 
 Expected: the remote branch contains all W7 commits and the working tree is clean.

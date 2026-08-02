@@ -2,7 +2,7 @@
 
 - 候选版本：iOS `1.1.0 (15)`
 - 已发布基线：iOS `1.0.3 (14)`
-- 候选分支：`codex/swift-auth-foundation`
+- 候选分支：`release/ios-1.1.0`
 **结论：** 代码与本地发布候选门禁可供审查；外部发布门禁未全部执行，暂不创建正式 GitHub Release，也不提交 App Store 审核。
 
 ## 1. 已完成

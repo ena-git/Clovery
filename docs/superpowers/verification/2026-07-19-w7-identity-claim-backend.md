@@ -1,8 +1,8 @@
 # W7 Identity Claim Backend 验收记录
 
-- 验收分支：`codex/swift-auth-foundation`
+- 验收分支：`release/ios-1.1.0`
 - 验收提交：`9b45ccd` (`feat(account): add resumable bootstrap state`)
-- 远程备份：`origin/codex/swift-auth-foundation` 已推送
+- 远程备份：`origin/release/ios-1.1.0` 已推送
 - 数据库环境：本机 PostgreSQL 16，使用测试临时 schema；Docker PostgreSQL 不作为本次前置条件
 
 ## 迁移与回滚

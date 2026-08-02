@@ -1147,7 +1147,7 @@ The verification document must include:
 ```bash
 git add docs/superpowers/verification/2026-07-19-w9-ios-account-bootstrap.md
 git commit -m "test(ios): verify account bootstrap flow"
-git push origin codex/swift-auth-foundation
+git push origin release/ios-1.1.0
 ```
 
 Expected: remote branch contains W9 and the working tree is clean.

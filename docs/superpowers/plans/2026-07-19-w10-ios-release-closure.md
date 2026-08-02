@@ -766,7 +766,7 @@ git commit -m "test(storekit): accept account entitlements"
 
 - [ ] **Step 1: Merge through a reviewed pull request**
 
-Ensure branch is current with the protected release branch, CI is green, W7-W10 evidence is complete, and no secrets/build output are staged. Create a non-draft PR from `codex/swift-auth-foundation`, obtain review, and merge without rewriting published history.
+Ensure branch is current with the protected release branch, CI is green, W7-W10 evidence is complete, and no secrets/build output are staged. Create a non-draft PR from `release/ios-1.1.0`, obtain review, and merge without rewriting published history.
 
 - [ ] **Step 2: Take final production database backup**
 

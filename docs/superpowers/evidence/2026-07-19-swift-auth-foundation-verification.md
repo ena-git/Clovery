@@ -4,7 +4,7 @@ Date: 2026-07-19
 
 ## Implementation
 
-- Branch: `codex/swift-auth-foundation`
+- Branch: `release/ios-1.1.0`
 - Implementation commits: `3508bf8`, `badd688`, `3342105`, `8a8afb6`, `9d59fa7`, `79fbe7e`
 - Reference screen size: 402 × 874
 
