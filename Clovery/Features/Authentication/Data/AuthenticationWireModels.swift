@@ -3,13 +3,11 @@ import Foundation
 struct RegisterRequest: Encodable {
     let loginID: String
     let password: String
-    let recoveryMethod: String
     let device: DeviceRegistration
 
     enum CodingKeys: String, CodingKey {
         case loginID = "login_id"
         case password
-        case recoveryMethod = "recovery_method"
         case device
     }
 }

@@ -24,17 +24,20 @@ struct WebView: UIViewRepresentable {
     private let fontStore: AppFontStore?
     private let vaultContext: AccountVaultWebContext?
     private let onAccountSecurity: () -> Void
+    private let onOpenTrash: () -> Void
 
     init(
         boardStore: BoardStore,
         fontStore: AppFontStore? = nil,
         vaultContext: AccountVaultWebContext? = nil,
-        onAccountSecurity: @escaping () -> Void = {}
+        onAccountSecurity: @escaping () -> Void = {},
+        onOpenTrash: @escaping () -> Void = {}
     ) {
         self.boardStore = boardStore
         self.fontStore = fontStore
         self.vaultContext = vaultContext
         self.onAccountSecurity = onAccountSecurity
+        self.onOpenTrash = onOpenTrash
     }
 
     // MARK: – Message handler (haptic + notifications + iCloud)
@@ -62,6 +65,8 @@ struct WebView: UIViewRepresentable {
         private let fontStore: AppFontStore?
         private let vaultContext: AccountVaultWebContext?
         private let onAccountSecurity: () -> Void
+        private let onOpenTrash: () -> Void
+        private(set) var trashStore: DiaryTrashStore?
         private var vaultSyncTask: Task<Void, Never>?
 #if DEBUG
         private var isVerificationFixture: Bool {
@@ -85,7 +90,8 @@ struct WebView: UIViewRepresentable {
             boardStore: BoardStore,
             fontStore: AppFontStore? = nil,
             vaultContext: AccountVaultWebContext? = nil,
-            onAccountSecurity: @escaping () -> Void = {}
+            onAccountSecurity: @escaping () -> Void = {},
+            onOpenTrash: @escaping () -> Void = {}
         ) {
             self.photoStore = photoStore
             self.imageExporter = imageExporter
@@ -93,6 +99,8 @@ struct WebView: UIViewRepresentable {
             self.fontStore = fontStore
             self.vaultContext = vaultContext
             self.onAccountSecurity = onAccountSecurity
+            self.onOpenTrash = onOpenTrash
+            self.trashStore = vaultContext.map { DiaryTrashStore(accountDirectory: $0.accountDirectory) }
             super.init()
         }
 
@@ -152,6 +160,15 @@ struct WebView: UIViewRepresentable {
                 guard let body = message.body as? [String: Any],
                       let action = body["action"] as? String else { return }
                 DispatchQueue.main.async { self.handleNotification(action: action, payload: body) }
+            } else if message.name == "themeMode" {
+                #if targetEnvironment(macCatalyst)
+                let mode = (message.body as? [String: Any])?["mode"] as? String
+                DispatchQueue.main.async {
+                    let style: UIUserInterfaceStyle = mode == "dark" ? .dark : (mode == "light" ? .light : .unspecified)
+                    UIApplication.shared.connectedScenes.compactMap { $0 as? UIWindowScene }
+                        .flatMap { $0.windows }.forEach { $0.overrideUserInterfaceStyle = style }
+                }
+                #endif
             } else if message.name == "review" {
                 DispatchQueue.main.async { self.requestAppReview() }
             } else if message.name == "icloud" {
@@ -160,6 +177,9 @@ struct WebView: UIViewRepresentable {
                 if action == "save" {
                     // Save immediately (not async) to ensure data persists before app could be killed
                     self.saveBridgePayload(body)
+                } else if action == "watchReady" {
+                    // The web app just registered its Apple Watch hook; hand over anything queued.
+                    WatchBridge.shared.flushPending()
                 }
             } else if message.name == "shareImage" {
                 guard let body = message.body as? [String: Any],
@@ -172,6 +192,9 @@ struct WebView: UIViewRepresentable {
                 handleOpenAppSettings()
             } else if message.name == "accountSecurity" {
                 DispatchQueue.main.async { self.handleAccountSecurity() }
+            } else if message.name == "openTrash" {
+                guard trashStore != nil else { return }
+                DispatchQueue.main.async { self.onOpenTrash() }
             } else if message.name == "checkBoardUnlocked" {
                 Task { @MainActor in
                     await self.boardStore.refresh()
@@ -214,6 +237,12 @@ struct WebView: UIViewRepresentable {
                       let reqId = body["reqId"] as? String,
                       let filename = body["filename"] as? String else { return }
                 loadPhoto(reqId: reqId, filename: filename)
+            } else if message.name == "photoDownload" {
+                guard let body = message.body as? [String: Any],
+                      let dataURL = body["dataURL"] as? String else { return }
+                imageExporter.handle(action: "save", dataURL: dataURL) { [weak self] outcome in
+                    self?.reportPhotoDownload(outcome)
+                }
             } else if message.name == "photoGC" {
                 guard let body = message.body as? [String: Any],
                       let keep = body["keep"] as? [String] else { return }
@@ -265,6 +294,13 @@ struct WebView: UIViewRepresentable {
 
         // MARK: WKNavigationDelegate
         func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {
+            // The React app mounts a moment after the page loads; retry a few times for watch entries.
+            for delay in [1.5, 4.0, 9.0] {
+                DispatchQueue.main.asyncAfter(deadline: .now() + delay) { WatchBridge.shared.flushPending() }
+            }
+            #if DEBUG
+            if vaultContext == nil { return }
+            #endif
             guard syncMode == .legacyCloud else {
                 refreshAccountVault()
                 return
@@ -277,10 +313,12 @@ struct WebView: UIViewRepresentable {
         }
 
         func webView(_ webView: WKWebView, didFail navigation: WKNavigation!, withError error: Error) {
+            print("[Clovery] didFail: \(error)")
             showLoadError(error, in: webView)
         }
 
         func webView(_ webView: WKWebView, didFailProvisionalNavigation navigation: WKNavigation!, withError error: Error) {
+            print("[Clovery] didFailProvisional: \(error)")
             showLoadError(error, in: webView)
         }
 
@@ -393,6 +431,15 @@ struct WebView: UIViewRepresentable {
             DispatchQueue.main.async { [weak self] in
                 self?.webView?.evaluateJavaScript(
                     BridgeJavaScript.photoSaveResult(outcome),
+                    completionHandler: nil
+                )
+            }
+        }
+
+        private func reportPhotoDownload(_ outcome: PhotoSaveOutcome) {
+            DispatchQueue.main.async { [weak self] in
+                self?.webView?.evaluateJavaScript(
+                    BridgeJavaScript.photoDownloadResult(outcome),
                     completionHandler: nil
                 )
             }
@@ -602,6 +649,26 @@ struct WebView: UIViewRepresentable {
             let deletedIDs = deletedIDsJSON.data(using: .utf8).flatMap {
                 try? JSONDecoder().decode([String].self, from: $0)
             } ?? []
+
+            // Detect newly deleted entries and save to trash before overwriting
+            if let store = trashStore,
+               let previousSnapshot = try? vaultContext.localStore.load() {
+                let previousByID = Dictionary(
+                    previousSnapshot.entries.compactMap { entry -> (String, [String: JSONValue])? in
+                        guard let id = entry.stringValue(for: "id") else { return nil }
+                        return (id, entry)
+                    },
+                    uniquingKeysWith: { first, _ in first }
+                )
+                let previousDeletedSet = Set(previousSnapshot.deletedIDs)
+                let newDeletedSet = Set(deletedIDs)
+                for id in newDeletedSet.subtracting(previousDeletedSet) {
+                    if let entry = previousByID[id] {
+                        store.add(entry)
+                    }
+                }
+            }
+
             let snapshot = VaultDiarySnapshot(
                 entries: entries,
                 deletedIDs: deletedIDs,
@@ -706,11 +773,17 @@ struct WebView: UIViewRepresentable {
                 if let lang = payload["widget_lang"] as? String {
                     shared.set(lang, forKey: "widget_lang")
                 }
+                if let dark = payload["widget_dark"] as? String {
+                    shared.set(dark, forKey: "widget_dark")
+                }
                 // Notify WidgetKit to refresh
                 DispatchQueue.main.async {
                     WidgetCenter.shared.reloadAllTimelines()
                 }
             }
+            // Keep the Apple Watch app in sync, and hand over anything written on the watch.
+            WatchBridge.shared.push(payload: payload)
+            WatchBridge.shared.flushPending()
         }
 
         func refreshAccountVault() {
@@ -737,6 +810,11 @@ struct WebView: UIViewRepresentable {
         }
 
         func accountVaultBootstrapScript() -> String? {
+            #if DEBUG
+            if vaultContext == nil {
+                return nil
+            }
+            #endif
             guard let vaultContext,
                   let snapshot = try? vaultContext.localStore.load() else {
                 return nil
@@ -905,7 +983,8 @@ struct WebView: UIViewRepresentable {
             boardStore: boardStore,
             fontStore: fontStore,
             vaultContext: vaultContext,
-            onAccountSecurity: onAccountSecurity
+            onAccountSecurity: onAccountSecurity,
+            onOpenTrash: onOpenTrash
         )
     }
 
@@ -928,20 +1007,26 @@ struct WebView: UIViewRepresentable {
             config.userContentController.add(context.coordinator, name: "notifications")
         }
         config.userContentController.add(context.coordinator, name: "review")
+        config.userContentController.add(context.coordinator, name: "themeMode")
         config.userContentController.add(context.coordinator, name: "icloud")
         config.userContentController.add(context.coordinator, name: "shareImage")
         config.userContentController.add(context.coordinator, name: "openAppSettings")
         config.userContentController.add(context.coordinator, name: "accountSecurity")
+        config.userContentController.add(context.coordinator, name: "openTrash")
         config.userContentController.add(context.coordinator, name: "checkBoardUnlocked")
         config.userContentController.add(context.coordinator, name: "purchaseBoard")
         config.userContentController.add(context.coordinator, name: "fetchBoardPrice")
         config.userContentController.add(context.coordinator, name: "restorePurchases")
         config.userContentController.add(context.coordinator, name: "photoSave")
         config.userContentController.add(context.coordinator, name: "photoLoad")
+        config.userContentController.add(context.coordinator, name: "photoDownload")
         config.userContentController.add(context.coordinator, name: "photoGC")
         config.userContentController.add(context.coordinator, name: "migrationExport")
         config.userContentController.add(context.coordinator, name: "cloudkit")
         config.userContentController.add(context.coordinator, name: "boardProtect")
+
+        // iPad defaults to desktop mode, which ignores the viewport meta tag.
+        config.defaultWebpagePreferences.preferredContentMode = .mobile
 
         let webView = WKWebView(frame: .zero, configuration: config)
         webView.navigationDelegate = context.coordinator
@@ -958,7 +1043,15 @@ struct WebView: UIViewRepresentable {
         // (avoids the white flash before React finishes rendering).
         webView.isOpaque = true
         // Match app background colour #DDD7C9
+#if targetEnvironment(macCatalyst)
+        webView.backgroundColor = UIColor { traits in
+            traits.userInterfaceStyle == .dark
+                ? UIColor(red: 15/255, green: 20/255, blue: 16/255, alpha: 1)
+                : UIColor(red: 221/255, green: 215/255, blue: 201/255, alpha: 1)
+        }
+#else
         webView.backgroundColor = UIColor(red: 221/255, green: 215/255, blue: 201/255, alpha: 1)
+#endif
 
         // Wire up iCloud sync
         context.coordinator.webView = webView
@@ -969,8 +1062,10 @@ struct WebView: UIViewRepresentable {
         WebViewCoordinatorBridge.shared.coordinator = context.coordinator
 
         if let url = Bundle.main.url(forResource: "Clover Diary", withExtension: "html") {
+            print("[Clovery] Loading HTML from: \(url.path)")
             webView.loadFileURL(url, allowingReadAccessTo: url.deletingLastPathComponent())
         } else {
+            print("[Clovery] ERROR: Clover Diary.html not found in bundle!")
             let html = Coordinator.errorHTML(
                 title: "Clovery could not load",
                 message: "Clover Diary.html was not found in the app bundle."
@@ -1004,5 +1099,15 @@ class WebViewCoordinatorBridge {
 
     func refreshAccountVault() {
         coordinator?.refreshAccountVault()
+    }
+
+    var trashStore: DiaryTrashStore? { coordinator?.trashStore }
+
+    func restoreTrashEntry(_ entry: [String: JSONValue]) {
+        guard let webView = coordinator?.webView else { return }
+        let script = BridgeJavaScript.restoreTrashEntry(entry)
+        DispatchQueue.main.async {
+            webView.evaluateJavaScript(script, completionHandler: nil)
+        }
     }
 }

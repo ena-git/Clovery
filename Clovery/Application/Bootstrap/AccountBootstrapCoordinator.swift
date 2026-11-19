@@ -265,6 +265,15 @@ final class AccountBootstrapCoordinator: ObservableObject {
     }
 }
 
+#if DEBUG
+extension AccountBootstrapCoordinator {
+    func skipAuthForDebug() {
+        cancelCurrentOperation()
+        route = .diary(accountID: "debug-preview", vaultID: "debug-preview")
+    }
+}
+#endif
+
 private enum BootstrapCoordinatorError: Error {
     case accountMismatch
 }

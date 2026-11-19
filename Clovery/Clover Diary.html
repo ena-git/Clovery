@@ -4,6 +4,31 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, viewport-fit=cover" />
+<script>
+// iPad / Mac: scale the whole UI uniformly (iPhone design = 390 x 844). A transform scale on the
+// root is exact; CSS zoom double-applies to grid/aspect-ratio children. Very wide windows keep a
+// capped content width, centered.
+(function(){
+  var MAX_CSS_W=900;
+  function apply(){
+    var de=document.documentElement,st=de.style;
+    st.transform='';st.width='';st.height='';
+    var w=window.innerWidth,h=window.innerHeight;
+    if(w<500) return;
+    var z=Math.max(1,Math.min(w/390,h/844));
+    var cssW=Math.min(w/z,MAX_CSS_W);
+    var left=(w-cssW*z)/2;
+    st.transformOrigin='0 0';
+    st.width=cssW+'px';
+    st.height=(h/z)+'px';
+    st.transform='translateX('+left+'px) scale('+z+')';
+    st.overflow='hidden';
+  }
+  apply();
+  window.addEventListener('orientationchange',function(){setTimeout(apply,300);});
+  window.addEventListener('resize',function(){ if(window.__scaleBusy) return; window.__scaleBusy=true; setTimeout(function(){window.__scaleBusy=false;apply();},60); });
+})();
+</script>
 <title>Clovery</title>
 <style>
   @font-face {
@@ -64,6 +89,14 @@
       -webkit-user-select: text !important; user-select: text !important;
       -webkit-touch-callout: default !important; }
   textarea, input { -webkit-user-select: text; user-select: text; }
+  /* Unfocused contentEditable divs should NOT get iOS's expanded tap target —
+     the expansion (65-100pt in every direction) blocks nearby SpringTap chips.
+     Removing user-select:text when not focused tells WKWebView not to treat the
+     element as a text-editing hit target, keeping its tap area at visual bounds. */
+  div[contenteditable]:not(:focus) {
+    -webkit-user-select: none !important;
+    user-select: none !important;
+  }
 
 </style>
 </head>
@@ -1085,6 +1118,7 @@ const IRENE_EXCITED_SRC = IRENE_CHEER_SRC;
   to { transform: translateY(100%); }
 }
 @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+@keyframes dialogPop { from { opacity:0; transform:scale(0.92); } to { opacity:1; transform:scale(1); } }
 @keyframes lbSlideLeft  { from { transform:translateX(80px);  opacity:0; } to { transform:translateX(0); opacity:1; } }
 @keyframes lbSlideRight { from { transform:translateX(-80px); opacity:0; } to { transform:translateX(0); opacity:1; } }
 @keyframes pageFoldIn {
@@ -1131,6 +1165,38 @@ const IRENE_EXCITED_SRC = IRENE_CHEER_SRC;
   0%   { transform: scale(0.82) translateY(4px); opacity: 0; }
   70%  { transform: scale(1.04) translateY(-1px); opacity: 1; }
   100% { transform: scale(1) translateY(0); opacity: 1; }
+}
+@keyframes seasonSlideIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes bookPageIn {
+  0%   { opacity: 0; transform: perspective(800px) rotateY(-60deg) scale(0.95); transform-origin: left center; }
+  100% { opacity: 1; transform: perspective(800px) rotateY(0deg) scale(1); transform-origin: left center; }
+}
+@keyframes bookPageInRev {
+  0%   { opacity: 0; transform: perspective(800px) rotateY(60deg) scale(0.95); transform-origin: right center; }
+  100% { opacity: 1; transform: perspective(800px) rotateY(0deg) scale(1); transform-origin: right center; }
+}
+@keyframes flipOutLeft {
+  0%   { transform: perspective(1400px) rotateY(0deg);    transform-origin: left center; opacity: 1; }
+  40%  { transform: perspective(1400px) rotateY(-90deg);  transform-origin: left center; opacity: 0.6; }
+  100% { transform: perspective(1400px) rotateY(-180deg); transform-origin: left center; opacity: 0; }
+}
+@keyframes flipInRight {
+  0%   { transform: perspective(1400px) rotateY(180deg);  transform-origin: right center; opacity: 0; }
+  60%  { transform: perspective(1400px) rotateY(90deg);   transform-origin: right center; opacity: 0.6; }
+  100% { transform: perspective(1400px) rotateY(0deg);    transform-origin: right center; opacity: 1; }
+}
+@keyframes flipOutRight {
+  0%   { transform: perspective(1400px) rotateY(0deg);   transform-origin: right center; opacity: 1; }
+  40%  { transform: perspective(1400px) rotateY(90deg);  transform-origin: right center; opacity: 0.6; }
+  100% { transform: perspective(1400px) rotateY(180deg); transform-origin: right center; opacity: 0; }
+}
+@keyframes flipInLeft {
+  0%   { transform: perspective(1400px) rotateY(-180deg); transform-origin: left center; opacity: 0; }
+  60%  { transform: perspective(1400px) rotateY(-90deg);  transform-origin: left center; opacity: 0.6; }
+  100% { transform: perspective(1400px) rotateY(0deg);    transform-origin: left center; opacity: 1; }
 }
 
 .springable { transition: transform 280ms cubic-bezier(0.34, 1.56, 0.64, 1); }
@@ -1341,6 +1407,20 @@ const PALETTES = {
     goldSoft: '#EFDFB4',
     divider: 'rgba(44,36,24,0.10)',
   },
+  zhimo: {
+    name: '纸墨',
+    bg: '#F5F5F0',
+    paper: '#FFFFFF',
+    ink: '#111111',
+    inkSoft: '#444444',
+    inkMuted: '#888888',
+    accent: '#111111',
+    accentDark: '#000000',
+    accentSoft: '#E8E8E8',
+    gold: '#888888',
+    goldSoft: '#E0E0E0',
+    divider: 'rgba(0,0,0,0.10)',
+  },
 };
 
 const DARK_PALETTES = {
@@ -1367,6 +1447,12 @@ const DARK_PALETTES = {
     ink: '#EAE2D0', inkSoft: '#B0A484', inkMuted: '#7A6E50',
     accent: '#8C9A50', accentDark: '#70803A', accentSoft: '#242218',
     gold: '#D0A840', goldSoft: '#3A3018', divider: 'rgba(255,255,255,0.08)',
+  },
+  zhimo: {
+    name: '纸墨', bg: '#0A0A0A', paper: '#141414', _dark: true,
+    ink: '#F0F0F0', inkSoft: '#AAAAAA', inkMuted: '#666666',
+    accent: '#E8E8E8', accentDark: '#FFFFFF', accentSoft: '#2A2A2A',
+    gold: '#AAAAAA', goldSoft: '#2A2A2A', divider: 'rgba(255,255,255,0.10)',
   },
 };
 const DARK_PALETTE = DARK_PALETTES.clover;
@@ -1595,20 +1681,23 @@ const SFX = (() => {
   }
 
   return {
-    // 通用轻触 — 非常轻微，几乎像触觉反馈
-    tap:    () => simple(960, 680, 0.058, 0.020),
+    // 通用轻触 — 像木块轻叩，干净清脆
+    tap:    () => simple(1040, 710, 0.042, 0.016),
 
-    // Tab 切换 — 清脆的"咔"
-    tab:    () => simple(1150, 820, 0.065, 0.042, 'triangle'),
+    // Tab 切换 — 明亮清脆
+    tab:    () => simple(1180, 840, 0.058, 0.038, 'triangle'),
 
-    // 返回/关闭 — 低沉短促
-    back:   () => simple(640, 390, 0.085, 0.032),
+    // 返回/关闭 — 低沉短促，干净收尾
+    back:   () => simple(560, 320, 0.068, 0.026),
 
-    // 打开 / 展开 — 向上扫
-    open:   () => simple(580, 920, 0.065, 0.030),
+    // 打开 / 展开 — 宽幅向上扫，轻盈
+    open:   () => simple(460, 1080, 0.088, 0.026),
 
-    // 四叶草 pop — 短促弹性
-    pop: () => simple(820, 500, 0.085, 0.052),
+    // 年份/月份选择 — 单一清脆音符
+    select: () => simple(1120, 1200, 0.048, 0.022),
+
+    // 四叶草 pop — 加入八度泛音，更有弹性
+    pop: () => { simple(830, 490, 0.082, 0.042); simple(1660, 980, 0.062, 0.014); },
 
     // 四叶草生长 — 轻柔从草丛冒出
     sprout: (delay = 0) => {
@@ -1663,25 +1752,41 @@ const Haptic = (() => {
   };
 })();
 
-// SpringTap — sfx prop selects which sound plays on pointerDown
-// sfx=null  → silent   sfx='tap' (default) → subtle tap
+// HTML-escape helper used by contentEditable fields
+const escHtml = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+
+// SpringTap — uses onTouchStart for immediate press feedback and onClick for the
+// action. onClick fires AFTER iOS's UIScrollView releases the touch (once it
+// decides the gesture was a tap, not a scroll), so this works inside any
+// overflowY:'auto' scroll container — unlike onPointerDown/Up which are
+// swallowed by UIScrollView before JavaScript ever sees them.
+// sfx=null → silent   sfx='tap' (default) → subtle tap
 function SpringTap({ onClick, children, style, scale = 0.94, sfx = 'tap', ...rest }) {
   const [pressed, setPressed] = React.useState(false);
-  const handleDown = React.useCallback(() => {
+  const handleTouchStart = React.useCallback(() => {
     setPressed(true);
     if (sfx && SFX[sfx]) SFX[sfx]();
   }, [sfx]);
+  const handleMouseDown = React.useCallback(() => { setPressed(true); }, []);
+  const handleMouseUp   = React.useCallback(() => { setPressed(false); }, []);
+  const handleClick = React.useCallback((e) => {
+    if (onClick) onClick(e);
+  }, [onClick]);
   return (
     <div
-      onPointerDown={handleDown}
-      onPointerUp={() => setPressed(false)}
+      onTouchStart={handleTouchStart}
+      onTouchEnd={() => setPressed(false)}
+      onTouchCancel={() => setPressed(false)}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
       onPointerLeave={() => setPressed(false)}
-      onClick={onClick}
+      onClick={handleClick}
       style={{
         cursor: 'pointer',
         WebkitTapHighlightColor: 'transparent',
         outline: 'none',
-        transition: 'transform 240ms cubic-bezier(0.34, 1.56, 0.64, 1)',
+        touchAction: 'manipulation',
+        transition: 'transform 220ms cubic-bezier(0.34, 1.56, 0.64, 1)',
         transform: pressed ? `scale(${scale})` : 'scale(1)',
         ...style,
       }}
@@ -1756,6 +1861,10 @@ const I18N = {
     stickerBox:'Sticker box', on:'On', off:'Off',
     appearance:'Appearance', themeLabel:'Theme', langLabel:'Language', fontLabel:'Font', fontHand:'Handwritten', fontSystem:'System', fontSerif:'Serif',
     sendStar:'Leave a review ✦', version:'Clovery · v1.0.2',
+    subscribeLabel:'Clovery Premium', subscribeDetail:'Unlock all features',
+    subscribeMonth:'$1 / month', subscribeQuarter:'$3 / quarter', subscribeYear:'$10 / year',
+    subscribeSave:'Best value', subscribeFeatures:['Unlimited entries','Cloud backup','Custom themes','Priority support'],
+    subscribeCta:'Start free trial', subscribeRestore:'Restore purchase', subscribePrivacy:'Privacy & Terms',
     replayWelcome:'Sign out',
     todaysPrompt:"Today's prompt",
     luckyPrompt:"What's your lucky little thing today?",
@@ -1782,7 +1891,8 @@ const I18N = {
     langName:'English',
     langOptions:[
       {code:'en',flag:'🇺🇸',name:'English'},
-      {code:'zh',flag:'🇨🇳',name:'中文'},
+      {code:'zh',flag:'🇨🇳',name:'简体中文'},
+      {code:'zh-TW',flag:'🇹🇼',name:'繁體中文'},
       {code:'ja',flag:'🇯🇵',name:'日本語'},
       {code:'ko',flag:'🇰🇷',name:'한국어'},
     ],
@@ -1819,16 +1929,23 @@ const I18N = {
     signInFromSettings:'Sign in / Create account',
     milestoneClover:(n,c)=>`🍀 Clover #${n}${c!==undefined?' · '+c+' lucky moments':''}`,
     milestoneDismiss:'Claim your luck! 🍀',
-    paletteNames:{ clover:'Clover', sakura:'Sakura', ocean:'Sky', kraft:'Kraft' },
+    paletteNames:{ clover:'Clover', sakura:'Sakura', ocean:'Sky', kraft:'Kraft', zhimo:'Ink' },
     progressLabel:'Today\'s luck meter',
     progressFull:'Today\'s luck is fully charged! Have a wonderful day o(≧v≦)o ✨',
+    titlePrompt:'Give today a title',
+    titlePh:'如果给今天起个标题……',
+    calendarViewMode:'Calendar',
+    bookViewMode:'Diary',
+    spring:'Spring', summer:'Summer', autumn:'Autumn', winter:'Winter',
+    bookYearLabel:y=>`${y}`,
+    bookEmpty:'No entries this season',
   },
   zh: {
     wdays:  ['周日','周一','周二','周三','周四','周五','周六'],
     wshort: ['日','一','二','三','四','五','六'],
     mons:   ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
     tabToday:'今天', tabPast:'记录', tabLucky:'幸运', tabMe:'我的',
-    tapWrite:'轻触记录', todaysLuck:'今天的幸运', writtenAt:'写于', ireneTag:'嗯呐的信', defaultName:'幸运的我',
+    tapWrite:'轻触记录', todaysLuck:'今天的幸运', writtenAt:'写于', ireneTag:'来自ena的信', defaultName:'幸运的我',
     whatLucky:'今天最幸运的小事是什么？',
     noEntry:'今天还没写——还来得及。',
     streak:(n)=>`连续 ${n} 天`,
@@ -1849,7 +1966,11 @@ const I18N = {
     homeDisplayLabel:'主页日记', homeDisplayToday:'今天', homeDisplayAll:'全部',
     stickerBox:'贴纸盒', on:'开启', off:'关闭',
     appearance:'外观', themeLabel:'主题', langLabel:'语言', fontLabel:'字体', fontHand:'手写体', fontSystem:'系统默认', fontSerif:'宋体',
-    sendStar:'好评支持嗯呐 ✦', version:'小幸运 · v1.0.2',
+    sendStar:'好评支持ena ✦', version:'小幸运 · v1.0.2',
+    subscribeLabel:'Clovery 高级版', subscribeDetail:'解锁全部功能',
+    subscribeMonth:'$1 / 月', subscribeQuarter:'$3 / 季度', subscribeYear:'$10 / 年',
+    subscribeSave:'最划算', subscribeFeatures:['无限条记录','云端备份','自定义主题','优先支持'],
+    subscribeCta:'开始免费试用', subscribeRestore:'恢复购买', subscribePrivacy:'隐私政策与条款',
     replayWelcome:'退出登录',
     todaysPrompt:'今天的提示',
     luckyPrompt:'今天最幸运的小事是什么？',
@@ -1875,10 +1996,11 @@ const I18N = {
       {ey:'一叶一叶地收集',title:'攒起你的\n四叶草。',body:'慢下来一点点——\n生活就在这里。',cta:'开始写'},
     ],
     moodL:{lucky:'幸运',happy:'开心',calm:'平静',moved:'感动',grateful:'感恩'},
-    langName:'中文',
+    langName:'简体中文',
     langOptions:[
       {code:'en',flag:'🇺🇸',name:'English'},
-      {code:'zh',flag:'🇨🇳',name:'中文'},
+      {code:'zh',flag:'🇨🇳',name:'简体中文'},
+      {code:'zh-TW',flag:'🇹🇼',name:'繁體中文'},
       {code:'ja',flag:'🇯🇵',name:'日本語'},
       {code:'ko',flag:'🇰🇷',name:'한국어'},
     ],
@@ -1913,9 +2035,122 @@ const I18N = {
     signInFromSettings:'登录 / 创建账号',
     milestoneClover:(n,c)=>`🍀 第${n}朵四叶草${c!==undefined?' · '+c+'条记录':''}`,
     milestoneDismiss:'收下好运！🍀',
-    paletteNames:{ clover:'四叶草', sakura:'樱花', ocean:'天空', kraft:'牛皮纸' },
+    paletteNames:{ clover:'四叶草', sakura:'樱花', ocean:'天空', kraft:'牛皮纸', zhimo:'纸墨' },
     progressLabel:'今日幸运进度',
     progressFull:'今日幸运已充值完毕！记得开心地度过今天～o(≧v≦)o',
+    titlePrompt:'给今天起个标题',
+    titlePh:'如果给今天起个标题……',
+    calendarViewMode:'日历',
+    bookViewMode:'日记本',
+    spring:'春', summer:'夏', autumn:'秋', winter:'冬',
+    bookYearLabel:y=>`${y}年`,
+    bookEmpty:'这个季节还没有日记哦',
+  },
+  'zh-TW': {
+    wdays:  ['週日','週一','週二','週三','週四','週五','週六'],
+    wshort: ['日','一','二','三','四','五','六'],
+    mons:   ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'],
+    tabToday:'今天', tabPast:'記錄', tabLucky:'幸運', tabMe:'我的',
+    tapWrite:'輕觸記錄', todaysLuck:'今天的幸運', writtenAt:'寫於', ireneTag:'來自ena的信', defaultName:'幸運的我',
+    whatLucky:'今天最幸運的小事是什麼？',
+    noEntry:'今天還沒寫——還來得及。',
+    streak:(n)=>`連續 ${n} 天`,
+    collected:(n)=>`${n} 條記錄`,
+    calTitle:'日曆',
+    monthCount:(n)=>`本月 ${n} 篇`,
+    allEntries:'全部記錄', noEntries:'本月暫無記錄。',
+    luckyTitle:'幸運', luckyCollection:'記錄你的',
+    tinyThings:'朵四葉草',
+    streak2:'連續天數', fourLeafs:'四葉草', thisMonth:'本月',
+    oftenIn:'常見於', yourMoments:'你的幸運時刻',
+    allMoments:'全部時刻', filterAll:'全部',
+    settingsTitle:'設定',
+    dayFinding:(n)=>`記錄幸運的第 ${n} 天`,
+    reminders:'提醒', dailyNudge:'晚間提醒', ninepm:'20:00',
+    weeklyRecap:'每週回顧', icloudSync:'iCloud 同步',
+    journalSection:'日記', lockFace:'面容 ID 鎖定', tagsLabel:'標籤管理',
+    homeDisplayLabel:'主頁日記', homeDisplayToday:'今天', homeDisplayAll:'全部',
+    stickerBox:'貼紙盒', on:'開啟', off:'關閉',
+    appearance:'外觀', themeLabel:'主題', langLabel:'語言', fontLabel:'字型', fontHand:'手寫體', fontSystem:'系統預設', fontSerif:'宋體',
+    sendStar:'好評支持ena ✦', version:'小幸運 · v1.0.2',
+    subscribeLabel:'Clovery 高級版', subscribeDetail:'解鎖全部功能',
+    subscribeMonth:'$1 / 月', subscribeQuarter:'$3 / 季度', subscribeYear:'$10 / 年',
+    subscribeSave:'最划算', subscribeFeatures:['無限條記錄','雲端備份','自訂主題','優先支援'],
+    subscribeCta:'開始免費試用', subscribeRestore:'恢復購買', subscribePrivacy:'隱私政策與條款',
+    replayWelcome:'登出',
+    todaysPrompt:'今天的提示',
+    luckyPrompt:'今天最幸運的小事是什麼？',
+    luckyPh:'哪怕是一件微小的事…',
+    howFeel:'今天心情怎麼樣？',
+    moreLabel:'還想說點什麼？', morePh:'不用寫太多…',
+    addLabel:'加點什麼', tagIt:'打個標籤',
+    cancel:'取消', save:'儲存', back:'上一步', next:'下一步', tagPh:'輸入標籤…',
+    deleteLabel:'刪除', confirmDeleteMsg:'確認刪除這條記錄？', stickerLabel:'添加貼紙',
+    savedTitle:'已妥善保存', savedSub:'又一個幸運瞬間收入囊中',
+    photo:'照片', sticker:'貼紙', weather:'天氣', dropPhoto:'把照片拖到這裡',
+    photosLabel:'照片 ✦', addPhotoLabel:'添加照片', photoLimitMsg:(n)=>`最多 ${n} 張照片`,
+    sugTags:['小吃','散步','貓咪','朋友','家','工作','天空','驚喜'],
+    quickPicksLabel:'快捷記錄 ✦',
+    quickLucky:['☕ 咖啡特別香','🚇 捷運剛好來了','☀️ 天氣超級好','😴 睡得很香','💬 朋友突然聯繫了','🐱 碰到了可愛的貓','🌸 路邊的花開了','🍜 今天的飯超好吃','🌈 看到了彩虹','📩 收到了好消息','🌿 一個人的安靜早晨','🏃 剛好趕上了末班車','🌙 月亮特別美','🍰 吃到了想吃很久的甜點','🛏️ 賴床了一會兒','🎶 循環播放最喜歡的歌','📚 看完了一本好書','🧸 抱了抱玩偶','🌧️ 雨聲很治癒','🍵 喝了一杯熱茶','🛁 泡了個熱水澡','🐶 路上遇到了狗狗','🎁 收到了小禮物','🧦 找到了配對的襪子','📱 跟朋友聊得很開心','🌅 看到了好看的日出或日落','🍂 踩到了脆脆的落葉','💌 寫了一封信或卡片','🧁 烘焙成功了','🎈 心情特別輕鬆'],
+    searchPh:'搜尋幸運時刻…', popularTags:'常用標籤',
+    matches:(n)=>`${n} 條結果`,
+    noResults:'還什麼都沒有…', done:'完成', skip:'跳過',
+    nameQ:'你叫什麼名字呀？', namePh:'我叫…', nameConfirm:'就是我！',
+    ob:[
+      {ey:'一個小角落',title:'留意你的\n幸運。',body:'只記錄美好的事。\n每天一件小事，就夠了。',cta:'下一步'},
+      {ey:'小事也算數',title:'捷運剛好\n有座位。',body:'或者路過時\n聞到了花香。',cta:'明白了'},
+      {ey:'一葉一葉地收集',title:'攢起你的\n四葉草。',body:'慢下來一點點——\n生活就在這裡。',cta:'開始寫'},
+    ],
+    moodL:{lucky:'幸運',happy:'開心',calm:'平靜',moved:'感動',grateful:'感恩'},
+    langName:'繁體中文',
+    langOptions:[
+      {code:'en',flag:'🇺🇸',name:'English'},
+      {code:'zh',flag:'🇨🇳',name:'简体中文'},
+      {code:'zh-TW',flag:'🇹🇼',name:'繁體中文'},
+      {code:'ja',flag:'🇯🇵',name:'日本語'},
+      {code:'ko',flag:'🇰🇷',name:'한국어'},
+    ],
+    darkMode:'深色模式', darkAuto:'跟隨系統', darkLabel:'明暗', darkLight:'淺色', darkDark:'深色',
+    profileTitle:'個人資料', nameLabel:'你的名字', profileDone:'完成',
+    tagsTitle:'標籤', tagCount:(n)=>`${n} 篇`,
+    stickersTitle:'貼紙盒',
+    timeTitle:'提醒時間', timeOptions:['19:00','19:30','20:00','20:30','21:00','21:30','22:00','22:30','23:00','23:30','00:00','00:30','01:00','01:30','02:00'],
+    reviewTitle:'給我們評分', reviewQ:'你喜歡小幸運嗎？', reviewCta:'寫評價', reviewThanks:'謝謝你 ✦',
+    fieldView:'田野', listView:'列表', growView:'生長', historyView:'全部', wallpaper:'桌布', wallpaperHint:'截圖即可儲存為桌布', wallpaperDone:'完成',
+    viewEntry:'查看 →',
+    growStart:'寫下你的第一個小幸運！',
+    growProgress:(n)=>`還差 ${n} 片就滿啦 🌿`,
+    growComplete:'四葉草長成啦！🎉',
+    currentLeaves:'本朵葉片',
+    growEmptyMsg:'寫下第一個小幸運，讓你的四葉草開始生長 🍀',
+    fieldEmpty:'集滿四片葉片，就能長出第一朵四葉草！',
+    authSlogan:'留意那些小小的幸運。',
+    authGetStarted:'開始體驗', authHaveAccount:'我已有帳號',
+    authCreateTitle:'創建你的\n帳號。', authWelcomeBack:'歡迎\n回來。',
+    authForgotTitle:'重置\n密碼。', authForgotBody:'輸入你的信箱，我們會發送重置連結。',
+    authName:'姓名', authEmail:'信箱', authPassword:'密碼',
+    authNamePh:'叫你什麼好？', authEmailPh:'you@example.com', authPasswordPh:'至少8位字元',
+    authSignUpCta:'創建帳號', authLoginCta:'登入',
+    authForgotPw:'忘記密碼？', authForgotCta:'發送重置連結', authForgotSent:'請查看你的信箱 ✦', authForgotBack:'返回登入',
+    authHaveShort:'已有帳號？', authNoAccount:'還沒有帳號？',
+    authSignUpLink:'註冊', authSignInLink:'登入',
+    authBack:'返回', authReplayLogin:'登出',
+    syncNudgeTitle:'備份你的幸運 ☁️',
+    syncNudgeBody:'創建一個免費帳號，保存你的日記，並在多台設備上同步。',
+    syncNudgeCta:'創建帳號', syncNudgeLater:'稍後再說',
+    signInFromSettings:'登入 / 創建帳號',
+    milestoneClover:(n,c)=>`🍀 第${n}朵四葉草${c!==undefined?' · '+c+'條記錄':''}`,
+    milestoneDismiss:'收下好運！🍀',
+    paletteNames:{ clover:'四葉草', sakura:'櫻花', ocean:'天空', kraft:'牛皮紙', zhimo:'紙墨' },
+    progressLabel:'今日幸運進度',
+    progressFull:'今日幸運已充值完畢！記得開心地度過今天～o(≧v≦)o',
+    titlePrompt:'給今天起個標題',
+    titlePh:'如果給今天起個標題……',
+    calendarViewMode:'日曆',
+    bookViewMode:'日記本',
+    spring:'春', summer:'夏', autumn:'秋', winter:'冬',
+    bookYearLabel:y=>`${y}年`,
+    bookEmpty:'這個季節還沒有日記哦',
   },
   ja: {
     wdays:  ['日曜','月曜','火曜','水曜','木曜','金曜','土曜'],
@@ -1972,7 +2207,8 @@ const I18N = {
     langName:'日本語',
     langOptions:[
       {code:'en',flag:'🇺🇸',name:'English'},
-      {code:'zh',flag:'🇨🇳',name:'中文'},
+      {code:'zh',flag:'🇨🇳',name:'简体中文'},
+      {code:'zh-TW',flag:'🇹🇼',name:'繁體中文'},
       {code:'ja',flag:'🇯🇵',name:'日本語'},
       {code:'ko',flag:'🇰🇷',name:'한국어'},
     ],
@@ -2007,9 +2243,16 @@ const I18N = {
     signInFromSettings:'サインイン / アカウント作成',
     milestoneClover:(n,c)=>`🍀 第${n}枚の四つ葉${c!==undefined?' · '+c+'件':''}`,
     milestoneDismiss:'ラッキーを受け取る！🍀',
-    paletteNames:{ clover:'クローバー', sakura:'サクラ', ocean:'スカイ', kraft:'クラフト' },
+    paletteNames:{ clover:'クローバー', sakura:'サクラ', ocean:'スカイ', kraft:'クラフト', zhimo:'紙墨' },
     progressLabel:'今日のラッキー進捗',
     progressFull:'今日のラッキーが満タンになりました！素敵な一日を o(≧v≦)o ✨',
+    titlePrompt:'今日のタイトルをつけよう',
+    titlePh:'如果给今天起个标题……',
+    calendarViewMode:'カレンダー',
+    bookViewMode:'日記',
+    spring:'春', summer:'夏', autumn:'秋', winter:'冬',
+    bookYearLabel:y=>`${y}年`,
+    bookEmpty:'この季節の日記はまだありません',
   },
   ko: {
     wdays:  ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'],
@@ -2066,7 +2309,8 @@ const I18N = {
     langName:'한국어',
     langOptions:[
       {code:'en',flag:'🇺🇸',name:'English'},
-      {code:'zh',flag:'🇨🇳',name:'中文'},
+      {code:'zh',flag:'🇨🇳',name:'简体中文'},
+      {code:'zh-TW',flag:'🇹🇼',name:'繁體中文'},
       {code:'ja',flag:'🇯🇵',name:'日本語'},
       {code:'ko',flag:'🇰🇷',name:'한국어'},
     ],
@@ -2101,9 +2345,16 @@ const I18N = {
     signInFromSettings:'로그인 / 계정 만들기',
     milestoneClover:(n,c)=>`🍀 ${n}번째 클로버${c!==undefined?' · '+c+'개':''}`,
     milestoneDismiss:'행운 받기！🍀',
-    paletteNames:{ clover:'클로버', sakura:'사쿠라', ocean:'스카이', kraft:'크래프트' },
+    paletteNames:{ clover:'클로버', sakura:'사쿠라', ocean:'스카이', kraft:'크래프트', zhimo:'지묵' },
     progressLabel:'오늘의 행운 진행도',
     progressFull:'오늘의 행운이 가득 찼어요! 멋진 하루 보내세요 o(≧v≦)o ✨',
+    titlePrompt:'오늘의 제목을 달아요',
+    titlePh:'如果给今天起个标题……',
+    calendarViewMode:'달력',
+    bookViewMode:'일기장',
+    spring:'봄', summer:'여름', autumn:'가을', winter:'겨울',
+    bookYearLabel:y=>`${y}년`,
+    bookEmpty:'이 계절의 일기가 아직 없어요',
   },
 };
 
@@ -2138,6 +2389,16 @@ const MOCK_ENTRIES = [
   { id:'e13', date:'2026-05-12', lucky:"Found a book I'd wanted forever at the used bookstore", mood:'happy',    text:'', tags:['books'] },
   { id:'e14', date:'2026-05-10', lucky:'Stepped outside at exactly the moment the rain stopped', mood:'calm',    text:'', tags:['weather'] },
   { id:'e15', date:'2026-05-08', lucky:'Fresh-baked croissants at the bakery downstairs', mood:'happy',    text:'', tags:['snacks'] },
+  { id:'e16', date:'2026-10-01', lucky:'今天发现楼下的桂花开了，整条街都香', mood:'moved', title:'桂花', text:'闻到的那一刻感觉秋天真的到了。', tags:['散步','秋天'], weather:'☀️' },
+  { id:'e17', date:'2026-10-05', lucky:'和朋友视频聊天聊了两个小时，什么都聊了', mood:'happy', title:'久违的通话', text:'从工作聊到梦想，最后聊到了小时候最喜欢的零食。笑了好多次。', tags:['朋友'], weather:'🌙' },
+  { id:'e18', date:'2026-10-08', lucky:'排队结账时前面的陌生人说"你先来吧，你只有一样"', mood:'lucky', title:'陌生人的善意', text:'很小的事，但我走路回家时一直在笑。', tags:['日常'], weather:'🌤️' },
+  { id:'e19', date:'2026-09-15', lucky:'下班路上突然下了一场大雨，刚好躲进一家小咖啡馆', mood:'calm', title:'意外的避雨', text:'点了一杯热拿铁，看着窗外的雨读了半小时书。感觉像是被雨送来的礼物。', tags:['咖啡','读书'], weather:'🌧️' },
+  { id:'e20', date:'2026-09-03', lucky:'今天的夕阳是粉橙色的，像糖果', mood:'moved', title:'粉色天空', text:'', tags:['天空'], weather:'🌅' },
+  { id:'e21', date:'2026-08-20', lucky:'找到了一直在找的那首歌，就是那首', mood:'happy', title:'找到了！', text:'当时只记得一两个音节，在脑海里转了三个月。今天无意间听到了，原地定住了五秒。', tags:['音乐'], weather:'☀️' },
+  { id:'e22', date:'2026-07-04', lucky:'冰箱里还有一块西瓜，刚好是最甜的那种', mood:'happy', title:'夏天的奖励', text:'', tags:['夏天','食物'], weather:'🌞' },
+  { id:'e23', date:'2026-06-11', lucky:'第一次独自去看了一场电影，坐在最中间的位置', mood:'calm', title:'一个人的场', text:'原来一个人看电影可以很好。可以随时笑，可以不解释。', tags:['独处','电影'], weather:'🌙' },
+  { id:'e24', date:'2026-03-28', lucky:'春天第一天穿短袖出门', mood:'happy', title:'第一件短袖', text:'风还有点凉，但阳光是暖的。', tags:['春天'], weather:'🌸' },
+  { id:'e25', date:'2026-02-14', lucky:'收到了一封手写信', mood:'moved', title:'手写的字', text:'信纸上有淡淡的玫瑰香。用手指摸了很久。', tags:['来往','冬天'], weather:'❄️' },
 ];
 
 const STREAK = 12;
@@ -2167,7 +2428,7 @@ const WELCOME_ENTRY = {
   },
   localizedText: {
     en: `Hi there ☁️ I'm ena, the maker of Clovery.\n\nSo happy you're here! Welcome to this little corner dedicated to collecting good luck and happy moments 🌟\n\nHave you ever noticed that life is actually full of sparkling little fragments? Like:\n\nJust catching the subway doors before they close 🏃💨\n\nThe barista giving you the warmest smile when you order your coffee ☕\n\nOr spotting a cloud shaped exactly like a fluffy marshmallow ☁️\n\nClovery was born to help you collect these small lucky moments that happen every day but are so easy to forget ^^\n\nNo pressure! This isn't about writing essays. Even just one sentence, an emoji, or a photo — if it makes you think "wow, that was nice!" it's worth keeping.\n\nWhen you're feeling down or tired later, come back and scroll through. You'll discover you've been surrounded by so many little lucky moments all along 🍯✨\n\nOkay — what's your first happy little thing today? Store your first lucky star in Clovery!\n\nWishing you an absolutely amazing today, tomorrow, and every day after! (๑•̀ㅂ•́)و✧\n`,
-    zh: `嗨！我是 Clovery 的制作人嗯呐 ( ´ ▽ \` )ﾉ\n\n超级开心能在这里遇到你！欢迎来到这个专门收集好运和幸福的秘密基地 🌟\n\n你有没有发现，生活里其实藏着好多好多亮晶晶的小碎片？比如：\n\n刚好赶上即将关闭的地铁门 🏃💨\n\n买咖啡的时候，店员对你露出了很治愈的微笑 (o^^o) ☕\n\n亦或是今天的云朵形状特别像一只棉花糖 ☁️\n\nClovery 的诞生，就是希望能陪你一起，把这些每天发生、却很容易被忘掉的「小幸运」一件件存起来 ^^\n\n不要有压力！这里不是要你写长篇大论的作文。哪怕只是简简单单的一句话、一个表情、或者拍一张照片，只要让你觉得「哇，真好呀！」，它就值得被好好收藏～\n\n当你以后遇到沮丧或者累了的时候，就回这里翻一翻。你会发现，原来自己一直都被这么多小幸运包围着呢 🍯✨\n\n好啦，今天你的第一件开心小事是什么呢？把你的第一颗幸运星存进 Clovery 吧！\n\n祝你今天、明天、未来的每一天都过得超级无敌棒！ (๑•̀ㅂ•́)و✧\n`,
+    zh: `嗨！我是 Clovery 的制作人ena ( ´ ▽ \` )ﾉ\n\n超级开心能在这里遇到你！欢迎来到这个专门收集好运和幸福的秘密基地 🌟\n\n你有没有发现，生活里其实藏着好多好多亮晶晶的小碎片？比如：\n\n刚好赶上即将关闭的地铁门 🏃💨\n\n买咖啡的时候，店员对你露出了很治愈的微笑 (o^^o) ☕\n\n亦或是今天的云朵形状特别像一只棉花糖 ☁️\n\nClovery 的诞生，就是希望能陪你一起，把这些每天发生、却很容易被忘掉的「小幸运」一件件存起来 ^^\n\n不要有压力！这里不是要你写长篇大论的作文。哪怕只是简简单单的一句话、一个表情、或者拍一张照片，只要让你觉得「哇，真好呀！」，它就值得被好好收藏～\n\n当你以后遇到沮丧或者累了的时候，就回这里翻一翻。你会发现，原来自己一直都被这么多小幸运包围着呢 🍯✨\n\n好啦，今天你的第一件开心小事是什么呢？把你的第一颗幸运星存进 Clovery 吧！\n\n祝你今天、明天、未来的每一天都过得超级无敌棒！ (๑•̀ㅂ•́)و✧\n`,
     ja: `こんにちは ☁️ Clovery を作った ena です。\n\nここで出会えてとっても嬉しいです！幸運と幸せを集める秘密基地へようこそ 🌟\n\n生活の中には実はキラキラした小さな欠片がたくさん隠れていることに気づいてますか？たとえば：\n\n閉まりそうな電車のドアにギリギリ間に合った 🏃💨\n\nコーヒーを注文したとき、店員さんが癒しの笑顔を見せてくれた ☕\n\n今日の雲がマシュマロにそっくりだった ☁️\n\nClovery は、毎日起きているのについ忘れてしまう「小さなラッキー」を一つひとつ記録するために生まれました ^^\n\nプレッシャーは不要です！長い文章は必要ありません。一言でも、絵文字でも、写真でも——「わあ、いいな！」と思ったなら、それは残す価値があります。\n\n落ち込んだり疲れたときは、ここに戻ってスクロールしてみてください。ずっとたくさんの小さなラッキーに囲まれていたことに気づくはずです 🍯✨\n\nさあ、今日最初の小さな幸せは何ですか？最初のラッキースターを Clovery に記録しましょう！\n\n今日も明日もずっと最高の毎日になりますように！ (๑•̀ㅂ•́)و✧\n`,
     ko: `안녕하세요 ☁️ Clovery를 만든 ena예요.\n\n여기서 만나게 되어 너무 기뻐요! 행운과 행복을 모으는 비밀 아지트에 오신 걸 환영해요 🌟\n\n생활 속에 사실 반짝반짝 빛나는 작은 조각들이 잔뜩 숨어 있다는 거 알고 있었나요? 예를 들면：\n\n닫히려던 지하철 문에 딱 맞춰서 탔을 때 🏃💨\n\n커피 주문할 때 직원이 따뜻한 미소를 보내줬을 때 ☕\n\n오늘 구름이 솜사탕처럼 생겼을 때 ☁️\n\nClovery는 매일 일어나지만 쉽게 잊혀지는 이런 「작은 행운」들을 하나씩 저장하기 위해 태어났어요 ^^\n\n부담 갖지 마세요! 긴 글 쓸 필요 없어요. 짧은 한 마디, 이모지, 사진 한 장이라도——「와, 좋았다!」 싶은 순간이라면 기록할 가치가 있어요.\n\n나중에 지치거나 힘들 때 여기 돌아와서 스크롤해 보세요. 내가 항상 이렇게 많은 작은 행운에 둘러싸여 있었다는 걸 발견하게 될 거예요 🍯✨\n\n자, 오늘 첫 번째 작은 행복은 뭔가요? 첫 번째 행운의 별을 Clovery에 저장해 봐요!\n\n오늘도 내일도 앞으로의 모든 날이 최고이길 바라요! (๑•̀ㅂ•́)و✧\n`,
   },
@@ -2196,7 +2457,7 @@ const WELCOME_ENTRY_2 = {
   },
   localizedText: {
     en: `Hi, it's ena again! ( ´ ▽ \` )ﾉ\n\nToday I want to talk properly about why I made Clovery a place that only records small lucky moments.\n\nIn psychology, there's a wonderfully healing concept called the "gratitude journal." Many scientists and psychologists have run experiments and found that spending just two minutes a day writing down 3 small things that make you think "thank you, this is so lovely!" — after just a few weeks, the happy neurons in your brain become incredibly active! Your brain can even reshape the way it thinks ^^\n\nDoes the word "gratitude" feel a bit formal and grand? \n\nBut in Clovery, we call it "catching small lucky moments." Because ena believes that life isn't only lucky when you get a promotion, buy a house, or achieve something big. On the contrary, what truly heals us is often the tiniest moments:\n\nA long day finally ending, and stepping into a hot bath 🛁\n\nThat pair of shoes you love, finally on sale today 👟✨\n\nOr just spotting the most adorably round-bellied calico cat by the road 🐱\n\nSo what's the point of recording these small lucky things? (๑•̀ㅂ•́)و✧\n\n* It helps you build a "lucky magnetic field": Science shows that once you start actively looking for lucky moments, your eyes become a "happiness radar" — and you'll find that good things around you seem to multiply!\n\n* It's your "low-point antidote": Everyone has those emo days. When you feel like life is awful and the whole world is against you, open Clovery and scroll through the hundreds of happy moments you've saved. They become a thick protective shield, gently reminding you: "Hey, you've actually been loved by this world all along 🍯."\n\n* It helps you sleep better: Try writing down today's small lucky moments just before you close your eyes. Drifting off with the contentment of "today was really good" — even your dreams will taste like sweet strawberries 🍓\n\nSo Clovery isn't a productivity tool for tracking to-dos. It's your very own "happiness bank."\n\nNo matter how busy today gets, let's go harvest some small lucky moments from life together!\n\nWhat happy thing are you going to deposit today? I'll be waiting for your first "deposit" on the next page ^^\n`,
-    zh: `嗨，又是嗯呐呀！( ´ ▽ \` )ﾉ\n\n今天想正式和你聊聊为什么我要把 Clovery 做成一个"只记录小幸运"的地方。\n\n在心理学上，有一个非常治愈的概念叫做"感恩日记"。很多科学家和心理学家做过实验，发现每天只要花两分钟，记下 3 件让你觉得"谢谢，真好呀"的小事，坚持几周后，大脑的快乐神经元就会变得超级活跃！大脑甚至会重塑我们的思维模式 ^^\n\n听到"感恩"这个词，是不是觉得有点严肃和宏大？\n\n但在 Clovery，我们把它叫做"捕捉小幸运"。因为嗯呐觉得，生活不是只有升职加薪、买房买车才叫幸运。恰恰相反，那些真正能治愈我们的，往往是极小的瞬间：\n\n在漫长的一天结束后，洗了一个热水澡 🛁\n\n喜欢的那双鞋子，今天刚好打折了 👟✨\n\n甚至只是今天在路边，看到了一只极其可爱、肚皮圆滚滚的三花猫 🐱\n\n记录这些小幸运，到底有什么好处呢？(๑•̀ㅂ•́)و✧\n\n* 它能帮你建立"好运磁场"： 科学表明，当你开始主动寻找幸运，你的眼睛就像装了"快乐雷达"，你会发现身边的好事竟然越来越多！\n\n* 它是你的"低谷期解药"： 人总有 emo 的时候嘛。当你哪天觉得生活好糟糕、全世界都在和你作对时，打开 Clovery，翻翻以前存下来的几百个快乐瞬间。它们会变成厚厚的防御罩，温柔地提醒你："嘿，其实你一直被这个世界爱着呢 🍯。"\n\n* 它能让你睡个好觉： 试着在闭上眼之前写下今天的小幸运。带着"今天真不错"的满足感睡去，连梦都会是甜甜的草莓味哦 🍓\n\n所以，Clovery 不是一个用来记录"待办事项"的效率工具，它是一座属于你的"快乐银行"。\n\n不管今天有多忙，都跟嗯呐一起，去生活里薅一把小幸运的羊毛吧！\n\n今天，你打算存入哪一件开心事呢？我在下一页等你的第一笔"存款"哦 ^^\n`,
+    zh: `嗨，又是ena呀！( ´ ▽ \` )ﾉ\n\n今天想正式和你聊聊为什么我要把 Clovery 做成一个"只记录小幸运"的地方。\n\n在心理学上，有一个非常治愈的概念叫做"感恩日记"。很多科学家和心理学家做过实验，发现每天只要花两分钟，记下 3 件让你觉得"谢谢，真好呀"的小事，坚持几周后，大脑的快乐神经元就会变得超级活跃！大脑甚至会重塑我们的思维模式 ^^\n\n听到"感恩"这个词，是不是觉得有点严肃和宏大？\n\n但在 Clovery，我们把它叫做"捕捉小幸运"。因为ena觉得，生活不是只有升职加薪、买房买车才叫幸运。恰恰相反，那些真正能治愈我们的，往往是极小的瞬间：\n\n在漫长的一天结束后，洗了一个热水澡 🛁\n\n喜欢的那双鞋子，今天刚好打折了 👟✨\n\n甚至只是今天在路边，看到了一只极其可爱、肚皮圆滚滚的三花猫 🐱\n\n记录这些小幸运，到底有什么好处呢？(๑•̀ㅂ•́)و✧\n\n* 它能帮你建立"好运磁场"： 科学表明，当你开始主动寻找幸运，你的眼睛就像装了"快乐雷达"，你会发现身边的好事竟然越来越多！\n\n* 它是你的"低谷期解药"： 人总有 emo 的时候嘛。当你哪天觉得生活好糟糕、全世界都在和你作对时，打开 Clovery，翻翻以前存下来的几百个快乐瞬间。它们会变成厚厚的防御罩，温柔地提醒你："嘿，其实你一直被这个世界爱着呢 🍯。"\n\n* 它能让你睡个好觉： 试着在闭上眼之前写下今天的小幸运。带着"今天真不错"的满足感睡去，连梦都会是甜甜的草莓味哦 🍓\n\n所以，Clovery 不是一个用来记录"待办事项"的效率工具，它是一座属于你的"快乐银行"。\n\n不管今天有多忙，都跟ena一起，去生活里薅一把小幸运的羊毛吧！\n\n今天，你打算存入哪一件开心事呢？我在下一页等你的第一笔"存款"哦 ^^\n`,
     ja: `こんにちは、また ena です！( ´ ▽ \` )ﾉ\n\n今日は、なぜ Clovery を「小さなラッキーだけを記録する場所」にしたのか、ちゃんとお話ししたいと思います。\n\n心理学には「感謝日記」という、とても癒しになる概念があります。多くの科学者や心理学者が実験を行った結果、毎日たった 2 分、「ありがとう、本当によかった」と思える小さなことを 3 つ書き留めるだけで、数週間後には脳の幸せニューロンがとても活発になることがわかっています！脳は思考パターンまで塗り替えてしまうんです ^^\n\n「感謝」という言葉、少し堅くて大げさな感じがしませんか？\n\nでも Clovery では、それを「小さなラッキーを捕まえること」と呼んでいます。なぜなら ena は、昇進やマイホームや大きな成果だけが「幸運」じゃないと思っているからです。むしろ本当に私たちを癒してくれるのは、ほんの小さな瞬間です：\n\n長い一日が終わって、お風呂にゆっくり入れた 🛁\n\nずっと気になっていたあの靴が、今日ちょうどセール中だった 👟✨\n\n道端で、お腹がまんまるでびっくりするほどかわいい三毛猫を見かけた 🐱\n\nこういう小さなラッキーを記録すると、どんないいことがあるの？ (๑•̀ㅂ•́)و✧\n\n* 「幸運の磁場」が生まれます： 科学的に証明されています——幸運を積極的に探し始めると、目が「ハッピーレーダー」になって、身の回りの良いことがどんどん増えていくように感じられます！\n\n* 「どん底期の解毒剤」になります： 誰だって落ち込む日はありますよね。生活がひどく感じて、世界中が敵みたいに思える日でも、Clovery を開いて、貯めてきた何百もの幸せな瞬間を見返してみてください。それが厚い盾になって、優しく伝えてくれます：「ねえ、あなたはずっとこの世界に愛されてるんだよ 🍯。」\n\n* ぐっすり眠れるようになります： 目を閉じる前に、今日の小さなラッキーを書いてみてください。「今日は本当によかった」という満足感を抱いて眠ると、夢まで甘いいちご味になるはずです 🍓\n\nだから Clovery は「やること」を管理する効率ツールじゃなくて、あなただけの「幸せ銀行」なんです。\n\nどんなに忙しい日でも、ena と一緒に、生活の中から小さなラッキーを摘み取りに行きましょう！\n\n今日は、どんな幸せを預けますか？次のページであなたの最初の「預け入れ」を待っています ^^\n`,
     ko: `안녕하세요, 또 ena예요！( ´ ▽ \` )ﾉ\n\n오늘은 왜 Clovery를 "작은 행운만 기록하는 곳"으로 만들었는지 제대로 이야기하고 싶어요.\n\n심리학에는 "감사 일기"라는 정말 치유적인 개념이 있어요. 많은 과학자와 심리학자들이 실험을 통해 발견했는데, 매일 단 2분만 "고마워, 정말 좋았어"라고 느끼는 소소한 일 3가지를 적으면, 몇 주 후에는 뇌의 행복 뉴런이 엄청나게 활성화된대요！뇌는 우리의 사고 패턴까지 바꿔버릴 수 있다고 해요 ^^\n\n"감사"라는 단어, 왠지 좀 딱딱하고 거창하게 느껴지지 않나요？\n\n하지만 Clovery에서는 이걸 "작은 행운 포착"이라고 불러요. 왜냐하면 ena는 승진, 내 집 마련, 큰 성취만이 행운이 아니라고 생각하거든요. 오히려 우리를 진짜로 치유해 주는 건 아주 작은 순간들이에요：\n\n긴 하루가 끝나고 따뜻한 목욕을 할 수 있었을 때 🛁\n\n좋아하던 그 신발이 오늘 마침 세일 중이었을 때 👟✨\n\n심지어 오늘 길가에서 배가 동그랗게 통통한 너무너무 귀여운 고양이를 봤을 때 🐱\n\n이런 작은 행운들을 기록하면 어떤 점이 좋냐고요？ (๑•̀ㅂ•́)و✧\n\n* 「행운의 자기장」을 만들어요： 과학적으로 증명됐어요——행운을 적극적으로 찾기 시작하면 눈이 「행복 레이더」가 되어서, 주변의 좋은 일들이 점점 더 많아지는 걸 발견하게 돼요！\n\n* 「힘든 시기의 해독제」가 돼요： 누구든 힘든 날은 있잖아요. 어떤 날 생활이 너무 힘들고 온 세상이 나와 싸우는 것 같을 때, Clovery를 열어서 쌓아 둔 수백 개의 행복한 순간들을 넘겨보세요. 그것들이 두꺼운 방어막이 되어 따뜻하게 말해줄 거예요：「있잖아, 사실 넌 계속 이 세상에게 사랑받고 있었던 거야 🍯。」\n\n* 잠을 더 잘 잘 수 있어요： 눈을 감기 직전에 오늘의 작은 행운을 적어보세요. "오늘 정말 좋았다"는 만족감을 안고 잠들면, 꿈도 달콤한 딸기맛이 될 거예요 🍓\n\n그래서 Clovery는 "할 일"을 관리하는 효율 도구가 아니라, 당신만의 「행복 은행」이에요.\n\n오늘이 아무리 바빠도, ena와 함께 생활 속에서 작은 행운을 한 움큼 뽑아 가요！\n\n오늘은 어떤 행복을 저금할 건가요？다음 페이지에서 첫 번째 「입금」을 기다릴게요 ^^\n`,
   },
@@ -2227,16 +2488,16 @@ function weekdayName(iso, lang) {
 // ── Irene's milestone messages — one per 4-entry clover formation ──
 const MILESTONE_MSGS = {
   zh: [
-    { badge:'第一朵四叶草 🌿', msg:'哇！你种下了第一朵四叶草！\n嗯呐说：好运已经在路上啦 ✨' },
+    { badge:'第一朵四叶草 🌿', msg:'哇！你种下了第一朵四叶草！\nena说：好运已经在路上啦 ✨' },
     { badge:'双倍奶茶好运 ☕', msg:'恭喜你，解锁了「双倍奶茶好运」！^^\n继续记录，好运还会加倍哦～' },
     { badge:'春日阳光加持 ☀️', msg:'第三朵！你走在阳光里 ☀️\n感谢你把每件小事都好好留了下来' },
     { badge:'晴天彩虹特权 🌈', msg:'四朵！这是属于你的幸运彩虹 🌈\n你比你想的更幸运哟' },
-    { badge:'猫猫认证好运 🐱', msg:'五朵！猫猫亲自认证你的好运来临 🐱\n嗯呐送你大大的鼓励！' },
+    { badge:'猫猫认证好运 🐱', msg:'五朵！猫猫亲自认证你的好运来临 🐱\nena送你大大的鼓励！' },
     { badge:'超级无敌幸运 🌟', msg:'六朵！你已经是「超级幸运收集家」啦！\n宇宙都在为你应援 🌟' },
     { badge:'七彩气泡幸运 🫧', msg:'七朵！愿你的生活永远像气泡饮料一样\n充满惊喜和快乐 🫧' },
-    { badge:'八倍好运滚滚来 🎱', msg:'八朵！八八大发，好运滚滚来～\n嗯呐已替你提前庆祝！🎉' },
+    { badge:'八倍好运滚滚来 🎱', msg:'八朵！八八大发，好运滚滚来～\nena已替你提前庆祝！🎉' },
     { badge:'永恒幸运草园 🏡', msg:'九朵！你的幸运草园越来越茂盛了\n每一条记录都是种下的一粒种子 🌱' },
-    { badge:'十全十美好运 ✨', msg:'十朵！「十全十美」成就解锁！\n你真的太厉害了，嗯呐超级骄傲！(๑•̀ㅂ•́)و✧' },
+    { badge:'十全十美好运 ✨', msg:'十朵！「十全十美」成就解锁！\n你真的太厉害了，ena超级骄傲！(๑•̀ㅂ•́)و✧' },
   ],
   en: [
     { badge:'First Clover! 🌿', msg:'You grew your very first clover! 🌿\nena says: good luck is already on its way ✨' },
@@ -2285,10 +2546,10 @@ const IRENE_DAY_MSGS = {
     '加油！你比自己想象的要厉害得多 💪 (ง •_•)ง',
     '小幸运已经在来的路上了，等着你发现！🍀 (✿◠‿◠)',
     '今天的你，闪闪发光！☀️ ヽ(✿ﾟ▽ﾟ)ノ',
-    '不管遇到什么，嗯呐都在这里陪你 💚 (´｡• ᵕ •｡`)',
+    '不管遇到什么，ena都在这里陪你 💚 (´｡• ᵕ •｡`)',
     '把今天的小幸运记下来，未来的你会感谢现在的你 🌟 ◝(⁰▿⁰)◜',
     '深呼吸，今天也一定可以的！ヾ(≧▽≦*)o',
-    '你的努力嗯呐都看见了，真的很棒 🥹 (´•ω•`)',
+    '你的努力ena都看见了，真的很棒 🥹 (´•ω•`)',
   ],
   en: [
     "You're already amazing — today will be great too! ✨ (๑•̀ㅂ•́)و✧",
@@ -2331,7 +2592,7 @@ const IRENE_NIGHT_MSGS = {
   zh: [
     '已经这么晚啦！快点去睡觉，明天的小幸运还等着你记录呢 🌙 (ˇ▼ˇ)',
     '熬夜不乖哦！好好休息一下，明天更有力气找小幸运！💤 (。-ω-)zzZ',
-    '不许熬夜！嗯呐要生气了~ 好好睡觉，好运才能蓄满 🌛 (＃`Д´)',
+    '不许熬夜！ena要生气了~ 好好睡觉，好运才能蓄满 🌛 (＃`Д´)',
     '夜深了，带着今天的小幸运去做个甜甜的梦吧 🍓 (✿˘◡˘✿)',
     '哟，夜猫子！但说真的……快去睡！好运需要好眠来充电 🌙 ヾ(⌐■_■)ノ♪',
   ],
@@ -2385,9 +2646,9 @@ function parseReminderTime(str) {
 
 const NOTIF_STRINGS = {
   zh: {
-    dailyTitle: '嗯呐来催你写日记啦 (◕‿◕✿)',
-    dailyBody:  '今天遇到什么小幸运了吗？快来告诉嗯呐吧～ 🍀',
-    weeklyTitle:'嗯呐想和你一起回顾这一周 (｡♥‿♥｡)',
+    dailyTitle: 'ena来催你写日记啦 (◕‿◕✿)',
+    dailyBody:  '今天遇到什么小幸运了吗？快来告诉ena吧～ 🍀',
+    weeklyTitle:'ena想和你一起回顾这一周 (｡♥‿♥｡)',
     weeklyBody: '这周发生了好多事吧？一起翻翻记录看看～ ✨',
   },
   en: {
@@ -2512,7 +2773,7 @@ function Toggle({value, onChange, theme}) {
 // ═══════════════════════════════════════════════════════════
 // TAB BAR
 // ═══════════════════════════════════════════════════════════
-function TabBar({tab, setTab, theme, lang}) {
+function TabBar({tab, setTab, theme, lang, dimmed}) {
   const i = I18N[lang||'en'];
   const tabs = [
     {id:'home',    label:i.tabToday,  icon:'home'},
@@ -2533,9 +2794,11 @@ function TabBar({tab, setTab, theme, lang}) {
       WebkitBackdropFilter: 'none',
       transition:'background 400ms',
       display:'flex', zIndex:100,
+      opacity: dimmed ? 0.35 : 1,
+      transition: 'opacity 200ms, background 400ms',
     }}>
       {tabs.map(t => {
-        const active = tab === t.id;
+        const active = !dimmed && tab === t.id;
         return (
           <SpringTap key={t.id} onClick={() => setTab(t.id)} sfx="tab" style={{flex:1, padding:'6px 4px'}}>
             <div style={{display:'flex', flexDirection:'column', alignItems:'center', gap:3}}>
@@ -2756,15 +3019,187 @@ function HomeScreen({entries, onWrite, onOpenEntry, onSwitchTab, theme, lang, ho
 }
 
 // ═══════════════════════════════════════════════════════════
+// DIARY PAGE CARD
+// ═══════════════════════════════════════════════════════════
+function DiaryPageCard({ entry, theme, lang, onClick, animDelay }) {
+  const SEASONS = {
+    spring:{ color:'#F4A7C3', dark:'#C45E8A', emoji:'🌸' },
+    summer:{ color:'#7BB576', dark:'#4A8045', emoji:'🌿' },
+    autumn:{ color:'#E8A838', dark:'#B07820', emoji:'🍂' },
+    winter:{ color:'#7BAFD4', dark:'#4A7FAA', emoji:'❄️' },
+  };
+  const getSeason = m => m>=3&&m<=5?'spring':m>=6&&m<=8?'summer':m>=9&&m<=11?'autumn':'winter';
+  const i = I18N[lang||'en'];
+  const { m, d } = formatDate(entry.date);
+  const season = getSeason(m);
+  const sc = SEASONS[season];
+  const wday = weekdayName(entry.date, lang);
+  const dateStr = (lang==='zh'||lang==='ja') ? `${m}月${d}日` : lang==='ko' ? `${m}월 ${d}일` : `${i.mons[m-1]} ${d}`;
+  const IRENE_TAGS = ['来自Irene','from Irene','Ireneより','Irene의 편지','来自ena','来自嗯呐','嗯呐的信','来自ena的信','from ena',"ena's letters",'enaより','enaの手紙','ena의 편지'];
+  const userTags = (entry.tags||[]).filter(t => !IRENE_TAGS.includes(t));
+  const paperBg = theme._dark ? '#1E1C18' : '#FDFBF7';
+  const inkColor = theme._dark ? '#E8E4DC' : '#2A2826';
+  const softInk = theme._dark ? '#A09A90' : '#5A5450';
+  const gridLine = theme._dark ? 'rgba(255,255,255,0.028)' : 'rgba(0,0,0,0.035)';
+  return (
+    <div onClick={onClick} style={{
+      background: paperBg,
+      borderRadius: 6,
+      marginBottom: 18,
+      cursor: 'pointer',
+      position: 'relative',
+      overflow: 'hidden',
+      boxShadow: theme._dark
+        ? '0 2px 10px rgba(0,0,0,0.35), 0 0 0 1px rgba(255,255,255,0.04)'
+        : '0 2px 14px rgba(0,0,0,0.09), 0 0 0 1px rgba(0,0,0,0.05)',
+      backgroundImage: `linear-gradient(${gridLine} 1px,transparent 1px),linear-gradient(90deg,${gridLine} 1px,transparent 1px)`,
+      backgroundSize: '24px 24px',
+      animation: `seasonSlideIn 380ms cubic-bezier(0.16,1,0.3,1) ${animDelay||0}ms both`,
+    }}>
+      {/* Season spine */}
+      <div style={{ position:'absolute', top:0, left:0, bottom:0, width:5, background:`linear-gradient(180deg,${sc.color},${sc.dark})` }}/>
+      <div style={{ padding:'16px 16px 14px 18px' }}>
+        {/* Date + weather sticker */}
+        <div style={{ display:'flex', alignItems:'flex-start', justifyContent:'space-between', marginBottom:8 }}>
+          <div>
+            <div style={{ fontSize:11, color:sc.dark, fontWeight:700, letterSpacing:1.8, fontFamily:'Gaegu,cursive', marginBottom:2 }}>
+              {wday.toUpperCase()}
+            </div>
+            <div style={{ fontSize:28, fontWeight:700, color:inkColor, lineHeight:1.05, fontFamily:'Gaegu,cursive', letterSpacing:-0.5 }}>
+              {dateStr}
+            </div>
+          </div>
+          {entry.weather && (
+            <div style={{
+              width:42, height:42, borderRadius:21, flexShrink:0, marginLeft:8, marginTop:2,
+              background: theme._dark ? 'rgba(255,255,255,0.09)' : 'rgba(255,255,255,0.92)',
+              display:'flex', alignItems:'center', justifyContent:'center',
+              fontSize:23, boxShadow:'0 1px 6px rgba(0,0,0,0.13)',
+            }}>{entry.weather}</div>
+          )}
+        </div>
+        {/* Divider */}
+        <div style={{ height:1, background:`linear-gradient(90deg,${sc.color}99,transparent)`, marginBottom:10 }}/>
+        {/* Title */}
+        {entry.title && (
+          <div style={{ fontSize:18, fontWeight:700, color:inkColor, fontFamily:'Gaegu,cursive', lineHeight:1.3, marginBottom:6 }}>
+            {entry.title}
+          </div>
+        )}
+        {/* Content */}
+        {entry.lucky && (
+          <div style={{ fontSize:15, color:softInk, lineHeight:1.9, fontFamily:'Gaegu,cursive', display:'-webkit-box', WebkitLineClamp:4, WebkitBoxOrient:'vertical', overflow:'hidden' }}>
+            {entry.lucky}
+          </div>
+        )}
+        {/* Footer */}
+        <div style={{ display:'flex', alignItems:'center', gap:6, marginTop:10, flexWrap:'wrap' }}>
+          <span style={{ fontSize:14, opacity:0.65 }}>{sc.emoji}</span>
+          {userTags.slice(0,3).map(t=>(
+            <span key={t} style={{ fontSize:11, padding:'2px 7px', borderRadius:9999, background:sc.color+'33', color:sc.dark, fontWeight:600 }}>#{t}</span>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+// ─── Month / Year Picker ──────────────────────────────────
+function MonthYearPicker({ year, month, onSelect, onClose, theme, lang }) {
+  const i = I18N[lang||'en'];
+  const { y: currentYear, m: currentMonth } = formatDate(TODAY);
+  const minYear = currentYear - 5;
+  const maxYear = currentYear;
+  const [selYear, setSelYear] = React.useState(Math.min(year, maxYear));
+  const yearRowRef = React.useRef(null);
+  React.useEffect(() => {
+    if (yearRowRef.current) yearRowRef.current.scrollLeft = yearRowRef.current.scrollWidth;
+  }, []);
+
+  return (
+    <div style={{
+      position:'fixed', inset:0, zIndex:200,
+      background:'rgba(0,0,0,0.28)', backdropFilter:'blur(10px)', WebkitBackdropFilter:'blur(10px)',
+      display:'flex', alignItems:'center', justifyContent:'center',
+    }} onClick={onClose}>
+      <div
+        onClick={e => e.stopPropagation()}
+        style={{
+          background:theme.bg,
+          borderRadius:28,
+          padding:'22px 20px 20px',
+          width:300,
+          boxShadow:'0 24px 64px rgba(0,0,0,0.22)',
+          animation:'dialogPop 240ms cubic-bezier(0.16,1,0.3,1) both',
+        }}>
+        {/* Year selection - horizontal chip row */}
+        <div ref={yearRowRef} style={{
+          display:'flex', gap:6, overflowX:'auto', marginBottom:14,
+          scrollbarWidth:'none', WebkitOverflowScrolling:'touch',
+          msOverflowStyle:'none',
+        }}>
+          {Array.from({length: maxYear - minYear + 1}, (_, idx) => minYear + idx).map((y, ci) => {
+            const isSel = y === selYear;
+            return (
+              <SpringTap key={y} sfx="select" onClick={() => setSelYear(y)} style={{
+                flexShrink:0,
+                padding:'7px 13px',
+                borderRadius:12,
+                background: isSel ? theme.accent : theme.accentSoft,
+                animation: `fadeSlideUp 180ms ease backwards`,
+                animationDelay: `${ci * 25}ms`,
+              }}>
+                <span style={{
+                  fontSize:14, fontWeight: isSel ? 700 : 500,
+                  color: isSel ? '#fff' : theme.accentDark,
+                  whiteSpace:'nowrap',
+                }}>{y}</span>
+              </SpringTap>
+            );
+          })}
+        </div>
+        {/* Month grid 3×4 */}
+        <div style={{display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:8}}>
+          {i.mons.map((name, idx) => {
+            const m = idx + 1;
+            if (selYear === currentYear && m > currentMonth) return null;
+            const isSelected = selYear===year && m===month;
+            return (
+              <SpringTap key={`${selYear}-${m}`} sfx="pop" onClick={() => onSelect(selYear, m)} style={{
+                height:46, borderRadius:14,
+                display:'flex', alignItems:'center', justifyContent:'center',
+                background: isSelected ? theme.accent : theme.accentSoft,
+                transition:'background 150ms',
+                animation: 'fadeSlideUp 200ms ease backwards',
+                animationDelay: `${idx * 18}ms`,
+              }}>
+                <span style={{
+                  fontSize:15, fontWeight: isSelected ? 700 : 500,
+                  color: isSelected ? '#fff' : theme.accentDark,
+                  letterSpacing: 0.1,
+                }}>{name}</span>
+              </SpringTap>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ═══════════════════════════════════════════════════════════
 // CALENDAR SCREEN
 // ═══════════════════════════════════════════════════════════
-function CalendarScreen({entries, onOpenEntry, onWrite, onSearch, theme, lang, tagOrder}) {
+function CalendarScreen({entries, onOpenEntry, onWrite, onSearch, theme, lang, tagOrder, onPickerOpenChange}) {
   const i = I18N[lang||'en'];
   const now = formatDate(TODAY);
   const [year,  setYear]  = React.useState(now.y);
   const [month, setMonth] = React.useState(now.m);
   const [gridKey, setGridKey] = React.useState(0);
   const [selectedTag, setSelectedTag] = React.useState(null);
+  const [pickerOpen, setPickerOpen] = React.useState(false);
+  React.useEffect(() => { onPickerOpenChange && onPickerOpenChange(pickerOpen); }, [pickerOpen]);
 
   const navigate = (dir) => {
     let ny = year, nm = month + dir;
@@ -2778,21 +3213,26 @@ function CalendarScreen({entries, onOpenEntry, onWrite, onSearch, theme, lang, t
   const allTags = React.useMemo(() => {
     const freq = {};
     entries.forEach(e => (e.tags||[]).forEach(t => { freq[t] = (freq[t]||0) + 1; }));
-    const ireneTags = ['来自Irene','from Irene','Ireneより','Irene의 편지','来自ena','来自嗯呐','嗯呐的信','from ena',"ena's letters",'enaより','enaの手紙','ena의 편지','ena의 편지들'];
+    const ireneTags = ['来自Irene','from Irene','Ireneより','Irene의 편지','来自ena','来自嗯呐','嗯呐的信','来自ena的信','from ena',"ena's letters",'enaより','enaの手紙','ena의 편지','ena의 편지들'];
     const ireneTag  = Object.keys(freq).find(t => ireneTags.includes(t));
-    let rest = Object.entries(freq).filter(([t]) => !ireneTags.includes(t));
+    const userOnly = Object.entries(freq).filter(([t]) => !ireneTags.includes(t));
+    const all = ireneTag ? [[ireneTag, freq[ireneTag]], ...userOnly] : userOnly;
     if (tagOrder) {
       const om = new Map(tagOrder.map((t, i) => [t, i]));
-      rest.sort((a, b) => {
+      all.sort((a, b) => {
         const ia = om.has(a[0]) ? om.get(a[0]) : 9999;
         const ib = om.has(b[0]) ? om.get(b[0]) : 9999;
         return ia !== ib ? ia - ib : b[1] - a[1];
       });
     } else {
-      rest.sort((a,b) => b[1]-a[1]);
+      const isIrene = (t) => ireneTag && t === ireneTag;
+      all.sort((a, b) => {
+        if (isIrene(a[0]) && !isIrene(b[0])) return -1;
+        if (!isIrene(a[0]) && isIrene(b[0])) return 1;
+        return b[1] - a[1];
+      });
     }
-    rest = rest.map(([t]) => t).slice(0,15);
-    return ireneTag ? [ireneTag, ...rest] : rest;
+    return all.map(([t]) => t).slice(0, 16);
   }, [entries, tagOrder]);
 
   // entriesByDate: for opening the newest entry when a grid cell is tapped
@@ -2826,7 +3266,7 @@ function CalendarScreen({entries, onOpenEntry, onWrite, onSearch, theme, lang, t
 
   // List shown below: no filter = current month; tag filter = current month + that tag
   // Exception: irene/嗯呐 tags show all months (they're sparse, month-limiting loses context)
-  const IRENE_TAG_LIST = ['来自Irene','from Irene','Ireneより','Irene의 편지','来自ena','来自嗯呐','嗯呐的信','from ena',"ena's letters",'enaより','enaの手紙','ena의 편지','ena의 편지들'];
+  const IRENE_TAG_LIST = ['来自Irene','from Irene','Ireneより','Irene의 편지','来自ena','来自嗯呐','嗯呐的信','来自ena的信','from ena',"ena's letters",'enaより','enaの手紙','ena의 편지','ena의 편지들'];
   const listEntries = React.useMemo(() => {
     const isIreneTag = selectedTag && IRENE_TAG_LIST.includes(selectedTag);
     const base = !selectedTag
@@ -2876,25 +3316,36 @@ function CalendarScreen({entries, onOpenEntry, onWrite, onSearch, theme, lang, t
       {/* Header */}
       <div style={{padding:'4px 24px 0'}}>
         <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:6}}>
-          <div style={{fontSize:17, color:theme.inkSoft, letterSpacing:0.6, fontWeight:500}}>
-            {i.calTitle}
-          </div>
           <SpringTap onClick={onSearch} style={{width:36,height:36,borderRadius:18,display:'flex',alignItems:'center',justifyContent:'center'}}>
             <Icon name="search" size={18} color={theme.ink} stroke={1.8}/>
           </SpringTap>
+          <div style={{width:36}}/>
         </div>
         <div style={{display:'flex', alignItems:'center', justifyContent:'center', gap:4}}>
           <SpringTap onClick={() => navigate(-1)} sfx="back" style={{width:36,height:36,borderRadius:10,display:'flex',alignItems:'center',justifyContent:'center'}}>
             <Icon name="chevron-left" size={17} color={theme.inkSoft} stroke={2.2}/>
           </SpringTap>
-          <div style={{fontSize:26, fontWeight:600, color:theme.ink, lineHeight:1.1, letterSpacing:-0.3, minWidth:160, textAlign:'center'}}>
-            {monthLabel}
-          </div>
+          <SpringTap onClick={() => setPickerOpen(true)} style={{
+            minWidth:160, height:40, borderRadius:12, display:'flex', alignItems:'center', justifyContent:'center', gap:5,
+          }}>
+            <span style={{fontSize:26, fontWeight:600, color:theme.ink, lineHeight:1.1, letterSpacing:-0.3}}>
+              {monthLabel}
+            </span>
+            <Icon name="chevron-down" size={13} color={theme.inkMuted} stroke={2.2}/>
+          </SpringTap>
           <SpringTap onClick={() => navigate(1)} style={{width:36,height:36,borderRadius:10,display:'flex',alignItems:'center',justifyContent:'center'}}>
             <Icon name="chevron-right" size={17} color={theme.inkSoft} stroke={2.2}/>
           </SpringTap>
         </div>
       </div>
+      {pickerOpen && (
+        <MonthYearPicker
+          year={year} month={month}
+          onSelect={(y, m) => { setYear(y); setMonth(m); setGridKey(k=>k+1); setPickerOpen(false); Haptic.impact('light'); }}
+          onClose={() => setPickerOpen(false)}
+          theme={theme} lang={lang}
+        />
+      )}
 
       <div style={{padding:'5px 24px 0', fontSize:16, color:theme.inkSoft}}>
         <span style={{color:theme.ink, fontWeight:600}}>{i.monthCount(monthEntries.length)}</span>
@@ -2924,11 +3375,11 @@ function CalendarScreen({entries, onOpenEntry, onWrite, onSearch, theme, lang, t
           const isFuture = iso > TODAY;
           return (
             <SpringTap key={iso}
-              onClick={isFuture ? undefined : dayArr.length > 0 ? () => {
-                const real = dayArr.filter(e => !e.isWelcome);
-                onOpenEntry(real.length > 0 ? real[0] : dayArr[0]);
+              onClick={isFuture ? undefined : hasAny ? () => {
+                const dateEntries = entries.filter(e => !e.isWelcome && e.date === iso);
+                onOpenEntry(dateEntries[0]);
               } : () => onWrite && onWrite(iso)}
-              style={{aspectRatio:'1/1.12', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', opacity:isFuture?0.28:1}}>
+              style={{aspectRatio:'1/1.12', maxHeight:62, width:'100%', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', opacity:isFuture?0.28:1}}>
               <div style={{
                 width:30, height:30, borderRadius:15,
                 display:'flex', alignItems:'center', justifyContent:'center',
@@ -3037,7 +3488,7 @@ function CalendarScreen({entries, onOpenEntry, onWrite, onSearch, theme, lang, t
                 order.sort((a, b) => b.localeCompare(a));
                 const dashClr2 = theme._dark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)';
                 return order.map((date, di) => {
-                  const dayItems = groups[date];
+                  const dayItems = [...groups[date]].sort((a, b) => (a.createdAt||0) - (b.createdAt||0) || (a.id < b.id ? -1 : 1));
                   const firstEntry = dayItems[0];
                   return (
                     <StaggerItem key={date} index={di}>
@@ -3374,13 +3825,17 @@ function CloverField({ entries, onOpenEntry, onFormationTap, theme, lang }) {
             transform:'translateX(-50%) translateY(-100%)',
             cursor:'pointer',
             zIndex: Math.round(formation.y),
-            animation:`cloverSprout 0.42s cubic-bezier(0.34,1.56,0.64,1) ${formation.formationIdx * 80}ms both`,
           }}
         >
           <div style={{
             transform:`rotate(${formation.rotation}deg)`,
           }}>
-            <FieldCloverImg size={formation.sizePx} filter={formation.filter}/>
+            <div style={{
+              transformOrigin:'50% 100%',
+              animation:`cloverSprout 0.42s cubic-bezier(0.34,1.56,0.64,1) ${formation.formationIdx * 80}ms both`,
+            }}>
+              <FieldCloverImg size={formation.sizePx} filter={formation.filter}/>
+            </div>
           </div>
         </div>
       ))}
@@ -3551,7 +4006,7 @@ function HistoryView({ entries, onOpenEntry, theme, lang }) {
       if (!map[e.date]) { map[e.date] = []; order.push(e.date); }
       map[e.date].push(e);
     });
-    return order.map(date => ({ date, items: map[date] }));
+    return order.map(date => ({ date, items: [...map[date]].reverse() }));
   }, [real]);
 
   if (real.length === 0) {
@@ -3602,7 +4057,7 @@ function HistoryView({ entries, onOpenEntry, theme, lang }) {
             <div style={{borderRadius:16, background:cardBg, boxShadow:cardShad, overflow:'hidden'}}>
               {items.map((e, idx) => {
                 const t = parseEntryTime(e);
-                const userTags = (e.tags||[]).filter(t => !['来自Irene','from Irene','Ireneより','Irene의 편지','来自ena','来自嗯呐','嗯呐的信','from ena',"ena's letters",'enaより','enaの手紙','ena의 편지','ena의 편지들'].includes(t));
+                const userTags = (e.tags||[]).filter(t => !['来自Irene','from Irene','Ireneより','Irene의 편지','来自ena','来自嗯呐','嗯呐的信','来自ena的信','from ena',"ena's letters",'enaより','enaの手紙','ena의 편지','ena의 편지들'].includes(t));
                 return (
                   <div key={e.id} style={{
                     padding:'11px 14px',
@@ -3659,6 +4114,7 @@ function FormationCard({ formation, onClose, onOpenEntry, theme, lang }) {
         backdropFilter:'blur(6px)', WebkitBackdropFilter:'blur(6px)',
         opacity: open ? 1 : 0,
         transition:'opacity 320ms',
+        pointerEvents: open ? 'auto' : 'none',
       }}/>
       {/* Sheet */}
       <div style={{
@@ -3892,12 +4348,9 @@ function SettingsScreen({entries, theme, onReset, lang, onLangChange, palette, o
   const daysRecorded = React.useMemo(() =>
     new Set((entries||[]).filter(e => !e.isWelcome).map(e => e.date)).size,
   [entries]);
-  const [themeOpen, setThemeOpen] = React.useState(false);
-  const [darkOpen,  setDarkOpen]  = React.useState(false);
-  const [langOpen,  setLangOpen]  = React.useState(false);
-  const [fontOpen,  setFontOpen]  = React.useState(false);
   const [migrationExport, setMigrationExport] = React.useState({status:'idle'});
   const isSystemFont = fontHand === 'System';
+  const [appearOpen, setAppearOpen] = React.useState(null);
 
   React.useEffect(() => {
     window.__cloveryMigrationExportResult = result => {
@@ -3972,149 +4425,113 @@ function SettingsScreen({entries, theme, onReset, lang, onLangChange, palette, o
             ))}
           </div>
         </div>
-        <SettingRow label={i.tagsLabel} detail={String(uniqueTagCount)} theme={theme} onTap={() => onSheet('tags')} isLast/>
+        <SettingRow label={i.tagsLabel} detail={String(uniqueTagCount)} theme={theme} onTap={() => onSheet('tags')} isLast={window.__cloverySyncMode !== 'accountVault'}/>
+        {window.__cloverySyncMode === 'accountVault' && (
+          <SettingRow
+            label={lang==='zh'?'日记回收站':lang==='ja'?'日記ごみ箱':lang==='ko'?'일기 휴지통':'Diary Trash'}
+            theme={theme}
+            onTap={() => window.webkit?.messageHandlers?.openTrash?.postMessage({})}
+            isLast/>
+        )}
       </SettingGroup>
 
       {/* Appearance */}
       <SettingGroup title={i.appearance} theme={theme}>
         {/* Theme */}
-        <SpringTap onClick={() => setThemeOpen(v => !v)} style={{
-          display:'flex', alignItems:'center', padding:'14px 0',
-          borderTop:`1px solid ${theme.divider}`, gap:12,
-        }}>
-          <div style={{flex:1, fontSize:17, color:theme.ink}}>{i.themeLabel}</div>
-          <div style={{fontSize:16, color:theme.inkSoft}}>{i.paletteNames?.[palette] || PALETTES[palette]?.name || palette}</div>
-          <Icon name={themeOpen?'chevron-down':'chevron-right'} size={12} color={theme.inkMuted}/>
+        <SpringTap onClick={() => setAppearOpen(appearOpen==='theme' ? null : 'theme')} style={{display:'flex',alignItems:'center',padding:'14px 0',borderTop:`1px solid ${theme.divider}`,gap:12}}>
+          <div style={{flex:1,fontSize:17,color:theme.ink}}>{i.themeLabel}</div>
+          <div style={{fontSize:16,color:theme.inkSoft}}>{i.paletteNames?.[palette]||PALETTES[palette]?.name||palette}</div>
+          <Icon name="chevron-right" size={12} color={theme.inkMuted} style={{transition:'transform 200ms',transform:appearOpen==='theme'?'rotate(90deg)':'rotate(0deg)'}}/>
         </SpringTap>
-        {themeOpen && (
-          <div style={{paddingBottom:16, animation:'fadeSlideUp 240ms ease both'}}>
-            <div style={{display:'flex', gap:8, paddingTop:4}}>
-              {Object.entries(PALETTES).map(([key,p]) => (
-                <SpringTap key={key} onClick={() => onPaletteChange(key)} style={{
-                  flex:1, padding:'10px 6px', borderRadius:14,
-                  background: palette===key ? theme.accentSoft : 'transparent',
-                  border:`1.5px solid ${palette===key ? theme.accent : theme.divider}`,
-                  display:'flex', flexDirection:'column', alignItems:'center', gap:6,
-                  transition:'all 200ms',
-                }}>
-                  <div style={{display:'flex', gap:2}}>
-                    <div style={{width:10,height:18,borderRadius:'5px 0 0 5px',background:p.accent}}/>
-                    <div style={{width:7,height:18,background:p.paper}}/>
-                    <div style={{width:7,height:18,borderRadius:'0 5px 5px 0',background:p.accentSoft}}/>
-                  </div>
-                  <div style={{fontSize:15, color:theme.inkSoft}}>{i.paletteNames?.[key] || p.name}</div>
-                </SpringTap>
-              ))}
-            </div>
+        {appearOpen==='theme' && (
+          <div style={{display:'flex',gap:8,paddingBottom:16}}>
+            {Object.entries(PALETTES).map(([key,p]) => (
+              <SpringTap key={key} onClick={() => { onPaletteChange(key); setAppearOpen(null); }} style={{
+                flex:'1 1 0',minWidth:0,padding:'10px 2px',borderRadius:16,
+                background:palette===key?theme.accentSoft:'transparent',
+                border:`1.5px solid ${palette===key?theme.accent:theme.divider}`,
+                display:'flex',flexDirection:'column',alignItems:'center',gap:6,
+              }}>
+                <div style={{display:'flex',gap:2,alignItems:'center'}}>
+                  <div style={{width:8,height:16,borderRadius:'4px 0 0 4px',background:p.accent}}/>
+                  <div style={{width:6,height:16,background:p.paper}}/>
+                  <div style={{width:6,height:16,borderRadius:'0 4px 4px 0',background:p.accentSoft}}/>
+                </div>
+                <div style={{fontSize:14,color:palette===key?theme.accentDark:theme.inkSoft,fontWeight:palette===key?600:400}}>{i.paletteNames?.[key]||p.name}</div>
+              </SpringTap>
+            ))}
           </div>
         )}
         {/* Dark mode */}
-        <SpringTap onClick={() => setDarkOpen(v => !v)} style={{
-          display:'flex', alignItems:'center', padding:'14px 0',
-          borderTop:`1px solid ${theme.divider}`, gap:12,
-        }}>
-          <div style={{flex:1, fontSize:17, color:theme.ink}}>{i.darkLabel}</div>
-          <div style={{fontSize:16, color:theme.inkSoft}}>{darkAuto ? i.darkAuto : (dark ? i.darkDark : i.darkLight)}</div>
-          <Icon name={darkOpen?'chevron-down':'chevron-right'} size={12} color={theme.inkMuted}/>
+        <SpringTap onClick={() => setAppearOpen(appearOpen==='dark' ? null : 'dark')} style={{display:'flex',alignItems:'center',padding:'14px 0',borderTop:`1px solid ${theme.divider}`,gap:12}}>
+          <div style={{flex:1,fontSize:17,color:theme.ink}}>{i.darkLabel}</div>
+          <div style={{fontSize:16,color:theme.inkSoft}}>{darkAuto?i.darkAuto:(dark?i.darkDark:i.darkLight)}</div>
+          <Icon name="chevron-right" size={12} color={theme.inkMuted} style={{transition:'transform 200ms',transform:appearOpen==='dark'?'rotate(90deg)':'rotate(0deg)'}}/>
         </SpringTap>
-        {darkOpen && (
-          <div style={{paddingBottom:16, animation:'fadeSlideUp 240ms ease both'}}>
-            <div style={{display:'flex', gap:8, paddingTop:4}}>
-              {[
-                {key:'light',  label:i.darkLight},
-                {key:'dark',   label:i.darkDark},
-                {key:'auto',   label:i.darkAuto},
-              ].map(o => {
-                const active = o.key==='auto' ? darkAuto : (!darkAuto && (o.key==='dark' ? dark : !dark));
-                return (
-                  <SpringTap key={o.key} onClick={() => {
-                    if (o.key==='auto') { onDarkAutoChange(true); }
-                    else { onDarkAutoChange(false); onDarkChange(o.key==='dark'); }
-                  }} style={{
-                    flex:1, padding:'12px 8px', borderRadius:14,
-                    background: active ? theme.accentSoft : 'transparent',
-                    border:`1.5px solid ${active ? theme.accent : theme.divider}`,
-                    textAlign:'center',
-                    fontSize:16, fontWeight: active ? 600 : 400,
-                    color: active ? theme.accentDark : theme.inkSoft,
-                    transition:'all 200ms',
-                  }}>
-                    {o.label}
-                  </SpringTap>
-                );
-              })}
-            </div>
+        {appearOpen==='dark' && (
+          <div style={{display:'flex',gap:8,paddingBottom:16}}>
+            {[
+              {key:'light',label:i.darkLight,active:!dark&&!darkAuto,  action:()=>{onDarkAutoChange(false);onDarkChange(false);setAppearOpen(null);}},
+              {key:'dark', label:i.darkDark, active:dark&&!darkAuto,   action:()=>{onDarkAutoChange(false);onDarkChange(true); setAppearOpen(null);}},
+              {key:'auto', label:i.darkAuto, active:darkAuto,          action:()=>{onDarkAutoChange(true);                     setAppearOpen(null);}},
+            ].map(opt=>(
+              <SpringTap key={opt.key} onClick={opt.action} style={{
+                flex:1,padding:'8px 0',borderRadius:20,textAlign:'center',
+                background:opt.active?theme.accentSoft:'transparent',
+                border:`1.5px solid ${opt.active?theme.accent:theme.divider}`,
+                fontSize:15,color:opt.active?theme.accentDark:theme.inkSoft,
+                fontWeight:opt.active?600:400,
+              }}>{opt.label}</SpringTap>
+            ))}
           </div>
         )}
         {/* Language */}
-        <SpringTap onClick={() => setLangOpen(v => !v)} style={{
-          display:'flex', alignItems:'center', padding:'14px 0',
-          borderTop:`1px solid ${theme.divider}`, gap:12,
-        }}>
-          <div style={{flex:1, fontSize:17, color:theme.ink}}>{i.langLabel}</div>
-          <div style={{fontSize:16, color:theme.inkSoft}}>{i.langName}</div>
-          <Icon name={langOpen?'chevron-down':'chevron-right'} size={12} color={theme.inkMuted}/>
+        <SpringTap onClick={() => setAppearOpen(appearOpen==='lang' ? null : 'lang')} style={{display:'flex',alignItems:'center',padding:'14px 0',borderTop:`1px solid ${theme.divider}`,gap:12}}>
+          <div style={{flex:1,fontSize:17,color:theme.ink}}>{i.langLabel}</div>
+          <div style={{fontSize:16,color:theme.inkSoft}}>{i.langName}</div>
+          <Icon name="chevron-right" size={12} color={theme.inkMuted} style={{transition:'transform 200ms',transform:appearOpen==='lang'?'rotate(90deg)':'rotate(0deg)'}}/>
         </SpringTap>
-        {langOpen && (
-          <div style={{paddingBottom:16, animation:'fadeSlideUp 240ms ease both'}}>
-            <div style={{display:'flex', gap:8, paddingTop:4}}>
-              {i.langOptions.map(o => {
-                const active = o.code === lang;
-                return (
-                  <SpringTap key={o.code} onClick={() => onLangChange(o.code)} style={{
-                    flex:1, padding:'10px 4px', borderRadius:14,
-                    background: active ? theme.accentSoft : 'transparent',
-                    border:`1.5px solid ${active ? theme.accent : theme.divider}`,
-                    display:'flex', flexDirection:'column', alignItems:'center', gap:4,
-                    transition:'all 200ms',
-                  }}>
-                    <div style={{fontSize:20}}>{o.flag}</div>
-                    <div style={{fontSize:13, fontWeight: active ? 600 : 400, color: active ? theme.accentDark : theme.inkSoft}}>{o.name}</div>
-                  </SpringTap>
-                );
-              })}
-            </div>
+        {appearOpen==='lang' && (
+          <div style={{display:'flex',gap:8,paddingBottom:16,flexWrap:'wrap'}}>
+            {i.langOptions.map(o => (
+              <SpringTap key={o.code} onClick={() => { onLangChange(o.code); setAppearOpen(null); }} style={{
+                flex:'1 1 calc(33% - 8px)',minWidth:0,padding:'10px 4px',borderRadius:20,
+                display:'flex',alignItems:'center',justifyContent:'center',gap:6,
+                background:lang===o.code?theme.accentSoft:'transparent',
+                border:`1.5px solid ${lang===o.code?theme.accent:theme.divider}`,
+                fontSize:15,color:lang===o.code?theme.accentDark:theme.inkSoft,
+                fontWeight:lang===o.code?600:400,
+              }}>
+                <span style={{fontSize:18}}>{o.flag}</span>
+                <span>{o.name}</span>
+              </SpringTap>
+            ))}
           </div>
         )}
         {/* Font */}
-        <SpringTap onClick={() => setFontOpen(v => !v)} style={{
-          display:'flex', alignItems:'center', padding:'14px 0',
-          borderTop:`1px solid ${theme.divider}`,
-          borderBottom: fontOpen ? 'none' : `1px solid ${theme.divider}`, gap:12,
-        }}>
-          <div style={{flex:1, fontSize:17, color:theme.ink}}>{i.fontLabel}</div>
-          <div style={{fontSize:16, color:theme.inkSoft}}>{fontHand==='System' ? i.fontSystem : fontHand==='Serif' ? i.fontSerif : fontHand==='NotoSerifSC' ? '雅宋' : fontHand==='NaiChaTi' ? '奶茶体' : i.fontHand}</div>
-          <Icon name={fontOpen?'chevron-down':'chevron-right'} size={12} color={theme.inkMuted}/>
+        <SpringTap onClick={() => setAppearOpen(appearOpen==='font' ? null : 'font')} style={{display:'flex',alignItems:'center',padding:'14px 0',borderTop:`1px solid ${theme.divider}`,gap:12}}>
+          <div style={{flex:1,fontSize:17,color:theme.ink}}>{i.fontLabel}</div>
+          <div style={{fontSize:16,color:theme.inkSoft}}>{fontHand==='System'?i.fontSystem:fontHand==='Serif'?i.fontSerif:fontHand==='NotoSerifSC'?'雅宋':fontHand==='NaiChaTi'?'奶茶体':i.fontHand}</div>
+          <Icon name="chevron-right" size={12} color={theme.inkMuted} style={{transition:'transform 200ms',transform:appearOpen==='font'?'rotate(90deg)':'rotate(0deg)'}}/>
         </SpringTap>
-        {fontOpen && (
-          <div style={{paddingBottom:16, borderBottom:`1px solid ${theme.divider}`, animation:'fadeSlideUp 240ms ease both'}}>
-            <div style={{display:'flex', flexWrap:'wrap', gap:8, paddingTop:4}}>
-              {[
-                {key:'Gaegu',  label:i.fontHand},
-                {key:'System', label:i.fontSystem},
-                ...(lang === 'zh' ? [
-                  {key:'NotoSerifSC', label:'雅宋'},
-                  {key:'NaiChaTi', label:'奶茶体'},
-                ] : []),
-              ].map(o => {
-                const active = fontHand === o.key;
-                return (
-                  <SpringTap key={o.key} onClick={() => onFontHandChange(o.key)} style={{
-                    flex: 1, padding:'12px 8px', borderRadius:14,
-                    background: active ? theme.accentSoft : 'transparent',
-                    border:`1.5px solid ${active ? theme.accent : theme.divider}`,
-                    textAlign:'center',
-                    fontSize:16, fontWeight: active ? 600 : 400,
-                    color: active ? theme.accentDark : theme.inkSoft,
-                    transition:'all 200ms',
-                  }}>
-                    {o.label}
-                  </SpringTap>
-                );
-              })}
-            </div>
+        {appearOpen==='font' && (
+          <div style={{display:'flex',gap:8,paddingBottom:16}}>
+            {[
+              {key:'Gaegu', label:i.fontHand},
+              {key:'System',label:i.fontSystem},
+              ...(lang==='zh'||lang==='zh-TW'?[{key:'NotoSerifSC',label:'雅宋'},{key:'NaiChaTi',label:'奶茶体'}]:[{key:'Serif',label:i.fontSerif}]),
+            ].map(opt=>(
+              <SpringTap key={opt.key} onClick={()=>{onFontHandChange(opt.key);setAppearOpen(null);}} style={{
+                flex:'1 1 0',minWidth:0,padding:'8px 4px',borderRadius:20,textAlign:'center',
+                background:fontHand===opt.key?theme.accentSoft:'transparent',
+                border:`1.5px solid ${fontHand===opt.key?theme.accent:theme.divider}`,
+                fontSize:15,color:fontHand===opt.key?theme.accentDark:theme.inkSoft,
+                fontWeight:fontHand===opt.key?600:400,
+              }}>{opt.label}</SpringTap>
+            ))}
           </div>
         )}
+        <div style={{borderBottom:`1px solid ${theme.divider}`}}/>
       </SettingGroup>
 
       {/* More */}
@@ -4140,6 +4557,20 @@ function SettingsScreen({entries, theme, onReset, lang, onLangChange, palette, o
             {lang==='zh'?'导出失败，原数据未修改，请重试':'Export failed. Your original data was not changed. Please retry.'}
           </div>
         )}
+        <SpringTap onClick={() => onSheet('subscribe')} style={{
+          display:'flex', alignItems:'center', padding:'14px 0',
+          borderTop:`1px solid ${theme.divider}`, gap:12,
+        }}>
+          <div style={{flex:1}}>
+            <div style={{fontSize:17, color:theme.ink, fontWeight:500}}>{i.subscribeLabel||'Clovery Premium'}</div>
+            <div style={{fontSize:13, color:theme.inkMuted, marginTop:1}}>{i.subscribeDetail||'Unlock all features'}</div>
+          </div>
+          <div style={{
+            padding:'4px 10px', borderRadius:9999, fontSize:12, fontWeight:700,
+            background:theme.accent, color:'#fff', letterSpacing:0.3,
+          }}>✦</div>
+          <Icon name="chevron-right" size={12} color={theme.inkMuted}/>
+        </SpringTap>
         <SpringTap onClick={() => onSheet('review')} style={{
           display:'flex', alignItems:'center', padding:'14px 0',
           borderTop:`1px solid ${theme.divider}`, gap:12,
@@ -4211,11 +4642,12 @@ function LanguagePicker({lang, onSelect, onClose, theme}) {
   const close = () => { setOpen(false); setTimeout(onClose, 300); };
   const opts = I18N[lang||'en'].langOptions;
   return (
-    <div style={{position:'absolute', inset:0, zIndex:400}}>
+    <div style={{position:'absolute', inset:0, zIndex:400, pointerEvents:open?'auto':'none'}}>
       <div onClick={close} style={{
         position:'absolute', inset:0,
         background:'rgba(0,0,0,0.28)', backdropFilter:'blur(4px)', WebkitBackdropFilter:'blur(4px)',
         opacity: open ? 1 : 0, transition:'opacity 300ms',
+        pointerEvents: open ? 'auto' : 'none',
       }}/>
       <div style={{
         position:'absolute', bottom:0, left:0, right:0,
@@ -4255,12 +4687,186 @@ function LanguagePicker({lang, onSelect, onClose, theme}) {
   );
 }
 
+function ThemeSheet({palette, onPaletteChange, onClose, theme, lang}) {
+  const i = I18N[lang||'en'];
+  const [open, setOpen] = React.useState(false);
+  React.useEffect(() => {
+    requestAnimationFrame(() => requestAnimationFrame(() => setOpen(true)));
+  }, []);
+  const close = () => { setOpen(false); setTimeout(onClose, 320); };
+  return (
+    <div style={{position:'absolute', inset:0, zIndex:400, pointerEvents:open?'auto':'none'}}>
+      <div onClick={close} style={{
+        position:'absolute', inset:0,
+        background:'rgba(0,0,0,0.28)', backdropFilter:'blur(4px)', WebkitBackdropFilter:'blur(4px)',
+        opacity:open?1:0, transition:'opacity 300ms',
+      }}/>
+      <div style={{
+        position:'absolute', bottom:0, left:0, right:0,
+        background:theme.bg, borderRadius:'24px 24px 0 0',
+        transform:open?'translateY(0)':'translateY(100%)',
+        transition:'transform 340ms cubic-bezier(0.16,1,0.3,1)',
+        boxShadow:'0 -8px 32px rgba(0,0,0,0.12)',
+        paddingBottom:'env(safe-area-inset-bottom, 0px)',
+      }}>
+        <div style={{padding:'10px 0 4px', display:'flex', justifyContent:'center'}}>
+          <div style={{width:40, height:5, borderRadius:3, background:theme.divider}}/>
+        </div>
+        <div style={{padding:'12px 24px 20px', fontSize:18, fontWeight:600, color:theme.ink}}>
+          {i.themeLabel}
+        </div>
+        <div style={{display:'flex', gap:10, padding:'0 24px 32px'}}>
+          {Object.entries(PALETTES).map(([key, p]) => (
+            <SpringTap key={key} onClick={() => { onPaletteChange(key); close(); }} style={{
+              flex:1, padding:'12px 6px', borderRadius:16,
+              background: palette===key ? theme.accentSoft : 'transparent',
+              border:`1.5px solid ${palette===key ? theme.accent : theme.divider}`,
+              display:'flex', flexDirection:'column', alignItems:'center', gap:8,
+              transition:'all 200ms',
+            }}>
+              <div style={{display:'flex', gap:2}}>
+                <div style={{width:10, height:20, borderRadius:'5px 0 0 5px', background:p.accent}}/>
+                <div style={{width:7, height:20, background:p.paper}}/>
+                <div style={{width:7, height:20, borderRadius:'0 5px 5px 0', background:p.accentSoft}}/>
+              </div>
+              <div style={{fontSize:13, color: palette===key ? theme.accentDark : theme.inkSoft, fontWeight: palette===key ? 600 : 400, textAlign:'center'}}>
+                {i.paletteNames?.[key] || p.name}
+              </div>
+            </SpringTap>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function DarkSheet({dark, darkAuto, onDarkChange, onDarkAutoChange, onClose, theme, lang}) {
+  const i = I18N[lang||'en'];
+  const [open, setOpen] = React.useState(false);
+  React.useEffect(() => {
+    requestAnimationFrame(() => requestAnimationFrame(() => setOpen(true)));
+  }, []);
+  const close = () => { setOpen(false); setTimeout(onClose, 320); };
+  const options = [
+    {key:'light', label:i.darkLight},
+    {key:'dark',  label:i.darkDark},
+    {key:'auto',  label:i.darkAuto},
+  ];
+  return (
+    <div style={{position:'absolute', inset:0, zIndex:400, pointerEvents:open?'auto':'none'}}>
+      <div onClick={close} style={{
+        position:'absolute', inset:0,
+        background:'rgba(0,0,0,0.28)', backdropFilter:'blur(4px)', WebkitBackdropFilter:'blur(4px)',
+        opacity:open?1:0, transition:'opacity 300ms',
+      }}/>
+      <div style={{
+        position:'absolute', bottom:0, left:0, right:0,
+        background:theme.bg, borderRadius:'24px 24px 0 0',
+        transform:open?'translateY(0)':'translateY(100%)',
+        transition:'transform 340ms cubic-bezier(0.16,1,0.3,1)',
+        boxShadow:'0 -8px 32px rgba(0,0,0,0.12)',
+        paddingBottom:'env(safe-area-inset-bottom, 0px)',
+      }}>
+        <div style={{padding:'10px 0 4px', display:'flex', justifyContent:'center'}}>
+          <div style={{width:40, height:5, borderRadius:3, background:theme.divider}}/>
+        </div>
+        <div style={{padding:'12px 24px 20px', fontSize:18, fontWeight:600, color:theme.ink}}>
+          {i.darkLabel}
+        </div>
+        <div style={{display:'flex', gap:10, padding:'0 24px 32px'}}>
+          {options.map(o => {
+            const active = o.key==='auto' ? darkAuto : (!darkAuto && (o.key==='dark' ? dark : !dark));
+            return (
+              <SpringTap key={o.key} onClick={() => {
+                if (o.key==='auto') { onDarkAutoChange(true); }
+                else { onDarkAutoChange(false); onDarkChange(o.key==='dark'); }
+                close();
+              }} style={{
+                flex:1, padding:'16px 8px', borderRadius:16,
+                background: active ? theme.accentSoft : 'transparent',
+                border:`1.5px solid ${active ? theme.accent : theme.divider}`,
+                textAlign:'center', fontSize:16,
+                fontWeight: active ? 600 : 400,
+                color: active ? theme.accentDark : theme.inkSoft,
+                transition:'all 200ms',
+              }}>
+                {o.label}
+              </SpringTap>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function FontSheet({fontHand, onFontHandChange, onClose, theme, lang}) {
+  const i = I18N[lang||'en'];
+  const [open, setOpen] = React.useState(false);
+  React.useEffect(() => {
+    requestAnimationFrame(() => requestAnimationFrame(() => setOpen(true)));
+  }, []);
+  const close = () => { setOpen(false); setTimeout(onClose, 320); };
+  const options = [
+    {key:'Gaegu',  label:i.fontHand},
+    {key:'System', label:i.fontSystem},
+    ...(lang === 'zh' || lang === 'zh-TW' ? [
+      {key:'NotoSerifSC', label:'雅宋'},
+      {key:'NaiChaTi', label:'奶茶体'},
+    ] : []),
+    ...(lang !== 'zh' && lang !== 'zh-TW' ? [{key:'Serif', label:i.fontSerif}] : []),
+  ];
+  return (
+    <div style={{position:'absolute', inset:0, zIndex:400, pointerEvents:open?'auto':'none'}}>
+      <div onClick={close} style={{
+        position:'absolute', inset:0,
+        background:'rgba(0,0,0,0.28)', backdropFilter:'blur(4px)', WebkitBackdropFilter:'blur(4px)',
+        opacity:open?1:0, transition:'opacity 300ms',
+      }}/>
+      <div style={{
+        position:'absolute', bottom:0, left:0, right:0,
+        background:theme.bg, borderRadius:'24px 24px 0 0',
+        transform:open?'translateY(0)':'translateY(100%)',
+        transition:'transform 340ms cubic-bezier(0.16,1,0.3,1)',
+        boxShadow:'0 -8px 32px rgba(0,0,0,0.12)',
+        paddingBottom:'env(safe-area-inset-bottom, 0px)',
+      }}>
+        <div style={{padding:'10px 0 4px', display:'flex', justifyContent:'center'}}>
+          <div style={{width:40, height:5, borderRadius:3, background:theme.divider}}/>
+        </div>
+        <div style={{padding:'12px 24px 20px', fontSize:18, fontWeight:600, color:theme.ink}}>
+          {i.fontLabel}
+        </div>
+        <div style={{display:'flex', flexWrap:'wrap', gap:10, padding:'0 24px 32px'}}>
+          {options.map(o => {
+            const active = fontHand === o.key;
+            return (
+              <SpringTap key={o.key} onClick={() => { onFontHandChange(o.key); close(); }} style={{
+                flex:1, minWidth:'40%', padding:'16px 8px', borderRadius:16,
+                background: active ? theme.accentSoft : 'transparent',
+                border:`1.5px solid ${active ? theme.accent : theme.divider}`,
+                textAlign:'center', fontSize:16,
+                fontWeight: active ? 600 : 400,
+                color: active ? theme.accentDark : theme.inkSoft,
+                transition:'all 200ms',
+              }}>
+                {o.label}
+              </SpringTap>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 Object.assign(window, {
   I18N, TODAY, MOCK_ENTRIES, STREAK, TOTAL_LUCKY,
   formatDate, weekdayName, relativeDay,
   StaggerItem, useCountUp, Toggle,
-  TabBar, HomeScreen, CalendarScreen, LuckyScreen, SettingsScreen,
+  TabBar, HomeScreen, CalendarScreen, DiaryPageCard, LuckyScreen, SettingsScreen,
   Stat, SettingGroup, SettingRow, ToggleRow, LanguagePicker,
+  ThemeSheet, DarkSheet, FontSheet,
 });
 
 </script>
@@ -4798,30 +5404,40 @@ function EntryEditor({onClose, onSave, theme, lang, editEntry, initialDate, allE
   const [showDatePicker, setShowDatePicker] = React.useState(false);
   const [tagInput,    setTagInput]    = React.useState('');
   const [showSaved,   setShowSaved]   = React.useState(false);
+  const [title,       setTitle]       = React.useState(() => {
+    if (editEntry?.title) return editEntry.title;
+    if (!isNew || !allEntries) return '';
+    const date = initialDate || TODAY;
+    const existing = allEntries.find(e => e.date === date && !e.isWelcome && e.title);
+    return existing?.title || '';
+  });
+  const [weather,     setWeather]     = React.useState('');
+  const [mood,        setMood]        = React.useState('');
+  // Stable initial HTML for contentEditable fields — captured once at mount,
+  // never updated, so dangerouslySetInnerHTML never resets the cursor.
+  const [ceInitTitle] = React.useState(title);
+  const [ceInitLucky] = React.useState(editEntry?.lucky || draft?.lucky || '');
 
   const MAX_TAGS = 5;
   const MAX_TAG_LEN = 12;
 
-  const IRENE_TAG_SET = new Set(['来自Irene','from Irene','Ireneより','Irene의 편지','来自ena','来自嗯呐','嗯呐的信','from ena',"ena's letters",'enaより','enaの手紙','ena의 편지','ena의 편지들']);
+  const IRENE_TAG_SET = new Set(['来自Irene','from Irene','Ireneより','Irene의 편지','来自ena','来自嗯呐','嗯呐的信','来自ena的信','from ena',"ena's letters",'enaより','enaの手紙','ena의 편지','ena의 편지들']);
   const userHistoryTags = React.useMemo(() => {
     if (!allEntries) return [];
     const lastUsed = {};
-    const sorted = [...allEntries].sort((a, b) => {
-      const da = a.createdAt || a.date || '';
-      const db = b.createdAt || b.date || '';
-      return db.localeCompare(da);
-    });
+    const toTs = e => e.createdAt ? Number(e.createdAt) : (e.date ? new Date(e.date.replace(/-/g,'/')).getTime() : 0);
+    const sorted = [...allEntries].sort((a, b) => toTs(b) - toTs(a));
     sorted.forEach(e => (e.tags || []).forEach(t => {
       if (!IRENE_TAG_SET.has(t) && !(t in lastUsed))
-        lastUsed[t] = e.createdAt || e.date || '';
+        lastUsed[t] = toTs(e);
     }));
-    return Object.entries(lastUsed).sort((a, b) => b[1].localeCompare(a[1])).map(([t]) => t);
+    return Object.entries(lastUsed).sort((a, b) => b[1] - a[1]).map(([t]) => t);
   }, [allEntries]);
 
   // Auto-save draft for new entries
   React.useEffect(() => {
     if (!isNew) return;
-    const cur = luckyRef.current?.value ?? lucky;
+    const cur = luckyRef.current?.innerText ?? lucky;
     if (!cur && tags.length === 0 && photos.length === 0) {
       try { localStorage.removeItem(DRAFT_KEY); } catch(e) {}
       return;
@@ -4835,9 +5451,14 @@ function EntryEditor({onClose, onSave, theme, lang, editEntry, initialDate, allE
   const editorContainerRef = React.useRef(null);
   const bottomNavRef = React.useRef(null);
   const luckyRef    = React.useRef(null);
+  const chipGridRef = React.useRef(null);
+  const chipCallbackRef = React.useRef(null);
+  const nativeTapDoneRef = React.useRef(-1);
+  const [confirmIdx, setConfirmIdx] = React.useState(-1);
+  const confirmTimerRef = React.useRef(null);
+  const lastTouchCoordsRef = React.useRef(null);
   const tagInputRef = React.useRef(null);
   const composingRef = React.useRef(false); // IME composition state
-  const [confirmReplaceIdx, setConfirmReplaceIdx] = React.useState(null);
 
   const TOTAL_STEPS = 2;
 
@@ -4850,13 +5471,11 @@ function EntryEditor({onClose, onSave, theme, lang, editEntry, initialDate, allE
       const j = Math.floor(Math.random() * (k + 1));
       [arr[k], arr[j]] = [arr[j], arr[k]];
     }
-    return arr.slice(0, 9); // 3 × 3 grid
+    return arr.slice(0, 6); // 2 × 3 grid
   }, []);
 
   React.useEffect(() => {
     requestAnimationFrame(() => requestAnimationFrame(() => setOpen(true)));
-    const t = setTimeout(() => luckyRef.current?.focus({preventScroll:true}), 480);
-    return () => clearTimeout(t);
   }, []);
 
   React.useEffect(() => {
@@ -4897,8 +5516,72 @@ function EntryEditor({onClose, onSave, theme, lang, editEntry, initialDate, allE
     return () => { vv.removeEventListener('resize', update); vv.removeEventListener('scroll', update); };
   }, []);
 
+  // WKWebView expands contentEditable hit areas by 65-100pt, routing chip taps to CEs.
+  // We capture the touch at the DOM CAPTURE phase (before WKWebView can reroute it),
+  // identify if it's on a chip, and redirect in focusin if CE focus was stolen.
+  React.useEffect(() => {
+    const grid = chipGridRef.current;
+    if (!grid) return;
+    let downXY = null;
+    const captureDown = (e) => {
+      // Reset the nativeTapDone guard for each new touch so it doesn't persist across taps.
+      nativeTapDoneRef.current = -1;
+      const pt = e.touches ? e.touches[0] : e;
+      if (pt) { downXY = { x: pt.clientX, y: pt.clientY }; }
+    };
+    const onFocusIn = (e) => {
+      if (!downXY) return;
+      const coords = { ...downXY };
+      downXY = null;
+      const chips = grid.querySelectorAll('[data-chip-idx]');
+      for (let ci = 0; ci < chips.length; ci++) {
+        const r = chips[ci].getBoundingClientRect();
+        if (coords.x >= r.left - 5 && coords.x <= r.right + 5 &&
+            coords.y >= r.top - 5 && coords.y <= r.bottom + 5) {
+          // Touch was on chip but WKWebView routed focus to a CE — redirect
+          setTimeout(() => {
+            if (document.activeElement && document.activeElement !== document.body)
+              document.activeElement.blur();
+            const chipIdx = parseInt(chips[ci].getAttribute('data-chip-idx'), 10);
+            chipCallbackRef.current?.(chipIdx);
+          }, 0);
+          return;
+        }
+      }
+    };
+    // Use capture phase so these fire BEFORE WKWebView's native hit expansion can suppress them.
+    document.addEventListener('pointerdown', captureDown, { capture: true });
+    document.addEventListener('touchstart', captureDown, { capture: true, passive: true });
+    document.addEventListener('focusin', onFocusIn);
+    return () => {
+      document.removeEventListener('pointerdown', captureDown, { capture: true });
+      document.removeEventListener('touchstart', captureDown, { capture: true });
+      document.removeEventListener('focusin', onFocusIn);
+    };
+  }, [step]);
+
   const close    = () => { setOpen(false); setTimeout(onClose, 320); };
-  const canSave  = (luckyRef.current?.value || lucky).trim().length > 0;
+  const canSave  = (luckyRef.current?.innerText || lucky).trim().length > 0;
+
+  // WKWebView expands contentEditable tap targets by 65-100pt, stealing chip taps.
+  // When a contentEditable is focused/clicked, check if the touch coords match a chip
+  // and redirect: blur the CE, then programmatically click the matching chip.
+  const tryRedirectToChip = React.useCallback(function(blurEl) {
+    const coords = lastTouchCoordsRef.current;
+    lastTouchCoordsRef.current = null;
+    if (!coords || !chipGridRef.current) return false;
+    const chips = chipGridRef.current.querySelectorAll('[data-chip-idx]');
+    for (let ci = 0; ci < chips.length; ci++) {
+      const r = chips[ci].getBoundingClientRect();
+      if (coords.x >= r.left - 8 && coords.x <= r.right + 8 &&
+          coords.y >= r.top - 8 && coords.y <= r.bottom + 8) {
+        blurEl?.blur();
+        chips[ci].click();
+        return true;
+      }
+    }
+    return false;
+  }, []);
 
   const goNext = () => {
     if (step < TOTAL_STEPS - 1) { dirRef.current = 1; setStep(s => s + 1); }
@@ -4985,8 +5668,10 @@ function EntryEditor({onClose, onSave, theme, lang, editEntry, initialDate, allE
       date:      entryDate,
       createdAt: editEntry?.createdAt || Date.now(),
       lucky:     lucky.trim(),
-      mood:      'lucky',
+      mood:      mood || 'lucky',
       tags:      finalTags,
+      ...(title.trim() ? { title: title.trim() } : {}),
+      ...(weather ? { weather } : {}),
       ...(photos.length > 0 ? { photos } : {}),
       ...(editEntry?.text ? { text: editEntry.text } : {}),
     });
@@ -5003,12 +5688,44 @@ function EntryEditor({onClose, onSave, theme, lang, editEntry, initialDate, allE
     animation:`${slideAnim} 320ms cubic-bezier(0.16,1,0.3,1) both`,
   };
 
+  // Keep this ref up to date on every render so the native touchend handler
+  // can call it directly without going through DOM click dispatch.
+  // Tapping a quick pick adds its text as a new line in the body; tapping an
+  // already-added pick removes it again.
+  // Empty body -> add directly. Body already has text (typed or from another pick) ->
+  // first tap arms "tap again to replace", second tap replaces the whole body.
+  const toggleChipText = (text, idx) => {
+    const current = (luckyRef.current?.innerText || '').trim();
+    const lines = current ? current.split('\n').map(l => l.trim()).filter(Boolean) : [];
+    const write = (next) => { setLucky(next); if (luckyRef.current) luckyRef.current.innerText = next; };
+    clearTimeout(confirmTimerRef.current);
+    if (lines.includes(text)) {
+      write(lines.filter(l => l !== text).join('\n'));
+      setConfirmIdx(-1);
+      return false;
+    }
+    if (lines.length === 0) { write(text); setConfirmIdx(-1); return true; }
+    if (confirmIdx === idx) { write(text); setConfirmIdx(-1); return true; }
+    setConfirmIdx(idx);
+    confirmTimerRef.current = setTimeout(() => setConfirmIdx(-1), 3000);
+    Haptic.impact('light');
+    return false;
+  };
+  chipCallbackRef.current = (idx) => {
+    nativeTapDoneRef.current = idx;
+    const text = dailyPicks[idx];
+    if (text === undefined) return;
+    if (luckyRef.current) luckyRef.current.blur();
+    if (toggleChipText(text, idx)) { Haptic.impact('light'); SFX.pop(); }
+  };
+
   return (
-    <div ref={editorContainerRef} style={{position:'absolute',inset:0,zIndex:300,display:'flex',flexDirection:'column'}}>
+    <div ref={editorContainerRef} style={{position:'absolute',inset:0,zIndex:300,display:'flex',flexDirection:'column',pointerEvents:open?'auto':'none'}}>
       <div onClick={close} style={{
         position:'absolute', inset:0,
         background:'rgba(20,30,20,0.35)', backdropFilter:'blur(6px)', WebkitBackdropFilter:'blur(6px)',
         opacity: open?1:0, transition:'opacity 320ms',
+        pointerEvents: open ? 'auto' : 'none',
       }}/>
       <div style={{
         marginTop:72, flex:1, position:'relative',
@@ -5053,7 +5770,9 @@ function EntryEditor({onClose, onSave, theme, lang, editEntry, initialDate, allE
 
           {/* ── Page 0: Lucky + daily quick picks ── */}
           {step === 0 && (
-            <div key="p0" style={{...pageStyle, padding:'18px 24px 20px'}} className="no-scrollbar">
+            <div key="p0" style={{...pageStyle, padding:'18px 24px 20px'}} className="no-scrollbar"
+              onTouchStart={e => { const t = e.touches[0]; if (t) { lastTouchCoordsRef.current = {x: t.clientX, y: t.clientY}; } }}
+            >
 
               {/* Big diary date — tap to change */}
               <div style={{marginBottom:14}}>
@@ -5102,69 +5821,120 @@ function EntryEditor({onClose, onSave, theme, lang, editEntry, initialDate, allE
                 )}
               </div>
 
-              {/* Textarea — primary input */}
-              <div style={{fontSize:16, color:theme.inkSoft, marginBottom:10, letterSpacing:0.1}}>
-                {i.luckyPrompt}
+              {/* Title input */}
+              <div style={{
+                fontSize:12, color:theme.inkMuted, marginBottom:5,
+                fontFamily:'Gaegu, cursive', letterSpacing:1.2, textTransform:'uppercase',
+              }}>
+                {isNew && title && (() => {
+                  const date = initialDate || TODAY;
+                  const existing = allEntries?.find(e => e.date === date && !e.isWelcome && e.title);
+                  return existing
+                    ? (lang === 'zh' ? '如果给今天起个标题…？' : 'Give today a title…?')
+                    : (i.titlePh || '如果给今天起个标题……');
+                })() || (i.titlePh || '如果给今天起个标题……')}
               </div>
-              <textarea ref={luckyRef} defaultValue={lucky}
-                onChange={e => setLucky(e.target.value)}
-                onCompositionStart={() => { composingRef.current = true; }}
-                onCompositionEnd={e => { composingRef.current = false; setLucky(e.target.value); }}
-                placeholder={i.luckyPh} rows={3}
+              {/* contentEditable instead of <input> — avoids iOS WKWebView's
+                  aggressive tap-target expansion on form elements that was blocking
+                  the Quick Pick chips above/below it. */}
+              <div
+                contentEditable
+                suppressContentEditableWarning
+                onInput={e => setTitle(e.currentTarget.innerText || '')}
+                onKeyDown={e => { if (e.key === 'Enter') e.preventDefault(); }}
+                onFocus={e => { tryRedirectToChip(e.currentTarget); }}
+                dangerouslySetInnerHTML={{ __html: escHtml(ceInitTitle) }}
                 style={{
                   width:'100%', boxSizing:'border-box', background:'transparent',
-                  border:'none', outline:'none', resize:'none',
-                  fontSize:17, lineHeight:1.65, color:theme.ink,
-                  padding:'0 0 12px',
-                  borderBottom:`1px solid ${theme.divider}`,
-                }}/>
+                  borderBottom:`1.5px solid ${theme.accent}`, outline:'none',
+                  fontSize:19, fontWeight:700, color:theme.ink, padding:'0 0 8px',
+                  marginBottom:18, letterSpacing:-0.2, fontFamily:'Gaegu, cursive',
+                  display:'block', minHeight:'1.5em', overflowX:'hidden',
+                  WebkitUserSelect:'text', userSelect:'text',
+                  wordBreak:'break-word',
+                }}
+              />
 
-              {/* Quick picks — 3×3 grid, daily shuffle */}
+              {/* Textarea — primary input */}
+              <div style={{
+                fontSize:12, color:theme.inkMuted, marginBottom:6,
+                fontFamily:'Gaegu, cursive', letterSpacing:1.2, textTransform:'uppercase',
+              }}>
+                {i.luckyPrompt}
+              </div>
+              {/* Quick picks — above textarea so iOS WebKit's downward tap-target expansion on <textarea> never blocks chip taps */}
               {dailyPicks.length > 0 && (
-                <div style={{marginTop:16}}>
-                  <div style={{fontSize:14, color:theme.inkMuted, letterSpacing:1, textTransform:'uppercase', marginBottom:8, fontWeight:600}}>
+                <div style={{marginBottom:12}}>
+                  <div style={{fontSize:12, color:theme.inkMuted, letterSpacing:1.2, textTransform:'uppercase', marginBottom:8, fontWeight:600, fontFamily:'Gaegu, cursive'}}>
                     {i.quickPicksLabel||'Quick picks ✦'}
                   </div>
-                  <div style={{display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:6}}>
+                  <div ref={chipGridRef} style={{display:'grid', gridTemplateColumns:'repeat(3,1fr)', gap:6}}>
                     {dailyPicks.map((text, idx) => {
-                      const active = lucky === text;
-                      const confirming = confirmReplaceIdx === idx;
+                      const active = lucky.split('\n').some(l => l.trim() === text);
+                      const confirming = confirmIdx === idx && !active;
+                      const handleChip = () => {
+                        if (nativeTapDoneRef.current === idx) { nativeTapDoneRef.current = -1; return; }
+                        if (luckyRef.current) luckyRef.current.blur();
+                        if (toggleChipText(text, idx)) { Haptic.impact('light'); SFX.pop(); }
+                      };
                       return (
-                        <SpringTap key={idx} sfx={active||confirming?'back':'pop'} onClick={() => {
-                          if (active) { setLucky(''); if (luckyRef.current) luckyRef.current.value = ''; return; }
-                          const current = (luckyRef.current?.value || '').trim();
-                          // window.confirm() is a no-op in this WKWebView (no
-                          // WKUIDelegate handler), so it always returned falsy
-                          // and silently did nothing — use the same tap-to-arm,
-                          // tap-again-to-confirm pattern as tag deletion instead.
-                          if (current && current !== text && !confirming) {
-                            setConfirmReplaceIdx(idx);
-                            Haptic.impact('light');
-                            setTimeout(() => setConfirmReplaceIdx(prev => prev === idx ? null : prev), 3000);
-                            return;
-                          }
-                          setConfirmReplaceIdx(null);
-                          setLucky(text); if (luckyRef.current) luckyRef.current.value = text; Haptic.impact('light');
-                        }} style={{
+                        // SpringTap renders a <div> with onPointerDown/onPointerUp — avoids
+                        // WKWebKit's aggressive hit-area expansion on <button>/<input> that
+                        // was swallowing taps before they reached onClick.
+                        <SpringTap key={idx} onClick={handleChip} sfx={null} scale={0.96} data-chip-idx={idx} style={{
                           padding:'8px 5px', borderRadius:12,
-                          background: active ? theme.accent : confirming ? 'rgba(220,60,60,0.10)' : theme.paper,
-                          border:`1.5px solid ${active ? theme.accent : confirming ? 'rgba(220,60,60,0.4)' : theme.divider}`,
-                          color: active ? '#fff' : confirming ? 'rgba(200,50,50,0.9)' : theme.inkSoft,
-                          fontSize:16, fontWeight: (active||confirming) ? 600 : 400,
+                          background: active ? theme.accent : (confirming ? theme.accentSoft : theme.paper),
+                          border: confirming ? `1.5px dashed ${theme.accent}` : `1.5px solid ${active ? theme.accent : theme.divider}`,
+                          color: active ? '#fff' : (confirming ? theme.accentDark : theme.inkSoft),
+                          fontSize:15, fontFamily:'Gaegu, cursive', fontWeight: active ? 600 : 400,
                           textAlign:'center', lineHeight:1.3,
-                          transition:'background 160ms, border-color 160ms, color 160ms',
+                          transition:'background 160ms, border-color 160ms, color 160ms, transform 220ms cubic-bezier(0.34,1.56,0.64,1)',
                           boxShadow: active ? `0 2px 8px ${theme.accent}40` : 'none',
-                        }}>{confirming ? (lang==='zh'?'再点一次替换':'Tap again to replace') : text}</SpringTap>
+                          animation: 'fadeSlideUp 220ms ease backwards',
+                          animationDelay: `${idx * 38}ms`,
+                        }}>{confirming ? (lang==='zh'?'再点一次替换':lang==='ja'?'もう一度タップで置換':lang==='ko'?'한 번 더 누르면 교체':'Tap again to replace') : text}</SpringTap>
                       );
                     })}
                   </div>
                 </div>
               )}
 
+              {/* contentEditable instead of <textarea> — same reason as title above */}
+              <div style={{position:'relative', marginBottom:14}}>
+                <div
+                  ref={luckyRef}
+                  contentEditable
+                  suppressContentEditableWarning
+                  onInput={e => setLucky(e.currentTarget.innerText || '')}
+                  onCompositionStart={() => { composingRef.current = true; }}
+                  onCompositionEnd={e => { composingRef.current = false; setLucky(e.currentTarget.innerText || ''); }}
+                  dangerouslySetInnerHTML={{ __html: escHtml(ceInitLucky) }}
+                  style={{
+                    width:'100%', boxSizing:'border-box', background:'transparent',
+                    border:'none', outline:'none',
+                    fontSize:15, lineHeight:1.75, color:theme.ink,
+                    fontFamily:'Gaegu, cursive',
+                    padding:'0 0 12px',
+                    borderBottom:`1px solid ${theme.divider}`,
+                    minHeight:'calc(3 * 1.75em + 12px)',
+                    display:'block', wordBreak:'break-word', overflowX:'hidden',
+                    WebkitUserSelect:'text', userSelect:'text',
+                  }}
+                />
+                {!lucky && (
+                  <div style={{
+                    position:'absolute', top:0, left:0,
+                    fontSize:15, lineHeight:1.75, color:theme.inkMuted,
+                    fontFamily:'Gaegu, cursive', pointerEvents:'none',
+                    opacity:0.6,
+                  }}>{i.luckyPh}</div>
+                )}
+              </div>
+
               {/* Photo upload — small thumbnail row + add tile */}
               <div style={{marginTop:18}}>
                 <div style={{display:'flex', alignItems:'baseline', justifyContent:'space-between', marginBottom:8}}>
-                  <div style={{fontSize:14, color:theme.inkMuted, letterSpacing:1, textTransform:'uppercase', fontWeight:600}}>
+                  <div style={{fontSize:12, color:theme.inkMuted, letterSpacing:1.2, textTransform:'uppercase', fontWeight:600, fontFamily:'Gaegu, cursive'}}>
                     {i.photosLabel||'Photos ✦'}
                   </div>
                   <div style={{fontSize:12, color:theme.inkMuted, opacity:0.7}}>
@@ -5202,8 +5972,8 @@ function EntryEditor({onClose, onSave, theme, lang, editEntry, initialDate, allE
                     display:'flex', alignItems:'center', justifyContent:'center', gap:7,
                     color:theme.inkMuted, opacity: photoBusy ? 0.5 : 1,
                   }}>
-                    <span style={{fontSize:18, lineHeight:1}}>{photoBusy ? '…' : '＋'}</span>
-                    <span style={{fontSize:16, lineHeight:1}}>{i.addPhotoLabel||'Add photo'}</span>
+                    <span style={{fontSize:15, lineHeight:1, fontFamily:'Gaegu, cursive'}}>{photoBusy ? '…' : '＋'}</span>
+                    <span style={{fontSize:15, lineHeight:1, fontFamily:'Gaegu, cursive'}}>{i.addPhotoLabel||'Add photo'}</span>
                   </SpringTap>
                 )}
               </div>
@@ -5213,7 +5983,7 @@ function EntryEditor({onClose, onSave, theme, lang, editEntry, initialDate, allE
           {/* ── Page 1: Tags ── */}
           {step === 1 && (
             <div key="p1" style={{...pageStyle}} className="no-scrollbar">
-              <div style={{fontSize:16, color:theme.inkSoft, marginBottom:14, letterSpacing:0.1}}>
+              <div style={{fontSize:12, color:theme.inkMuted, marginBottom:5, fontFamily:'Gaegu, cursive', letterSpacing:1.2, textTransform:'uppercase', fontWeight:600}}>
                 {i.tagIt}
               </div>
 
@@ -5222,7 +5992,7 @@ function EntryEditor({onClose, onSave, theme, lang, editEntry, initialDate, allE
                 display:'flex', alignItems:'center', gap:8, marginBottom:14,
                 borderBottom:`1px solid ${theme.divider}`, paddingBottom:12,
               }}>
-                <span style={{fontSize:16, color:theme.inkMuted}}>#</span>
+                <span style={{fontSize:15, color:theme.inkMuted, fontFamily:'Gaegu, cursive'}}>#</span>
                 <input ref={tagInputRef} defaultValue=""
                   onCompositionStart={() => { composingRef.current = true; }}
                   onCompositionEnd={e => { composingRef.current = false; setTagInput(e.target.value); }}
@@ -5242,7 +6012,7 @@ function EntryEditor({onClose, onSave, theme, lang, editEntry, initialDate, allE
                   placeholder={i.tagPh||'type a tag…'}
                   style={{
                     flex:1, background:'transparent', border:'none', outline:'none',
-                    fontSize:16, color:theme.ink,
+                    fontSize:15, color:theme.ink, fontFamily:'Gaegu, cursive',
                   }}/>
                 {tagInput.trim().length > 0 && (
                   <SpringTap onClick={() => {
@@ -5250,7 +6020,7 @@ function EntryEditor({onClose, onSave, theme, lang, editEntry, initialDate, allE
                     if (val) { addTag(val); if (tagInputRef.current) tagInputRef.current.value = ''; setTagInput(''); }
                   }} sfx="pop" style={{
                     padding:'4px 12px', borderRadius:99, background:theme.accent,
-                    color:'#fff', fontSize:17, fontWeight:600,
+                    color:'#fff', fontSize:15, fontWeight:600, fontFamily:'Gaegu, cursive',
                   }}>+</SpringTap>
                 )}
               </div>
@@ -5262,10 +6032,10 @@ function EntryEditor({onClose, onSave, theme, lang, editEntry, initialDate, allE
                     <SpringTap key={t} onClick={() => removeTag(t)} sfx="back" style={{
                       padding:'6px 12px', borderRadius:9999,
                       background:theme.accent, color:'#fff',
-                      fontSize:16, fontWeight:500,
+                      fontSize:15, fontWeight:500, fontFamily:'Gaegu, cursive',
                       display:'flex', alignItems:'center', gap:5,
                     }}>
-                      #{t} <span style={{fontSize:16, opacity:0.9, fontWeight:400, lineHeight:1}}>✕</span>
+                      #{t} <span style={{fontSize:15, opacity:0.9, fontWeight:400, lineHeight:1}}>✕</span>
                     </SpringTap>
                   ))}
                 </div>
@@ -5273,53 +6043,96 @@ function EntryEditor({onClose, onSave, theme, lang, editEntry, initialDate, allE
 
               {/* Tag limit hint */}
               {tags.length >= MAX_TAGS && (
-                <div style={{fontSize:14, color:theme.inkMuted, marginBottom:8}}>
+                <div style={{fontSize:13, color:theme.inkMuted, marginBottom:8, fontFamily:'Gaegu, cursive'}}>
                   {lang==='zh'?`最多 ${MAX_TAGS} 个标签`:lang==='ja'?`最大 ${MAX_TAGS} 個`
                    :lang==='ko'?`최대 ${MAX_TAGS}개`:`Max ${MAX_TAGS} tags`}
                 </div>
               )}
 
-              {/* Suggested tags — user history first, then defaults */}
+              {/* Tag browser — recent row + all-tags 3-row scroll + suggested 2 rows */}
               {tags.length < MAX_TAGS && (() => {
-                const sugSet = new Set(i.sugTags);
-                const historyOnly = userHistoryTags.filter(t => !tags.includes(t) && !sugSet.has(t)).slice(0, 8);
-                const defaultOnly = i.sugTags.filter(t => !tags.includes(t));
+                const allUserTags = userHistoryTags.filter(t => !tags.includes(t));
+                const recentTags  = allUserTags.slice(0, 4);
+                const defaultOnly = i.sugTags.filter(t => !tags.includes(t)).slice(0, 8);
+                const tagChipStyle = (variant) => ({
+                  flexShrink: 0,
+                  padding:'5px 13px', borderRadius:9999,
+                  fontSize:15, fontFamily:'Gaegu, cursive',
+                  transition:'all 160ms',
+                  ...(variant === 'user' ? {
+                    background: theme.accentSoft,
+                    border: `1.5px solid ${theme.accent}44`,
+                    color: theme.accentDark,
+                  } : {
+                    background: 'transparent',
+                    border: `1.5px solid ${theme.divider}`,
+                    color: theme.inkSoft,
+                  }),
+                });
+                const labelStyle = {
+                  fontSize:12, color:theme.inkMuted, marginBottom:6,
+                  letterSpacing:1.2, textTransform:'uppercase',
+                  fontWeight:600, fontFamily:'Gaegu, cursive',
+                };
                 return (
-                  <div style={{display:'flex', flexDirection:'column', gap:10}}>
-                    {historyOnly.length > 0 && (
+                  <div style={{display:'flex', flexDirection:'column', gap:12}}>
+                    {/* Row 1: recent tags — single-row horizontal scroll */}
+                    {recentTags.length > 0 && (
                       <div>
-                        <div style={{fontSize:13, color:theme.inkMuted, marginBottom:6, letterSpacing:0.5, fontWeight:500}}>
-                          {lang==='zh'?'最近使用':lang==='ja'?'最近使用':lang==='ko'?'최근 사용':'Recent'}
+                        <div style={labelStyle}>
+                          {lang==='zh'?'最近使用':lang==='ko'?'최근 사용':'Recent'}
                         </div>
-                        <div style={{display:'flex', flexWrap:'wrap', gap:7}}>
-                          {historyOnly.map(t => (
-                            <SpringTap key={t} onClick={() => addTag(t)} sfx="pop" style={{
-                              padding:'8px 16px', borderRadius:9999,
-                              background:theme.accentSoft,
-                              border:`1.5px solid ${theme.accent}44`,
-                              color:theme.accentDark,
-                              fontSize:17, transition:'all 180ms',
-                            }}>#{t}</SpringTap>
+                        <div style={{display:'flex', gap:6, flexWrap:'nowrap', overflow:'hidden', paddingBottom:3, marginBottom:-3}}>
+                          {recentTags.map(t => (
+                            <SpringTap key={t} onClick={() => addTag(t)} sfx="pop" style={tagChipStyle('user')}>#{t}</SpringTap>
                           ))}
                         </div>
                       </div>
                     )}
+                    {/* All user tags — flex wrap row by row; 3-row grid scroll only when many tags */}
+                    {allUserTags.length > 0 && (() => {
+                      const chipH = 34, gapH = 6;
+                      const maxRows = 3;
+                      const maxH = maxRows * chipH + (maxRows - 1) * gapH;
+                      const manyTags = allUserTags.length > 12;
+                      return (
+                        <div>
+                          <div style={labelStyle}>
+                            {lang==='zh'?'我的标签':lang==='ko'?'내 태그':'My tags'}
+                          </div>
+                          {manyTags ? (
+                            <div style={{
+                              display:'grid',
+                              gridTemplateRows:`repeat(${maxRows}, auto)`,
+                              gridAutoFlow:'column',
+                              gridAutoColumns:'max-content',
+                              gap:gapH,
+                              overflowX:'auto',
+                              paddingBottom:4,
+                            }} className="no-scrollbar">
+                              {allUserTags.map(t => (
+                                <SpringTap key={t} onClick={() => addTag(t)} sfx="pop" style={tagChipStyle('default')}>#{t}</SpringTap>
+                              ))}
+                            </div>
+                          ) : (
+                            <div style={{display:'flex', flexWrap:'wrap', gap:gapH}}>
+                              {allUserTags.map(t => (
+                                <SpringTap key={t} onClick={() => addTag(t)} sfx="pop" style={tagChipStyle('default')}>#{t}</SpringTap>
+                              ))}
+                            </div>
+                          )}
+                        </div>
+                      );
+                    })()}
+                    {/* Suggested — 2 rows, flex-wrap */}
                     {defaultOnly.length > 0 && (
                       <div>
-                        {historyOnly.length > 0 && (
-                          <div style={{fontSize:13, color:theme.inkMuted, marginBottom:6, letterSpacing:0.5, fontWeight:500}}>
-                            {lang==='zh'?'推荐':lang==='ja'?'おすすめ':lang==='ko'?'추천':'Suggested'}
-                          </div>
-                        )}
-                        <div style={{display:'flex', flexWrap:'wrap', gap:7}}>
+                        <div style={labelStyle}>
+                          {lang==='zh'?'推荐':lang==='ja'?'おすすめ':lang==='ko'?'추천':'Suggested'}
+                        </div>
+                        <div style={{display:'flex', flexWrap:'wrap', gap:6}}>
                           {defaultOnly.map(t => (
-                            <SpringTap key={t} onClick={() => addTag(t)} sfx="pop" style={{
-                              padding:'8px 16px', borderRadius:9999,
-                              background:'transparent',
-                              border:`1.5px solid ${theme.divider}`,
-                              color:theme.inkSoft,
-                              fontSize:17, transition:'all 180ms',
-                            }}>#{t}</SpringTap>
+                            <SpringTap key={t} onClick={() => addTag(t)} sfx="pop" style={tagChipStyle('default')}>#{t}</SpringTap>
                           ))}
                         </div>
                       </div>
@@ -5430,6 +6243,7 @@ function SearchOverlay({onClose, entries, onOpenEntry, theme, lang}) {
       position:'absolute', inset:0, zIndex:250, background:theme.bg,
       opacity: closing?0:1, transition:'opacity 220ms',
       display:'flex', flexDirection:'column',
+      pointerEvents: closing ? 'none' : 'auto',
     }}>
       <div style={{paddingTop:'calc(var(--sat) + 10px)', paddingLeft:16, paddingRight:16, paddingBottom:14, display:'flex', gap:10, alignItems:'center', boxSizing:'border-box', width:'100%'}}>
         {/* Back button */}
@@ -5498,7 +6312,7 @@ function SearchOverlay({onClose, entries, onOpenEntry, theme, lang}) {
                 opacity: theme._dark ? 0.7 : 1,
               }}/>
               <div style={{fontSize:18, color:theme.inkSoft, fontFamily:'Gaegu, cursive', marginTop:6}}>
-                {lang==='zh' ? '嗯呐找不到呢… (•᷄⌓•᷅)' : lang==='ja' ? '見つからないよ… (•᷄⌓•᷅)' : lang==='ko' ? '못 찾겠어요… (•᷄⌓•᷅)' : "Can't find anything… (•᷄⌓•᷅)"}
+                {lang==='zh' ? 'ena找不到呢… (•᷄⌓•᷅)' : lang==='ja' ? '見つからないよ… (•᷄⌓•᷅)' : lang==='ko' ? '못 찾겠어요… (•᷄⌓•᷅)' : "Can't find anything… (•᷄⌓•᷅)"}
               </div>
               <div style={{fontSize:14, color:theme.inkMut || theme.inkMuted, marginTop:2}}>
                 {lang==='zh' ? '换个关键词试试？' : lang==='ja' ? '他のキーワードで試してみて？' : lang==='ko' ? '다른 키워드로 검색해 볼까요?' : 'Try a different keyword?'}
@@ -5518,11 +6332,42 @@ function EntryDetail({entry, entries, onClose, theme, lang, onEdit, onDelete, on
   const [confirmDeleteId, setConfirmDeleteId] = React.useState(null);
   const [lightboxData, setLightboxData] = React.useState(null);
   const [shareOpen, setShareOpen] = React.useState(false);
+  const [photoDownloading, setPhotoDownloading] = React.useState(false);
+  const [photoDownloadMsg, setPhotoDownloadMsg] = React.useState(null); // 'ok'|'err'|'denied'
 
   React.useEffect(() => {
     requestAnimationFrame(() => requestAnimationFrame(() => setOpen(true)));
   }, []);
   const close = () => { setOpen(false); setTimeout(onClose, 320); };
+
+  // Native callback for photo download result
+  React.useEffect(() => {
+    window.__cloveryPhotoDownloaded = (outcome) => {
+      setPhotoDownloading(false);
+      if (outcome === 'success') {
+        setPhotoDownloadMsg('ok');
+        setTimeout(() => setPhotoDownloadMsg(null), 2000);
+      } else if (outcome === 'permissionDenied') {
+        setPhotoDownloadMsg('denied');
+        setTimeout(() => setPhotoDownloadMsg(null), 3000);
+      } else {
+        setPhotoDownloadMsg('err');
+        setTimeout(() => setPhotoDownloadMsg(null), 2000);
+      }
+    };
+    return () => { delete window.__cloveryPhotoDownloaded; };
+  }, []);
+
+  const downloadPhoto = async (src) => {
+    if (photoDownloading) return;
+    setPhotoDownloading(true);
+    Haptic.impact('medium');
+    const resolved = await resolvePhotoSrc(src);
+    if (!resolved) { setPhotoDownloading(false); return; }
+    try {
+      window.webkit?.messageHandlers?.photoDownload?.postMessage({ dataURL: resolved });
+    } catch(e) { setPhotoDownloading(false); }
+  };
 
 
   const handleDelete = (id) => {
@@ -5547,7 +6392,7 @@ function EntryDetail({entry, entries, onClose, theme, lang, onEdit, onDelete, on
     if (entry.isWelcome || !entries) return [entry];
     const same = entries
       .filter(e => e.date === entry.date && !e.isWelcome)
-      .sort((a, b) => a.id < b.id ? -1 : 1);
+      .sort((a, b) => ((a.createdAt || 0) - (b.createdAt || 0)) || (a.id < b.id ? -1 : 1));
     return same.length > 0 ? same : [entry];
   }, [entry, entries]);
 
@@ -5566,6 +6411,7 @@ function EntryDetail({entry, entries, onClose, theme, lang, onEdit, onDelete, on
     <div style={{
       position:'absolute', inset:0, zIndex:240,
       display:'flex', flexDirection:'column',
+      pointerEvents: open ? 'auto' : 'none',
     }}>
 
       {/* ── Sheet ── */}
@@ -5580,25 +6426,11 @@ function EntryDetail({entry, entries, onClose, theme, lang, onEdit, onDelete, on
         overflow:'hidden',
       }}>
 
-        {/* Top bar: add entry for this day + share + close */}
+        {/* Top bar: close only */}
         <div style={{
-          display:'flex', alignItems:'center', justifyContent:'space-between',
-          padding:'calc(var(--sat) + 8px) 20px 4px', flexShrink:0,
+          display:'flex', alignItems:'center', justifyContent:'flex-end',
+          padding:'calc(var(--sat) + 8px) 20px 8px', flexShrink:0,
         }}>
-          <div style={{display:'flex', gap:8, alignItems:'center'}}>
-            {!entry.isWelcome && onWrite && (
-              <SpringTap onClick={() => { close(); setTimeout(() => onWrite(entry.date), 320); }} style={{
-                height:34, borderRadius:17, paddingLeft:12, paddingRight:14,
-                background: isDark ? 'rgba(255,255,255,0.07)' : theme.accentSoft,
-                display:'flex', alignItems:'center', gap:5,
-              }}>
-                <span style={{fontSize:19, lineHeight:1, color:theme.accentDark, fontWeight:400}}>+</span>
-                <span style={{fontSize:13, color:theme.accentDark, fontWeight:600}}>
-                  {lang==='zh'?'再记一条':lang==='ko'?'추가':lang==='ja'?'追加':'Add'}
-                </span>
-              </SpringTap>
-            )}
-          </div>
           <SpringTap onClick={close} style={{
             width:34, height:34, borderRadius:17,
             background: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.05)',
@@ -5612,9 +6444,9 @@ function EntryDetail({entry, entries, onClose, theme, lang, onEdit, onDelete, on
         </div>
 
         {/* Scrollable diary content */}
-        <div style={{flex:1, overflowY:'auto', padding:'14px 28px 60px'}} className="no-scrollbar">
+        <div style={{flex:1, overflowY:'auto', padding:`14px 28px calc(env(safe-area-inset-bottom, 0px) + ${entry.isWelcome ? '24px' : '86px'})`}} className="no-scrollbar">
 
-          {/* ── Date header (KEEP EXACTLY) ── */}
+          {/* ── Date header ── */}
           <div style={{textAlign:'center', marginBottom:24}}>
             <div style={{
               fontSize:15, color:theme.inkMuted,
@@ -5666,7 +6498,7 @@ function EntryDetail({entry, entries, onClose, theme, lang, onEdit, onDelete, on
                                : lang==='ko' ? '사랑을 담아 ♡'
                                : lang==='ja' ? '愛を込めて ♡'
                                : 'with love ♡';
-              const letterLabel= lang==='zh' ? '嗯呐的来信'
+              const letterLabel= lang==='zh' ? 'ena的来信'
                                : lang==='ko' ? 'ena의 편지'
                                : lang==='ja' ? 'enaからの手紙'
                                : 'Letter from ena';
@@ -5750,7 +6582,7 @@ function EntryDetail({entry, entries, onClose, theme, lang, onEdit, onDelete, on
                               textAlign:'center', marginTop:5,
                               fontSize:15, color:'#999',
                               fontFamily:'Gaegu, cursive',
-                            }}>{lang==='zh'?'嗯呐':'ena'} ♡</div>
+                            }}>ena ♡</div>
                           </div>
                           );
                         })()}
@@ -5800,7 +6632,7 @@ function EntryDetail({entry, entries, onClose, theme, lang, onEdit, onDelete, on
                           fontSize:16, fontFamily:'Gaegu, cursive',
                           color: accentClr, fontWeight:700,
                         }}>
-                          {lang==='zh'?'来自. 嗯呐 🍀':'From. ena 🍀'}
+                          {'来自. ena 🍀'}
                         </div>
                         <div style={{
                           fontSize:16, color:theme.inkMuted,
@@ -5831,17 +6663,38 @@ function EntryDetail({entry, entries, onClose, theme, lang, onEdit, onDelete, on
                 background: cardBg, boxShadow: cardShad,
                 marginBottom:18,
               }}>
+                {/* Day title — shown once at top of card */}
+                {(() => {
+                  const dayTitle = regs.find(e => e.title)?.title;
+                  return dayTitle ? (
+                    <div style={{
+                      fontSize:22, fontWeight:700, color:theme.ink, lineHeight:1.25,
+                      letterSpacing:-0.4, padding:'16px 18px 10px', fontFamily:'Gaegu, cursive',
+                      textAlign:'center', borderBottom:`1px dashed ${dividerClr}`,
+                    }}>
+                      {dayTitle}
+                    </div>
+                  ) : null;
+                })()}
                 {regs.map((e, rIdx) => {
                   const dL = e.lucky;
                   const dT = e.text;
                   const eTime = parseEntryTime(e);
-                  const userTags = (e.tags||[]).filter(t => !['来自Irene','from Irene','Ireneより','Irene의 편지','来自ena','来自嗯呐','嗯呐的信','from ena',"ena's letters",'enaより','enaの手紙','ena의 편지','ena의 편지들'].includes(t));
+                  const moodEmoji = e.mood ? (MOODS.find(m => m.id === e.mood)?.emoji || '') : '';
+                  const userTags = (e.tags||[]).filter(t => !['来自Irene','from Irene','Ireneより','Irene의 편지','来自ena','来自嗯呐','嗯呐的信','来自ena的信','from ena',"ena's letters",'enaより','enaの手紙','ena의 편지','ena의 편지들'].includes(t));
                   return (
                     <div key={e.id} style={{
                       padding:'14px 18px 14px',
                       borderBottom: rIdx < regs.length - 1
                         ? `1px dashed ${dividerClr}` : 'none',
                     }}>
+                      {/* Per-entry weather + mood stickers */}
+                      {(e.weather || moodEmoji) && (
+                        <div style={{display:'flex', gap:5, alignItems:'center', marginBottom:8}}>
+                          {e.weather && <span style={{fontSize:20, lineHeight:1}}>{e.weather}</span>}
+                          {moodEmoji && <span style={{fontSize:20, lineHeight:1}}>{moodEmoji}</span>}
+                        </div>
+                      )}
                       {/* Row: time label + action buttons */}
                       <div style={{
                         display:'flex', alignItems:'center', justifyContent:'space-between',
@@ -5874,22 +6727,13 @@ function EntryDetail({entry, entries, onClose, theme, lang, onEdit, onDelete, on
                           </SpringTap>
                         </div>
                       </div>
-                      {/* Lucky headline */}
-                      <div style={{
-                        fontSize:19, color:theme.ink, lineHeight:'28px',
-                        fontFamily:'Gaegu, cursive', whiteSpace:'pre-line',
-                      }}>
-                        {wrapKaomoji(dL)}
-                      </div>
-                      {/* Body text */}
-                      {dT && (
+                      {/* Body text — single level */}
+                      {(dL || dT) && (
                         <div style={{
-                          fontSize:16, color:theme.inkSoft, lineHeight:1.8,
-                          whiteSpace:'pre-line', marginTop:8,
-                          fontFamily:'Gaegu, cursive',
-                          borderTop:`1px solid ${dividerClr}`, paddingTop:8,
+                          fontSize:15, color:theme.inkSoft, lineHeight:1.9,
+                          fontFamily:'Gaegu, cursive', whiteSpace:'pre-line',
                         }}>
-                          {wrapKaomoji(dT)}
+                          {wrapKaomoji([dL, dT].filter(Boolean).join('\n\n'))}
                         </div>
                       )}
                       {/* Photos */}
@@ -5903,9 +6747,9 @@ function EntryDetail({entry, entries, onClose, theme, lang, onEdit, onDelete, on
                           ))}
                         </div>
                       )}
-                      {/* Tags */}
+                      {/* Tags — separate row */}
                       {userTags.length > 0 && (
-                        <div style={{display:'flex', flexWrap:'wrap', gap:5, marginTop:9, justifyContent:'flex-end'}}>
+                        <div style={{display:'flex', flexWrap:'wrap', gap:5, marginTop:10}}>
                           {userTags.map(t => (
                             <span key={t} style={{
                               padding:'3px 10px', borderRadius:9999,
@@ -5925,35 +6769,56 @@ function EntryDetail({entry, entries, onClose, theme, lang, onEdit, onDelete, on
 
 
         </div>
+
+        {/* ── Bottom action bar: 再写一条 (primary) + 留言板 (secondary) ── */}
+        {!entry.isWelcome && (
+          <div style={{
+            position:'absolute', bottom:0, left:0, right:0,
+            padding:`26px 29px calc(env(safe-area-inset-bottom, 0px) + 14px)`,
+            display:'flex', gap:12,
+            background:`linear-gradient(to top, ${theme.bg} 62%, transparent)`,
+            pointerEvents:'none',
+          }}>
+            {onWrite && (
+              <SpringTap
+                onClick={() => { close(); setTimeout(() => onWrite(entry.date), 320); }}
+                sfx="tap"
+                style={{
+                  flex:1, height:52, boxSizing:'border-box', borderRadius:26, pointerEvents:'auto',
+                  background: isDark ? 'rgba(255,255,255,0.06)' : theme.paper,
+                  border:`1.5px solid ${theme.accent}`,
+                  display:'flex', alignItems:'center', justifyContent:'center', gap:8,
+                }}>
+                <Icon name="plus" size={17} color={theme.accentDark} stroke={2.4}/>
+                <span style={{fontSize:17, color:theme.accentDark, fontWeight:600, fontFamily:'Gaegu, cursive', letterSpacing:0.5}}>
+                  {lang==='zh'?'再写一条':lang==='ja'?'もう一つ':lang==='ko'?'또 쓰기':'Write More'}
+                </span>
+              </SpringTap>
+            )}
+            <SpringTap
+              onClick={() => { Haptic.impact('soft'); setShareOpen(true); }}
+              sfx="pop"
+              style={{
+                flex:1, height:52, boxSizing:'border-box', borderRadius:26, pointerEvents:'auto',
+                background: theme.accent,
+                boxShadow:`0 6px 18px ${theme.accent}55`,
+                display:'flex', alignItems:'center', justifyContent:'center', gap:8,
+              }}>
+              <Icon name="board" size={17} color="#fff" stroke={2}/>
+              <span style={{fontSize:17, color:'#fff', fontWeight:600, fontFamily:'Gaegu, cursive', letterSpacing:0.5}}>
+                {lang==='zh'?'留言板':lang==='ja'?'ボード':lang==='ko'?'보드':'Board'}
+              </span>
+            </SpringTap>
+          </div>
+        )}
       </div>
 
-      {/* Floating board button — always rendered, hidden behind sheet (zIndex:350 > 50) */}
-      {!entry.isWelcome && (
-        <div style={{
-          position:'absolute', bottom:'calc(var(--sab) + 24px)', right:20, zIndex:50,
-          opacity: open && !shareOpen ? 1 : 0,
-          transform: open && !shareOpen ? 'translateY(0)' : 'translateY(20px)',
-          transition: 'opacity 280ms, transform 280ms cubic-bezier(0.16,1,0.3,1)',
-          pointerEvents: open && !shareOpen ? 'auto' : 'none',
-        }}>
-          <SpringTap onClick={() => { Haptic.impact('soft'); setShareOpen(true); }} sfx="pop" style={{
-            padding:'12px 20px', borderRadius:9999,
-            background:theme.accent,
-            boxShadow:`0 4px 16px ${theme.accent}50`,
-            display:'flex', alignItems:'center', gap:6,
-          }}>
-            <Icon name="board" size={17} color="#fff" stroke={2}/>
-            <span style={{fontSize:15, fontWeight:600, color:'#fff', whiteSpace:'nowrap'}}>
-              {lang==='zh'?'生成今日留言板 →':lang==='ja'?'今日のボードを作成 →':lang==='ko'?'오늘 보드 만들기 →':'Create Board →'}
-            </span>
-          </SpringTap>
-        </div>
-      )}
 
       {/* Share card sheet */}
       {shareOpen && (
         <ShareCardSheet
           entries={dayEntries.filter(e => !e.isWelcome)}
+          allEntries={entries} anchorDate={entry.date}
           theme={theme} lang={lang}
           onClose={() => setShareOpen(false)}/>
       )}
@@ -6025,6 +6890,38 @@ function EntryDetail({entry, entries, onClose, theme, lang, onEdit, onDelete, on
                 {index+1} / {total}
               </div>
             )}
+
+            {/* Download button */}
+            <SpringTap
+              onClick={ev => { ev.stopPropagation(); downloadPhoto(photos[index]); }}
+              style={{
+                position:'absolute', top:'env(safe-area-inset-top, 16px)', right:20,
+                width:38, height:38, borderRadius:19,
+                background: photoDownloading ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.15)',
+                display:'flex', alignItems:'center', justifyContent:'center',
+                transition:'background 200ms',
+              }}>
+              {photoDownloading
+                ? <span style={{fontSize:13, color:'rgba(255,255,255,0.5)'}}>…</span>
+                : <Icon name="download" size={15} color="rgba(255,255,255,0.88)"/>}
+            </SpringTap>
+
+            {/* Download feedback toast */}
+            {photoDownloadMsg && (
+              <div style={{
+                position:'absolute', bottom:40, left:'50%', transform:'translateX(-50%)',
+                background:'rgba(255,255,255,0.18)', backdropFilter:'blur(12px)',
+                borderRadius:20, padding:'8px 16px',
+                fontSize:14, color:'#fff', fontWeight:600, whiteSpace:'nowrap',
+                animation:'fadeIn 200ms ease both',
+              }}>
+                {photoDownloadMsg==='ok'
+                  ? (lang==='zh'?'已保存到相册 ✓':lang==='ja'?'保存しました ✓':lang==='ko'?'저장됨 ✓':'Saved ✓')
+                  : photoDownloadMsg==='denied'
+                  ? (lang==='zh'?'请在设置中允许相册权限':lang==='ja'?'設定で写真へのアクセスを許可してください':lang==='ko'?'사진 접근을 허용해 주세요':'Allow photo access in Settings')
+                  : (lang==='zh'?'保存失败，请重试':lang==='ja'?'保存に失敗しました':'Save failed')}
+              </div>
+            )}
           </div>
         );
       })()}
@@ -6041,11 +6938,12 @@ function Sheet({onClose, theme, title, children, tallness, full, slideFrom}) {
   const close = () => { setOpen(false); setTimeout(onClose, 320); };
   const fromRight = full && slideFrom === 'right';
   return (
-    <div style={{position:'absolute', inset:0, zIndex:350, display:'flex', flexDirection:'column'}}>
+    <div style={{position:'absolute', inset:0, zIndex:350, display:'flex', flexDirection:'column', pointerEvents:open?'auto':'none'}}>
       {!full && <div onClick={close} style={{
         position:'absolute', inset:0,
         background:'rgba(20,30,20,0.32)', backdropFilter:'blur(5px)', WebkitBackdropFilter:'blur(5px)',
         opacity:open?1:0, transition:'opacity 300ms',
+        pointerEvents: open ? 'auto' : 'none',
       }}/>}
       <div style={{
         position:'absolute',
@@ -6173,8 +7071,11 @@ function TagsSheet({entries, onClose, onUpdateEntries, theme, lang, tagOrder: ta
   const [editingTag, setEditingTag] = React.useState(null);
   const [editValue,  setEditValue]  = React.useState('');
   const renameRef = React.useRef(null);
+  const [newTagValue, setNewTagValue] = React.useState('');
+  const newTagRef = React.useRef(null);
+  const _ntc = React.useRef(false);
 
-  const IRENE_TAGS = ['来自Irene','from Irene','Ireneより','Irene의 편지','来自ena','来自嗯呐','嗯呐的信','from ena',"ena's letters",'enaより','enaの手紙','ena의 편지','ena의 편지들'];
+  const IRENE_TAGS = ['来自Irene','from Irene','Ireneより','Irene의 편지','来自ena','来自嗯呐','嗯呐的信','来自ena的信','from ena',"ena's letters",'enaより','enaの手紙','ena의 편지','ena의 편지들'];
 
   const tagCountMap = React.useMemo(() => {
     const tc = {};
@@ -6189,7 +7090,8 @@ function TagsSheet({entries, onClose, onUpdateEntries, theme, lang, tagOrder: ta
   const tagOrder = tagOrderProp;
 
   const userTagCounts = React.useMemo(() => {
-    const all = Object.entries(tagCountMap).filter(([t]) => !IRENE_TAGS.includes(t));
+    const userOnly = Object.entries(tagCountMap).filter(([t]) => !IRENE_TAGS.includes(t));
+    const all = ireneTag ? [[ireneTag, tagCountMap[ireneTag]], ...userOnly] : userOnly;
     if (tagOrder) {
       const om = new Map(tagOrder.map((t, idx) => [t, idx]));
       all.sort((a, b) => {
@@ -6198,10 +7100,15 @@ function TagsSheet({entries, onClose, onUpdateEntries, theme, lang, tagOrder: ta
         return ia !== ib ? ia - ib : b[1] - a[1];
       });
     } else {
-      all.sort((a, b) => b[1] - a[1]);
+      const isIrene = (t) => ireneTag && t === ireneTag;
+      all.sort((a, b) => {
+        if (isIrene(a[0]) && !isIrene(b[0])) return -1;
+        if (!isIrene(a[0]) && isIrene(b[0])) return 1;
+        return b[1] - a[1];
+      });
     }
     return all;
-  }, [tagCountMap, tagOrder]);
+  }, [tagCountMap, tagOrder, ireneTag]);
 
   const saveOrder = (arr) => {
     if (onTagOrderChange) onTagOrderChange(arr);
@@ -6322,27 +7229,7 @@ function TagsSheet({entries, onClose, onUpdateEntries, theme, lang, tagOrder: ta
   return (
     <Sheet onClose={onClose} theme={theme} title={i.tagsTitle} tallness="87%">
       <div ref={listRef} className="no-select" style={{padding:'8px 24px 40px'}}>
-        {/* Pinned irene tag — always first, not draggable */}
-        {ireneTag && (
-          <div style={{
-            display:'flex', alignItems:'center', padding:'12px 0',
-            borderBottom:`1px solid ${theme.divider}`,
-          }}>
-            <img src={ENVELOPE_SRC} style={{width:16, height:16, marginRight:10, flexShrink:0, objectFit:'contain'}}/>
-            <div style={{flex:1, fontSize:16, color:theme.inkSoft, fontWeight:500, fontStyle:'italic'}}>
-              #{ireneTag}
-            </div>
-            <div style={{
-              padding:'4px 10px', borderRadius:9999,
-              background:theme.accentSoft,
-              fontSize:17, color:theme.accentDark, fontWeight:600,
-            }}>
-              {i.tagCount(tagCountMap[ireneTag])}
-            </div>
-          </div>
-        )}
-
-        {/* Draggable user tags */}
+        {/* Draggable tags (including irene tag) */}
         {userTagCounts.map(([tag, n], idx) => (
           <div
             key={tag}
@@ -6366,7 +7253,19 @@ function TagsSheet({entries, onClose, onUpdateEntries, theme, lang, tagOrder: ta
               </svg>
             </div>
 
-            {editingTag === tag ? (
+            {tag === ireneTag ? (
+              <>
+                <img src={ENVELOPE_SRC} style={{width:16, height:16, marginRight:10, flexShrink:0, objectFit:'contain'}}/>
+                <div style={{flex:1, fontSize:16, color:theme.inkSoft, fontWeight:500, fontStyle:'italic'}}>#{tag}</div>
+                <div style={{
+                  padding:'4px 10px', borderRadius:9999,
+                  background:theme.accentSoft,
+                  fontSize:17, color:theme.accentDark, fontWeight:600,
+                }}>
+                  {i.tagCount(n)}
+                </div>
+              </>
+            ) : editingTag === tag ? (
               <>
                 <input
                   autoFocus
@@ -6430,12 +7329,68 @@ function TagsSheet({entries, onClose, onUpdateEntries, theme, lang, tagOrder: ta
             )}
           </div>
         ))}
-        {userTagCounts.length === 0 && !ireneTag && (
-          <div style={{padding:'48px 0', textAlign:'center', color:theme.inkMuted}}>
+        {userTagCounts.length === 0 && (
+          <div style={{padding:'48px 0 20px', textAlign:'center', color:theme.inkMuted}}>
             <Clover size={48}/><br/>
             <div style={{marginTop:12, fontSize:17}}>{i.noResults}</div>
           </div>
         )}
+        {/* New tag input */}
+        <div style={{
+          display:'flex', alignItems:'center', gap:10, marginTop:8,
+          padding:'12px 14px', borderRadius:16,
+          border:`1.5px dashed ${theme.divider}`,
+          background: theme.paper,
+        }}>
+          <span style={{fontSize:16, color:theme.inkMuted, fontWeight:500}}>#</span>
+          <input
+            ref={newTagRef}
+            value={newTagValue}
+            placeholder={i.tagPh||'type a tag…'}
+            onCompositionStart={() => { _ntc.current = true; }}
+            onCompositionEnd={e => { _ntc.current = false; setNewTagValue(e.target.value); }}
+            onChange={e => { if (!_ntc.current) setNewTagValue(e.target.value); }}
+            onKeyDown={e => {
+              if (_ntc.current) return;
+              if (e.key === 'Enter' && newTagValue.trim()) {
+                e.preventDefault();
+                const clean = newTagValue.trim().replace(/^#+/, '');
+                if (clean) {
+                  Haptic.impact('light');
+                  onUpdateEntries(prev => prev);
+                  if (onTagOrderChange && tagOrderProp) {
+                    onTagOrderChange([...(tagOrderProp || []), clean]);
+                  }
+                  setNewTagValue('');
+                }
+              }
+            }}
+            style={{
+              flex:1, background:'transparent', border:'none', outline:'none',
+              fontSize:16, color:theme.ink, fontFamily:'inherit',
+            }}
+          />
+          {newTagValue.trim().length > 0 && (
+            <SpringTap sfx="pop" onClick={() => {
+              const clean = newTagValue.trim().replace(/^#+/, '');
+              if (clean) {
+                Haptic.impact('light');
+                if (onTagOrderChange) {
+                  onTagOrderChange([...(tagOrderProp || []), clean]);
+                }
+                setNewTagValue('');
+                if (newTagRef.current) newTagRef.current.focus();
+              }
+            }} style={{
+              width:30, height:30, borderRadius:15, background:theme.accent,
+              display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0,
+            }}>
+              <svg width={14} height={14} viewBox="0 0 24 24" fill="none" stroke="#fff" strokeWidth={3} strokeLinecap="round">
+                <path d="M12 5v14M5 12h14"/>
+              </svg>
+            </SpringTap>
+          )}
+        </div>
       </div>
     </Sheet>
   );
@@ -6467,6 +7422,106 @@ function TimePickerSheet({value, onChange, onClose, theme, lang}) {
             )}
           </SpringTap>
         ))}
+      </div>
+    </Sheet>
+  );
+}
+
+// ─── Subscription Sheet ────────────────────────────────────
+function SubscriptionSheet({onClose, theme, lang}) {
+  const i = I18N[lang||'en'];
+  const [selected, setSelected] = React.useState('year');
+  const plans = [
+    { id:'month',   label: i.subscribeMonth||'$1 / month',   price:'$1',  per: lang==='zh'||lang==='zh-TW'?'月':lang==='ja'?'月':lang==='ko'?'개월':'mo' },
+    { id:'quarter', label: i.subscribeQuarter||'$3 / quarter', price:'$3',  per: lang==='zh'||lang==='zh-TW'?'季度':lang==='ja'?'3ヶ月':lang==='ko'?'분기':'qtr' },
+    { id:'year',    label: i.subscribeYear||'$10 / year',    price:'$10', per: lang==='zh'||lang==='zh-TW'?'年':lang==='ja'?'年':lang==='ko'?'년':'yr', badge: i.subscribeSave||'Best value' },
+  ];
+  const features = i.subscribeFeatures || ['Unlimited entries','Cloud backup','Custom themes','Priority support'];
+  return (
+    <Sheet onClose={onClose} theme={theme} title={i.subscribeLabel||'Premium'} tallness="92%">
+      <div style={{padding:'0 24px 40px', display:'flex', flexDirection:'column', gap:0}}>
+        {/* Header clover decoration */}
+        <div style={{textAlign:'center', paddingBottom:16}}>
+          <Clover size={52} animated animation="breathe"/>
+          <div style={{marginTop:8, fontSize:17, color:theme.inkSoft, lineHeight:1.5}}>
+            {i.subscribeDetail||'Unlock all features'}
+          </div>
+        </div>
+        {/* Plan selector */}
+        <div style={{display:'flex', flexDirection:'column', gap:10, marginBottom:20}}>
+          {plans.map(plan => (
+            <SpringTap key={plan.id} sfx="pop" onClick={() => setSelected(plan.id)} style={{
+              borderRadius:16, padding:'14px 18px',
+              border:`2px solid ${selected===plan.id ? theme.accent : theme.divider}`,
+              background: selected===plan.id ? theme.accentSoft : theme.paper,
+              display:'flex', alignItems:'center', gap:12,
+              transition:'all 200ms',
+            }}>
+              <div style={{
+                width:22, height:22, borderRadius:11, flexShrink:0,
+                border:`2px solid ${selected===plan.id ? theme.accent : theme.inkMuted}`,
+                background: selected===plan.id ? theme.accent : 'transparent',
+                display:'flex', alignItems:'center', justifyContent:'center',
+                transition:'all 200ms',
+              }}>
+                {selected===plan.id && <div style={{width:8,height:8,borderRadius:4,background:'#fff'}}/>}
+              </div>
+              <div style={{flex:1}}>
+                <span style={{fontSize:17, fontWeight:selected===plan.id?700:500, color:theme.ink}}>{plan.label}</span>
+              </div>
+              {plan.badge && (
+                <div style={{
+                  padding:'3px 10px', borderRadius:9999, fontSize:12, fontWeight:700,
+                  background:theme.accent, color:'#fff', letterSpacing:0.3,
+                }}>{plan.badge}</div>
+              )}
+            </SpringTap>
+          ))}
+        </div>
+        {/* Features list */}
+        <div style={{marginBottom:24}}>
+          {features.map((f, idx) => (
+            <div key={idx} style={{display:'flex', alignItems:'center', gap:10, padding:'7px 0', borderBottom: idx < features.length-1 ? `1px solid ${theme.divider}` : 'none'}}>
+              <div style={{
+                width:20, height:20, borderRadius:10, background:theme.accentSoft,
+                display:'flex', alignItems:'center', justifyContent:'center', flexShrink:0,
+              }}>
+                <svg width={12} height={12} viewBox="0 0 24 24" fill="none" stroke={theme.accent} strokeWidth={3} strokeLinecap="round" strokeLinejoin="round">
+                  <path d="M5 12l5 5L19 7"/>
+                </svg>
+              </div>
+              <span style={{fontSize:16, color:theme.ink}}>{f}</span>
+            </div>
+          ))}
+        </div>
+        {/* CTA */}
+        <SpringTap sfx="pop" onClick={() => {
+          Haptic.notification('success');
+          window.webkit?.messageHandlers?.subscribe?.postMessage({ plan: selected });
+        }} style={{
+          background:theme.accent, borderRadius:16, padding:'17px 24px',
+          textAlign:'center', fontSize:17, fontWeight:700, color:'#fff',
+          letterSpacing:0.3,
+          boxShadow:`0 6px 20px ${theme.accent}55`,
+        }}>
+          {i.subscribeCta||'Start free trial'}
+        </SpringTap>
+        <div style={{display:'flex', justifyContent:'center', gap:24, marginTop:16}}>
+          <SpringTap onClick={() => window.webkit?.messageHandlers?.restorePurchase?.postMessage({})}
+            style={{fontSize:13, color:theme.inkMuted}}>
+            {i.subscribeRestore||'Restore purchase'}
+          </SpringTap>
+          <SpringTap onClick={() => window.webkit?.messageHandlers?.openPrivacy?.postMessage({})}
+            style={{fontSize:13, color:theme.inkMuted}}>
+            {i.subscribePrivacy||'Privacy & Terms'}
+          </SpringTap>
+        </div>
+        <div style={{textAlign:'center', marginTop:12, fontSize:11, color:theme.inkMuted, lineHeight:1.5}}>
+          {lang==='zh'||lang==='zh-TW' ? '自动续费，可随时取消。订阅前请确认App Store协议。' :
+           lang==='ja' ? '自動更新。いつでもキャンセル可。' :
+           lang==='ko' ? '자동 갱신, 언제든지 취소 가능。' :
+           'Auto-renews. Cancel anytime. Subject to App Store Terms.'}
+        </div>
       </div>
     </Sheet>
   );
@@ -6549,7 +7604,7 @@ function ReviewSheet({onClose, theme, lang}) {
 
 Object.assign(window, {
   EntryCard, AuthFlow, EntryEditor, SearchOverlay, EntryDetail,
-  Sheet, ProfileSheet, TagsSheet, TimePickerSheet, ReviewSheet,
+  Sheet, ProfileSheet, TagsSheet, TimePickerSheet, ReviewSheet, SubscriptionSheet, MonthYearPicker,
 });
 
 </script>
@@ -6558,6 +7613,16 @@ Object.assign(window, {
 
 
 // app.jsx
+
+// ── Error boundary — catches render errors from overlays ──
+class ErrorBoundary extends React.Component {
+  constructor(props) { super(props); this.state = { error: null }; }
+  static getDerivedStateFromError(err) { return { error: err }; }
+  render() {
+    if (this.state.error) return null;
+    return this.props.children;
+  }
+}
 
 // ── Milestone celebration sheet — triggered every 4 entries ──
 function MilestoneCelebrationSheet({ milestone, lang, theme, onClose }) {
@@ -6578,6 +7643,7 @@ function MilestoneCelebrationSheet({ milestone, lang, theme, onClose }) {
       background: open ? 'rgba(0,0,0,0.32)' : 'rgba(0,0,0,0)',
       transition:'background 340ms',
       display:'flex', alignItems:'flex-end',
+      pointerEvents: open ? 'auto' : 'none',
     }} onClick={close}>
       <div onClick={e => e.stopPropagation()} style={{
         width:'100%', background:theme.bg,
@@ -6821,7 +7887,7 @@ function WelcomeLetterFlow({ theme, lang, onClose, onName, startStep = 0, onlyFi
   const isOpen    = step === 2 || step === 4;
   const letter    = LETTERS[letterIdx];
 
-  const fromLine    = zh?'来自嗯呐':ko?'ena로부터':ja?'enaより':'From ena';
+  const fromLine    = zh?'来自ena':ko?'ena로부터':ja?'enaより':'From ena';
   const letterLabel = zh?`第 ${letterIdx+1} 封信（共 2 封）`:ko?`편지 ${letterIdx+1} / 2`:ja?`手紙 ${letterIdx+1} / 2`:`Letter ${letterIdx+1} of 2`;
   const openCTA     = zh?'轻触打开信封':ko?'편지 열기':ja?'開封する':'Open the letter';
   const nextCTA     = (step === 2 && !onlyFirst)
@@ -6866,6 +7932,7 @@ function WelcomeLetterFlow({ theme, lang, onClose, onName, startStep = 0, onlyFi
       padding:'20px 24px',
       opacity: visible ? 1 : 0,
       transition:'opacity 280ms',
+      pointerEvents: visible ? 'auto' : 'none',
     }}>
       <div key={step === 0 ? 'name' : letterIdx} style={{
         width:'100%', maxWidth:350,
@@ -7121,7 +8188,7 @@ function WelcomeLetterFlow({ theme, lang, onClose, onName, startStep = 0, onlyFi
                   </div>
                   <div style={{fontSize:17, fontWeight:700, color:theme.accent,
                     fontFamily:'Gaegu, cursive'}}>
-                    {zh?'爱你的嗯呐 ✦':ja?'enaより ✦':ko?'ena가 ✦':'With love, ena ✦'}
+                    {zh?'爱你的ena ✦':ja?'enaより ✦':ko?'ena가 ✦':'With love, ena ✦'}
                   </div>
                 </div>
                 {/* Signature portrait seal */}
@@ -7163,11 +8230,12 @@ function WelcomeLetterFlow({ theme, lang, onClose, onName, startStep = 0, onlyFi
 
 // ── Board builder shared constants ──
 const BOARD_THEMES = [
-  { wood:'#A0C86A', cork:'#EDF6E2', pill:'#6A9C38', ink:'#1A3810', notes:['#F2FAE8','#EDF8E2','#F0FAE5','#EAFAE0'] },
-  { wood:'#F4D47A', cork:'#FEF9E8', pill:'#C8A040', ink:'#2C2008', notes:['#FFFDF0','#FEFAE4','#FFFBEE','#FEF8E2'] },
-  { wood:'#F0A8BC', cork:'#FFF0F4', pill:'#C06080', ink:'#381420', notes:['#FEF6F8','#FDF2F5','#FEF4F8','#FCF0F4'] },
-  { wood:'#9ED4F0', cork:'#EBF7FD', pill:'#5898C8', ink:'#0E2030', notes:['#F2F8FD','#EEF5FC','#F0F7FD','#EBFAFF'] },
-  { wood:'#CCC0EC', cork:'#F4F0FD', pill:'#8868B4', ink:'#201438', notes:['#F7F4FE','#F2EEF9','#F5F2FE','#F0EEF9'] },
+  // Soft flat frame + near-white paper; `pill` doubles as the swatch colour.
+  { wood:'#BCD9AB', cork:'#F7FAF1', pill:'#6E9C58', swatch:'#A3CF8C', ink:'#26391E', notes:['#F2FAE8','#EDF8E2','#F0FAE5','#EAFAE0'] },
+  { wood:'#F4DEA2', cork:'#FFFBF0', pill:'#C9A24A', swatch:'#F4D27A', ink:'#3A2D0E', notes:['#FFFDF0','#FEFAE4','#FFFBEE','#FEF8E2'] },
+  { wood:'#F3C3CF', cork:'#FFF7F9', pill:'#C9718A', swatch:'#F2A9BF', ink:'#43202C', notes:['#FEF6F8','#FDF2F5','#FEF4F8','#FCF0F4'] },
+  { wood:'#B9DBEF', cork:'#F4FAFD', pill:'#6AA2C9', swatch:'#8EC4E6', ink:'#15293A', notes:['#F2F8FD','#EEF5FC','#F0F7FD','#EBFAFF'] },
+  { wood:'#D5CBEF', cork:'#F9F6FE', pill:'#9578C0', swatch:'#B9A8E4', ink:'#2A1D44', notes:['#F7F4FE','#F2EEF9','#F5F2FE','#F0EEF9'] },
 ];
 const BOARD_PIN_COLORS = ['#E0A8A8','#E8C89A','#A8BCE0','#A8C8B8'];
 const BOARD_STICKER_SETS = [
@@ -7199,7 +8267,7 @@ const BOARD_GEOM = {
   FRAME: 32,
   NOTE_W: 176, NOTE_PAD_X: 13, NOTE_PAD_TOP: 30, NOTE_PAD_BOT: 13, NOTE_FS: 22, NOTE_MOOD_FS: 16,
   PHOTO_MAX: 230,
-  STICKER_R: 51, STICKER_FS: 48,
+  STICKER_R: 51, STICKER_FS: 48, STICKER_EMOJI_K: 1.3,
 };
 
 // ── Share card: today's message board (bulletin board aesthetic) ──
@@ -7431,44 +8499,7 @@ async function generateShareCard(entries, theme, lang, opts = {}) {
   ctx.fillStyle = WOOD;
   ctx.fillRect(0, 0, W, H);
 
-  // ── Vintage frame texture — diagonal crosshatch + corner studs ──
-  {
-    // Clip to the 4 narrow frame strips only
-    ctx.save();
-    ctx.beginPath();
-    ctx.rect(0,       0,        W,     FRAME);          // top
-    ctx.rect(0,       H-FRAME,  W,     FRAME);          // bottom
-    ctx.rect(0,       FRAME,    FRAME, H-FRAME*2);      // left
-    ctx.rect(W-FRAME, FRAME,    FRAME, H-FRAME*2);      // right
-    ctx.clip();
-
-    // Fine crosshatch — gives a woven-linen / vintage canvas feel
-    ctx.lineWidth = 0.65;
-    const hStep = 7;
-    // Forward diagonals (↘)
-    ctx.strokeStyle = 'rgba(0,0,0,0.07)';
-    for (let d = -H; d < W + H; d += hStep) {
-      ctx.beginPath(); ctx.moveTo(d, 0); ctx.lineTo(d + H, H); ctx.stroke();
-    }
-    // Back diagonals (↙) — slightly lighter for depth
-    ctx.strokeStyle = 'rgba(0,0,0,0.045)';
-    for (let d = 0; d < W + H + H; d += hStep) {
-      ctx.beginPath(); ctx.moveTo(d, 0); ctx.lineTo(d - H, H); ctx.stroke();
-    }
-    ctx.restore();
-
-    // Corner stud accents — four small circles like vintage frame rivets
-    const cOff = FRAME * 0.52;
-    const cR   = FRAME * 0.30;
-    [[cOff, cOff], [W-cOff, cOff], [cOff, H-cOff], [W-cOff, H-cOff]].forEach(([cx,cy]) => {
-      // Outer ring (shadow)
-      ctx.fillStyle = 'rgba(0,0,0,0.18)';
-      ctx.beginPath(); ctx.arc(cx, cy, cR, 0, Math.PI*2); ctx.fill();
-      // Centre highlight (light catch)
-      ctx.fillStyle = 'rgba(255,255,255,0.22)';
-      ctx.beginPath(); ctx.arc(cx - cR*0.25, cy - cR*0.3, cR*0.45, 0, Math.PI*2); ctx.fill();
-    });
-  }
+  // (flat soft frame — no texture / studs; a hairline is drawn around the paper below)
 
   // Inner board — perfect rectangle, clipped
   ctx.save();
@@ -7491,6 +8522,8 @@ async function generateShareCard(entries, theme, lang, opts = {}) {
   edgeSh.addColorStop(0,'rgba(0,0,0,0.055)'); edgeSh.addColorStop(1,'rgba(0,0,0,0)');
   ctx.fillStyle = edgeSh; ctx.fillRect(FRAME, FRAME, W-FRAME*2, 30);
   ctx.restore();
+  ctx.strokeStyle = 'rgba(0,0,0,0.07)'; ctx.lineWidth = 2;
+  ctx.strokeRect(FRAME+1, FRAME+1, W-FRAME*2-2, H-FRAME*2-2);
 
   // ── 2. Title pill + date ──
   const HEADER_H = 108;  // taller header: pill fully inside inner board with breathing room
@@ -7588,12 +8621,10 @@ async function generateShareCard(entries, theme, lang, opts = {}) {
       ctx.restore();
       return;
     }
-    ctx.shadowColor = 'rgba(0,0,0,0.15)'; ctx.shadowBlur = 6;
-    ctx.shadowOffsetX = 1; ctx.shadowOffsetY = 3;
-    ctx.fillStyle = '#FFFFFF';
-    ctx.beginPath(); ctx.arc(0, 0, R, 0, Math.PI * 2); ctx.fill();
-    ctx.shadowColor = 'transparent'; ctx.shadowBlur = 0; ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 0;
-    ctx.font = `${STICKER_SIZE}px serif`;
+    // Emoji stickers are drawn bare (no white disc), with a soft drop shadow.
+    ctx.shadowColor = 'rgba(0,0,0,0.22)'; ctx.shadowBlur = 7;
+    ctx.shadowOffsetX = 0; ctx.shadowOffsetY = 3;
+    ctx.font = `${STICKER_SIZE * BOARD_GEOM.STICKER_EMOJI_K}px serif`;
     ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
     ctx.fillText(emoji, 0, 0);
     ctx.restore();
@@ -7705,12 +8736,13 @@ function BoardPaywall({ theme, lang, onClose, onPurchase, onRestore, purchasing,
     : ['Drag diary, photos & stickers','5 theme colors to choose from','Custom layout your personal board','Lifetime access, one-time purchase'];
 
   return (
-    <div style={{position:'fixed', inset:0, zIndex:900, display:'flex', alignItems:'flex-end'}}>
+    <div style={{position:'fixed', inset:0, zIndex:900, display:'flex', alignItems:'flex-end', pointerEvents:open?'auto':'none'}}>
       {/* Backdrop */}
       <div onClick={close} style={{
         position:'absolute', inset:0, background:'rgba(0,0,0,0.45)',
         backdropFilter:'blur(8px)', WebkitBackdropFilter:'blur(8px)',
-        opacity:open?1:0, transition:'opacity 300ms'
+        opacity:open?1:0, transition:'opacity 300ms',
+        pointerEvents: open ? 'auto' : 'none',
       }}/>
       {/* Card */}
       <div style={{
@@ -7748,11 +8780,11 @@ function BoardPaywall({ theme, lang, onClose, onPurchase, onRestore, purchasing,
             borderRadius:14, padding:'12px 16px', marginBottom:20, textAlign:'left'
           }}>
             <div style={{fontSize:12.5, color:theme.accent, fontWeight:600, marginBottom:4}}>
-              {zh ? '嗯呐' : 'ena'} ( ´ ▽ ` )ﾉ
+              ena ( ´ ▽ ` )ﾉ
             </div>
             <div style={{fontSize:13.5, color:theme.ink, lineHeight:1.65}}>
               {zh
-                ? `${trialMax} 次免费试用已经用完啦！\n嗯呐好开心你喜欢留言板～ 解锁之后可以无限制使用，还能随时保存和分享哦 ✨`
+                ? `${trialMax} 次免费试用已经用完啦！\nena好开心你喜欢留言板～ 解锁之后可以无限制使用，还能随时保存和分享哦 ✨`
                 : `You've used all ${trialMax} free tries!\nena's so glad you love it~ Unlock for unlimited access and saving anytime ✨`
               }
             </div>
@@ -7836,11 +8868,36 @@ function BoardPaywall({ theme, lang, onClose, onPurchase, onRestore, purchasing,
 }
 
 // ── ShareCardSheet — bulletin board photo picker + preview ────────
-function ShareCardSheet({ entries, theme, lang, onClose }) {
+function ShareCardSheet({ entries, allEntries, anchorDate, theme, lang, onClose }) {
   const isDark = theme._dark;
-  const SWATCHES = ['#A0C86A','#F4D47A','#F0A8BC','#9ED4F0','#CCC0EC'];
+  const SWATCHES = BOARD_THEMES.map(t => t.swatch);
   const TABS = ['diary','photos','stickers'];
-  const filteredEntries = entries;
+  const [range, setRange] = React.useState('day'); // 'day' | 'week' | 'month'
+  const rangeInfo = React.useMemo(() => {
+    const anchor = anchorDate || entries[0]?.date || localIso(new Date());
+    if (range === 'day') return { list: entries, sub: '' };
+    const a = new Date(anchor.replace(/-/g,'/'));
+    let from, to;
+    if (range === 'week') {
+      from = new Date(a); from.setDate(a.getDate() - ((a.getDay() + 6) % 7));
+      to = new Date(from); to.setDate(from.getDate() + 6);
+    } else {
+      from = new Date(a.getFullYear(), a.getMonth(), 1);
+      to = new Date(a.getFullYear(), a.getMonth() + 1, 0);
+    }
+    const f = localIso(from), t = localIso(to);
+    const list = (allEntries || entries)
+      .filter(e => !e.isWelcome && e.date >= f && e.date <= t)
+      .sort((x, y) => (x.date < y.date ? -1 : x.date > y.date ? 1 : ((x.createdAt || 0) - (y.createdAt || 0))));
+    const m = I18N[lang||'en'].mons;
+    const fmt = (d) => (lang==='zh'||lang==='ja') ? `${d.getMonth()+1}月${d.getDate()}日`
+      : lang==='ko' ? `${d.getMonth()+1}월 ${d.getDate()}일` : `${m[d.getMonth()]} ${d.getDate()}`;
+    const sub = range === 'week' ? `${fmt(from)} – ${fmt(to)}`
+      : (lang==='zh'||lang==='ja') ? `${a.getFullYear()}年${a.getMonth()+1}月`
+      : lang==='ko' ? `${a.getFullYear()}년 ${a.getMonth()+1}월` : `${m[a.getMonth()]} ${a.getFullYear()}`;
+    return { list, sub };
+  }, [range, entries, allEntries, anchorDate, lang]);
+  const filteredEntries = rangeInfo.list;
   const FRAME = 32;
 
   // ── Board IAP / trial state (gated on save/share) ──
@@ -7848,7 +8905,7 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
   const [boardTrialCount, setBoardTrialCount] = React.useState(() => {
     try { return Math.min(parseInt(localStorage.getItem('clovery_board_trial_count') || '0', 10), BOARD_TRIAL_MAX); } catch(e) { return 0; }
   });
-  const [boardUnlocked, setBoardUnlocked]   = React.useState(false);
+  const [boardUnlocked, setBoardUnlocked]   = React.useState(true); // board is free for everyone
   const [paywallOpen, setPaywallOpen]       = React.useState(false);
   const [trialConfirmOpen, setTrialConfirmOpen] = React.useState(false);
   const [pendingAction, setPendingAction]   = React.useState(null); // 'save' | 'share'
@@ -7870,7 +8927,7 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
 
   React.useEffect(() => {
     window._boardUnlockStatus = (unlocked) => {
-      setBoardUnlocked(!!unlocked);
+      setBoardUnlocked(true);
       setRestoring(false);
       setPurchaseNoticeKind(kind => {
         if (unlocked) return kind === 'restored' ? kind : null;
@@ -7908,8 +8965,6 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
     window._boardPriceResult = (price) => {
       if (price) setBoardPrice(price);
     };
-    window.webkit?.messageHandlers?.checkBoardUnlocked?.postMessage({});
-    window.webkit?.messageHandlers?.fetchBoardPrice?.postMessage({});
     return () => {
       window._boardUnlockStatus = null;
       window._boardPurchaseResult = null;
@@ -7991,11 +9046,11 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
     let cancelled = false;
     setSpinning(true);
     const t = setTimeout(async () => {
-      const url = await generateShareCard(filteredEntries, theme, lang, { boardItems, boardColorIdx });
+      const url = await generateShareCard(filteredEntries, theme, lang, { boardItems, boardColorIdx, dateRange: range, dateSub: rangeInfo.sub });
       if (!cancelled) { setPreviewURL(url); setSpinning(false); }
     }, 500);
     return () => { cancelled = true; clearTimeout(t); };
-  }, [boardItems, boardColorIdx]);
+  }, [boardItems, boardColorIdx, range]);
 
   React.useEffect(() => {
     window.__clovery_imageSaveResult = (outcome) => {
@@ -8224,9 +9279,9 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
       }
       return (
         <div key={item.id} className={`brd-item ${animCls}`}
-          style={{...base, width:R*2, height:R*2, borderRadius:'50%', background:'#fff',
-            boxShadow:'0 1px 6px rgba(0,0,0,0.18)', display:'flex', alignItems:'center',
-            justifyContent:'center', fontSize: BOARD_GEOM.STICKER_FS * S}} {...handlers}>
+          style={{...base, width:R*2, height:R*2, display:'flex', alignItems:'center',
+            justifyContent:'center', lineHeight:1, fontSize: BOARD_GEOM.STICKER_FS * BOARD_GEOM.STICKER_EMOJI_K * S,
+            filter:'drop-shadow(0 3px 4px rgba(0,0,0,0.22))'}} {...handlers}>
           {item.data.emoji}
         </div>
       );
@@ -8294,7 +9349,7 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
     });
     if (trayTab === 'diary') {
       if (!regs.length) {
-        return <div style={{fontSize:14, opacity:0.45, padding:'10px 6px'}}>{lang==='zh'?'今天还没有日记':'No entries today'}</div>;
+        return <div style={{fontSize:14, opacity:0.45, padding:'10px 6px'}}>{lang==='zh'?'这段时间还没有日记':'No entries in this period'}</div>;
       }
       return regs.map((e, i) => (
         <div key={e.id||i} {...dragProps('diary', {e})}
@@ -8327,9 +9382,9 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
     return [
       ...tStickers.map((emoji, i) => (
         <div key={`e${i}`} {...dragProps('sticker', {emoji})}
-          style={{flexShrink:0, width:46, height:46, background:'#fff', borderRadius:'50%',
+          style={{flexShrink:0, width:46, height:46, lineHeight:1,
             display:'flex', alignItems:'center', justifyContent:'center',
-            boxShadow:'0 2px 8px rgba(0,0,0,0.15)', fontSize:22, cursor:'grab'}}>
+            filter:'drop-shadow(0 2px 3px rgba(0,0,0,0.20))', fontSize:32, cursor:'grab'}}>
           {emoji}
         </div>
       )),
@@ -8345,7 +9400,12 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
   };
 
   const T = {
-    title:    lang==='zh'?'今日留言板':lang==='ko'?'오늘의 보드':lang==='ja'?'今日のボード':"Today's Board",
+    title:    ({day:{zh:'今日留言板',ko:'오늘의 보드',ja:'今日のボード',en:"Today's Board"},
+                week:{zh:'本周留言板',ko:'이번 주 보드',ja:'今週のボード',en:"This Week's Board"},
+                month:{zh:'本月留言板',ko:'이번 달 보드',ja:'今月のボード',en:"This Month's Board"}})[range][lang||'en'] || "Today's Board",
+    rangeDay:   lang==='zh'?'今日':lang==='ja'?'今日':lang==='ko'?'오늘':'Today',
+    rangeWeek:  lang==='zh'?'本周':lang==='ja'?'今週':lang==='ko'?'이번 주':'Week',
+    rangeMonth: lang==='zh'?'本月':lang==='ja'?'今月':lang==='ko'?'이번 달':'Month',
     save:     lang==='zh'?'保存':lang==='ko'?'저장':lang==='ja'?'保存':'Save',
     share:    lang==='zh'?'分享':lang==='ko'?'공유':lang==='ja'?'共有':'Share',
     saved:    lang==='zh'?'已保存 ✓':lang==='ko'?'저장됨 ✓':lang==='ja'?'保存しました ✓':'Saved ✓',
@@ -8359,9 +9419,18 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
   };
 
   const _bun = (() => { try { return localStorage.getItem('clovery_name') || ''; } catch(e) { return ''; } })();
+  const _scopeW = range==='week' ? (lang==='zh'?'本周':lang==='ja'?'今週':lang==='ko'?'이번 주':'Weekly')
+               : range==='month' ? (lang==='zh'?'本月':lang==='ja'?'今月':lang==='ko'?'이번 달':'Monthly')
+               : (lang==='zh'?'今日':lang==='ja'?'今日':lang==='ko'?'오늘':"Today's");
   const boardTitle = _bun
-    ? (lang==='zh'?`${_bun} 的今日留言板`:lang==='ko'?`${_bun} 의 오늘 보드`:lang==='ja'?`${_bun} の今日のボード`:`${_bun}'s Board`)
+    ? (lang==='zh'?`${_bun} 的${_scopeW}留言板`:lang==='ko'?`${_bun} 의 ${_scopeW} 보드`:lang==='ja'?`${_bun} の${_scopeW}ボード`:`${_bun}'s ${_scopeW} Board`)
     : T.title;
+  const changeRange = (r) => {
+    if (r === range) return;
+    Haptic.impact('light');
+    setBoardItems([]); setPreviewURL(null); setSaved(false); setSelectedItemId(null);
+    setRange(r);
+  };
 
   const doSave  = () => {
     if (!previewURL || spinning) return;
@@ -8385,9 +9454,35 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
     <Sheet onClose={onClose} theme={theme} title={T.title} full slideFrom="right">
       <div style={{display:'flex', flexDirection:'column', height:'100%', overflow:'hidden'}}>
 
+        {/* ── Scope: today / week / month ── */}
+        <div style={{flex:'0 0 auto', display:'flex', alignItems:'center', justifyContent:'space-between', gap:10, padding:'2px 16px 8px'}}>
+          <div style={{display:'flex', padding:3, gap:2, borderRadius:20,
+            background: isDark?'rgba(255,255,255,0.08)':'rgba(0,0,0,0.06)'}}>
+            {[['day',T.rangeDay],['week',T.rangeWeek],['month',T.rangeMonth]].map(([k,label]) => (
+              <button key={k} onClick={() => changeRange(k)}
+                style={{border:'none', cursor:'pointer', padding:'5px 18px', borderRadius:17, fontSize:14,
+                  fontWeight: range===k ? 600 : 400, fontFamily:'inherit',
+                  background: range===k ? theme.accent : 'transparent',
+                  color: range===k ? '#fff' : theme.inkSoft,
+                  transition:'background 160ms, color 160ms'}}>{label}</button>
+            ))}
+          </div>
+          <div style={{display:'flex', alignItems:'center', gap:9}}>
+            {SWATCHES.map((color, i) => (
+              <SpringTap key={i} onClick={() => { setBoardColorIdx(i); setSaved(false); }} sfx="pop">
+                <div style={{width:22, height:22, borderRadius:'50%', background:color,
+                  border: boardColorIdx===i ? `2px solid ${theme.accent}` : '2px solid transparent',
+                  outline: boardColorIdx===i ? `1.5px solid ${theme.accent}55` : 'none',
+                  outlineOffset:2, boxShadow:'0 1px 4px rgba(0,0,0,0.13)',
+                  transition:'border-color 140ms'}}/>
+              </SpringTap>
+            ))}
+          </div>
+        </div>
+
         {/* ── Interactive board ── */}
         <div style={{flex:'1 1 auto', position:'relative', display:'flex', alignItems:'center',
-          justifyContent:'center', padding:'4px 14px',
+          justifyContent:'center', padding:'4px 8px',
           background: isDark?'rgba(0,0,0,0.18)':'rgba(0,0,0,0.04)'}}>
 
           {/* Clear button — bottom-right of the canvas area */}
@@ -8405,27 +9500,15 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
           <div ref={boardRef} style={{
               position:'relative',
               width:'100%',
-              maxWidth:'calc((100vh - var(--sat) - 354px) * 0.75)',
+              maxWidth:'calc((100vh - var(--sat) - 336px) * 0.75)',
               aspectRatio:'3 / 4',
               flexShrink:0,
             }}>
             <div style={{position:'absolute', inset:0, overflow:'hidden',
               boxShadow: isDark?'0 8px 40px rgba(0,0,0,0.65)':'0 4px 28px rgba(0,0,0,0.24)'}}>
 
-              {/* WOOD frame + vintage crosshatch */}
-              <div style={{position:'absolute', inset:0, backgroundColor:bt.wood,
-                backgroundImage:`repeating-linear-gradient(45deg,rgba(0,0,0,0.06) 0,rgba(0,0,0,0.06) 1px,transparent 0,transparent 50%),repeating-linear-gradient(-45deg,rgba(0,0,0,0.038) 0,rgba(0,0,0,0.038) 1px,transparent 0,transparent 50%)`,
-                backgroundSize:`${7*BS}px ${7*BS}px`}}>
-                {/* Corner studs */}
-                {cornerPositions.map(([lx,ly],k) => (
-                  <div key={k} style={{position:'absolute', left:lx, top:ly,
-                    width:cR*2, height:cR*2, borderRadius:'50%',
-                    background:'rgba(0,0,0,0.18)', transform:'translate(-50%,-50%)'}}>
-                    <div style={{position:'absolute', top:'18%', left:'18%',
-                      width:'44%', height:'44%', borderRadius:'50%', background:'rgba(255,255,255,0.22)'}}/>
-                  </div>
-                ))}
-              </div>
+              {/* Soft flat frame */}
+              <div style={{position:'absolute', inset:0, backgroundColor:bt.wood}}/>
 
               {/* CORK inner board */}
               <div onMouseDown={startBackgroundInteract} onTouchStart={startBackgroundInteract}
@@ -8433,10 +9516,11 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
                 left:FRAME*BS, top:FRAME*BS, right:FRAME*BS, bottom:FRAME*BS,
                 backgroundColor:bt.cork,
                 backgroundImage:'radial-gradient(circle, rgba(0,0,0,0.055) 1px, transparent 1px)',
-                backgroundSize:`${26*BS}px ${26*BS}px`}}>
+                backgroundSize:`${26*BS}px ${26*BS}px`,
+                boxShadow:`inset 0 0 0 ${Math.max(1,BS*2)}px rgba(0,0,0,0.07)`}}>
 
-                {/* Title pill — matches canvas: PILL_Y=50, PILL_H=52, font=28px @810 */}
-                <div style={{position:'absolute', top:50*BS, left:'50%',
+                {/* Title pill — matches canvas: PILL_Y=50, PILL_H=52, font=28px @810; subtract FRAME(32) since parent is already offset by FRAME*BS */}
+                <div style={{position:'absolute', top:18*BS, left:'50%',
                   transform:'translateX(-50%)', background:bt.pill,
                   height:52*BS, borderRadius:8*BS, padding:`0 ${26*BS}px`, whiteSpace:'nowrap',
                   display:'flex', alignItems:'center', justifyContent:'center',
@@ -8447,14 +9531,14 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
                   </span>
                 </div>
 
-                {/* Date + weekday — matches canvas: dateY = PILL_Y+PILL_H+22 = 124 */}
-                <div style={{position:'absolute', top:124*BS, left:'50%',
+                {/* Date + weekday — matches canvas: dateY = PILL_Y+PILL_H+22 = 124; subtract FRAME(32) since parent is already offset by FRAME*BS */}
+                <div style={{position:'absolute', top:92*BS, left:'50%',
                   transform:'translateX(-50%)',
                   display:'flex', alignItems:'center', gap:9*BS,
                   whiteSpace:'nowrap', pointerEvents:'none'}}>
                   <div style={{width:26*BS, height:Math.max(1,BS), backgroundColor:bt.ink, opacity:0.25, borderRadius:1}}/>
                   <span style={{fontSize:14*BS, fontWeight:500, color:bt.ink, opacity:0.64}}>
-                    {dateStr}&nbsp;&nbsp;{wday}
+                    {range==='day' ? <>{dateStr}&nbsp;&nbsp;{wday}</> : rangeInfo.sub}
                   </span>
                   <div style={{width:26*BS, height:Math.max(1,BS), backgroundColor:bt.ink, opacity:0.25, borderRadius:1}}/>
                 </div>
@@ -8537,21 +9621,6 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
 
         </div>
 
-        {/* ── Color swatches + clear ── */}
-        <div style={{flex:'0 0 auto', display:'flex', alignItems:'center', justifyContent:'center',
-          gap:14, padding:'7px 16px 6px',
-          borderTop:`1px solid ${isDark?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)'}`}}>
-          {SWATCHES.map((color, i) => (
-            <SpringTap key={i} onClick={() => { setBoardColorIdx(i); setSaved(false); }} sfx="pop">
-              <div style={{width:25, height:25, borderRadius:'50%', background:color,
-                border: boardColorIdx===i ? `2.5px solid ${theme.accent}` : '2.5px solid transparent',
-                outline: boardColorIdx===i ? `1.5px solid ${theme.accent}55` : 'none',
-                outlineOffset:2, boxShadow:'0 1px 4px rgba(0,0,0,0.13)',
-                transition:'border-color 140ms'}}/>
-            </SpringTap>
-          ))}
-        </div>
-
         {/* ── Tray ── */}
         <div style={{flex:'0 0 auto',
           borderTop:`1px solid ${isDark?'rgba(255,255,255,0.06)':'rgba(0,0,0,0.06)'}`}}>
@@ -8573,7 +9642,7 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
           {/* Items */}
           <div style={{display:'flex', gap:10, padding:'8px 12px',
             overflowX:'auto', WebkitOverflowScrolling:'touch',
-            minHeight:108, alignItems:'center'}}>
+            minHeight:78, alignItems:'center'}}>
             {trayItems()}
           </div>
         </div>
@@ -8773,11 +9842,11 @@ function IreneOfflineSheet({ theme, lang, onDismiss }) {
 
   const isDark  = theme._dark;
   const src     = variant === 'run' ? IRENE_RUN2_SRC : IRENE_BORED_SRC;
-  const msgRun  = lang==='zh' ? "嗯呐正在努力追踪信号中... 🏃‍♂️💨 (っ•̀ω•́)っ"
+  const msgRun  = lang==='zh' ? "ena正在努力追踪信号中... 🏃‍♂️💨 (っ•̀ω•́)っ"
     : lang==='ja' ? "電波を探してます... 🏃‍♂️💨 (っ•̀ω•́)っ"
     : lang==='ko' ? "신호를 찾고 있어요... 🏃‍♂️💨 (っ•̀ω•́)っ"
     : "ena is hunting for signal... 🏃‍♂️💨 (っ•̀ω•́)っ";
-  const msgBored= lang==='zh' ? "嗯呐也无语了，网络怎么这么烂嘛... 🙄 🦖 (•᷄⌓•᷅)"
+  const msgBored= lang==='zh' ? "ena也无语了，网络怎么这么烂嘛... 🙄 🦖 (•᷄⌓•᷅)"
     : lang==='ja' ? "ネットワークがひどすぎる... 🙄 🦖 (•᷄⌓•᷅)"
     : lang==='ko' ? "네트워크가 너무 느려요... 🙄 🦖 (•᷄⌓•᷅)"
     : "ena can't believe this connection... 🙄 🦖 (•᷄⌓•᷅)";
@@ -8790,6 +9859,7 @@ function IreneOfflineSheet({ theme, lang, onDismiss }) {
       background:'rgba(0,0,0,0.40)',
       display:'flex', alignItems:'flex-end',
       opacity: open ? 1 : 0, transition:'opacity 300ms',
+      pointerEvents: open ? 'auto' : 'none',
     }} onClick={close}>
       <div style={{
         width:'100%', background:paperBg,
@@ -9100,6 +10170,19 @@ function App() {
   }, []);
   const effectiveDark = t.darkAuto ? sysDark : t.dark;
   const theme = getTheme(t.palette, effectiveDark);
+  // Keep the page background in step with the theme so window chrome (Mac title bar, rubber-band edges) never shows the khaki default.
+  React.useEffect(() => {
+    if (theme && theme.bg) {
+      document.documentElement.style.background = theme.bg;
+      document.body.style.background = theme.bg;
+    }
+  }, [theme && theme.bg]);
+  // Tell the native shell the chosen appearance so the Mac title bar matches.
+  React.useEffect(() => {
+    try {
+      window.webkit?.messageHandlers?.themeMode?.postMessage({ mode: t.darkAuto ? 'auto' : (t.dark ? 'dark' : 'light') });
+    } catch (e) {}
+  }, [t.darkAuto, t.dark]);
   const [lang, setLang] = React.useState(() => {
     const stored = localStorage.getItem('clovery_lang');
     // Validate stored value is one of our supported languages
@@ -9122,7 +10205,7 @@ function App() {
   React.useEffect(() => {
     if (!lang) return;
     const iTag = (I18N[lang] && I18N[lang].ireneTag) || '来自ena';
-    const allITags = ['来自Irene','from Irene','Ireneより','Irene의 편지','来自ena','来自嗯呐','嗯呐的信','from ena',"ena's letters",'enaより','enaの手紙','ena의 편지','ena의 편지들'];
+    const allITags = ['来自Irene','from Irene','Ireneより','Irene의 편지','来自ena','来自嗯呐','嗯呐的信','来自ena的信','from ena',"ena's letters",'enaより','enaの手紙','ena의 편지','ena의 편지들'];
     setEntries(prev => {
       if (!prev.some(e => e.isWelcome && !(e.tags||[]).includes(iTag))) return prev;
       return prev.map(e => {
@@ -9247,7 +10330,7 @@ function App() {
         // Migration: ensure welcome letters have correct localized tag and sentinel date
         const _iLang = localStorage.getItem('clovery_lang') || 'zh';
         const _iTag = (I18N[_iLang] && I18N[_iLang].ireneTag) || '来自ena';
-        const _allITags = ['来自Irene','from Irene','Ireneより','Irene의 편지','来自ena','来自嗯呐','嗯呐的信','from ena',"ena's letters",'enaより','enaの手紙','ena의 편지','ena의 편지들'];
+        const _allITags = ['来自Irene','from Irene','Ireneより','Irene의 편지','来自ena','来自嗯呐','嗯呐的信','来自ena的信','from ena',"ena's letters",'enaより','enaの手紙','ena의 편지','ena의 편지들'];
         parsed.forEach(e => {
           if (e.isWelcome) {
             e.tags = [_iTag, ...(e.tags||[]).filter(t => !_allITags.includes(t))];
@@ -9362,12 +10445,13 @@ function App() {
           const tw = JSON.parse(localStorage.getItem('clovery_tweak')||'{}');
           msg.widget_font = tw.fontHand || 'Gaegu';
           msg.widget_palette = tw.palette || 'clover';
+          msg.widget_dark = tw.darkAuto === false ? (tw.dark ? 'dark' : 'light') : 'auto';
           msg.widget_lang = localStorage.getItem('clovery_lang') || 'zh';
         } catch(e) {}
         window.webkit.messageHandlers.icloud.postMessage(msg);
       }
     } catch(e) {}
-  }, [entries, profileName, t.fontHand, t.palette, lang]);
+  }, [entries, profileName, t.fontHand, t.palette, t.dark, t.darkAuto, lang]);
 
   // iCloud: register callback so Swift can push remote changes into React state
   React.useEffect(() => {
@@ -9423,11 +10507,52 @@ function App() {
     return () => { delete window.__clovery_applyVault; };
   }, [accountVaultMode]);
 
+  // Entries written on the Apple Watch are handed over by the native side through this hook.
+  React.useEffect(() => {
+    window.__clovery_addExternalEntry = (entry) => {
+      if (!entry || !entry.id || !entry.lucky) return false;
+      setEntries(prev => {
+        if (prev.some(e => e.id === entry.id)) return prev;
+        const updated = [entry, ...prev];
+        try { localStorage.setItem('clovery_entries', JSON.stringify(updated)); } catch(e) {}
+        return updated;
+      });
+      if (!accountVaultMode) {
+        try { window.webkit?.messageHandlers?.cloudkit?.postMessage({action:'push', entry: JSON.stringify(entry)}); } catch(e) {}
+      }
+      return true;
+    };
+    // Tell the native side the hook exists so it can deliver anything queued from the watch.
+    try { window.webkit?.messageHandlers?.icloud?.postMessage({action:'watchReady'}); } catch(e) {}
+    return () => { delete window.__clovery_addExternalEntry; };
+  }, [accountVaultMode]);
+
+  React.useEffect(() => {
+    if (!accountVaultMode) return;
+    window.__clovery_restoreTrashEntry = (entry) => {
+      if (!entry || !entry.id) return;
+      setEntries(prev => {
+        const without = prev.filter(e => e.id !== entry.id);
+        const updated = [...without, entry];
+        try {
+          const deletedRaw = localStorage.getItem('clovery_deleted_ids');
+          const deletedIDs = deletedRaw ? JSON.parse(deletedRaw) : [];
+          const newDeleted = deletedIDs.filter(id => id !== entry.id);
+          localStorage.setItem('clovery_deleted_ids', JSON.stringify(newDeleted));
+          localStorage.setItem('clovery_entries', JSON.stringify(updated));
+        } catch(e) {}
+        return updated;
+      });
+    };
+    return () => { delete window.__clovery_restoreTrashEntry; };
+  }, [accountVaultMode]);
+
   const [editorOpen,setEditorOpen]= React.useState(false);
   const [editorInitialDate, setEditorInitialDate] = React.useState(null);
   const [editEntry, setEditEntry] = React.useState(null);
   const [searchOpen,setSearchOpen]= React.useState(false);
   const [selected,  setSelected]  = React.useState(null);
+  const [calPickerOpen, setCalPickerOpen] = React.useState(false);
   const [onboarded, setOnboarded] = React.useState(true); // always local guest mode
   const [confetti,  setConfetti]  = React.useState(false);
   const [milestoneCelebration, setMilestoneCelebration] = React.useState(null); // null | number
@@ -9548,7 +10673,7 @@ function App() {
   const screenContent = (
     <ScreenFade key={tab}>
       {tab==='home'     && <HomeScreen     entries={entries} onWrite={() => openEditor()} onOpenEntry={setSelected} onSwitchTab={switchTab} theme={theme} lang={lang} homeDisplayMode={homeDisplayMode}/>}
-      {tab==='calendar' && <CalendarScreen entries={entries} onOpenEntry={setSelected} onWrite={iso => openEditor(null, iso)} onSearch={() => setSearchOpen(true)} theme={theme} lang={lang} tagOrder={tagOrder}/>}
+      {tab==='calendar' && <CalendarScreen entries={entries} onOpenEntry={setSelected} onWrite={iso => openEditor(null, iso)} onSearch={() => setSearchOpen(true)} theme={theme} lang={lang} tagOrder={tagOrder} onPickerOpenChange={setCalPickerOpen}/>}
       {tab==='lucky'    && <LuckyScreen    entries={entries} onOpenEntry={setSelected} onFormationTap={handleFormationTap} theme={theme} lang={lang}/>}
       {tab==='settings' && <SettingsScreen
         entries={entries}
@@ -9582,20 +10707,24 @@ function App() {
             )}
 
             {screenContent}
-            {!editorOpen && <TabBar tab={tab} setTab={switchTab} theme={theme} lang={lang}/>}
+            {!editorOpen && <TabBar tab={tab} setTab={switchTab} theme={theme} lang={lang} dimmed={calPickerOpen}/>}
             {confetti && <CloverConfetti count={36} color={theme.accent}/>}
             {milestoneCelebration && <MilestoneCelebrationSheet
               milestone={milestoneCelebration}
               lang={lang} theme={theme}
               onClose={() => setMilestoneCelebration(null)}/>}
-            {editorOpen && <EntryEditor onClose={() => {setEditorOpen(false); setEditEntry(null); setEditorInitialDate(null);}} onSave={addEntry} theme={theme} lang={lang} editEntry={editEntry} initialDate={editorInitialDate} allEntries={entries}/>}
+            {editorOpen && <ErrorBoundary><EntryEditor onClose={() => {setEditorOpen(false); setEditEntry(null); setEditorInitialDate(null);}} onSave={addEntry} theme={theme} lang={lang} editEntry={editEntry} initialDate={editorInitialDate} allEntries={entries}/></ErrorBoundary>}
             {searchOpen && <SearchOverlay onClose={() => setSearchOpen(false)} entries={entries} onOpenEntry={setSelected} theme={theme} lang={lang}/>}
             {selected && <EntryDetail entry={selected} entries={entries} onClose={() => setSelected(null)} theme={theme} lang={lang} onEdit={openEditor} onDelete={deleteEntry} onWrite={date => openEditor(null, date)}/>}
             {settingsSheet==='lang'      && <LanguagePicker lang={lang} onSelect={code => {setLang(code); setSettingsSheet(null);}} onClose={() => setSettingsSheet(null)} theme={theme}/>}
-            {settingsSheet==='profile'  && <ProfileSheet    name={profileName} onSave={setProfileName} onClose={() => setSettingsSheet(null)} theme={theme} lang={lang} totalEntries={entries.filter(e=>!e.isWelcome).length} streak={computeStreak(entries)} fourLeafs={Math.floor([...new Set(entries.filter(e=>!e.isWelcome).map(e=>e.date))].length/4)}/>}
+            {settingsSheet==='profile'  && <ProfileSheet    name={profileName} onSave={setProfileName} onClose={() => setSettingsSheet(null)} theme={theme} lang={lang} totalEntries={entries.filter(e=>!e.isWelcome).length} streak={computeStreak(entries)} fourLeafs={Math.floor([...new Set(entries.filter(e=>!e.isWelcome && !isRetroactive(e)).map(e=>e.date))].length/4)}/>}
             {settingsSheet==='tags'     && <TagsSheet        entries={entries} onClose={() => setSettingsSheet(null)} onUpdateEntries={setEntries} theme={theme} lang={lang} tagOrder={tagOrder} onTagOrderChange={updateTagOrder}/>}
             {settingsSheet==='time'     && <TimePickerSheet  value={reminderTime} onChange={v => { setReminderTime(v); }} onClose={() => setSettingsSheet(null)} theme={theme} lang={lang}/>}
-            {settingsSheet==='review'   && <ReviewSheet      onClose={() => setSettingsSheet(null)} theme={theme} lang={lang}/>}
+            {settingsSheet==='review'   && <ReviewSheet       onClose={() => setSettingsSheet(null)} theme={theme} lang={lang}/>}
+            {settingsSheet==='subscribe' && <SubscriptionSheet onClose={() => setSettingsSheet(null)} theme={theme} lang={lang}/>}
+            {settingsSheet==='theme'    && <ThemeSheet palette={t.palette} onPaletteChange={v => setTweak('palette', v)} onClose={() => setSettingsSheet(null)} theme={theme} lang={lang}/>}
+            {settingsSheet==='dark'     && <DarkSheet  dark={effectiveDark} darkAuto={t.darkAuto} onDarkChange={v => setTweak('dark', v)} onDarkAutoChange={v => setTweak('darkAuto', v)} onClose={() => setSettingsSheet(null)} theme={theme} lang={lang}/>}
+            {settingsSheet==='font'     && <FontSheet  fontHand={t.fontHand} onFontHandChange={v => setTweak('fontHand', v)} onClose={() => setSettingsSheet(null)} theme={theme} lang={lang}/>}
             {/* FormationCard rendered at root level — above TabBar stacking context */}
             {activeFormation && (
               <FormationCard

@@ -82,7 +82,6 @@ final class AuthenticationAPI: AuthenticationAPIProtocol {
             RegisterRequest(
                 loginID: loginID,
                 password: password,
-                recoveryMethod: "recovery_codes",
                 device: device
             )
         )

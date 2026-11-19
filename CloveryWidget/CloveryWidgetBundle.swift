@@ -15,6 +15,7 @@ struct CloveryWidgetBundle: WidgetBundle {
         CloveryLeafWidget()
         CloveryDiaryWidget()
         CloveryFieldWidget()
+        CloveryLockCloverWidget()
         if #available(iOS 18.0, *) {
             CloveryWidgetControl()
         }

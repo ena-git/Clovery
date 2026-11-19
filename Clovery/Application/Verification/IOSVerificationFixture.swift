@@ -6,6 +6,7 @@ enum IOSVerificationFixture: String, CaseIterable {
     case authentication
     case notice
     case providerLogin = "provider-login"
+    case providerSignUp = "provider-signup"
     case identityClaim = "identity-claim"
     case migration
     case entitlement
@@ -108,6 +109,16 @@ struct IOSVerificationFixtureView: View {
                     api: authenticationAPI,
                     sessionController: sessionController,
                     showSignUp: {},
+                    quickProviders: [.apple, .google]
+                )
+            }
+            .tint(.authInk)
+        case .providerSignUp:
+            NavigationStack {
+                SignUpView(
+                    api: authenticationAPI,
+                    sessionController: sessionController,
+                    showLogin: {},
                     quickProviders: [.apple, .google]
                 )
             }

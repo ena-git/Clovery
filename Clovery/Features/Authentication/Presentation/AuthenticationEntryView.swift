@@ -6,44 +6,50 @@ struct AuthenticationEntryView: View {
 
     var body: some View {
         GeometryReader { geometry in
-            ScrollView(showsIndicators: false) {
-                VStack(spacing: 0) {
-                    Spacer(minLength: max(110, geometry.size.height * 0.18))
+            // Centered content
+            VStack(spacing: 14) {
+                Image(AuthenticationAsset.cloverHero.rawValue)
+                    .resizable()
+                    .scaledToFit()
+                    .frame(width: 108, height: 108)
 
-                    Image(AuthenticationAsset.cloverHero.rawValue)
-                        .resizable()
-                        .scaledToFit()
-                        .frame(width: 237, height: 237)
-                        .zIndex(1)
+                Text("Clovery")
+                    .font(.system(size: 40, weight: .bold))
+                    .foregroundColor(.authInk)
 
-                    AuthDashedCard(height: 251) {
-                        VStack(spacing: 26) {
-                            entryButton(title: "登录", action: showLogin)
-                            entryButton(title: "注册", action: showSignUp)
-                        }
+                Text("记录生活中的小确幸")
+                    .cloveryFont(.caption)
+                    .foregroundColor(.authInk.opacity(0.5))
+            }
+            .frame(maxWidth: .infinity)
+            .frame(maxHeight: .infinity)
+            // Bottom CTA buttons pinned via overlay
+            .overlay(alignment: .bottom) {
+                VStack(spacing: 10) {
+                    Button(action: showSignUp) {
+                        Text("注册")
+                            .cloveryFont(.action)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 56)
+                            .background(Color.authAccent, in: Capsule())
+                            .shadow(color: Color.authAccent.opacity(0.38), radius: 14, y: 5)
                     }
-                    .frame(maxWidth: 340)
-                    .offset(y: -24)
+                    .buttonStyle(.plain)
 
-                    Spacer(minLength: 32)
+                    Button(action: showLogin) {
+                        Text("已有账户？登录")
+                            .cloveryFont(.action)
+                            .foregroundColor(.authAccent)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 50)
+                    }
+                    .buttonStyle(.plain)
                 }
-                .frame(maxWidth: .infinity)
-                .frame(minHeight: geometry.size.height)
+                .padding(.horizontal, 28)
+                .padding(.bottom, max(40, geometry.safeAreaInsets.bottom + 16))
             }
         }
         .background(Color.authBackground.ignoresSafeArea())
-    }
-
-    private func entryButton(title: String, action: @escaping () -> Void) -> some View {
-        Button(action: action) {
-            Text(title)
-                .cloveryFont(.action)
-                .foregroundColor(.authInk)
-                .frame(maxWidth: .infinity)
-                .frame(minHeight: 78)
-                .background(Color.authSurface, in: Capsule())
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(title)
     }
 }

@@ -3,24 +3,30 @@ import UIKit
 
 enum CloveryFontRole {
     case title
+    case heading
     case action
     case body
     case caption
+    case footnote
 
     var pointSize: CGFloat {
         switch self {
         case .title: 48
+        case .heading: 30
         case .action, .body: 24
         case .caption: 16
+        case .footnote: 12
         }
     }
 
     var textStyle: UIFont.TextStyle {
         switch self {
         case .title: .largeTitle
+        case .heading: .title1
         case .action: .title3
         case .body: .body
         case .caption: .caption1
+        case .footnote: .caption2
         }
     }
 }
@@ -92,7 +98,7 @@ struct CloveryFontResolver {
             case "zh":
                 names = ["YLHZYS", "Gaegu-Regular", "Yomogi-Regular"]
             case "ja":
-                names = ["Yomogi-Regular", "YLHZYS", "Gaegu-Regular"]
+                names = ["Yomogi-Regular", "Gaegu-Regular"]
             default:
                 names = ["Gaegu-Regular", "YLHZYS", "Yomogi-Regular"]
             }

@@ -81,14 +81,30 @@ struct DeleteAccountConfirmationView: View {
                 .padding(24)
             }
             .background(Color.authBackground.ignoresSafeArea())
-            .navigationTitle("第二次确认")
-            .navigationBarTitleDisplayMode(.inline)
-            .toolbar {
-                ToolbarItem(placement: .navigationBarLeading) {
-                    Button("取消") { dismiss() }
-                        .cloveryFont(.caption)
-                        .foregroundColor(.authInk)
+            .navigationBarHidden(true)
+            .safeAreaInset(edge: .top, spacing: 0) {
+                ZStack {
+                    Color.authBackground
+                    HStack {
+                        Spacer()
+                        Text("第二次确认")
+                            .cloveryFont(.caption)
+                            .foregroundColor(.authInk)
+                        Spacer()
+                    }
+                    HStack {
+                        Text("取消")
+                            .cloveryFont(.caption)
+                            .foregroundColor(.authInk)
+                            .contentShape(Rectangle())
+                            .onTapGesture { dismiss() }
+                            .accessibilityAddTraits(.isButton)
+                            .accessibilityLabel("取消")
+                            .padding(.leading, 20)
+                        Spacer()
+                    }
                 }
+                .frame(height: 44)
             }
         }
         .accessibilityIdentifier("account-deletion-screen")

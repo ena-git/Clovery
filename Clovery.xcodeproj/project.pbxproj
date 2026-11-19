@@ -29,99 +29,106 @@
 		AABB00000000000000000071 /* BoardStoreClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000072 /* BoardStoreClient.swift */; };
 		AABB00000000000000000073 /* Clovery.storekit in Resources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000074 /* Clovery.storekit */; };
 		AABB00000000000000000075 /* BoardEntitlementReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000076 /* BoardEntitlementReporter.swift */; };
-		AABB00000000000000000080 /* APIConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000090 /* APIConfiguration.swift */; };
-		AABB00000000000000000081 /* APIError.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000091 /* APIError.swift */; };
-		AABB00000000000000000082 /* APIRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000092 /* APIRequest.swift */; };
-		AABB00000000000000000083 /* APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000093 /* APIClient.swift */; };
-		AABB00000000000000000084 /* AuthenticationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000094 /* AuthenticationModels.swift */; };
-		AABB00000000000000000085 /* AuthenticationAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000095 /* AuthenticationAPI.swift */; };
-		AABB00000000000000000086 /* KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000096 /* KeychainStore.swift */; };
-		AABB00000000000000000087 /* DeviceIdentityStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000097 /* DeviceIdentityStore.swift */; };
-		AABB00000000000000000088 /* AuthenticationSessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000098 /* AuthenticationSessionStore.swift */; };
-		AABB00000000000000000089 /* AuthenticationValidation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000099 /* AuthenticationValidation.swift */; };
-		AABB0000000000000000008A /* AuthenticationState.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000009A /* AuthenticationState.swift */; };
-		AABB0000000000000000008B /* ApplicationSessionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000009B /* ApplicationSessionController.swift */; };
-		AABB0000000000000000008C /* LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000009C /* LoginViewModel.swift */; };
-		AABB0000000000000000008D /* SignUpViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000009D /* SignUpViewModel.swift */; };
-		AABB0000000000000000008E /* AuthenticationTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000009E /* AuthenticationTheme.swift */; };
-		AABB0000000000000000008F /* AuthenticationAssets.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000009F /* AuthenticationAssets.swift */; };
-		AABB000000000000000000A0 /* AuthDashedCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000B0 /* AuthDashedCard.swift */; };
-		AABB000000000000000000A1 /* AuthCapsuleField.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000B1 /* AuthCapsuleField.swift */; };
-		AABB000000000000000000A2 /* AuthProviderButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000B2 /* AuthProviderButton.swift */; };
-		AABB000000000000000000A3 /* AuthDivider.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000B3 /* AuthDivider.swift */; };
-		AABB000000000000000000A4 /* AuthenticationEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000B4 /* AuthenticationEntryView.swift */; };
-		AABB000000000000000000A5 /* AuthenticationFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000B5 /* AuthenticationFlowView.swift */; };
-		AABB000000000000000000A6 /* LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000B6 /* LoginView.swift */; };
-		AABB000000000000000000A7 /* SignUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000B7 /* SignUpView.swift */; };
-		AABB000000000000000000A8 /* RecoveryCodesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000B8 /* RecoveryCodesView.swift */; };
-		AABB000000000000000000C0 /* ProviderAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000D0 /* ProviderAuthentication.swift */; };
-		AABB000000000000000000C1 /* AuthorizationControllerBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000D1 /* AuthorizationControllerBridge.swift */; };
-		AABB000000000000000000C2 /* AppleAuthenticationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000D2 /* AppleAuthenticationProvider.swift */; };
-		AABB000000000000000000C3 /* WebAuthenticationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000D3 /* WebAuthenticationProvider.swift */; };
-		AABB000000000000000000C4 /* WebAuthnSerialization.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000D4 /* WebAuthnSerialization.swift */; };
-		AABB000000000000000000C5 /* PasskeyAuthenticationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000D5 /* PasskeyAuthenticationProvider.swift */; };
-		AABB000000000000000000C6 /* AccountRecoveryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000D6 /* AccountRecoveryViewModel.swift */; };
-		AABB000000000000000000C7 /* AccountRecoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000D7 /* AccountRecoveryView.swift */; };
-		AABB000000000000000000C8 /* AuthenticationProviderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000D8 /* AuthenticationProviderViewModel.swift */; };
-		AABB000000000000000000C9 /* ApplicationRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000D9 /* ApplicationRootView.swift */; };
-		AABB000000000000000000CA /* LegacyUpgradeController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000DA /* LegacyUpgradeController.swift */; };
-		AABB000000000000000000CB /* LegacyDataDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000DB /* LegacyDataDetector.swift */; };
-		AABB000000000000000000CC /* UpgradeNoticeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000DC /* UpgradeNoticeView.swift */; };
-		AABB000000000000000000F0 /* AppFontSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000F3 /* AppFontSelection.swift */; };
-		AABB000000000000000000F1 /* AppFontStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000F4 /* AppFontStore.swift */; };
-		AABB000000000000000000F2 /* CloveryFontModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000F5 /* CloveryFontModifier.swift */; };
-		AABB00000000000000000101 /* AuthenticatedAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000111 /* AuthenticatedAPIClient.swift */; };
-		AABB00000000000000000102 /* IdentityClaimAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000112 /* IdentityClaimAPI.swift */; };
-		AABB00000000000000000103 /* AuthenticationWireModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000113 /* AuthenticationWireModels.swift */; };
-		AABB00000000000000000104 /* ProviderVisibilityPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000114 /* ProviderVisibilityPolicy.swift */; };
-		AABB00000000000000000105 /* IdentityClaimRegistrationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000115 /* IdentityClaimRegistrationViewModel.swift */; };
-		AABB00000000000000000106 /* IdentityClaimRegistrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000116 /* IdentityClaimRegistrationView.swift */; };
-		AABB00000000000000000107 /* BootstrapRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000117 /* BootstrapRoute.swift */; };
-		AABB00000000000000000108 /* AccountBootstrapAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000118 /* AccountBootstrapAPI.swift */; };
-		AABB00000000000000000109 /* BootstrapCheckpointStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000119 /* BootstrapCheckpointStore.swift */; };
-		AABB0000000000000000010A /* AccountBootstrapCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000011A /* AccountBootstrapCoordinator.swift */; };
-		AABB0000000000000000010B /* BootstrapDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000011B /* BootstrapDependencies.swift */; };
-		AABB0000000000000000010C /* ApplicationLoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000011C /* ApplicationLoadingView.swift */; };
-		AABB0000000000000000010D /* LegacySnapshotSources.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000121 /* LegacySnapshotSources.swift */; };
-		AABB0000000000000000010E /* LegacySnapshotReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000122 /* LegacySnapshotReader.swift */; };
-		AABB0000000000000000010F /* LegacySnapshotMerger.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000123 /* LegacySnapshotMerger.swift */; };
+		AABB00000000000000000080 /* Core/Configuration/APIConfiguration.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000090 /* Core/Configuration/APIConfiguration.swift */; };
+		AABB00000000000000000081 /* Core/Networking/APIError.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000091 /* Core/Networking/APIError.swift */; };
+		AABB00000000000000000082 /* Core/Networking/APIRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000092 /* Core/Networking/APIRequest.swift */; };
+		AABB00000000000000000083 /* Core/Networking/APIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000093 /* Core/Networking/APIClient.swift */; };
+		AABB00000000000000000084 /* Features/Authentication/Data/AuthenticationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000094 /* Features/Authentication/Data/AuthenticationModels.swift */; };
+		AABB00000000000000000085 /* Features/Authentication/Data/AuthenticationAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000095 /* Features/Authentication/Data/AuthenticationAPI.swift */; };
+		AABB00000000000000000086 /* Core/Security/KeychainStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000096 /* Core/Security/KeychainStore.swift */; };
+		AABB00000000000000000087 /* Core/Security/DeviceIdentityStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000097 /* Core/Security/DeviceIdentityStore.swift */; };
+		AABB00000000000000000088 /* Core/Security/AuthenticationSessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000098 /* Core/Security/AuthenticationSessionStore.swift */; };
+		AABB00000000000000000089 /* Features/Authentication/Domain/AuthenticationValidation.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000099 /* Features/Authentication/Domain/AuthenticationValidation.swift */; };
+		AABB0000000000000000008A /* Features/Authentication/Domain/AuthenticationState.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000009A /* Features/Authentication/Domain/AuthenticationState.swift */; };
+		AABB0000000000000000008B /* Application/ApplicationSessionController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000009B /* Application/ApplicationSessionController.swift */; };
+		AABB0000000000000000008C /* Features/Authentication/Presentation/LoginViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000009C /* Features/Authentication/Presentation/LoginViewModel.swift */; };
+		AABB0000000000000000008D /* Features/Authentication/Presentation/SignUpViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000009D /* Features/Authentication/Presentation/SignUpViewModel.swift */; };
+		AABB0000000000000000008E /* Features/Authentication/Presentation/AuthenticationTheme.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000009E /* Features/Authentication/Presentation/AuthenticationTheme.swift */; };
+		AABB0000000000000000008F /* Features/Authentication/Presentation/AuthenticationAssets.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000009F /* Features/Authentication/Presentation/AuthenticationAssets.swift */; };
+		AABB000000000000000000A0 /* Features/Authentication/Presentation/Components/AuthDashedCard.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000B0 /* Features/Authentication/Presentation/Components/AuthDashedCard.swift */; };
+		AABB000000000000000000A1 /* Features/Authentication/Presentation/Components/AuthCapsuleField.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000B1 /* Features/Authentication/Presentation/Components/AuthCapsuleField.swift */; };
+		AABB000000000000000000A2 /* Features/Authentication/Presentation/Components/AuthProviderButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000B2 /* Features/Authentication/Presentation/Components/AuthProviderButton.swift */; };
+		AABB000000000000000000A3 /* Features/Authentication/Presentation/Components/AuthDivider.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000B3 /* Features/Authentication/Presentation/Components/AuthDivider.swift */; };
+		BBCC000000000000000000E1 /* Features/Authentication/Presentation/Components/AuthPrimaryButtonStyle.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBCC000000000000000000E3 /* Features/Authentication/Presentation/Components/AuthPrimaryButtonStyle.swift */; };
+		BBCC000000000000000000E2 /* Features/Authentication/Presentation/Components/AuthBackButton.swift in Sources */ = {isa = PBXBuildFile; fileRef = BBCC000000000000000000E4 /* Features/Authentication/Presentation/Components/AuthBackButton.swift */; };
+		AABB000000000000000000A4 /* Features/Authentication/Presentation/AuthenticationEntryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000B4 /* Features/Authentication/Presentation/AuthenticationEntryView.swift */; };
+		AABB000000000000000000A5 /* Features/Authentication/Presentation/AuthenticationFlowView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000B5 /* Features/Authentication/Presentation/AuthenticationFlowView.swift */; };
+		AABB000000000000000000A6 /* Features/Authentication/Presentation/LoginView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000B6 /* Features/Authentication/Presentation/LoginView.swift */; };
+		AABB000000000000000000A7 /* Features/Authentication/Presentation/SignUpView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000B7 /* Features/Authentication/Presentation/SignUpView.swift */; };
+		AABB000000000000000000A8 /* Features/Authentication/Presentation/RecoveryCodesView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000B8 /* Features/Authentication/Presentation/RecoveryCodesView.swift */; };
+		AABB000000000000000000C0 /* Features/Authentication/Providers/ProviderAuthentication.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000D0 /* Features/Authentication/Providers/ProviderAuthentication.swift */; };
+		AABB000000000000000000C1 /* Features/Authentication/Providers/AuthorizationControllerBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000D1 /* Features/Authentication/Providers/AuthorizationControllerBridge.swift */; };
+		AABB000000000000000000C2 /* Features/Authentication/Providers/AppleAuthenticationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000D2 /* Features/Authentication/Providers/AppleAuthenticationProvider.swift */; };
+		AABB000000000000000000C3 /* Features/Authentication/Providers/WebAuthenticationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000D3 /* Features/Authentication/Providers/WebAuthenticationProvider.swift */; };
+		AABB000000000000000000C4 /* Features/Authentication/Providers/WebAuthnSerialization.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000D4 /* Features/Authentication/Providers/WebAuthnSerialization.swift */; };
+		AABB000000000000000000C5 /* Features/Authentication/Providers/PasskeyAuthenticationProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000D5 /* Features/Authentication/Providers/PasskeyAuthenticationProvider.swift */; };
+		AABB000000000000000000C6 /* Features/Authentication/Presentation/AccountRecoveryViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000D6 /* Features/Authentication/Presentation/AccountRecoveryViewModel.swift */; };
+		AABB000000000000000000C7 /* Features/Authentication/Presentation/AccountRecoveryView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000D7 /* Features/Authentication/Presentation/AccountRecoveryView.swift */; };
+		AABB000000000000000000C8 /* Features/Authentication/Presentation/AuthenticationProviderViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000D8 /* Features/Authentication/Presentation/AuthenticationProviderViewModel.swift */; };
+		AABB000000000000000000C9 /* Application/ApplicationRootView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000D9 /* Application/ApplicationRootView.swift */; };
+		AABB000000000000000000CA /* Application/LegacyUpgradeController.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000DA /* Application/LegacyUpgradeController.swift */; };
+		AABB000000000000000000CB /* Features/Upgrade/LegacyDataDetector.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000DB /* Features/Upgrade/LegacyDataDetector.swift */; };
+		AABB000000000000000000CC /* Features/Upgrade/UpgradeNoticeView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000DC /* Features/Upgrade/UpgradeNoticeView.swift */; };
+		AABB000000000000000000F0 /* Application/Appearance/AppFontSelection.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000F3 /* Application/Appearance/AppFontSelection.swift */; };
+		AABB000000000000000000F1 /* Application/Appearance/AppFontStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000F4 /* Application/Appearance/AppFontStore.swift */; };
+		AABB000000000000000000F2 /* Application/Appearance/CloveryFontModifier.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB000000000000000000F5 /* Application/Appearance/CloveryFontModifier.swift */; };
+		AABB00000000000000000101 /* Core/Networking/AuthenticatedAPIClient.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000111 /* Core/Networking/AuthenticatedAPIClient.swift */; };
+		AABB00000000000000000102 /* Features/Authentication/Data/IdentityClaimAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000112 /* Features/Authentication/Data/IdentityClaimAPI.swift */; };
+		AABB00000000000000000103 /* Features/Authentication/Data/AuthenticationWireModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000113 /* Features/Authentication/Data/AuthenticationWireModels.swift */; };
+		AABB00000000000000000104 /* Features/Authentication/Domain/ProviderVisibilityPolicy.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000114 /* Features/Authentication/Domain/ProviderVisibilityPolicy.swift */; };
+		AABB00000000000000000105 /* Features/Authentication/Presentation/IdentityClaimRegistrationViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000115 /* Features/Authentication/Presentation/IdentityClaimRegistrationViewModel.swift */; };
+		AABB00000000000000000106 /* Features/Authentication/Presentation/IdentityClaimRegistrationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000116 /* Features/Authentication/Presentation/IdentityClaimRegistrationView.swift */; };
+		AABB00000000000000000107 /* Application/Bootstrap/BootstrapRoute.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000117 /* Application/Bootstrap/BootstrapRoute.swift */; };
+		AABB00000000000000000108 /* Features/Bootstrap/Data/AccountBootstrapAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000118 /* Features/Bootstrap/Data/AccountBootstrapAPI.swift */; };
+		AABB00000000000000000109 /* Application/Bootstrap/BootstrapCheckpointStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000119 /* Application/Bootstrap/BootstrapCheckpointStore.swift */; };
+		AABB0000000000000000010A /* Application/Bootstrap/AccountBootstrapCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000011A /* Application/Bootstrap/AccountBootstrapCoordinator.swift */; };
+		AABB0000000000000000010B /* Application/Bootstrap/BootstrapDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000011B /* Application/Bootstrap/BootstrapDependencies.swift */; };
+		AABB0000000000000000010C /* Application/ApplicationLoadingView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000011C /* Application/ApplicationLoadingView.swift */; };
+		AABB0000000000000000010D /* Features/Migration/Data/LegacySnapshotSources.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000121 /* Features/Migration/Data/LegacySnapshotSources.swift */; };
+		AABB0000000000000000010E /* Features/Migration/Data/LegacySnapshotReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000122 /* Features/Migration/Data/LegacySnapshotReader.swift */; };
+		AABB0000000000000000010F /* Features/Migration/Domain/LegacySnapshotMerger.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000123 /* Features/Migration/Domain/LegacySnapshotMerger.swift */; };
 		AABB00000000000000000110 /* MigrationBundleContent.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000124 /* MigrationBundleContent.swift */; };
 		AABB00000000000000000130 /* MigrationBundleContentValidator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000131 /* MigrationBundleContentValidator.swift */; };
-		AABB00000000000000000140 /* AtomicJSONFileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000146 /* AtomicJSONFileStore.swift */; };
-		AABB00000000000000000141 /* LegacyMigrationCheckpointStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000147 /* LegacyMigrationCheckpointStore.swift */; };
-		AABB00000000000000000142 /* LegacyMigrationAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000148 /* LegacyMigrationAPI.swift */; };
-		AABB00000000000000000143 /* LegacyMigrationArchiveReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000149 /* LegacyMigrationArchiveReader.swift */; };
-		AABB00000000000000000144 /* LegacyMigrationArchivePreparer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000014A /* LegacyMigrationArchivePreparer.swift */; };
-		AABB00000000000000000145 /* LegacyMigrationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000014B /* LegacyMigrationCoordinator.swift */; };
-		AABB0000000000000000014C /* LegacyMigrationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000014D /* LegacyMigrationModels.swift */; };
-		AABB00000000000000000150 /* AccountEntitlementAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000156 /* AccountEntitlementAPI.swift */; };
-		AABB00000000000000000151 /* AccountEntitlementCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000157 /* AccountEntitlementCache.swift */; };
-		AABB00000000000000000152 /* EntitlementReconciler.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000158 /* EntitlementReconciler.swift */; };
-		AABB00000000000000000160 /* VaultSyncAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000166 /* VaultSyncAPI.swift */; };
-		AABB00000000000000000161 /* VaultAssetAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000167 /* VaultAssetAPI.swift */; };
-		AABB00000000000000000162 /* VaultSyncCheckpointStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000168 /* VaultSyncCheckpointStore.swift */; };
-		AABB00000000000000000163 /* VaultLocalStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000169 /* VaultLocalStore.swift */; };
-		AABB00000000000000000164 /* InitialVaultPuller.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000016A /* InitialVaultPuller.swift */; };
-		AABB00000000000000000165 /* VaultAssetUploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000016B /* VaultAssetUploader.swift */; };
-		AABB00000000000000000170 /* VaultSyncCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000016C /* VaultSyncCoordinator.swift */; };
-		AABB00000000000000000171 /* VaultSyncConflictResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000172 /* VaultSyncConflictResolver.swift */; };
-		AABB00000000000000000173 /* VaultSnapshotMetadataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000174 /* VaultSnapshotMetadataStore.swift */; };
-		AABB00000000000000000175 /* AccountBootstrapPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000176 /* AccountBootstrapPipeline.swift */; };
-		AABB00000000000000000177 /* AccountVaultRuntimeRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000178 /* AccountVaultRuntimeRegistry.swift */; };
-		AABB00000000000000000179 /* AccountReconciliationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000017A /* AccountReconciliationView.swift */; };
-		AABB0000000000000000017B /* IOSVerificationFixture.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000017C /* IOSVerificationFixture.swift */; };
-		AABB0000000000000000018D /* IOSVerificationAccountDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000018E /* IOSVerificationAccountDependencies.swift */; };
-		AABB00000000000000000180 /* AccountManagementAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000181 /* AccountManagementAPI.swift */; };
-		AABB00000000000000000182 /* AccountSecurityViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000183 /* AccountSecurityViewModel.swift */; };
-		AABB00000000000000000184 /* LegalDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000185 /* LegalDocument.swift */; };
-		AABB00000000000000000186 /* LegalAcknowledgementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000187 /* LegalAcknowledgementView.swift */; };
-		AABB00000000000000000188 /* AccountSecurityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000189 /* AccountSecurityView.swift */; };
-		AABB0000000000000000018A /* DeleteAccountConfirmationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000018B /* DeleteAccountConfirmationView.swift */; };
+		AABB00000000000000000140 /* Core/Storage/AtomicJSONFileStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000146 /* Core/Storage/AtomicJSONFileStore.swift */; };
+		AABB00000000000000000141 /* Features/Migration/Domain/LegacyMigrationCheckpointStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000147 /* Features/Migration/Domain/LegacyMigrationCheckpointStore.swift */; };
+		AABB00000000000000000142 /* Features/Migration/Data/LegacyMigrationAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000148 /* Features/Migration/Data/LegacyMigrationAPI.swift */; };
+		AABB00000000000000000143 /* Features/Migration/Data/LegacyMigrationArchiveReader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000149 /* Features/Migration/Data/LegacyMigrationArchiveReader.swift */; };
+		AABB00000000000000000144 /* Features/Migration/Domain/LegacyMigrationArchivePreparer.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000014A /* Features/Migration/Domain/LegacyMigrationArchivePreparer.swift */; };
+		AABB00000000000000000145 /* Features/Migration/Domain/LegacyMigrationCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000014B /* Features/Migration/Domain/LegacyMigrationCoordinator.swift */; };
+		AABB0000000000000000014C /* Features/Migration/Data/LegacyMigrationModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000014D /* Features/Migration/Data/LegacyMigrationModels.swift */; };
+		AABB00000000000000000150 /* Features/Entitlements/Data/AccountEntitlementAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000156 /* Features/Entitlements/Data/AccountEntitlementAPI.swift */; };
+		AABB00000000000000000151 /* Features/Entitlements/Data/AccountEntitlementCache.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000157 /* Features/Entitlements/Data/AccountEntitlementCache.swift */; };
+		AABB00000000000000000152 /* Features/Entitlements/Domain/EntitlementReconciler.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000158 /* Features/Entitlements/Domain/EntitlementReconciler.swift */; };
+		AABB00000000000000000160 /* Features/Sync/Data/VaultSyncAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000166 /* Features/Sync/Data/VaultSyncAPI.swift */; };
+		AABB00000000000000000161 /* Features/Sync/Data/VaultAssetAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000167 /* Features/Sync/Data/VaultAssetAPI.swift */; };
+		AABB00000000000000000162 /* Features/Sync/Domain/VaultSyncCheckpointStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000168 /* Features/Sync/Domain/VaultSyncCheckpointStore.swift */; };
+		AABB00000000000000000163 /* Features/Sync/Data/VaultLocalStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000169 /* Features/Sync/Data/VaultLocalStore.swift */; };
+		AABB00000000000000000164 /* Features/Sync/Domain/InitialVaultPuller.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000016A /* Features/Sync/Domain/InitialVaultPuller.swift */; };
+		AABB00000000000000000165 /* Features/Sync/Domain/VaultAssetUploader.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000016B /* Features/Sync/Domain/VaultAssetUploader.swift */; };
+		AABB00000000000000000170 /* Features/Sync/Domain/VaultSyncCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000016C /* Features/Sync/Domain/VaultSyncCoordinator.swift */; };
+		AABB00000000000000000171 /* Features/Sync/Domain/VaultSyncConflictResolver.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000172 /* Features/Sync/Domain/VaultSyncConflictResolver.swift */; };
+		AABB00000000000000000173 /* Features/Sync/Domain/VaultSnapshotMetadataStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000174 /* Features/Sync/Domain/VaultSnapshotMetadataStore.swift */; };
+		AABB00000000000000000175 /* Application/Bootstrap/AccountBootstrapPipeline.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000176 /* Application/Bootstrap/AccountBootstrapPipeline.swift */; };
+		AABB00000000000000000177 /* Features/Sync/Domain/AccountVaultRuntimeRegistry.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000178 /* Features/Sync/Domain/AccountVaultRuntimeRegistry.swift */; };
+		AABB00000000000000000179 /* Features/Bootstrap/Presentation/AccountReconciliationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000017A /* Features/Bootstrap/Presentation/AccountReconciliationView.swift */; };
+		AABB0000000000000000017B /* Application/Verification/IOSVerificationFixture.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000017C /* Application/Verification/IOSVerificationFixture.swift */; };
+		AABB00000000000000000180 /* Features/Account/Data/AccountManagementAPI.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000181 /* Features/Account/Data/AccountManagementAPI.swift */; };
+		AABB00000000000000000182 /* Features/Account/Presentation/AccountSecurityViewModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000183 /* Features/Account/Presentation/AccountSecurityViewModel.swift */; };
+		AABB00000000000000000184 /* Features/Legal/LegalDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000185 /* Features/Legal/LegalDocument.swift */; };
+		AABB00000000000000000186 /* Features/Legal/LegalAcknowledgementView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000187 /* Features/Legal/LegalAcknowledgementView.swift */; };
+		AABB00000000000000000188 /* Features/Account/Presentation/AccountSecurityView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000189 /* Features/Account/Presentation/AccountSecurityView.swift */; };
+		AABB0000000000000000018A /* Features/Account/Presentation/DeleteAccountConfirmationView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000018B /* Features/Account/Presentation/DeleteAccountConfirmationView.swift */; };
 		AABB0000000000000000018C /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000001C /* PrivacyInfo.xcprivacy */; };
+		AABB0000000000000000018D /* Application/Verification/IOSVerificationAccountDependencies.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000018E /* Application/Verification/IOSVerificationAccountDependencies.swift */; };
+		AABB0000000000000000018F /* Features/Diary/DiaryTrashStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000190 /* Features/Diary/DiaryTrashStore.swift */; };
+		AABB00000000000000000191 /* Features/Diary/DiaryTrashView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000192 /* Features/Diary/DiaryTrashView.swift */; };
 		FCECDFE02FE92C7C0067AF51 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFDF2FE92C7C0067AF51 /* WidgetKit.framework */; };
 		FCECDFE22FE92C7C0067AF51 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFE12FE92C7C0067AF51 /* SwiftUI.framework */; };
-		FCECDFEF2FE92C7D0067AF51 /* CloveryWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		FCECDFEF2FE92C7D0067AF51 /* CloveryWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */; platformFilters = (ios, ); settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
 		FCECE0002FE92C7D0067AF51 /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000005 /* fonts */; };
+		FCAA00000000000000000006 /* fonts in Resources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000005 /* fonts */; };
+		FCAA0000000000000000000E /* CloveryWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = FCAA0000000000000000000A /* CloveryWatch.app */; platformFilters = (ios, ); settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		FCAA00000000000000000011 /* WatchBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = FCAA00000000000000000010 /* WatchBridge.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -146,6 +153,13 @@
 			remoteGlobalIDString = FCECDFDC2FE92C7C0067AF51;
 			remoteInfo = CloveryWidgetExtension;
 		};
+		FCAA0000000000000000000B /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AABB00000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = FCAA00000000000000000001;
+			remoteInfo = CloveryWatch;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -158,6 +172,17 @@
 				FCECDFEF2FE92C7D0067AF51 /* CloveryWidgetExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FCAA0000000000000000000D /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				FCAA0000000000000000000E /* CloveryWatch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -187,103 +212,110 @@
 		AABB00000000000000000072 /* BoardStoreClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardStoreClient.swift; sourceTree = "<group>"; };
 		AABB00000000000000000074 /* Clovery.storekit */ = {isa = PBXFileReference; lastKnownFileType = text; path = Clovery.storekit; sourceTree = "<group>"; };
 		AABB00000000000000000076 /* BoardEntitlementReporter.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardEntitlementReporter.swift; sourceTree = "<group>"; };
-		AABB00000000000000000090 /* APIConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/Configuration/APIConfiguration.swift; sourceTree = "<group>"; };
-		AABB00000000000000000091 /* APIError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/Networking/APIError.swift; sourceTree = "<group>"; };
-		AABB00000000000000000092 /* APIRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/Networking/APIRequest.swift; sourceTree = "<group>"; };
-		AABB00000000000000000093 /* APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/Networking/APIClient.swift; sourceTree = "<group>"; };
-		AABB00000000000000000094 /* AuthenticationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Data/AuthenticationModels.swift; sourceTree = "<group>"; };
-		AABB00000000000000000095 /* AuthenticationAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Data/AuthenticationAPI.swift; sourceTree = "<group>"; };
-		AABB00000000000000000096 /* KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/Security/KeychainStore.swift; sourceTree = "<group>"; };
-		AABB00000000000000000097 /* DeviceIdentityStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/Security/DeviceIdentityStore.swift; sourceTree = "<group>"; };
-		AABB00000000000000000098 /* AuthenticationSessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/Security/AuthenticationSessionStore.swift; sourceTree = "<group>"; };
-		AABB00000000000000000099 /* AuthenticationValidation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Domain/AuthenticationValidation.swift; sourceTree = "<group>"; };
-		AABB0000000000000000009A /* AuthenticationState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Domain/AuthenticationState.swift; sourceTree = "<group>"; };
-		AABB0000000000000000009B /* ApplicationSessionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/ApplicationSessionController.swift; sourceTree = "<group>"; };
-		AABB0000000000000000009C /* LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/LoginViewModel.swift; sourceTree = "<group>"; };
-		AABB0000000000000000009D /* SignUpViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/SignUpViewModel.swift; sourceTree = "<group>"; };
-		AABB0000000000000000009E /* AuthenticationTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/AuthenticationTheme.swift; sourceTree = "<group>"; };
-		AABB0000000000000000009F /* AuthenticationAssets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/AuthenticationAssets.swift; sourceTree = "<group>"; };
-		AABB000000000000000000B0 /* AuthDashedCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/Components/AuthDashedCard.swift; sourceTree = "<group>"; };
-		AABB000000000000000000B1 /* AuthCapsuleField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/Components/AuthCapsuleField.swift; sourceTree = "<group>"; };
-		AABB000000000000000000B2 /* AuthProviderButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/Components/AuthProviderButton.swift; sourceTree = "<group>"; };
-		AABB000000000000000000B3 /* AuthDivider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/Components/AuthDivider.swift; sourceTree = "<group>"; };
-		AABB000000000000000000B4 /* AuthenticationEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/AuthenticationEntryView.swift; sourceTree = "<group>"; };
-		AABB000000000000000000B5 /* AuthenticationFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/AuthenticationFlowView.swift; sourceTree = "<group>"; };
-		AABB000000000000000000B6 /* LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/LoginView.swift; sourceTree = "<group>"; };
-		AABB000000000000000000B7 /* SignUpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/SignUpView.swift; sourceTree = "<group>"; };
-		AABB000000000000000000B8 /* RecoveryCodesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/RecoveryCodesView.swift; sourceTree = "<group>"; };
-		AABB000000000000000000D0 /* ProviderAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Providers/ProviderAuthentication.swift; sourceTree = "<group>"; };
-		AABB000000000000000000D1 /* AuthorizationControllerBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Providers/AuthorizationControllerBridge.swift; sourceTree = "<group>"; };
-		AABB000000000000000000D2 /* AppleAuthenticationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Providers/AppleAuthenticationProvider.swift; sourceTree = "<group>"; };
-		AABB000000000000000000D3 /* WebAuthenticationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Providers/WebAuthenticationProvider.swift; sourceTree = "<group>"; };
-		AABB000000000000000000D4 /* WebAuthnSerialization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Providers/WebAuthnSerialization.swift; sourceTree = "<group>"; };
-		AABB000000000000000000D5 /* PasskeyAuthenticationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Providers/PasskeyAuthenticationProvider.swift; sourceTree = "<group>"; };
-		AABB000000000000000000D6 /* AccountRecoveryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/AccountRecoveryViewModel.swift; sourceTree = "<group>"; };
-		AABB000000000000000000D7 /* AccountRecoveryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/AccountRecoveryView.swift; sourceTree = "<group>"; };
-		AABB000000000000000000D8 /* AuthenticationProviderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/AuthenticationProviderViewModel.swift; sourceTree = "<group>"; };
-		AABB000000000000000000D9 /* ApplicationRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/ApplicationRootView.swift; sourceTree = "<group>"; };
-		AABB000000000000000000DA /* LegacyUpgradeController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/LegacyUpgradeController.swift; sourceTree = "<group>"; };
-		AABB000000000000000000DB /* LegacyDataDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Upgrade/LegacyDataDetector.swift; sourceTree = "<group>"; };
-		AABB000000000000000000DC /* UpgradeNoticeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Upgrade/UpgradeNoticeView.swift; sourceTree = "<group>"; };
+		AABB00000000000000000090 /* Core/Configuration/APIConfiguration.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/Configuration/APIConfiguration.swift; sourceTree = "<group>"; };
+		AABB00000000000000000091 /* Core/Networking/APIError.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/Networking/APIError.swift; sourceTree = "<group>"; };
+		AABB00000000000000000092 /* Core/Networking/APIRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/Networking/APIRequest.swift; sourceTree = "<group>"; };
+		AABB00000000000000000093 /* Core/Networking/APIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/Networking/APIClient.swift; sourceTree = "<group>"; };
+		AABB00000000000000000094 /* Features/Authentication/Data/AuthenticationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Data/AuthenticationModels.swift; sourceTree = "<group>"; };
+		AABB00000000000000000095 /* Features/Authentication/Data/AuthenticationAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Data/AuthenticationAPI.swift; sourceTree = "<group>"; };
+		AABB00000000000000000096 /* Core/Security/KeychainStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/Security/KeychainStore.swift; sourceTree = "<group>"; };
+		AABB00000000000000000097 /* Core/Security/DeviceIdentityStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/Security/DeviceIdentityStore.swift; sourceTree = "<group>"; };
+		AABB00000000000000000098 /* Core/Security/AuthenticationSessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/Security/AuthenticationSessionStore.swift; sourceTree = "<group>"; };
+		AABB00000000000000000099 /* Features/Authentication/Domain/AuthenticationValidation.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Domain/AuthenticationValidation.swift; sourceTree = "<group>"; };
+		AABB0000000000000000009A /* Features/Authentication/Domain/AuthenticationState.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Domain/AuthenticationState.swift; sourceTree = "<group>"; };
+		AABB0000000000000000009B /* Application/ApplicationSessionController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/ApplicationSessionController.swift; sourceTree = "<group>"; };
+		AABB0000000000000000009C /* Features/Authentication/Presentation/LoginViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/LoginViewModel.swift; sourceTree = "<group>"; };
+		AABB0000000000000000009D /* Features/Authentication/Presentation/SignUpViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/SignUpViewModel.swift; sourceTree = "<group>"; };
+		AABB0000000000000000009E /* Features/Authentication/Presentation/AuthenticationTheme.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/AuthenticationTheme.swift; sourceTree = "<group>"; };
+		AABB0000000000000000009F /* Features/Authentication/Presentation/AuthenticationAssets.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/AuthenticationAssets.swift; sourceTree = "<group>"; };
+		AABB000000000000000000B0 /* Features/Authentication/Presentation/Components/AuthDashedCard.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/Components/AuthDashedCard.swift; sourceTree = "<group>"; };
+		AABB000000000000000000B1 /* Features/Authentication/Presentation/Components/AuthCapsuleField.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/Components/AuthCapsuleField.swift; sourceTree = "<group>"; };
+		AABB000000000000000000B2 /* Features/Authentication/Presentation/Components/AuthProviderButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/Components/AuthProviderButton.swift; sourceTree = "<group>"; };
+		AABB000000000000000000B3 /* Features/Authentication/Presentation/Components/AuthDivider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/Components/AuthDivider.swift; sourceTree = "<group>"; };
+		BBCC000000000000000000E3 /* Features/Authentication/Presentation/Components/AuthPrimaryButtonStyle.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/Components/AuthPrimaryButtonStyle.swift; sourceTree = "<group>"; };
+		BBCC000000000000000000E4 /* Features/Authentication/Presentation/Components/AuthBackButton.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/Components/AuthBackButton.swift; sourceTree = "<group>"; };
+		AABB000000000000000000B4 /* Features/Authentication/Presentation/AuthenticationEntryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/AuthenticationEntryView.swift; sourceTree = "<group>"; };
+		AABB000000000000000000B5 /* Features/Authentication/Presentation/AuthenticationFlowView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/AuthenticationFlowView.swift; sourceTree = "<group>"; };
+		AABB000000000000000000B6 /* Features/Authentication/Presentation/LoginView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/LoginView.swift; sourceTree = "<group>"; };
+		AABB000000000000000000B7 /* Features/Authentication/Presentation/SignUpView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/SignUpView.swift; sourceTree = "<group>"; };
+		AABB000000000000000000B8 /* Features/Authentication/Presentation/RecoveryCodesView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/RecoveryCodesView.swift; sourceTree = "<group>"; };
+		AABB000000000000000000D0 /* Features/Authentication/Providers/ProviderAuthentication.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Providers/ProviderAuthentication.swift; sourceTree = "<group>"; };
+		AABB000000000000000000D1 /* Features/Authentication/Providers/AuthorizationControllerBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Providers/AuthorizationControllerBridge.swift; sourceTree = "<group>"; };
+		AABB000000000000000000D2 /* Features/Authentication/Providers/AppleAuthenticationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Providers/AppleAuthenticationProvider.swift; sourceTree = "<group>"; };
+		AABB000000000000000000D3 /* Features/Authentication/Providers/WebAuthenticationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Providers/WebAuthenticationProvider.swift; sourceTree = "<group>"; };
+		AABB000000000000000000D4 /* Features/Authentication/Providers/WebAuthnSerialization.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Providers/WebAuthnSerialization.swift; sourceTree = "<group>"; };
+		AABB000000000000000000D5 /* Features/Authentication/Providers/PasskeyAuthenticationProvider.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Providers/PasskeyAuthenticationProvider.swift; sourceTree = "<group>"; };
+		AABB000000000000000000D6 /* Features/Authentication/Presentation/AccountRecoveryViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/AccountRecoveryViewModel.swift; sourceTree = "<group>"; };
+		AABB000000000000000000D7 /* Features/Authentication/Presentation/AccountRecoveryView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/AccountRecoveryView.swift; sourceTree = "<group>"; };
+		AABB000000000000000000D8 /* Features/Authentication/Presentation/AuthenticationProviderViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/AuthenticationProviderViewModel.swift; sourceTree = "<group>"; };
+		AABB000000000000000000D9 /* Application/ApplicationRootView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/ApplicationRootView.swift; sourceTree = "<group>"; };
+		AABB000000000000000000DA /* Application/LegacyUpgradeController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/LegacyUpgradeController.swift; sourceTree = "<group>"; };
+		AABB000000000000000000DB /* Features/Upgrade/LegacyDataDetector.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Upgrade/LegacyDataDetector.swift; sourceTree = "<group>"; };
+		AABB000000000000000000DC /* Features/Upgrade/UpgradeNoticeView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Upgrade/UpgradeNoticeView.swift; sourceTree = "<group>"; };
 		AABB000000000000000000E0 /* Debug.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Debug.xcconfig; sourceTree = "<group>"; };
 		AABB000000000000000000E1 /* Release.xcconfig */ = {isa = PBXFileReference; lastKnownFileType = text.xcconfig; path = Release.xcconfig; sourceTree = "<group>"; };
-		AABB000000000000000000F3 /* AppFontSelection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/Appearance/AppFontSelection.swift; sourceTree = "<group>"; };
-		AABB000000000000000000F4 /* AppFontStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/Appearance/AppFontStore.swift; sourceTree = "<group>"; };
-		AABB000000000000000000F5 /* CloveryFontModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/Appearance/CloveryFontModifier.swift; sourceTree = "<group>"; };
-		AABB00000000000000000111 /* AuthenticatedAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/Networking/AuthenticatedAPIClient.swift; sourceTree = "<group>"; };
-		AABB00000000000000000112 /* IdentityClaimAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Data/IdentityClaimAPI.swift; sourceTree = "<group>"; };
-		AABB00000000000000000113 /* AuthenticationWireModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Data/AuthenticationWireModels.swift; sourceTree = "<group>"; };
-		AABB00000000000000000114 /* ProviderVisibilityPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Domain/ProviderVisibilityPolicy.swift; sourceTree = "<group>"; };
-		AABB00000000000000000115 /* IdentityClaimRegistrationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/IdentityClaimRegistrationViewModel.swift; sourceTree = "<group>"; };
-		AABB00000000000000000116 /* IdentityClaimRegistrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/IdentityClaimRegistrationView.swift; sourceTree = "<group>"; };
-		AABB00000000000000000117 /* BootstrapRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/Bootstrap/BootstrapRoute.swift; sourceTree = "<group>"; };
-		AABB00000000000000000118 /* AccountBootstrapAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Bootstrap/Data/AccountBootstrapAPI.swift; sourceTree = "<group>"; };
-		AABB00000000000000000119 /* BootstrapCheckpointStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/Bootstrap/BootstrapCheckpointStore.swift; sourceTree = "<group>"; };
-		AABB0000000000000000011A /* AccountBootstrapCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/Bootstrap/AccountBootstrapCoordinator.swift; sourceTree = "<group>"; };
-		AABB0000000000000000011B /* BootstrapDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/Bootstrap/BootstrapDependencies.swift; sourceTree = "<group>"; };
-		AABB0000000000000000011C /* ApplicationLoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/ApplicationLoadingView.swift; sourceTree = "<group>"; };
-		AABB00000000000000000121 /* LegacySnapshotSources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Migration/Data/LegacySnapshotSources.swift; sourceTree = "<group>"; };
-		AABB00000000000000000122 /* LegacySnapshotReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Migration/Data/LegacySnapshotReader.swift; sourceTree = "<group>"; };
-		AABB00000000000000000123 /* LegacySnapshotMerger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Migration/Domain/LegacySnapshotMerger.swift; sourceTree = "<group>"; };
+		AABB000000000000000000F3 /* Application/Appearance/AppFontSelection.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/Appearance/AppFontSelection.swift; sourceTree = "<group>"; };
+		AABB000000000000000000F4 /* Application/Appearance/AppFontStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/Appearance/AppFontStore.swift; sourceTree = "<group>"; };
+		AABB000000000000000000F5 /* Application/Appearance/CloveryFontModifier.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/Appearance/CloveryFontModifier.swift; sourceTree = "<group>"; };
+		AABB00000000000000000111 /* Core/Networking/AuthenticatedAPIClient.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/Networking/AuthenticatedAPIClient.swift; sourceTree = "<group>"; };
+		AABB00000000000000000112 /* Features/Authentication/Data/IdentityClaimAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Data/IdentityClaimAPI.swift; sourceTree = "<group>"; };
+		AABB00000000000000000113 /* Features/Authentication/Data/AuthenticationWireModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Data/AuthenticationWireModels.swift; sourceTree = "<group>"; };
+		AABB00000000000000000114 /* Features/Authentication/Domain/ProviderVisibilityPolicy.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Domain/ProviderVisibilityPolicy.swift; sourceTree = "<group>"; };
+		AABB00000000000000000115 /* Features/Authentication/Presentation/IdentityClaimRegistrationViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/IdentityClaimRegistrationViewModel.swift; sourceTree = "<group>"; };
+		AABB00000000000000000116 /* Features/Authentication/Presentation/IdentityClaimRegistrationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Authentication/Presentation/IdentityClaimRegistrationView.swift; sourceTree = "<group>"; };
+		AABB00000000000000000117 /* Application/Bootstrap/BootstrapRoute.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/Bootstrap/BootstrapRoute.swift; sourceTree = "<group>"; };
+		AABB00000000000000000118 /* Features/Bootstrap/Data/AccountBootstrapAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Bootstrap/Data/AccountBootstrapAPI.swift; sourceTree = "<group>"; };
+		AABB00000000000000000119 /* Application/Bootstrap/BootstrapCheckpointStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/Bootstrap/BootstrapCheckpointStore.swift; sourceTree = "<group>"; };
+		AABB0000000000000000011A /* Application/Bootstrap/AccountBootstrapCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/Bootstrap/AccountBootstrapCoordinator.swift; sourceTree = "<group>"; };
+		AABB0000000000000000011B /* Application/Bootstrap/BootstrapDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/Bootstrap/BootstrapDependencies.swift; sourceTree = "<group>"; };
+		AABB0000000000000000011C /* Application/ApplicationLoadingView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/ApplicationLoadingView.swift; sourceTree = "<group>"; };
+		AABB00000000000000000121 /* Features/Migration/Data/LegacySnapshotSources.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Migration/Data/LegacySnapshotSources.swift; sourceTree = "<group>"; };
+		AABB00000000000000000122 /* Features/Migration/Data/LegacySnapshotReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Migration/Data/LegacySnapshotReader.swift; sourceTree = "<group>"; };
+		AABB00000000000000000123 /* Features/Migration/Domain/LegacySnapshotMerger.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Migration/Domain/LegacySnapshotMerger.swift; sourceTree = "<group>"; };
 		AABB00000000000000000124 /* MigrationBundleContent.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationBundleContent.swift; sourceTree = "<group>"; };
 		AABB00000000000000000131 /* MigrationBundleContentValidator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = MigrationBundleContentValidator.swift; sourceTree = "<group>"; };
-		AABB00000000000000000146 /* AtomicJSONFileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/Storage/AtomicJSONFileStore.swift; sourceTree = "<group>"; };
-		AABB00000000000000000147 /* LegacyMigrationCheckpointStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Migration/Domain/LegacyMigrationCheckpointStore.swift; sourceTree = "<group>"; };
-		AABB00000000000000000148 /* LegacyMigrationAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Migration/Data/LegacyMigrationAPI.swift; sourceTree = "<group>"; };
-		AABB00000000000000000149 /* LegacyMigrationArchiveReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Migration/Data/LegacyMigrationArchiveReader.swift; sourceTree = "<group>"; };
-		AABB0000000000000000014A /* LegacyMigrationArchivePreparer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Migration/Domain/LegacyMigrationArchivePreparer.swift; sourceTree = "<group>"; };
-		AABB0000000000000000014B /* LegacyMigrationCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Migration/Domain/LegacyMigrationCoordinator.swift; sourceTree = "<group>"; };
-		AABB0000000000000000014D /* LegacyMigrationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Migration/Data/LegacyMigrationModels.swift; sourceTree = "<group>"; };
-		AABB00000000000000000156 /* AccountEntitlementAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Entitlements/Data/AccountEntitlementAPI.swift; sourceTree = "<group>"; };
-		AABB00000000000000000157 /* AccountEntitlementCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Entitlements/Data/AccountEntitlementCache.swift; sourceTree = "<group>"; };
-		AABB00000000000000000158 /* EntitlementReconciler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Entitlements/Domain/EntitlementReconciler.swift; sourceTree = "<group>"; };
-		AABB00000000000000000166 /* VaultSyncAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Sync/Data/VaultSyncAPI.swift; sourceTree = "<group>"; };
-		AABB00000000000000000167 /* VaultAssetAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Sync/Data/VaultAssetAPI.swift; sourceTree = "<group>"; };
-		AABB00000000000000000168 /* VaultSyncCheckpointStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Sync/Domain/VaultSyncCheckpointStore.swift; sourceTree = "<group>"; };
-		AABB00000000000000000169 /* VaultLocalStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Sync/Data/VaultLocalStore.swift; sourceTree = "<group>"; };
-		AABB0000000000000000016A /* InitialVaultPuller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Sync/Domain/InitialVaultPuller.swift; sourceTree = "<group>"; };
-		AABB0000000000000000016B /* VaultAssetUploader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Sync/Domain/VaultAssetUploader.swift; sourceTree = "<group>"; };
-		AABB0000000000000000016C /* VaultSyncCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Sync/Domain/VaultSyncCoordinator.swift; sourceTree = "<group>"; };
-		AABB00000000000000000172 /* VaultSyncConflictResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Sync/Domain/VaultSyncConflictResolver.swift; sourceTree = "<group>"; };
-		AABB00000000000000000174 /* VaultSnapshotMetadataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Sync/Domain/VaultSnapshotMetadataStore.swift; sourceTree = "<group>"; };
-		AABB00000000000000000176 /* AccountBootstrapPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/Bootstrap/AccountBootstrapPipeline.swift; sourceTree = "<group>"; };
-		AABB00000000000000000178 /* AccountVaultRuntimeRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Sync/Domain/AccountVaultRuntimeRegistry.swift; sourceTree = "<group>"; };
-		AABB0000000000000000017A /* AccountReconciliationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Bootstrap/Presentation/AccountReconciliationView.swift; sourceTree = "<group>"; };
-		AABB0000000000000000017C /* IOSVerificationFixture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/Verification/IOSVerificationFixture.swift; sourceTree = "<group>"; };
-		AABB0000000000000000018E /* IOSVerificationAccountDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/Verification/IOSVerificationAccountDependencies.swift; sourceTree = "<group>"; };
-		AABB00000000000000000181 /* AccountManagementAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Account/Data/AccountManagementAPI.swift; sourceTree = "<group>"; };
-		AABB00000000000000000183 /* AccountSecurityViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Account/Presentation/AccountSecurityViewModel.swift; sourceTree = "<group>"; };
-		AABB00000000000000000185 /* LegalDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Legal/LegalDocument.swift; sourceTree = "<group>"; };
-		AABB00000000000000000187 /* LegalAcknowledgementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Legal/LegalAcknowledgementView.swift; sourceTree = "<group>"; };
-		AABB00000000000000000189 /* AccountSecurityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Account/Presentation/AccountSecurityView.swift; sourceTree = "<group>"; };
-		AABB0000000000000000018B /* DeleteAccountConfirmationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Account/Presentation/DeleteAccountConfirmationView.swift; sourceTree = "<group>"; };
+		AABB00000000000000000146 /* Core/Storage/AtomicJSONFileStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Core/Storage/AtomicJSONFileStore.swift; sourceTree = "<group>"; };
+		AABB00000000000000000147 /* Features/Migration/Domain/LegacyMigrationCheckpointStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Migration/Domain/LegacyMigrationCheckpointStore.swift; sourceTree = "<group>"; };
+		AABB00000000000000000148 /* Features/Migration/Data/LegacyMigrationAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Migration/Data/LegacyMigrationAPI.swift; sourceTree = "<group>"; };
+		AABB00000000000000000149 /* Features/Migration/Data/LegacyMigrationArchiveReader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Migration/Data/LegacyMigrationArchiveReader.swift; sourceTree = "<group>"; };
+		AABB0000000000000000014A /* Features/Migration/Domain/LegacyMigrationArchivePreparer.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Migration/Domain/LegacyMigrationArchivePreparer.swift; sourceTree = "<group>"; };
+		AABB0000000000000000014B /* Features/Migration/Domain/LegacyMigrationCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Migration/Domain/LegacyMigrationCoordinator.swift; sourceTree = "<group>"; };
+		AABB0000000000000000014D /* Features/Migration/Data/LegacyMigrationModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Migration/Data/LegacyMigrationModels.swift; sourceTree = "<group>"; };
+		AABB00000000000000000156 /* Features/Entitlements/Data/AccountEntitlementAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Entitlements/Data/AccountEntitlementAPI.swift; sourceTree = "<group>"; };
+		AABB00000000000000000157 /* Features/Entitlements/Data/AccountEntitlementCache.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Entitlements/Data/AccountEntitlementCache.swift; sourceTree = "<group>"; };
+		AABB00000000000000000158 /* Features/Entitlements/Domain/EntitlementReconciler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Entitlements/Domain/EntitlementReconciler.swift; sourceTree = "<group>"; };
+		AABB00000000000000000166 /* Features/Sync/Data/VaultSyncAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Sync/Data/VaultSyncAPI.swift; sourceTree = "<group>"; };
+		AABB00000000000000000167 /* Features/Sync/Data/VaultAssetAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Sync/Data/VaultAssetAPI.swift; sourceTree = "<group>"; };
+		AABB00000000000000000168 /* Features/Sync/Domain/VaultSyncCheckpointStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Sync/Domain/VaultSyncCheckpointStore.swift; sourceTree = "<group>"; };
+		AABB00000000000000000169 /* Features/Sync/Data/VaultLocalStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Sync/Data/VaultLocalStore.swift; sourceTree = "<group>"; };
+		AABB0000000000000000016A /* Features/Sync/Domain/InitialVaultPuller.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Sync/Domain/InitialVaultPuller.swift; sourceTree = "<group>"; };
+		AABB0000000000000000016B /* Features/Sync/Domain/VaultAssetUploader.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Sync/Domain/VaultAssetUploader.swift; sourceTree = "<group>"; };
+		AABB0000000000000000016C /* Features/Sync/Domain/VaultSyncCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Sync/Domain/VaultSyncCoordinator.swift; sourceTree = "<group>"; };
+		AABB00000000000000000172 /* Features/Sync/Domain/VaultSyncConflictResolver.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Sync/Domain/VaultSyncConflictResolver.swift; sourceTree = "<group>"; };
+		AABB00000000000000000174 /* Features/Sync/Domain/VaultSnapshotMetadataStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Sync/Domain/VaultSnapshotMetadataStore.swift; sourceTree = "<group>"; };
+		AABB00000000000000000176 /* Application/Bootstrap/AccountBootstrapPipeline.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/Bootstrap/AccountBootstrapPipeline.swift; sourceTree = "<group>"; };
+		AABB00000000000000000178 /* Features/Sync/Domain/AccountVaultRuntimeRegistry.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Sync/Domain/AccountVaultRuntimeRegistry.swift; sourceTree = "<group>"; };
+		AABB0000000000000000017A /* Features/Bootstrap/Presentation/AccountReconciliationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Bootstrap/Presentation/AccountReconciliationView.swift; sourceTree = "<group>"; };
+		AABB0000000000000000017C /* Application/Verification/IOSVerificationFixture.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/Verification/IOSVerificationFixture.swift; sourceTree = "<group>"; };
+		AABB00000000000000000181 /* Features/Account/Data/AccountManagementAPI.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Account/Data/AccountManagementAPI.swift; sourceTree = "<group>"; };
+		AABB00000000000000000183 /* Features/Account/Presentation/AccountSecurityViewModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Account/Presentation/AccountSecurityViewModel.swift; sourceTree = "<group>"; };
+		AABB00000000000000000185 /* Features/Legal/LegalDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Legal/LegalDocument.swift; sourceTree = "<group>"; };
+		AABB00000000000000000187 /* Features/Legal/LegalAcknowledgementView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Legal/LegalAcknowledgementView.swift; sourceTree = "<group>"; };
+		AABB00000000000000000189 /* Features/Account/Presentation/AccountSecurityView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Account/Presentation/AccountSecurityView.swift; sourceTree = "<group>"; };
+		AABB0000000000000000018B /* Features/Account/Presentation/DeleteAccountConfirmationView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Account/Presentation/DeleteAccountConfirmationView.swift; sourceTree = "<group>"; };
+		AABB0000000000000000018E /* Application/Verification/IOSVerificationAccountDependencies.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Application/Verification/IOSVerificationAccountDependencies.swift; sourceTree = "<group>"; };
+		AABB00000000000000000190 /* Features/Diary/DiaryTrashStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Diary/DiaryTrashStore.swift; sourceTree = "<group>"; };
+		AABB00000000000000000192 /* Features/Diary/DiaryTrashView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = Features/Diary/DiaryTrashView.swift; sourceTree = "<group>"; };
 		AACC00000000000000000001 /* CloveryTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CloveryTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		AADD00000000000000000001 /* CloveryUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = CloveryUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		BBCC000000000000000000F1 /* zh-Hant */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hant"; path = "zh-Hant.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		FC889A182FD464C9002510AD /* Clovery.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = Clovery.entitlements; sourceTree = "<group>"; };
 		FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = CloveryWidgetExtension.appex; sourceTree = BUILT_PRODUCTS_DIR; };
 		FCECDFDF2FE92C7C0067AF51 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		FCECDFE12FE92C7C0067AF51 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		FCECDFF52FE92CA80067AF51 /* CloveryWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CloveryWidgetExtension.entitlements; sourceTree = "<group>"; };
+		FCAA0000000000000000000A /* CloveryWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CloveryWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		FCAA00000000000000000010 /* WatchBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchBridge.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -300,9 +332,17 @@
 		AACC00000000000000000002 /* CloveryTests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = CloveryTests; sourceTree = "<group>"; };
 		AADD00000000000000000002 /* CloveryUITests */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = CloveryUITests; sourceTree = "<group>"; };
 		FCECDFE32FE92C7C0067AF51 /* CloveryWidget */ = {isa = PBXFileSystemSynchronizedRootGroup; exceptions = (FCECDFF32FE92C7D0067AF51 /* PBXFileSystemSynchronizedBuildFileExceptionSet */, ); explicitFileTypes = {}; explicitFolders = (); path = CloveryWidget; sourceTree = "<group>"; };
+		FCAA00000000000000000002 /* CloveryWatch */ = {isa = PBXFileSystemSynchronizedRootGroup; explicitFileTypes = {}; explicitFolders = (); path = CloveryWatch; sourceTree = "<group>"; };
 /* End PBXFileSystemSynchronizedRootGroup section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		AABB00000000000000000022 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AACC00000000000000000005 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -311,13 +351,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		AADD00000000000000000005 /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		AABB00000000000000000022 /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -333,6 +366,13 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		FCAA00000000000000000004 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -344,6 +384,7 @@
 				AACC00000000000000000002 /* CloveryTests */,
 				AADD00000000000000000002 /* CloveryUITests */,
 				FCECDFE32FE92C7C0067AF51 /* CloveryWidget */,
+				FCAA00000000000000000002 /* CloveryWatch */,
 				AABB000000000000000000E2 /* Config */,
 				FCECDFDE2FE92C7C0067AF51 /* Frameworks */,
 				AABB00000000000000000004 /* Products */,
@@ -358,95 +399,100 @@
 				AABB00000000000000000007 /* CloveryApp.swift */,
 				AABB00000000000000000008 /* ContentView.swift */,
 				AABB00000000000000000009 /* WebView.swift */,
+				FCAA00000000000000000010 /* WatchBridge.swift */,
 				AABB00000000000000000076 /* BoardEntitlementReporter.swift */,
-				AABB00000000000000000090 /* APIConfiguration.swift */,
-				AABB00000000000000000091 /* APIError.swift */,
-				AABB00000000000000000092 /* APIRequest.swift */,
-				AABB00000000000000000093 /* APIClient.swift */,
-				AABB00000000000000000111 /* AuthenticatedAPIClient.swift */,
-				AABB00000000000000000094 /* AuthenticationModels.swift */,
-				AABB00000000000000000095 /* AuthenticationAPI.swift */,
-				AABB00000000000000000112 /* IdentityClaimAPI.swift */,
-				AABB00000000000000000113 /* AuthenticationWireModels.swift */,
-				AABB00000000000000000114 /* ProviderVisibilityPolicy.swift */,
-				AABB00000000000000000115 /* IdentityClaimRegistrationViewModel.swift */,
-				AABB00000000000000000116 /* IdentityClaimRegistrationView.swift */,
-				AABB00000000000000000117 /* BootstrapRoute.swift */,
-				AABB00000000000000000118 /* AccountBootstrapAPI.swift */,
-				AABB00000000000000000119 /* BootstrapCheckpointStore.swift */,
-				AABB0000000000000000011A /* AccountBootstrapCoordinator.swift */,
-				AABB0000000000000000011B /* BootstrapDependencies.swift */,
-				AABB0000000000000000011C /* ApplicationLoadingView.swift */,
-				AABB00000000000000000121 /* LegacySnapshotSources.swift */,
-				AABB00000000000000000122 /* LegacySnapshotReader.swift */,
-				AABB00000000000000000123 /* LegacySnapshotMerger.swift */,
+				AABB00000000000000000090 /* Core/Configuration/APIConfiguration.swift */,
+				AABB00000000000000000091 /* Core/Networking/APIError.swift */,
+				AABB00000000000000000092 /* Core/Networking/APIRequest.swift */,
+				AABB00000000000000000093 /* Core/Networking/APIClient.swift */,
+				AABB00000000000000000111 /* Core/Networking/AuthenticatedAPIClient.swift */,
+				AABB00000000000000000094 /* Features/Authentication/Data/AuthenticationModels.swift */,
+				AABB00000000000000000095 /* Features/Authentication/Data/AuthenticationAPI.swift */,
+				AABB00000000000000000112 /* Features/Authentication/Data/IdentityClaimAPI.swift */,
+				AABB00000000000000000113 /* Features/Authentication/Data/AuthenticationWireModels.swift */,
+				AABB00000000000000000114 /* Features/Authentication/Domain/ProviderVisibilityPolicy.swift */,
+				AABB00000000000000000115 /* Features/Authentication/Presentation/IdentityClaimRegistrationViewModel.swift */,
+				AABB00000000000000000116 /* Features/Authentication/Presentation/IdentityClaimRegistrationView.swift */,
+				AABB00000000000000000117 /* Application/Bootstrap/BootstrapRoute.swift */,
+				AABB00000000000000000118 /* Features/Bootstrap/Data/AccountBootstrapAPI.swift */,
+				AABB00000000000000000119 /* Application/Bootstrap/BootstrapCheckpointStore.swift */,
+				AABB0000000000000000011A /* Application/Bootstrap/AccountBootstrapCoordinator.swift */,
+				AABB0000000000000000011B /* Application/Bootstrap/BootstrapDependencies.swift */,
+				AABB0000000000000000011C /* Application/ApplicationLoadingView.swift */,
+				AABB00000000000000000121 /* Features/Migration/Data/LegacySnapshotSources.swift */,
+				AABB00000000000000000122 /* Features/Migration/Data/LegacySnapshotReader.swift */,
+				AABB00000000000000000123 /* Features/Migration/Domain/LegacySnapshotMerger.swift */,
 				AABB00000000000000000124 /* MigrationBundleContent.swift */,
 				AABB00000000000000000131 /* MigrationBundleContentValidator.swift */,
-				AABB00000000000000000146 /* AtomicJSONFileStore.swift */,
-				AABB00000000000000000147 /* LegacyMigrationCheckpointStore.swift */,
-				AABB00000000000000000148 /* LegacyMigrationAPI.swift */,
-				AABB00000000000000000149 /* LegacyMigrationArchiveReader.swift */,
-				AABB0000000000000000014A /* LegacyMigrationArchivePreparer.swift */,
-				AABB0000000000000000014B /* LegacyMigrationCoordinator.swift */,
-				AABB0000000000000000014D /* LegacyMigrationModels.swift */,
-				AABB00000000000000000156 /* AccountEntitlementAPI.swift */,
-				AABB00000000000000000157 /* AccountEntitlementCache.swift */,
-				AABB00000000000000000158 /* EntitlementReconciler.swift */,
-				AABB00000000000000000166 /* VaultSyncAPI.swift */,
-				AABB00000000000000000167 /* VaultAssetAPI.swift */,
-				AABB00000000000000000168 /* VaultSyncCheckpointStore.swift */,
-				AABB00000000000000000169 /* VaultLocalStore.swift */,
-				AABB0000000000000000016A /* InitialVaultPuller.swift */,
-				AABB0000000000000000016B /* VaultAssetUploader.swift */,
-				AABB0000000000000000016C /* VaultSyncCoordinator.swift */,
-				AABB00000000000000000172 /* VaultSyncConflictResolver.swift */,
-				AABB00000000000000000174 /* VaultSnapshotMetadataStore.swift */,
-				AABB00000000000000000176 /* AccountBootstrapPipeline.swift */,
-				AABB00000000000000000178 /* AccountVaultRuntimeRegistry.swift */,
-				AABB0000000000000000017A /* AccountReconciliationView.swift */,
-				AABB0000000000000000017C /* IOSVerificationFixture.swift */,
-				AABB0000000000000000018E /* IOSVerificationAccountDependencies.swift */,
-				AABB00000000000000000181 /* AccountManagementAPI.swift */,
-				AABB00000000000000000183 /* AccountSecurityViewModel.swift */,
-				AABB00000000000000000185 /* LegalDocument.swift */,
-				AABB00000000000000000187 /* LegalAcknowledgementView.swift */,
-				AABB00000000000000000189 /* AccountSecurityView.swift */,
-				AABB0000000000000000018B /* DeleteAccountConfirmationView.swift */,
-				AABB00000000000000000096 /* KeychainStore.swift */,
-				AABB00000000000000000097 /* DeviceIdentityStore.swift */,
-				AABB00000000000000000098 /* AuthenticationSessionStore.swift */,
-				AABB00000000000000000099 /* AuthenticationValidation.swift */,
-				AABB0000000000000000009A /* AuthenticationState.swift */,
-				AABB0000000000000000009B /* ApplicationSessionController.swift */,
-				AABB0000000000000000009C /* LoginViewModel.swift */,
-				AABB0000000000000000009D /* SignUpViewModel.swift */,
-				AABB0000000000000000009E /* AuthenticationTheme.swift */,
-				AABB0000000000000000009F /* AuthenticationAssets.swift */,
-				AABB000000000000000000B0 /* AuthDashedCard.swift */,
-				AABB000000000000000000B1 /* AuthCapsuleField.swift */,
-				AABB000000000000000000B2 /* AuthProviderButton.swift */,
-				AABB000000000000000000B3 /* AuthDivider.swift */,
-				AABB000000000000000000B4 /* AuthenticationEntryView.swift */,
-				AABB000000000000000000B5 /* AuthenticationFlowView.swift */,
-				AABB000000000000000000B6 /* LoginView.swift */,
-				AABB000000000000000000B7 /* SignUpView.swift */,
-				AABB000000000000000000B8 /* RecoveryCodesView.swift */,
-				AABB000000000000000000D0 /* ProviderAuthentication.swift */,
-				AABB000000000000000000D1 /* AuthorizationControllerBridge.swift */,
-				AABB000000000000000000D2 /* AppleAuthenticationProvider.swift */,
-				AABB000000000000000000D3 /* WebAuthenticationProvider.swift */,
-				AABB000000000000000000D4 /* WebAuthnSerialization.swift */,
-				AABB000000000000000000D5 /* PasskeyAuthenticationProvider.swift */,
-				AABB000000000000000000D6 /* AccountRecoveryViewModel.swift */,
-				AABB000000000000000000D7 /* AccountRecoveryView.swift */,
-				AABB000000000000000000D8 /* AuthenticationProviderViewModel.swift */,
-				AABB000000000000000000D9 /* ApplicationRootView.swift */,
-				AABB000000000000000000DA /* LegacyUpgradeController.swift */,
-				AABB000000000000000000F3 /* AppFontSelection.swift */,
-				AABB000000000000000000F4 /* AppFontStore.swift */,
-				AABB000000000000000000F5 /* CloveryFontModifier.swift */,
-				AABB000000000000000000DB /* LegacyDataDetector.swift */,
-				AABB000000000000000000DC /* UpgradeNoticeView.swift */,
+				AABB00000000000000000146 /* Core/Storage/AtomicJSONFileStore.swift */,
+				AABB00000000000000000147 /* Features/Migration/Domain/LegacyMigrationCheckpointStore.swift */,
+				AABB00000000000000000148 /* Features/Migration/Data/LegacyMigrationAPI.swift */,
+				AABB00000000000000000149 /* Features/Migration/Data/LegacyMigrationArchiveReader.swift */,
+				AABB0000000000000000014A /* Features/Migration/Domain/LegacyMigrationArchivePreparer.swift */,
+				AABB0000000000000000014B /* Features/Migration/Domain/LegacyMigrationCoordinator.swift */,
+				AABB0000000000000000014D /* Features/Migration/Data/LegacyMigrationModels.swift */,
+				AABB00000000000000000156 /* Features/Entitlements/Data/AccountEntitlementAPI.swift */,
+				AABB00000000000000000157 /* Features/Entitlements/Data/AccountEntitlementCache.swift */,
+				AABB00000000000000000158 /* Features/Entitlements/Domain/EntitlementReconciler.swift */,
+				AABB00000000000000000166 /* Features/Sync/Data/VaultSyncAPI.swift */,
+				AABB00000000000000000167 /* Features/Sync/Data/VaultAssetAPI.swift */,
+				AABB00000000000000000168 /* Features/Sync/Domain/VaultSyncCheckpointStore.swift */,
+				AABB00000000000000000169 /* Features/Sync/Data/VaultLocalStore.swift */,
+				AABB0000000000000000016A /* Features/Sync/Domain/InitialVaultPuller.swift */,
+				AABB0000000000000000016B /* Features/Sync/Domain/VaultAssetUploader.swift */,
+				AABB0000000000000000016C /* Features/Sync/Domain/VaultSyncCoordinator.swift */,
+				AABB00000000000000000172 /* Features/Sync/Domain/VaultSyncConflictResolver.swift */,
+				AABB00000000000000000174 /* Features/Sync/Domain/VaultSnapshotMetadataStore.swift */,
+				AABB00000000000000000176 /* Application/Bootstrap/AccountBootstrapPipeline.swift */,
+				AABB00000000000000000178 /* Features/Sync/Domain/AccountVaultRuntimeRegistry.swift */,
+				AABB0000000000000000017A /* Features/Bootstrap/Presentation/AccountReconciliationView.swift */,
+				AABB0000000000000000017C /* Application/Verification/IOSVerificationFixture.swift */,
+				AABB0000000000000000018E /* Application/Verification/IOSVerificationAccountDependencies.swift */,
+				AABB00000000000000000190 /* Features/Diary/DiaryTrashStore.swift */,
+				AABB00000000000000000192 /* Features/Diary/DiaryTrashView.swift */,
+				AABB00000000000000000181 /* Features/Account/Data/AccountManagementAPI.swift */,
+				AABB00000000000000000183 /* Features/Account/Presentation/AccountSecurityViewModel.swift */,
+				AABB00000000000000000185 /* Features/Legal/LegalDocument.swift */,
+				AABB00000000000000000187 /* Features/Legal/LegalAcknowledgementView.swift */,
+				AABB00000000000000000189 /* Features/Account/Presentation/AccountSecurityView.swift */,
+				AABB0000000000000000018B /* Features/Account/Presentation/DeleteAccountConfirmationView.swift */,
+				AABB00000000000000000096 /* Core/Security/KeychainStore.swift */,
+				AABB00000000000000000097 /* Core/Security/DeviceIdentityStore.swift */,
+				AABB00000000000000000098 /* Core/Security/AuthenticationSessionStore.swift */,
+				AABB00000000000000000099 /* Features/Authentication/Domain/AuthenticationValidation.swift */,
+				AABB0000000000000000009A /* Features/Authentication/Domain/AuthenticationState.swift */,
+				AABB0000000000000000009B /* Application/ApplicationSessionController.swift */,
+				AABB0000000000000000009C /* Features/Authentication/Presentation/LoginViewModel.swift */,
+				AABB0000000000000000009D /* Features/Authentication/Presentation/SignUpViewModel.swift */,
+				AABB0000000000000000009E /* Features/Authentication/Presentation/AuthenticationTheme.swift */,
+				AABB0000000000000000009F /* Features/Authentication/Presentation/AuthenticationAssets.swift */,
+				AABB000000000000000000B0 /* Features/Authentication/Presentation/Components/AuthDashedCard.swift */,
+				AABB000000000000000000B1 /* Features/Authentication/Presentation/Components/AuthCapsuleField.swift */,
+				AABB000000000000000000B2 /* Features/Authentication/Presentation/Components/AuthProviderButton.swift */,
+				AABB000000000000000000B3 /* Features/Authentication/Presentation/Components/AuthDivider.swift */,
+				BBCC000000000000000000E3 /* Features/Authentication/Presentation/Components/AuthPrimaryButtonStyle.swift */,
+				BBCC000000000000000000E4 /* Features/Authentication/Presentation/Components/AuthBackButton.swift */,
+				AABB000000000000000000B4 /* Features/Authentication/Presentation/AuthenticationEntryView.swift */,
+				AABB000000000000000000B5 /* Features/Authentication/Presentation/AuthenticationFlowView.swift */,
+				AABB000000000000000000B6 /* Features/Authentication/Presentation/LoginView.swift */,
+				AABB000000000000000000B7 /* Features/Authentication/Presentation/SignUpView.swift */,
+				AABB000000000000000000B8 /* Features/Authentication/Presentation/RecoveryCodesView.swift */,
+				AABB000000000000000000D0 /* Features/Authentication/Providers/ProviderAuthentication.swift */,
+				AABB000000000000000000D1 /* Features/Authentication/Providers/AuthorizationControllerBridge.swift */,
+				AABB000000000000000000D2 /* Features/Authentication/Providers/AppleAuthenticationProvider.swift */,
+				AABB000000000000000000D3 /* Features/Authentication/Providers/WebAuthenticationProvider.swift */,
+				AABB000000000000000000D4 /* Features/Authentication/Providers/WebAuthnSerialization.swift */,
+				AABB000000000000000000D5 /* Features/Authentication/Providers/PasskeyAuthenticationProvider.swift */,
+				AABB000000000000000000D6 /* Features/Authentication/Presentation/AccountRecoveryViewModel.swift */,
+				AABB000000000000000000D7 /* Features/Authentication/Presentation/AccountRecoveryView.swift */,
+				AABB000000000000000000D8 /* Features/Authentication/Presentation/AuthenticationProviderViewModel.swift */,
+				AABB000000000000000000D9 /* Application/ApplicationRootView.swift */,
+				AABB000000000000000000DA /* Application/LegacyUpgradeController.swift */,
+				AABB000000000000000000F3 /* Application/Appearance/AppFontSelection.swift */,
+				AABB000000000000000000F4 /* Application/Appearance/AppFontStore.swift */,
+				AABB000000000000000000F5 /* Application/Appearance/CloveryFontModifier.swift */,
+				AABB000000000000000000DB /* Features/Upgrade/LegacyDataDetector.swift */,
+				AABB000000000000000000DC /* Features/Upgrade/UpgradeNoticeView.swift */,
 				AABB00000000000000000020 /* BoardStore.swift */,
 				AABB00000000000000000072 /* BoardStoreClient.swift */,
 				AABB00000000000000000074 /* Clovery.storekit */,
@@ -474,19 +520,11 @@
 			children = (
 				AABB00000000000000000006 /* Clovery.app */,
 				FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */,
+				FCAA0000000000000000000A /* CloveryWatch.app */,
 				AACC00000000000000000001 /* CloveryTests.xctest */,
 				AADD00000000000000000001 /* CloveryUITests.xctest */,
 			);
 			name = Products;
-			sourceTree = "<group>";
-		};
-		FCECDFDE2FE92C7C0067AF51 /* Frameworks */ = {
-			isa = PBXGroup;
-			children = (
-				FCECDFDF2FE92C7C0067AF51 /* WidgetKit.framework */,
-				FCECDFE12FE92C7C0067AF51 /* SwiftUI.framework */,
-			);
-			name = Frameworks;
 			sourceTree = "<group>";
 		};
 		AABB000000000000000000E2 /* Config */ = {
@@ -498,9 +536,39 @@
 			path = Config;
 			sourceTree = "<group>";
 		};
+		FCECDFDE2FE92C7C0067AF51 /* Frameworks */ = {
+			isa = PBXGroup;
+			children = (
+				FCECDFDF2FE92C7C0067AF51 /* WidgetKit.framework */,
+				FCECDFE12FE92C7C0067AF51 /* SwiftUI.framework */,
+			);
+			name = Frameworks;
+			sourceTree = "<group>";
+		};
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		AABB00000000000000000031 /* Clovery */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AABB00000000000000000052 /* Build configuration list for PBXNativeTarget "Clovery" */;
+			buildPhases = (
+				AABB00000000000000000021 /* Sources */,
+				AABB00000000000000000022 /* Frameworks */,
+				AABB00000000000000000023 /* Resources */,
+				FCECDFF02FE92C7D0067AF51 /* Embed Foundation Extensions */,
+				FCAA0000000000000000000D /* Embed Watch Content */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				FCECDFEE2FE92C7D0067AF51 /* PBXTargetDependency */,
+				FCAA0000000000000000000C /* PBXTargetDependency */,
+			);
+			name = Clovery;
+			productName = Clovery;
+			productReference = AABB00000000000000000006 /* Clovery.app */;
+			productType = "com.apple.product-type.application";
+		};
 		AACC00000000000000000003 /* CloveryTests */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = AACC00000000000000000007 /* Build configuration list for PBXNativeTarget "CloveryTests" */;
@@ -543,25 +611,6 @@
 			productReference = AADD00000000000000000001 /* CloveryUITests.xctest */;
 			productType = "com.apple.product-type.bundle.ui-testing";
 		};
-		AABB00000000000000000031 /* Clovery */ = {
-			isa = PBXNativeTarget;
-			buildConfigurationList = AABB00000000000000000052 /* Build configuration list for PBXNativeTarget "Clovery" */;
-			buildPhases = (
-				AABB00000000000000000021 /* Sources */,
-				AABB00000000000000000022 /* Frameworks */,
-				AABB00000000000000000023 /* Resources */,
-				FCECDFF02FE92C7D0067AF51 /* Embed Foundation Extensions */,
-			);
-			buildRules = (
-			);
-			dependencies = (
-				FCECDFEE2FE92C7D0067AF51 /* PBXTargetDependency */,
-			);
-			name = Clovery;
-			productName = Clovery;
-			productReference = AABB00000000000000000006 /* Clovery.app */;
-			productType = "com.apple.product-type.application";
-		};
 		FCECDFDC2FE92C7C0067AF51 /* CloveryWidgetExtension */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = FCECDFF42FE92C7D0067AF51 /* Build configuration list for PBXNativeTarget "CloveryWidgetExtension" */;
@@ -583,6 +632,28 @@
 			productName = CloveryWidgetExtension;
 			productReference = FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
+		};
+		FCAA00000000000000000001 /* CloveryWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = FCAA00000000000000000007 /* Build configuration list for PBXNativeTarget "CloveryWatch" */;
+			buildPhases = (
+				FCAA00000000000000000003 /* Sources */,
+				FCAA00000000000000000004 /* Frameworks */,
+				FCAA00000000000000000005 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			fileSystemSynchronizedGroups = (
+				FCAA00000000000000000002 /* CloveryWatch */,
+			);
+			name = CloveryWatch;
+			packageProductDependencies = (
+			);
+			productName = CloveryWatch;
+			productReference = FCAA0000000000000000000A /* CloveryWatch.app */;
+			productType = "com.apple.product-type.application";
 		};
 /* End PBXNativeTarget section */
 
@@ -608,6 +679,9 @@
 					FCECDFDC2FE92C7C0067AF51 = {
 						CreatedOnToolsVersion = 26.4.1;
 					};
+					FCAA00000000000000000001 = {
+						CreatedOnToolsVersion = 26.4.1;
+					};
 				};
 			};
 			buildConfigurationList = AABB00000000000000000051 /* Build configuration list for PBXProject "Clovery" */;
@@ -618,6 +692,7 @@
 				en,
 				Base,
 				"zh-Hans",
+				"zh-Hant",
 			);
 			mainGroup = AABB00000000000000000002;
 			productRefGroup = AABB00000000000000000004 /* Products */;
@@ -626,6 +701,7 @@
 			targets = (
 				AABB00000000000000000031 /* Clovery */,
 				FCECDFDC2FE92C7C0067AF51 /* CloveryWidgetExtension */,
+				FCAA00000000000000000001 /* CloveryWatch */,
 				AACC00000000000000000003 /* CloveryTests */,
 				AADD00000000000000000003 /* CloveryUITests */,
 			);
@@ -633,6 +709,22 @@
 /* End PBXProject section */
 
 /* Begin PBXResourcesBuildPhase section */
+		AABB00000000000000000023 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AABB00000000000000000073 /* Clovery.storekit in Resources */,
+				AABB00000000000000000014 /* Assets.xcassets in Resources */,
+				AABB00000000000000000015 /* Clover Diary.html in Resources */,
+				AABB0000000000000000001E /* app.compiled.js in Resources */,
+				AABB00000000000000000016 /* fonts in Resources */,
+				AABB0000000000000000001A /* vendor in Resources */,
+				AABB0000000000000000001B /* PrivacyInfo.xcprivacy in Resources */,
+				AABB00000000000000000018 /* InfoPlist.strings in Resources */,
+				BBCC000000000000000000F4 /* Localizable.strings in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		AACC00000000000000000006 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -647,21 +739,6 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		AABB00000000000000000023 /* Resources */ = {
-			isa = PBXResourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-				AABB00000000000000000073 /* Clovery.storekit in Resources */,
-				AABB00000000000000000014 /* Assets.xcassets in Resources */,
-				AABB00000000000000000015 /* Clover Diary.html in Resources */,
-				AABB0000000000000000001E /* app.compiled.js in Resources */,
-				AABB00000000000000000016 /* fonts in Resources */,
-				AABB0000000000000000001A /* vendor in Resources */,
-				AABB0000000000000000001B /* PrivacyInfo.xcprivacy in Resources */,
-				AABB00000000000000000018 /* InfoPlist.strings in Resources */,
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		FCECDFDB2FE92C7C0067AF51 /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -671,23 +748,17 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		FCAA00000000000000000005 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FCAA00000000000000000006 /* fonts in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
-		AACC00000000000000000004 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-		AADD00000000000000000004 /* Sources */ = {
-			isa = PBXSourcesBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		AABB00000000000000000021 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -706,98 +777,124 @@
 				AABB0000000000000000006C /* MigrationBundleExporter.swift in Sources */,
 				AABB0000000000000000006E /* PhotoLibrarySaver.swift in Sources */,
 				AABB00000000000000000070 /* ImageExportService.swift in Sources */,
-				AABB00000000000000000080 /* APIConfiguration.swift in Sources */,
-				AABB00000000000000000081 /* APIError.swift in Sources */,
-				AABB00000000000000000082 /* APIRequest.swift in Sources */,
-				AABB00000000000000000083 /* APIClient.swift in Sources */,
-				AABB00000000000000000101 /* AuthenticatedAPIClient.swift in Sources */,
-				AABB00000000000000000084 /* AuthenticationModels.swift in Sources */,
-				AABB00000000000000000085 /* AuthenticationAPI.swift in Sources */,
-				AABB00000000000000000102 /* IdentityClaimAPI.swift in Sources */,
-				AABB00000000000000000103 /* AuthenticationWireModels.swift in Sources */,
-				AABB00000000000000000104 /* ProviderVisibilityPolicy.swift in Sources */,
-				AABB00000000000000000105 /* IdentityClaimRegistrationViewModel.swift in Sources */,
-				AABB00000000000000000106 /* IdentityClaimRegistrationView.swift in Sources */,
-				AABB00000000000000000107 /* BootstrapRoute.swift in Sources */,
-				AABB00000000000000000108 /* AccountBootstrapAPI.swift in Sources */,
-				AABB00000000000000000109 /* BootstrapCheckpointStore.swift in Sources */,
-				AABB0000000000000000010A /* AccountBootstrapCoordinator.swift in Sources */,
-				AABB0000000000000000010B /* BootstrapDependencies.swift in Sources */,
-				AABB0000000000000000010C /* ApplicationLoadingView.swift in Sources */,
-				AABB0000000000000000010D /* LegacySnapshotSources.swift in Sources */,
-				AABB0000000000000000010E /* LegacySnapshotReader.swift in Sources */,
-				AABB0000000000000000010F /* LegacySnapshotMerger.swift in Sources */,
+				AABB00000000000000000080 /* Core/Configuration/APIConfiguration.swift in Sources */,
+				AABB00000000000000000081 /* Core/Networking/APIError.swift in Sources */,
+				AABB00000000000000000082 /* Core/Networking/APIRequest.swift in Sources */,
+				AABB00000000000000000083 /* Core/Networking/APIClient.swift in Sources */,
+				AABB00000000000000000101 /* Core/Networking/AuthenticatedAPIClient.swift in Sources */,
+				AABB00000000000000000084 /* Features/Authentication/Data/AuthenticationModels.swift in Sources */,
+				AABB00000000000000000085 /* Features/Authentication/Data/AuthenticationAPI.swift in Sources */,
+				AABB00000000000000000102 /* Features/Authentication/Data/IdentityClaimAPI.swift in Sources */,
+				AABB00000000000000000103 /* Features/Authentication/Data/AuthenticationWireModels.swift in Sources */,
+				AABB00000000000000000104 /* Features/Authentication/Domain/ProviderVisibilityPolicy.swift in Sources */,
+				AABB00000000000000000105 /* Features/Authentication/Presentation/IdentityClaimRegistrationViewModel.swift in Sources */,
+				AABB00000000000000000106 /* Features/Authentication/Presentation/IdentityClaimRegistrationView.swift in Sources */,
+				AABB00000000000000000107 /* Application/Bootstrap/BootstrapRoute.swift in Sources */,
+				AABB00000000000000000108 /* Features/Bootstrap/Data/AccountBootstrapAPI.swift in Sources */,
+				AABB00000000000000000109 /* Application/Bootstrap/BootstrapCheckpointStore.swift in Sources */,
+				AABB0000000000000000010A /* Application/Bootstrap/AccountBootstrapCoordinator.swift in Sources */,
+				AABB0000000000000000010B /* Application/Bootstrap/BootstrapDependencies.swift in Sources */,
+				AABB0000000000000000010C /* Application/ApplicationLoadingView.swift in Sources */,
+				AABB0000000000000000010D /* Features/Migration/Data/LegacySnapshotSources.swift in Sources */,
+				AABB0000000000000000010E /* Features/Migration/Data/LegacySnapshotReader.swift in Sources */,
+				AABB0000000000000000010F /* Features/Migration/Domain/LegacySnapshotMerger.swift in Sources */,
 				AABB00000000000000000110 /* MigrationBundleContent.swift in Sources */,
 				AABB00000000000000000130 /* MigrationBundleContentValidator.swift in Sources */,
-				AABB00000000000000000140 /* AtomicJSONFileStore.swift in Sources */,
-				AABB00000000000000000141 /* LegacyMigrationCheckpointStore.swift in Sources */,
-				AABB00000000000000000142 /* LegacyMigrationAPI.swift in Sources */,
-				AABB00000000000000000143 /* LegacyMigrationArchiveReader.swift in Sources */,
-				AABB00000000000000000144 /* LegacyMigrationArchivePreparer.swift in Sources */,
-				AABB00000000000000000145 /* LegacyMigrationCoordinator.swift in Sources */,
-				AABB0000000000000000014C /* LegacyMigrationModels.swift in Sources */,
-				AABB00000000000000000150 /* AccountEntitlementAPI.swift in Sources */,
-				AABB00000000000000000151 /* AccountEntitlementCache.swift in Sources */,
-				AABB00000000000000000152 /* EntitlementReconciler.swift in Sources */,
-				AABB00000000000000000160 /* VaultSyncAPI.swift in Sources */,
-				AABB00000000000000000161 /* VaultAssetAPI.swift in Sources */,
-				AABB00000000000000000162 /* VaultSyncCheckpointStore.swift in Sources */,
-				AABB00000000000000000163 /* VaultLocalStore.swift in Sources */,
-				AABB00000000000000000164 /* InitialVaultPuller.swift in Sources */,
-				AABB00000000000000000165 /* VaultAssetUploader.swift in Sources */,
-				AABB00000000000000000170 /* VaultSyncCoordinator.swift in Sources */,
-				AABB00000000000000000171 /* VaultSyncConflictResolver.swift in Sources */,
-				AABB00000000000000000173 /* VaultSnapshotMetadataStore.swift in Sources */,
-				AABB00000000000000000175 /* AccountBootstrapPipeline.swift in Sources */,
-				AABB00000000000000000177 /* AccountVaultRuntimeRegistry.swift in Sources */,
-				AABB00000000000000000179 /* AccountReconciliationView.swift in Sources */,
-				AABB0000000000000000017B /* IOSVerificationFixture.swift in Sources */,
-				AABB0000000000000000018D /* IOSVerificationAccountDependencies.swift in Sources */,
-				AABB00000000000000000180 /* AccountManagementAPI.swift in Sources */,
-				AABB00000000000000000182 /* AccountSecurityViewModel.swift in Sources */,
-				AABB00000000000000000184 /* LegalDocument.swift in Sources */,
-				AABB00000000000000000186 /* LegalAcknowledgementView.swift in Sources */,
-				AABB00000000000000000188 /* AccountSecurityView.swift in Sources */,
-				AABB0000000000000000018A /* DeleteAccountConfirmationView.swift in Sources */,
-				AABB00000000000000000086 /* KeychainStore.swift in Sources */,
-				AABB00000000000000000087 /* DeviceIdentityStore.swift in Sources */,
-				AABB00000000000000000088 /* AuthenticationSessionStore.swift in Sources */,
-				AABB00000000000000000089 /* AuthenticationValidation.swift in Sources */,
-				AABB0000000000000000008A /* AuthenticationState.swift in Sources */,
-				AABB0000000000000000008B /* ApplicationSessionController.swift in Sources */,
-				AABB0000000000000000008C /* LoginViewModel.swift in Sources */,
-				AABB0000000000000000008D /* SignUpViewModel.swift in Sources */,
-				AABB0000000000000000008E /* AuthenticationTheme.swift in Sources */,
-				AABB0000000000000000008F /* AuthenticationAssets.swift in Sources */,
-				AABB000000000000000000A0 /* AuthDashedCard.swift in Sources */,
-				AABB000000000000000000A1 /* AuthCapsuleField.swift in Sources */,
-				AABB000000000000000000A2 /* AuthProviderButton.swift in Sources */,
-				AABB000000000000000000A3 /* AuthDivider.swift in Sources */,
-				AABB000000000000000000A4 /* AuthenticationEntryView.swift in Sources */,
-				AABB000000000000000000A5 /* AuthenticationFlowView.swift in Sources */,
-				AABB000000000000000000A6 /* LoginView.swift in Sources */,
-				AABB000000000000000000A7 /* SignUpView.swift in Sources */,
-				AABB000000000000000000A8 /* RecoveryCodesView.swift in Sources */,
-				AABB000000000000000000C0 /* ProviderAuthentication.swift in Sources */,
-				AABB000000000000000000C1 /* AuthorizationControllerBridge.swift in Sources */,
-				AABB000000000000000000C2 /* AppleAuthenticationProvider.swift in Sources */,
-				AABB000000000000000000C3 /* WebAuthenticationProvider.swift in Sources */,
-				AABB000000000000000000C4 /* WebAuthnSerialization.swift in Sources */,
-				AABB000000000000000000C5 /* PasskeyAuthenticationProvider.swift in Sources */,
-				AABB000000000000000000C6 /* AccountRecoveryViewModel.swift in Sources */,
-				AABB000000000000000000C7 /* AccountRecoveryView.swift in Sources */,
-				AABB000000000000000000C8 /* AuthenticationProviderViewModel.swift in Sources */,
-				AABB000000000000000000C9 /* ApplicationRootView.swift in Sources */,
-				AABB000000000000000000CA /* LegacyUpgradeController.swift in Sources */,
-				AABB000000000000000000F0 /* AppFontSelection.swift in Sources */,
-				AABB000000000000000000F1 /* AppFontStore.swift in Sources */,
-				AABB000000000000000000F2 /* CloveryFontModifier.swift in Sources */,
-				AABB000000000000000000CB /* LegacyDataDetector.swift in Sources */,
-				AABB000000000000000000CC /* UpgradeNoticeView.swift in Sources */,
+				AABB00000000000000000140 /* Core/Storage/AtomicJSONFileStore.swift in Sources */,
+				AABB00000000000000000141 /* Features/Migration/Domain/LegacyMigrationCheckpointStore.swift in Sources */,
+				AABB00000000000000000142 /* Features/Migration/Data/LegacyMigrationAPI.swift in Sources */,
+				AABB00000000000000000143 /* Features/Migration/Data/LegacyMigrationArchiveReader.swift in Sources */,
+				AABB00000000000000000144 /* Features/Migration/Domain/LegacyMigrationArchivePreparer.swift in Sources */,
+				AABB00000000000000000145 /* Features/Migration/Domain/LegacyMigrationCoordinator.swift in Sources */,
+				AABB0000000000000000014C /* Features/Migration/Data/LegacyMigrationModels.swift in Sources */,
+				AABB00000000000000000150 /* Features/Entitlements/Data/AccountEntitlementAPI.swift in Sources */,
+				AABB00000000000000000151 /* Features/Entitlements/Data/AccountEntitlementCache.swift in Sources */,
+				AABB00000000000000000152 /* Features/Entitlements/Domain/EntitlementReconciler.swift in Sources */,
+				AABB00000000000000000160 /* Features/Sync/Data/VaultSyncAPI.swift in Sources */,
+				AABB00000000000000000161 /* Features/Sync/Data/VaultAssetAPI.swift in Sources */,
+				AABB00000000000000000162 /* Features/Sync/Domain/VaultSyncCheckpointStore.swift in Sources */,
+				AABB00000000000000000163 /* Features/Sync/Data/VaultLocalStore.swift in Sources */,
+				AABB00000000000000000164 /* Features/Sync/Domain/InitialVaultPuller.swift in Sources */,
+				AABB00000000000000000165 /* Features/Sync/Domain/VaultAssetUploader.swift in Sources */,
+				AABB00000000000000000170 /* Features/Sync/Domain/VaultSyncCoordinator.swift in Sources */,
+				AABB00000000000000000171 /* Features/Sync/Domain/VaultSyncConflictResolver.swift in Sources */,
+				AABB00000000000000000173 /* Features/Sync/Domain/VaultSnapshotMetadataStore.swift in Sources */,
+				AABB00000000000000000175 /* Application/Bootstrap/AccountBootstrapPipeline.swift in Sources */,
+				AABB00000000000000000177 /* Features/Sync/Domain/AccountVaultRuntimeRegistry.swift in Sources */,
+				AABB00000000000000000179 /* Features/Bootstrap/Presentation/AccountReconciliationView.swift in Sources */,
+				AABB0000000000000000017B /* Application/Verification/IOSVerificationFixture.swift in Sources */,
+				AABB0000000000000000018D /* Application/Verification/IOSVerificationAccountDependencies.swift in Sources */,
+				AABB0000000000000000018F /* Features/Diary/DiaryTrashStore.swift in Sources */,
+				AABB00000000000000000191 /* Features/Diary/DiaryTrashView.swift in Sources */,
+				AABB00000000000000000180 /* Features/Account/Data/AccountManagementAPI.swift in Sources */,
+				AABB00000000000000000182 /* Features/Account/Presentation/AccountSecurityViewModel.swift in Sources */,
+				AABB00000000000000000184 /* Features/Legal/LegalDocument.swift in Sources */,
+				AABB00000000000000000186 /* Features/Legal/LegalAcknowledgementView.swift in Sources */,
+				AABB00000000000000000188 /* Features/Account/Presentation/AccountSecurityView.swift in Sources */,
+				AABB0000000000000000018A /* Features/Account/Presentation/DeleteAccountConfirmationView.swift in Sources */,
+				AABB00000000000000000086 /* Core/Security/KeychainStore.swift in Sources */,
+				AABB00000000000000000087 /* Core/Security/DeviceIdentityStore.swift in Sources */,
+				AABB00000000000000000088 /* Core/Security/AuthenticationSessionStore.swift in Sources */,
+				AABB00000000000000000089 /* Features/Authentication/Domain/AuthenticationValidation.swift in Sources */,
+				AABB0000000000000000008A /* Features/Authentication/Domain/AuthenticationState.swift in Sources */,
+				AABB0000000000000000008B /* Application/ApplicationSessionController.swift in Sources */,
+				AABB0000000000000000008C /* Features/Authentication/Presentation/LoginViewModel.swift in Sources */,
+				AABB0000000000000000008D /* Features/Authentication/Presentation/SignUpViewModel.swift in Sources */,
+				AABB0000000000000000008E /* Features/Authentication/Presentation/AuthenticationTheme.swift in Sources */,
+				AABB0000000000000000008F /* Features/Authentication/Presentation/AuthenticationAssets.swift in Sources */,
+				AABB000000000000000000A0 /* Features/Authentication/Presentation/Components/AuthDashedCard.swift in Sources */,
+				AABB000000000000000000A1 /* Features/Authentication/Presentation/Components/AuthCapsuleField.swift in Sources */,
+				AABB000000000000000000A2 /* Features/Authentication/Presentation/Components/AuthProviderButton.swift in Sources */,
+				AABB000000000000000000A3 /* Features/Authentication/Presentation/Components/AuthDivider.swift in Sources */,
+				BBCC000000000000000000E1 /* Features/Authentication/Presentation/Components/AuthPrimaryButtonStyle.swift in Sources */,
+				BBCC000000000000000000E2 /* Features/Authentication/Presentation/Components/AuthBackButton.swift in Sources */,
+				AABB000000000000000000A4 /* Features/Authentication/Presentation/AuthenticationEntryView.swift in Sources */,
+				AABB000000000000000000A5 /* Features/Authentication/Presentation/AuthenticationFlowView.swift in Sources */,
+				AABB000000000000000000A6 /* Features/Authentication/Presentation/LoginView.swift in Sources */,
+				AABB000000000000000000A7 /* Features/Authentication/Presentation/SignUpView.swift in Sources */,
+				AABB000000000000000000A8 /* Features/Authentication/Presentation/RecoveryCodesView.swift in Sources */,
+				AABB000000000000000000C0 /* Features/Authentication/Providers/ProviderAuthentication.swift in Sources */,
+				AABB000000000000000000C1 /* Features/Authentication/Providers/AuthorizationControllerBridge.swift in Sources */,
+				AABB000000000000000000C2 /* Features/Authentication/Providers/AppleAuthenticationProvider.swift in Sources */,
+				AABB000000000000000000C3 /* Features/Authentication/Providers/WebAuthenticationProvider.swift in Sources */,
+				AABB000000000000000000C4 /* Features/Authentication/Providers/WebAuthnSerialization.swift in Sources */,
+				AABB000000000000000000C5 /* Features/Authentication/Providers/PasskeyAuthenticationProvider.swift in Sources */,
+				AABB000000000000000000C6 /* Features/Authentication/Presentation/AccountRecoveryViewModel.swift in Sources */,
+				AABB000000000000000000C7 /* Features/Authentication/Presentation/AccountRecoveryView.swift in Sources */,
+				AABB000000000000000000C8 /* Features/Authentication/Presentation/AuthenticationProviderViewModel.swift in Sources */,
+				AABB000000000000000000C9 /* Application/ApplicationRootView.swift in Sources */,
+				AABB000000000000000000CA /* Application/LegacyUpgradeController.swift in Sources */,
+				AABB000000000000000000F0 /* Application/Appearance/AppFontSelection.swift in Sources */,
+				AABB000000000000000000F1 /* Application/Appearance/AppFontStore.swift in Sources */,
+				AABB000000000000000000F2 /* Application/Appearance/CloveryFontModifier.swift in Sources */,
+				AABB000000000000000000CB /* Features/Upgrade/LegacyDataDetector.swift in Sources */,
+				AABB000000000000000000CC /* Features/Upgrade/UpgradeNoticeView.swift in Sources */,
+				FCAA00000000000000000011 /* WatchBridge.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AACC00000000000000000004 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AADD00000000000000000004 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 		FCECDFD92FE92C7C0067AF51 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FCAA00000000000000000003 /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -819,8 +916,15 @@
 		};
 		FCECDFEE2FE92C7D0067AF51 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
+			platformFilter = ios;
 			target = FCECDFDC2FE92C7C0067AF51 /* CloveryWidgetExtension */;
 			targetProxy = FCECDFED2FE92C7D0067AF51 /* PBXContainerItemProxy */;
+		};
+		FCAA0000000000000000000C /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			platformFilter = ios;
+			target = FCAA00000000000000000001 /* CloveryWatch */;
+			targetProxy = FCAA0000000000000000000B /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -829,6 +933,7 @@
 			isa = PBXVariantGroup;
 			children = (
 				AABB0000000000000000000F /* zh-Hans */,
+				BBCC000000000000000000F1 /* zh-Hant */,
 			);
 			name = InfoPlist.strings;
 			sourceTree = "<group>";
@@ -836,80 +941,6 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
-		AACC00000000000000000008 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = M92TBSSR2R;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.clovery.app.tests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Clovery.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Clovery";
-			};
-			name = Debug;
-		};
-		AACC00000000000000000009 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				BUNDLE_LOADER = "$(TEST_HOST)";
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = M92TBSSR2R;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.clovery.app.tests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
-				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Clovery.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Clovery";
-			};
-			name = Release;
-		};
-		AADD00000000000000000008 /* Debug */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = M92TBSSR2R;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.clovery.app.UITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
-				TEST_TARGET_NAME = Clovery;
-			};
-			name = Debug;
-		};
-		AADD00000000000000000009 /* Release */ = {
-			isa = XCBuildConfiguration;
-			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
-				CURRENT_PROJECT_VERSION = 1;
-				DEVELOPMENT_TEAM = M92TBSSR2R;
-				GENERATE_INFOPLIST_FILE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
-				MARKETING_VERSION = 1.0;
-				PRODUCT_BUNDLE_IDENTIFIER = com.clovery.app.UITests;
-				PRODUCT_NAME = "$(TARGET_NAME)";
-				SWIFT_EMIT_LOC_STRINGS = NO;
-				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
-				TEST_TARGET_NAME = Clovery;
-			};
-			name = Release;
-		};
 		AABB00000000000000000041 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -1034,12 +1065,12 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = AABB000000000000000000E0 /* Debug.xcconfig */;
 			buildSettings = {
+				APS_ENVIRONMENT = development;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Clovery/Clovery.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				CODE_SIGN_STYLE = Automatic;
-				APS_ENVIRONMENT = development;
 				CURRENT_PROJECT_VERSION = 15;
 				DEVELOPMENT_TEAM = M92TBSSR2R;
 				GENERATE_INFOPLIST_FILE = YES;
@@ -1051,22 +1082,24 @@
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Clovery accesses your photo library to add photos to diary entries.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 13.1;
 				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.clovery.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator maccatalyst";
+				SUPPORTS_MACCATALYST = YES;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -1074,10 +1107,10 @@
 			isa = XCBuildConfiguration;
 			baseConfigurationReference = AABB000000000000000000E1 /* Release.xcconfig */;
 			buildSettings = {
+				APS_ENVIRONMENT = production;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
 				CODE_SIGN_ENTITLEMENTS = Clovery/Clovery.entitlements;
-				APS_ENVIRONMENT = production;
 				CODE_SIGN_IDENTITY = "Apple Distribution";
 				CODE_SIGN_STYLE = Automatic;
 				CURRENT_PROJECT_VERSION = 15;
@@ -1091,22 +1124,98 @@
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Clovery accesses your photo library to add photos to diary entries.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
 					"@executable_path/Frameworks",
 				);
+				MACOSX_DEPLOYMENT_TARGET = 13.1;
 				MARKETING_VERSION = 1.1.0;
 				PRODUCT_BUNDLE_IDENTIFIER = com.clovery.app;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				PROVISIONING_PROFILE_SPECIFIER = "";
-				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
-				SUPPORTS_MACCATALYST = NO;
+				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator maccatalyst";
+				SUPPORTS_MACCATALYST = YES;
 				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		AACC00000000000000000008 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = M92TBSSR2R;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.clovery.app.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
 				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Clovery.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Clovery";
+			};
+			name = Debug;
+		};
+		AACC00000000000000000009 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = M92TBSSR2R;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.clovery.app.tests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Clovery.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Clovery";
+			};
+			name = Release;
+		};
+		AADD00000000000000000008 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = M92TBSSR2R;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.clovery.app.UITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = Clovery;
+			};
+			name = Debug;
+		};
+		AADD00000000000000000009 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = M92TBSSR2R;
+				GENERATE_INFOPLIST_FILE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 16.0;
+				MARKETING_VERSION = 1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.clovery.app.UITests;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_EMIT_LOC_STRINGS = NO;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 1;
+				TEST_TARGET_NAME = Clovery;
 			};
 			name = Release;
 		};
@@ -1183,27 +1292,72 @@
 			};
 			name = Release;
 		};
+		FCAA00000000000000000008 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 15;
+				DEVELOPMENT_TEAM = M92TBSSR2R;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Clovery;
+				INFOPLIST_KEY_WKApplication = YES;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.clovery.app;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.clovery.app.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		FCAA00000000000000000009 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				ASSETCATALOG_COMPILER_GLOBAL_ACCENT_COLOR_NAME = AccentColor;
+				CODE_SIGN_IDENTITY = "Apple Distribution";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 15;
+				DEVELOPMENT_TEAM = M92TBSSR2R;
+				ENABLE_PREVIEWS = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_KEY_CFBundleDisplayName = Clovery;
+				INFOPLIST_KEY_WKApplication = YES;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.clovery.app;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.1.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = com.clovery.app.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SUPPORTED_PLATFORMS = "watchos watchsimulator";
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		AACC00000000000000000007 /* Build configuration list for PBXNativeTarget "CloveryTests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				AACC00000000000000000008 /* Debug */,
-				AACC00000000000000000009 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
-		AADD00000000000000000007 /* Build configuration list for PBXNativeTarget "CloveryUITests" */ = {
-			isa = XCConfigurationList;
-			buildConfigurations = (
-				AADD00000000000000000008 /* Debug */,
-				AADD00000000000000000009 /* Release */,
-			);
-			defaultConfigurationIsVisible = 0;
-			defaultConfigurationName = Release;
-		};
 		AABB00000000000000000051 /* Build configuration list for PBXProject "Clovery" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
@@ -1222,11 +1376,38 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
+		AACC00000000000000000007 /* Build configuration list for PBXNativeTarget "CloveryTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AACC00000000000000000008 /* Debug */,
+				AACC00000000000000000009 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AADD00000000000000000007 /* Build configuration list for PBXNativeTarget "CloveryUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AADD00000000000000000008 /* Debug */,
+				AADD00000000000000000009 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		FCECDFF42FE92C7D0067AF51 /* Build configuration list for PBXNativeTarget "CloveryWidgetExtension" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				FCECDFF12FE92C7D0067AF51 /* Debug */,
 				FCECDFF22FE92C7D0067AF51 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		FCAA00000000000000000007 /* Build configuration list for PBXNativeTarget "CloveryWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				FCAA00000000000000000008 /* Debug */,
+				FCAA00000000000000000009 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;

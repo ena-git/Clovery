@@ -21,6 +21,10 @@ enum BridgeJavaScript {
         evaluateJSONCallback(name: "window.__clovery_imageSaveResult", payload: [outcome.rawValue])
     }
 
+    static func photoDownloadResult(_ outcome: PhotoSaveOutcome) -> String {
+        evaluateJSONCallback(name: "window.__cloveryPhotoDownloaded", payload: [outcome.rawValue])
+    }
+
     static func photoSaved(filename: String) -> String {
         evaluateJSONCallback(name: "window.__cloveryPhotoSaved", payload: [filename])
     }
@@ -76,6 +80,36 @@ enum BridgeJavaScript {
                 "name": snapshot.name ?? NSNull()
             ]]
         )
+    }
+
+    /// Script that hands an entry written on the Apple Watch to the web app. Evaluates to `true` once
+    /// the web app accepted it (or already had it), `false` while the page is not ready yet.
+    static func addExternalEntry(_ entry: [String: Any]) -> String? {
+        guard JSONSerialization.isValidJSONObject(entry),
+              let data = try? JSONSerialization.data(withJSONObject: entry, options: [.sortedKeys, .withoutEscapingSlashes]),
+              let json = String(data: data, encoding: .utf8) else { return nil }
+        return """
+        (function(){
+          const entry = \(json);
+          if (typeof window.__clovery_addExternalEntry !== 'function') return false;
+          return window.__clovery_addExternalEntry(entry) === true;
+        })();
+        """
+    }
+
+    static func restoreTrashEntry(_ entry: [String: JSONValue]) -> String {
+        let encoder = JSONEncoder()
+        encoder.outputFormatting = [.sortedKeys, .withoutEscapingSlashes]
+        guard let data = try? encoder.encode(entry),
+              let json = String(data: data, encoding: .utf8) else { return "" }
+        return """
+        (function(){
+          const entry = \(json);
+          if (window.__clovery_restoreTrashEntry) {
+            window.__clovery_restoreTrashEntry(entry);
+          }
+        })();
+        """
     }
 
     static func migrationExportResult(

@@ -37,8 +37,8 @@ final class ImageExportService: ImageExporting {
         dataURL: String,
         saveCompletion: @escaping (PhotoSaveOutcome) -> Void
     ) {
-        let prefix = "data:image/png;base64,"
-        guard dataURL.hasPrefix(prefix),
+        let supportedPrefixes = ["data:image/png;base64,", "data:image/jpeg;base64,"]
+        guard let prefix = supportedPrefixes.first(where: { dataURL.hasPrefix($0) }),
               let data = Data(base64Encoded: String(dataURL.dropFirst(prefix.count))),
               UIImage(data: data) != nil else {
             if action == "save" {

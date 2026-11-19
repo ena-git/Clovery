@@ -13,7 +13,7 @@ struct AccountRecoveryView: View {
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 0) {
                     header
-                        .padding(.top, 32)
+                        .padding(.top, 28)
 
                     if viewModel.didComplete {
                         completionCard
@@ -25,6 +25,7 @@ struct AccountRecoveryView: View {
                 }
                 .frame(maxWidth: .infinity)
                 .frame(minHeight: geometry.size.height)
+                .dynamicTypeSize(.xSmall ... .large)
             }
             .scrollDismissesKeyboard(.interactively)
         }
@@ -44,30 +45,25 @@ struct AccountRecoveryView: View {
     }
 
     private var header: some View {
-        VStack(spacing: 0) {
+        VStack(spacing: 4) {
             Text("找回账户")
-                .cloveryFont(.title)
+                .cloveryFont(.heading)
                 .foregroundColor(.authInk)
-            Text("使用 Clovery 恢复码")
-                .cloveryFont(.action)
-                .foregroundColor(.authInk)
+            Text("重置你的密码")
+                .cloveryFont(.caption)
+                .foregroundColor(.authInk.opacity(0.7))
         }
         .multilineTextAlignment(.center)
     }
 
     private var recoveryForm: some View {
         VStack(spacing: 0) {
-            AuthDashedCard(height: 408) {
-                VStack(spacing: 20) {
+            AuthDashedCard(height: 214) {
+                VStack(spacing: 14) {
                     AuthTextField(
                         placeholder: "Clovery ID...",
                         text: $viewModel.loginID,
                         contentType: .username
-                    )
-                    AuthTextField(
-                        placeholder: "恢复码…",
-                        text: $viewModel.recoveryCode,
-                        contentType: .oneTimeCode
                     )
                     AuthTextField(
                         placeholder: "新密码…",
@@ -84,17 +80,18 @@ struct AccountRecoveryView: View {
                         onSubmit: submit
                     )
                 }
+                .padding(.vertical, 14)
             }
             .frame(maxWidth: 347)
-            .padding(.top, 26)
+            .padding(.top, 22)
 
             if let errorMessage = viewModel.errorMessage {
                 Text(errorMessage)
                     .cloveryFont(.caption)
-                    .foregroundColor(.red)
+                    .foregroundColor(.authError)
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 32)
-                    .padding(.top, 10)
+                    .padding(.top, 8)
             }
 
             Button(action: submit) {
@@ -108,23 +105,23 @@ struct AccountRecoveryView: View {
                     }
                 }
                 .foregroundColor(.authInk)
-                .frame(minWidth: 190, minHeight: 44)
+                .frame(minWidth: 140, minHeight: 44)
             }
             .buttonStyle(.plain)
             .disabled(viewModel.isSubmitting)
-            .padding(.top, 14)
+            .padding(.top, 10)
         }
     }
 
     private var completionCard: some View {
-        AuthDashedCard(height: 230) {
-            VStack(spacing: 22) {
+        AuthDashedCard(height: 200) {
+            VStack(spacing: 16) {
                 Text("密码已更新")
-                    .cloveryFont(.action)
+                    .cloveryFont(.body)
                     .foregroundColor(.authInk)
                 Text("之前的登录会话已退出，请使用新密码重新登录。")
                     .cloveryFont(.caption)
-                    .foregroundColor(.authInk)
+                    .foregroundColor(.authInk.opacity(0.75))
                     .multilineTextAlignment(.center)
                     .padding(.horizontal, 24)
                 Button("返回登录", action: { dismiss() })
@@ -134,7 +131,7 @@ struct AccountRecoveryView: View {
             }
         }
         .frame(maxWidth: 347)
-        .padding(.top, 42)
+        .padding(.top, 36)
     }
 
     private func submit() {

@@ -5,29 +5,28 @@ struct LegalAcknowledgementView: View {
     @State private var presentedDocument: LegalDocument?
 
     var body: some View {
-        HStack(alignment: .top, spacing: 8) {
+        HStack(alignment: .center, spacing: 6) {
             Button {
                 isAccepted.toggle()
             } label: {
                 Image(systemName: isAccepted ? "checkmark.circle.fill" : "circle")
-                    .font(.system(size: 20))
+                    .font(.system(size: 15))
                     .foregroundColor(.authInk)
-                    .frame(width: 44, height: 44)
             }
             .buttonStyle(.plain)
             .accessibilityLabel(isAccepted ? "已同意用户协议和隐私政策" : "同意用户协议和隐私政策")
 
-            VStack(alignment: .leading, spacing: 5) {
-                Text("注册即表示你已阅读并同意")
-                    .foregroundColor(.authPlaceholder)
-                HStack(spacing: 10) {
-                    legalButton(.terms)
-                    legalButton(.privacy)
-                }
-            }
-            .cloveryFont(.caption)
-            .padding(.top, 4)
+            Text("注册即同意")
+                .foregroundColor(.authPlaceholder)
+
+            legalButton(.terms)
+
+            Text("·")
+                .foregroundColor(.authPlaceholder)
+
+            legalButton(.privacy)
         }
+        .cloveryFont(.footnote)
         .sheet(item: $presentedDocument) { document in
             LegalDocumentSafariView(document: document)
                 .ignoresSafeArea()

@@ -23,7 +23,7 @@ struct ProviderVisibilityPolicy {
     func quickProviders(for platform: ClientPlatform) -> [AuthenticationProviderKind] {
         switch platform {
         case .iOS:
-            return [.apple, .google]
+            return [.apple]
         case .huaweiHarmony:
             return [.huawei]
         case .androidOther:

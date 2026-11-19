@@ -1306,6 +1306,18 @@ const IRENE_EXCITED_SRC = IRENE_CHEER_SRC;
   70%  { transform: scale(1.04) translateY(-1px); opacity: 1; }
   100% { transform: scale(1) translateY(0); opacity: 1; }
 }
+@keyframes seasonSlideIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+@keyframes bookPageIn {
+  0%   { opacity: 0; transform: perspective(800px) rotateY(-60deg) scale(0.95); transform-origin: left center; }
+  100% { opacity: 1; transform: perspective(800px) rotateY(0deg) scale(1); transform-origin: left center; }
+}
+@keyframes bookPageInRev {
+  0%   { opacity: 0; transform: perspective(800px) rotateY(60deg) scale(0.95); transform-origin: right center; }
+  100% { opacity: 1; transform: perspective(800px) rotateY(0deg) scale(1); transform-origin: right center; }
+}
 
 .springable { transition: transform 280ms cubic-bezier(0.34, 1.56, 0.64, 1); }
 .springable:active { transform: scale(0.94); }
@@ -2159,7 +2171,14 @@ const I18N = {
       kraft: 'Kraft'
     },
     progressLabel: 'Today\'s luck meter',
-    progressFull: 'Today\'s luck is fully charged! Have a wonderful day o(≧v≦)o ✨'
+    progressFull: 'Today\'s luck is fully charged! Have a wonderful day o(≧v≦)o ✨',
+    titlePrompt: 'Give today a title',
+    titlePh: "What's today's story…",
+    calendarViewMode: 'Calendar',
+    bookViewMode: 'Diary',
+    spring: 'Spring', summer: 'Summer', autumn: 'Autumn', winter: 'Winter',
+    bookYearLabel: y => `${y}`,
+    bookEmpty: 'No entries this season'
   },
   zh: {
     wdays: ['周日', '周一', '周二', '周三', '周四', '周五', '周六'],
@@ -2349,7 +2368,14 @@ const I18N = {
       kraft: '牛皮纸'
     },
     progressLabel: '今日幸运进度',
-    progressFull: '今日幸运已充值完毕！记得开心地度过今天～o(≧v≦)o'
+    progressFull: '今日幸运已充值完毕！记得开心地度过今天～o(≧v≦)o',
+    titlePrompt: '给今天起个标题',
+    titlePh: '今天的故事叫什么名字…',
+    calendarViewMode: '日历',
+    bookViewMode: '日记本',
+    spring: '春', summer: '夏', autumn: '秋', winter: '冬',
+    bookYearLabel: y => `${y}年`,
+    bookEmpty: '这个季节还没有日记哦'
   },
   ja: {
     wdays: ['日曜', '月曜', '火曜', '水曜', '木曜', '金曜', '土曜'],
@@ -2539,7 +2565,14 @@ const I18N = {
       kraft: 'クラフト'
     },
     progressLabel: '今日のラッキー進捗',
-    progressFull: '今日のラッキーが満タンになりました！素敵な一日を o(≧v≦)o ✨'
+    progressFull: '今日のラッキーが満タンになりました！素敵な一日を o(≧v≦)o ✨',
+    titlePrompt: '今日のタイトルをつけよう',
+    titlePh: '今日の物語は…',
+    calendarViewMode: 'カレンダー',
+    bookViewMode: '日記',
+    spring: '春', summer: '夏', autumn: '秋', winter: '冬',
+    bookYearLabel: y => `${y}年`,
+    bookEmpty: 'この季節の日記はまだありません'
   },
   ko: {
     wdays: ['일요일', '월요일', '화요일', '수요일', '목요일', '금요일', '토요일'],
@@ -2729,7 +2762,14 @@ const I18N = {
       kraft: '크래프트'
     },
     progressLabel: '오늘의 행운 진행도',
-    progressFull: '오늘의 행운이 가득 찼어요! 멋진 하루 보내세요 o(≧v≦)o ✨'
+    progressFull: '오늘의 행운이 가득 찼어요! 멋진 하루 보내세요 o(≧v≦)o ✨',
+    titlePrompt: '오늘의 제목을 달아요',
+    titlePh: '오늘의 이야기는…',
+    calendarViewMode: '달력',
+    bookViewMode: '일기장',
+    spring: '봄', summer: '여름', autumn: '가을', winter: '겨울',
+    bookYearLabel: y => `${y}년`,
+    bookEmpty: '이 계절의 일기가 아직 없어요'
   }
 };
 const TODAY = (() => {
@@ -3599,6 +3639,7 @@ function CalendarScreen({
   onOpenEntry,
   onWrite,
   onSearch,
+  onToggleMode,
   theme,
   lang
 }) {
@@ -3703,12 +3744,33 @@ function CalendarScreen({
     }
   }, React.createElement("div", {
     style: {
-      fontSize: 17,
-      color: theme.inkSoft,
-      letterSpacing: 0.6,
-      fontWeight: 500
+      display: 'flex',
+      alignItems: 'center',
+      gap: 8
     }
-  }, i.calTitle), React.createElement(SpringTap, {
+  },
+    React.createElement("div", {
+      style: {
+        fontSize: 17,
+        color: theme.inkSoft,
+        letterSpacing: 0.6,
+        fontWeight: 500
+      }
+    }, i.calTitle),
+    onToggleMode && React.createElement(SpringTap, {
+      onClick: onToggleMode,
+      sfx: "pop",
+      style: {
+        width: 30,
+        height: 30,
+        borderRadius: 10,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: theme.accentSoft
+      }
+    }, React.createElement("span", { style: { fontSize: 14, lineHeight: 1 } }, "📖"))
+  ), React.createElement(SpringTap, {
     onClick: onSearch,
     style: {
       width: 36,
@@ -4109,6 +4171,501 @@ function isRetroactive(e) {
   const d = new Date(ts);
   const createdDateStr = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
   return createdDateStr > e.date;
+}
+function DiaryPageCard({
+  entry,
+  theme,
+  lang,
+  season,
+  onClick,
+  animDelay
+}) {
+  const i = I18N[lang || 'en'];
+  const {
+    m,
+    d
+  } = formatDate(entry.date);
+  const wday = weekdayName(entry.date, lang);
+  const isDark = theme.bg === '#0F1410';
+  const cardBg = isDark ? 'rgba(255,255,255,0.05)' : '#FFFFFF';
+  return React.createElement(SpringTap, {
+    onClick: onClick,
+    style: {
+      display: 'block',
+      marginBottom: 12,
+      borderRadius: 20,
+      background: cardBg,
+      border: `1px solid ${season.color}50`,
+      boxShadow: `0 2px 14px ${season.color}18, 0 1px 3px rgba(0,0,0,0.04)`,
+      overflow: 'hidden',
+      animation: `seasonSlideIn 380ms cubic-bezier(0.16,1,0.3,1) both`,
+      animationDelay: `${animDelay || 0}ms`
+    }
+  },
+    React.createElement("div", {
+      style: {
+        height: 3,
+        background: `linear-gradient(90deg, ${season.color}, ${season.dark})`
+      }
+    }),
+    React.createElement("div", {
+      style: {
+        padding: '14px 18px 16px',
+        position: 'relative'
+      }
+    },
+      React.createElement("div", {
+        style: {
+          position: 'absolute',
+          inset: '14px 18px',
+          pointerEvents: 'none',
+          overflow: 'hidden'
+        }
+      },
+        [0, 1, 2, 3, 4].map(k => React.createElement("div", {
+          key: k,
+          style: {
+            position: 'absolute',
+            left: 0,
+            right: 0,
+            top: `${22 + k * 24}px`,
+            height: 1,
+            background: season.color + '18'
+          }
+        }))
+      ),
+      React.createElement("div", {
+        style: {
+          display: 'flex',
+          alignItems: 'baseline',
+          gap: 8,
+          marginBottom: 8,
+          position: 'relative'
+        }
+      },
+        React.createElement("span", {
+          style: {
+            fontSize: 13,
+            color: season.dark,
+            fontWeight: 600,
+            letterSpacing: 0.5
+          }
+        }, season.emoji, " ", wday),
+        React.createElement("span", {
+          style: {
+            fontSize: 12,
+            color: theme.inkMuted
+          }
+        }, lang === 'zh' || lang === 'ja' ? `${m}月${d}日` : lang === 'ko' ? `${m}월 ${d}일` : `${i.mons[m - 1]} ${d}`)
+      ),
+      entry.title && React.createElement("div", {
+        style: {
+          fontSize: 22,
+          lineHeight: 1.3,
+          fontWeight: 700,
+          color: theme.ink,
+          marginBottom: 8,
+          position: 'relative',
+          letterSpacing: -0.3
+        }
+      }, entry.title),
+      React.createElement("div", {
+        style: {
+          fontSize: 15,
+          lineHeight: 1.65,
+          color: theme.inkSoft,
+          position: 'relative',
+          display: '-webkit-box',
+          WebkitLineClamp: entry.title ? 2 : 3,
+          WebkitBoxOrient: 'vertical',
+          overflow: 'hidden'
+        }
+      }, entry.lucky || entry.text || ''),
+      (entry.tags && entry.tags.length > 0 || entry.weather || entry.mood && entry.mood !== 'lucky') && React.createElement("div", {
+        style: {
+          display: 'flex',
+          alignItems: 'center',
+          gap: 6,
+          marginTop: 10,
+          flexWrap: 'wrap',
+          position: 'relative'
+        }
+      },
+        entry.weather && React.createElement("span", {
+          style: {
+            fontSize: 16
+          }
+        }, entry.weather),
+        entry.mood && entry.mood !== 'lucky' && React.createElement("span", {
+          style: {
+            fontSize: 16
+          }
+        }, entry.mood),
+        (entry.tags || []).slice(0, 3).map(t => React.createElement("span", {
+          key: t,
+          style: {
+            fontSize: 11,
+            color: season.dark,
+            fontWeight: 500,
+            background: season.color + '22',
+            borderRadius: 99,
+            padding: '2px 8px',
+            border: `1px solid ${season.color}40`
+          }
+        }, `#${t}`))
+      )
+    )
+  );
+}
+function DiaryBookScreen({
+  entries,
+  onOpenEntry,
+  onToggleMode,
+  theme,
+  lang
+}) {
+  const i = I18N[lang || 'en'];
+  const now = new Date();
+  const [year, setYear] = React.useState(now.getFullYear());
+  const [season, setSeason] = React.useState(() => {
+    const m = now.getMonth() + 1;
+    if (m >= 3 && m <= 5) return 'spring';
+    if (m >= 6 && m <= 8) return 'summer';
+    if (m >= 9 && m <= 11) return 'autumn';
+    return 'winter';
+  });
+  const [flipKey, setFlipKey] = React.useState(0);
+  const SEASONS = React.useMemo(() => ({
+    spring: {
+      months: [3, 4, 5],
+      color: '#F4A7C3',
+      dark: '#C45E8A',
+      emoji: '🌸',
+      label: i.spring || '春'
+    },
+    summer: {
+      months: [6, 7, 8],
+      color: '#7AB375',
+      dark: '#4A8045',
+      emoji: '🌿',
+      label: i.summer || '夏'
+    },
+    autumn: {
+      months: [9, 10, 11],
+      color: '#E8B94A',
+      dark: '#B07E15',
+      emoji: '🍁',
+      label: i.autumn || '秋'
+    },
+    winter: {
+      months: [12, 1, 2],
+      color: '#8BB8E8',
+      dark: '#4070B8',
+      emoji: '❄️',
+      label: i.winter || '冬'
+    }
+  }), [i]);
+  const yearEntries = React.useMemo(() => {
+    return entries.filter(e => {
+      if (e.isWelcome) return false;
+      const y = parseInt((e.date || '').substring(0, 4));
+      return y === year;
+    });
+  }, [entries, year]);
+  const seasonCounts = React.useMemo(() => {
+    const c = {
+      spring: 0,
+      summer: 0,
+      autumn: 0,
+      winter: 0
+    };
+    yearEntries.forEach(e => {
+      const m = parseInt((e.date || '').substring(5, 7));
+      if (m >= 3 && m <= 5) c.spring++;
+      else if (m >= 6 && m <= 8) c.summer++;
+      else if (m >= 9 && m <= 11) c.autumn++;
+      else c.winter++;
+    });
+    return c;
+  }, [yearEntries]);
+  const seasonEntries = React.useMemo(() => {
+    const months = SEASONS[season].months;
+    return yearEntries.filter(e => {
+      const m = parseInt((e.date || '').substring(5, 7));
+      return months.includes(m);
+    }).sort((a, b) => b.date.localeCompare(a.date));
+  }, [yearEntries, season, SEASONS]);
+  const selectSeason = s => {
+    setSeason(s);
+    setFlipKey(k => k + 1);
+    Haptic.impact('light');
+  };
+  const navigateYear = dir => {
+    setYear(y => y + dir);
+    setFlipKey(k => k + 1);
+    Haptic.impact('light');
+  };
+  const activeSeason = SEASONS[season];
+  const isDark = theme.bg === '#0F1410';
+  const cx = 82,
+    cy = 82;
+  const petalDefs = [{
+    key: 'spring',
+    angle: -45
+  }, {
+    key: 'summer',
+    angle: 45
+  }, {
+    key: 'autumn',
+    angle: 135
+  }, {
+    key: 'winter',
+    angle: -135
+  }];
+  return React.createElement("div", {
+    style: {
+      paddingTop: 'calc(var(--sat) + 4px)',
+      paddingBottom: 110,
+      WebkitMaskImage: `linear-gradient(to bottom, transparent 0px, black calc(var(--sat) + 10px), black 100%)`,
+      maskImage: `linear-gradient(to bottom, transparent 0px, black calc(var(--sat) + 10px), black 100%)`
+    }
+  },
+    React.createElement("div", {
+      style: {
+        padding: '4px 20px 0',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between'
+      }
+    },
+      React.createElement("div", {
+        style: {
+          fontSize: 17,
+          color: theme.inkSoft,
+          letterSpacing: 0.6,
+          fontWeight: 500
+        }
+      }, i.bookViewMode || '日记本'),
+      React.createElement(SpringTap, {
+        onClick: onToggleMode,
+        style: {
+          width: 36,
+          height: 36,
+          borderRadius: 18,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          background: theme.accentSoft
+        }
+      }, React.createElement(Icon, {
+        name: "calendar",
+        size: 17,
+        color: theme.accentDark,
+        stroke: 1.8
+      }))
+    ),
+    React.createElement("div", {
+      style: {
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        gap: 4,
+        padding: '6px 0 2px'
+      }
+    },
+      React.createElement(SpringTap, {
+        onClick: () => navigateYear(-1),
+        sfx: "back",
+        style: {
+          width: 36,
+          height: 36,
+          borderRadius: 10,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }
+      }, React.createElement(Icon, {
+        name: "chevron-left",
+        size: 17,
+        color: theme.inkSoft,
+        stroke: 2.2
+      })),
+      React.createElement("div", {
+        style: {
+          fontSize: 26,
+          fontWeight: 600,
+          color: theme.ink,
+          lineHeight: 1.1,
+          letterSpacing: -0.3,
+          minWidth: 110,
+          textAlign: 'center'
+        }
+      }, i.bookYearLabel ? i.bookYearLabel(year) : `${year}`),
+      React.createElement(SpringTap, {
+        onClick: () => navigateYear(1),
+        style: {
+          width: 36,
+          height: 36,
+          borderRadius: 10,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center'
+        }
+      }, React.createElement(Icon, {
+        name: "chevron-right",
+        size: 17,
+        color: theme.inkSoft,
+        stroke: 2.2
+      }))
+    ),
+    React.createElement("div", {
+      style: {
+        display: 'flex',
+        justifyContent: 'center',
+        padding: '8px 0 0'
+      }
+    },
+      React.createElement("svg", {
+        width: 164,
+        height: 164,
+        viewBox: "0 0 164 164",
+        style: {
+          overflow: 'visible'
+        }
+      },
+        petalDefs.map(({
+          key,
+          angle
+        }) => {
+          const s = SEASONS[key];
+          const isActive = season === key;
+          const rad = angle * Math.PI / 180;
+          const badgeX = cx + Math.cos(rad) * 48;
+          const badgeY = cy + Math.sin(rad) * 48;
+          return React.createElement("g", {
+            key,
+            onClick: () => selectSeason(key),
+            style: {
+              cursor: 'pointer',
+              transition: 'transform 300ms cubic-bezier(0.34,1.56,0.64,1)',
+              transformOrigin: `${cx}px ${cy}px`,
+              transform: isActive ? 'scale(1.12)' : 'scale(1)'
+            }
+          },
+            React.createElement("g", {
+              style: {
+                transform: `rotate(${angle}deg)`,
+                transformOrigin: `${cx}px ${cy}px`
+              }
+            },
+              React.createElement("ellipse", {
+                cx: cx,
+                cy: cy - 30,
+                rx: 17,
+                ry: 29,
+                fill: isActive ? s.dark : s.color,
+                opacity: isActive ? 1 : 0.8,
+                style: {
+                  transition: 'fill 250ms ease, opacity 250ms ease',
+                  filter: isActive ? `drop-shadow(0 3px 8px ${s.dark}50)` : 'none'
+                }
+              })
+            ),
+            React.createElement("circle", {
+              cx: cx + Math.cos(rad) * 30,
+              cy: cy + Math.sin(rad) * 30,
+              r: 22,
+              fill: 'transparent'
+            }),
+            seasonCounts[key] > 0 && React.createElement("g", null,
+              React.createElement("circle", {
+                cx: badgeX,
+                cy: badgeY,
+                r: 11,
+                fill: isActive ? s.dark : (isDark ? 'rgba(255,255,255,0.15)' : 'rgba(255,255,255,0.92)'),
+                style: {
+                  filter: 'drop-shadow(0 1px 3px rgba(0,0,0,0.18))'
+                }
+              }),
+              React.createElement("text", {
+                x: badgeX,
+                y: badgeY + 4,
+                textAnchor: 'middle',
+                fontSize: 9,
+                fontWeight: 700,
+                fill: isActive ? '#fff' : (isDark ? '#fff' : '#333'),
+                style: {
+                  fontFamily: '-apple-system, sans-serif',
+                  pointerEvents: 'none'
+                }
+              }, seasonCounts[key] > 99 ? '99+' : String(seasonCounts[key]))
+            )
+          );
+        }),
+        React.createElement("circle", {
+          cx: cx,
+          cy: cy,
+          r: 16,
+          fill: isDark ? '#2D4835' : '#2D5A35'
+        }),
+        React.createElement("text", {
+          x: cx,
+          y: cy + 6,
+          textAnchor: 'middle',
+          fontSize: 17,
+          style: {
+            pointerEvents: 'none'
+          }
+        }, "🍀")
+      )
+    ),
+    React.createElement("div", {
+      style: {
+        textAlign: 'center',
+        padding: '6px 0 12px'
+      }
+    },
+      React.createElement("span", {
+        style: {
+          display: 'inline-flex',
+          alignItems: 'center',
+          gap: 5,
+          padding: '4px 16px',
+          borderRadius: 99,
+          background: activeSeason.color + '28',
+          color: activeSeason.dark,
+          fontSize: 14,
+          fontWeight: 600,
+          border: `1px solid ${activeSeason.color}50`
+        }
+      }, activeSeason.emoji, " ", activeSeason.label, " · ", seasonEntries.length, " ", lang === 'zh' ? '篇' : lang === 'ja' ? '件' : lang === 'ko' ? '개' : (seasonEntries.length === 1 ? 'entry' : 'entries'))
+    ),
+    React.createElement("div", {
+      key: `${year}-${season}-${flipKey}`,
+      style: {
+        padding: '0 16px'
+      }
+    },
+      seasonEntries.length === 0
+        ? React.createElement("div", {
+            style: {
+              textAlign: 'center',
+              padding: '40px 20px',
+              color: theme.inkMuted,
+              fontSize: 15
+            }
+          }, i.bookEmpty || '这个季节还没有日记哦')
+        : seasonEntries.map((entry, idx) => React.createElement(DiaryPageCard, {
+            key: entry.id,
+            entry: entry,
+            theme: theme,
+            lang: lang,
+            season: activeSeason,
+            onClick: () => onOpenEntry(entry),
+            animDelay: idx * 55
+          }))
+    )
+  );
 }
 function stableEntrySort(a, b) {
   if (a.date < b.date) return -1;
@@ -6580,6 +7137,8 @@ function EntryEditor({
   const [open, setOpen] = React.useState(false);
   const [step, setStep] = React.useState(0);
   const dirRef = React.useRef(1);
+  const [title, setTitle] = React.useState(editEntry?.title || '');
+  const [weather, setWeather] = React.useState(editEntry?.weather || '');
   const [lucky, setLucky] = React.useState(editEntry?.lucky || '');
   const [tags, setTags] = React.useState(editEntry?.tags || []);
   const [entryDate, setEntryDate] = React.useState(editEntry?.date || initialDate || TODAY);
@@ -6662,6 +7221,8 @@ function EntryEditor({
       lucky: lucky.trim(),
       mood: 'lucky',
       tags,
+      ...(title.trim() ? { title: title.trim() } : {}),
+      ...(weather ? { weather } : {}),
       ...(editEntry?.text ? {
         text: editEntry.text
       } : {})
@@ -6876,7 +7437,27 @@ function EntryEditor({
       marginBottom: 10,
       letterSpacing: 0.1
     }
-  }, i.luckyPrompt), React.createElement("textarea", {
+  }, i.luckyPrompt),
+  React.createElement("input", {
+    value: title,
+    onChange: e => setTitle(e.target.value),
+    placeholder: i.titlePh || '今天的故事叫什么名字…',
+    style: {
+      width: '100%',
+      boxSizing: 'border-box',
+      background: 'transparent',
+      border: 'none',
+      borderBottom: `2px solid ${theme.accent}`,
+      outline: 'none',
+      fontSize: 22,
+      fontWeight: 700,
+      color: theme.ink,
+      padding: '0 0 8px',
+      marginBottom: 14,
+      letterSpacing: -0.3
+    }
+  }),
+  React.createElement("textarea", {
     ref: luckyRef,
     defaultValue: lucky,
     onChange: e => setLucky(e.target.value),
@@ -6956,7 +7537,58 @@ function EntryEditor({
       ...pageStyle
     },
     className: "no-scrollbar"
-  }, React.createElement("div", {
+  },
+  React.createElement("div", {
+    style: {
+      marginBottom: 20
+    }
+  },
+    React.createElement("div", {
+      style: {
+        fontSize: 13,
+        color: theme.inkMuted,
+        letterSpacing: 1,
+        textTransform: 'uppercase',
+        marginBottom: 10,
+        fontWeight: 600
+      }
+    }, i.weatherLabel || (lang === 'zh' ? '天气' : lang === 'ja' ? '天気' : lang === 'ko' ? '날씨' : 'Weather')),
+    React.createElement("div", {
+      style: {
+        display: 'flex',
+        gap: 10,
+        flexWrap: 'wrap'
+      }
+    }, ['☀️', '🌤️', '⛅', '☁️', '🌧️', '🌩️', '❄️', '🌈'].map(w => React.createElement(SpringTap, {
+      key: w,
+      sfx: weather === w ? 'back' : 'pop',
+      onClick: () => setWeather(weather === w ? '' : w),
+      style: {
+        width: 44,
+        height: 44,
+        borderRadius: 14,
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        fontSize: 24,
+        background: weather === w ? theme.accentSoft : theme.paper,
+        border: `1.5px solid ${weather === w ? theme.accent : theme.divider}`,
+        transition: 'all 160ms ease',
+        boxShadow: weather === w ? `0 2px 8px ${theme.accent}30` : 'none'
+      }
+    }, w)))
+  ),
+  React.createElement("div", {
+    style: {
+      fontSize: 13,
+      color: theme.inkMuted,
+      letterSpacing: 0.8,
+      marginTop: 4,
+      fontStyle: 'italic'
+    }
+  }, lang === 'zh' ? '心情贴纸即将到来…' : lang === 'ja' ? 'ムードスタンプ近日公開…' : lang === 'ko' ? '감정 스티커 곧 출시…' : 'Mood stickers coming soon…')
+  ),
+  React.createElement("div", {
     style: {
       fontSize: 16,
       color: theme.inkSoft,
@@ -7806,7 +8438,19 @@ function EntryDetail({
         name: "edit",
         size: 12,
         color: theme.inkMuted
-      })))), React.createElement("div", {
+      })))),
+      e.title && React.createElement("div", {
+        style: {
+          fontSize: 24,
+          fontWeight: 700,
+          color: theme.ink,
+          lineHeight: 1.25,
+          letterSpacing: -0.4,
+          marginBottom: 8,
+          fontFamily: 'Gaegu, cursive'
+        }
+      }, e.title),
+      React.createElement("div", {
         style: {
           fontSize: 19,
           color: theme.ink,
@@ -7825,26 +8469,32 @@ function EntryDetail({
           borderTop: `1px solid ${dividerClr}`,
           paddingTop: 8
         }
-      }, dT), userTags.length > 0 && React.createElement("div", {
+      }, dT), (userTags.length > 0 || e.weather) && React.createElement("div", {
         style: {
           display: 'flex',
           flexWrap: 'wrap',
           gap: 5,
           marginTop: 9,
-          justifyContent: 'flex-end'
+          justifyContent: 'flex-end',
+          alignItems: 'center'
         }
-      }, userTags.map(t => React.createElement("span", {
-        key: t,
-        style: {
-          padding: '3px 10px',
-          borderRadius: 9999,
-          background: theme.accentSoft,
-          fontSize: 13,
-          color: theme.accentDark,
-          fontWeight: 600,
-          fontFamily: 'Gaegu, cursive'
-        }
-      }, "#", t))));
+      },
+        e.weather && React.createElement("span", {
+          style: { fontSize: 18, marginRight: 2 }
+        }, e.weather),
+        userTags.map(t => React.createElement("span", {
+          key: t,
+          style: {
+            padding: '3px 10px',
+            borderRadius: 9999,
+            background: theme.accentSoft,
+            fontSize: 13,
+            color: theme.accentDark,
+            fontWeight: 600,
+            fontFamily: 'Gaegu, cursive'
+          }
+        }, "#", t))
+      ));
     }));
   })())));
 }
@@ -9458,6 +10108,11 @@ function App() {
     style.textContent = `.clover-app,.clover-app *,.clover-app input,.clover-app textarea,.clover-app button{font-family:${stack} !important;}`;
   }, [t.fontHand, lang]);
   const [tab, setTab] = React.useState('home');
+  const [recordMode, setRecordMode] = React.useState('calendar');
+  const toggleRecordMode = React.useCallback(() => {
+    setRecordMode(m => m === 'calendar' ? 'book' : 'calendar');
+    Haptic.impact('light');
+  }, []);
   const switchTab = React.useCallback(t => {
     setTab(t);
     if (t !== 'lucky') setActiveFormation(null);
@@ -9583,11 +10238,18 @@ function App() {
     onSwitchTab: switchTab,
     theme: theme,
     lang: lang
-  }), tab === 'calendar' && React.createElement(CalendarScreen, {
+  }), tab === 'calendar' && recordMode === 'calendar' && React.createElement(CalendarScreen, {
     entries: entries,
     onOpenEntry: setSelected,
     onWrite: iso => openEditor(null, iso),
     onSearch: () => setSearchOpen(true),
+    onToggleMode: toggleRecordMode,
+    theme: theme,
+    lang: lang
+  }), tab === 'calendar' && recordMode === 'book' && React.createElement(DiaryBookScreen, {
+    entries: entries,
+    onOpenEntry: setSelected,
+    onToggleMode: toggleRecordMode,
     theme: theme,
     lang: lang
   }), tab === 'lucky' && React.createElement(LuckyScreen, {

@@ -12,13 +12,23 @@ final class APIClient {
 
     init(
         configuration: APIConfiguration,
-        session: URLSession = .shared,
+        session: URLSession = APIClient.defaultSession,
         decoder: JSONDecoder = JSONDecoder()
     ) {
         self.configuration = configuration
         self.session = session
         self.decoder = decoder
     }
+
+    private static let defaultSession: URLSession = {
+        #if DEBUG
+        let config = URLSessionConfiguration.default
+        config.connectionProxyDictionary = [:]
+        return URLSession(configuration: config)
+        #else
+        return .shared
+        #endif
+    }()
 
     func send<Response: Decodable>(
         _ request: APIRequest,

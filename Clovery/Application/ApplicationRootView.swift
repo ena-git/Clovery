@@ -13,6 +13,7 @@ struct ApplicationRootView: View {
     @StateObject private var boardStore: BoardStore
     @StateObject private var fontStore: AppFontStore
     @State private var showsAccountSecurity = false
+    @State private var showsTrash = false
 
     @MainActor
     init(
@@ -35,8 +36,12 @@ struct ApplicationRootView: View {
     var body: some View {
         routeView
             .task {
+                #if DEBUG
+                bootstrapCoordinator.skipAuthForDebug()
+                #else
                 bootstrapCoordinator.start()
                 await bootstrapCoordinator.waitForIdle()
+                #endif
             }
             .onChange(of: authenticatedAccountKey) { _ in
                 boardStore.accountDidChange()
@@ -47,6 +52,7 @@ struct ApplicationRootView: View {
                 guard phase == .active else { return }
                 Task { await boardStore.refresh() }
                 WebViewCoordinatorBridge.shared.refreshAccountVault()
+                WatchBridge.shared.flushPending()
             }
             .environment(\.appFontSelection, fontStore.selection)
     }
@@ -78,12 +84,19 @@ struct ApplicationRootView: View {
                 logout: bootstrapCoordinator.logout
             )
         case let .diary(accountID, vaultID):
+            #if DEBUG
+            let isDebugPreview = accountID == "debug-preview"
+            #else
+            let isDebugPreview = false
+            #endif
             let namespace = VaultSyncNamespace(accountID: accountID, vaultID: vaultID)
-            WebView(
+            let vaultContext = isDebugPreview ? nil : vaultRegistry.context(for: namespace)
+            DiaryHostView(
                 boardStore: boardStore,
                 fontStore: fontStore,
-                vaultContext: vaultRegistry.context(for: namespace),
-                onAccountSecurity: { showsAccountSecurity = true }
+                vaultContext: vaultContext,
+                onAccountSecurity: { showsAccountSecurity = true },
+                onOpenTrash: { showsTrash = true }
             )
                 .id("\(accountID):\(vaultID)")
                 .ignoresSafeArea()
@@ -94,6 +107,16 @@ struct ApplicationRootView: View {
                         entitlementCache: entitlementCache,
                         entitlementState: boardStore
                     )
+                }
+                .sheet(isPresented: $showsTrash) {
+                    if let store = WebViewCoordinatorBridge.shared.trashStore {
+                        DiaryTrashView(
+                            trashStore: store,
+                            onRestore: { entry in
+                                WebViewCoordinatorBridge.shared.restoreTrashEntry(entry)
+                            }
+                        )
+                    }
                 }
         }
     }
@@ -108,5 +131,25 @@ struct ApplicationRootView: View {
         sessionController.authenticationSession().map {
             VaultSyncNamespace(accountID: $0.accountID, vaultID: $0.vaultID)
         }
+    }
+}
+
+// Full-screen diary WebView; iPad and Mac scaling is handled inside the page.
+private struct DiaryHostView: View {
+    let boardStore: BoardStore
+    let fontStore: AppFontStore
+    let vaultContext: AccountVaultWebContext?
+    let onAccountSecurity: () -> Void
+    let onOpenTrash: () -> Void
+
+    var body: some View {
+        WebView(
+            boardStore: boardStore,
+            fontStore: fontStore,
+            vaultContext: vaultContext,
+            onAccountSecurity: onAccountSecurity,
+            onOpenTrash: onOpenTrash
+        )
+        .ignoresSafeArea()
     }
 }
