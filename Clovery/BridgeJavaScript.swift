@@ -17,6 +17,10 @@ enum BridgeJavaScript {
         evaluateJSONCallback(name: "window._boardPriceResult", payload: [price])
     }
 
+    static func boardTrialCount(_ count: Int) -> String {
+        evaluateJSONCallback(name: "window._boardTrialCount", payload: [count])
+    }
+
     static func photoSaveResult(_ outcome: PhotoSaveOutcome) -> String {
         evaluateJSONCallback(name: "window.__clovery_imageSaveResult", payload: [outcome.rawValue])
     }
@@ -37,6 +41,63 @@ enum BridgeJavaScript {
             name: "window.__cloveryPhotoSaveFailed",
             payload: [filename, code]
         )
+    }
+
+    static func cloudKitSyncStatus(_ status: [String: Any]) -> String {
+        evaluateJSONCallback(
+            name: "window.__cloveryCloudKitStatus",
+            payload: [status]
+        )
+    }
+
+    static func deepLink(_ route: String) -> String {
+        guard JSONSerialization.isValidJSONObject([route]),
+              let data = try? JSONSerialization.data(withJSONObject: [route]),
+              let json = String(data: data, encoding: .utf8),
+              json.first == "[",
+              json.last == "]" else {
+            return ""
+        }
+        let routeLiteral = String(json.dropFirst().dropLast())
+        return """
+        (function(){
+          var route = \(routeLiteral);
+          if (window.__cloveryHandleDeepLink) {
+            window.__cloveryHandleDeepLink(route);
+          } else {
+            try { localStorage.setItem('clovery_deeplink_pending', route); } catch(e) {}
+          }
+        })();
+        """
+    }
+
+    static func watchEntries(_ entries: [[String: Any]]) -> String {
+        guard JSONSerialization.isValidJSONObject(entries),
+              let data = try? JSONSerialization.data(withJSONObject: entries),
+              let json = String(data: data, encoding: .utf8) else {
+            return ""
+        }
+        return """
+        (function(){
+          var incoming = \(json);
+          if (window.__cloveryImportWatchEntries) {
+            window.__cloveryImportWatchEntries(incoming);
+          } else {
+            try {
+              var prev = JSON.parse(localStorage.getItem('clovery_watch_pending') || '[]');
+              var seen = {};
+              var merged = [];
+              prev.concat(incoming).forEach(function(item){
+                if (item && item.id && !seen[item.id]) {
+                  seen[item.id] = true;
+                  merged.push(item);
+                }
+              });
+              localStorage.setItem('clovery_watch_pending', JSON.stringify(merged));
+            } catch(e) {}
+          }
+        })();
+        """
     }
 
     static func iCloudData(_ payload: [String: Any]) -> String {

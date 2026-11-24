@@ -83,7 +83,16 @@ final class SystemImageSharePresenter: ImageSharing {
                 activityItems: [url],
                 applicationActivities: nil
             )
-            controller.popoverPresentationController?.sourceView = rootViewController.view
+            if let popover = controller.popoverPresentationController {
+                popover.sourceView = rootViewController.view
+                popover.sourceRect = CGRect(
+                    x: rootViewController.view.bounds.midX,
+                    y: rootViewController.view.bounds.midY,
+                    width: 1,
+                    height: 1
+                )
+                popover.permittedArrowDirections = []
+            }
             rootViewController.present(controller, animated: true)
         }
     }

@@ -64,6 +64,36 @@
       -webkit-user-select: text !important; user-select: text !important;
       -webkit-touch-callout: default !important; }
   textarea, input { -webkit-user-select: text; user-select: text; }
+  .clovery-page { width: 100%; margin-left: auto; margin-right: auto; box-sizing: border-box; }
+  .clovery-tabbar-inner { width: 100%; margin: 0 auto; display: flex; }
+  .clovery-sheet-box { width: 100%; }
+  .clovery-sheet-overlay { display: flex; flex-direction: column; }
+  .clovery-editor-overlay { display: flex; flex-direction: column; }
+  .clovery-editor-box { width: 100%; margin-top: 72px; flex: 1; border-radius: 30px 30px 0 0; }
+  .clovery-paywall-overlay { display: flex; align-items: flex-end; }
+  .clovery-paywall-card { width: 100%; border-radius: 28px 28px 0 0; }
+  @media (min-width: 700px) {
+    .clovery-page { max-width: 680px; }
+    .clovery-tabbar-bar { padding-left: 24px !important; padding-right: 24px !important; background: transparent !important; pointer-events: none; }
+    .clovery-tabbar-inner { max-width: 540px; pointer-events: auto; padding: 6px 12px; border-radius: 9999px;
+      background: rgba(255,255,255,0.78); -webkit-backdrop-filter: blur(20px) saturate(1.5); backdrop-filter: blur(20px) saturate(1.5);
+      box-shadow: 0 8px 30px rgba(0,0,0,0.09), inset 0 0 0 1px rgba(0,0,0,0.05); }
+    [data-clovery-dark="1"] .clovery-tabbar-inner {
+      background: rgba(26,34,28,0.86); box-shadow: 0 8px 32px rgba(0,0,0,0.45), inset 0 0 0 1px rgba(255,255,255,0.08); }
+    .clovery-sheet-overlay { justify-content: center; align-items: center; }
+    .clovery-sheet-box { max-width: 680px !important; margin: 0 auto; }
+    .clovery-sheet-box-modal { position: relative !important; bottom: auto !important; left: auto !important; right: auto !important;
+      max-width: 560px !important; max-height: min(86%, 760px) !important; border-radius: 26px !important;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.22) !important; }
+    .clovery-sheet-box-full { max-width: 820px !important; left: 50% !important; right: auto !important;
+      transform: translateX(-50%) !important; }
+    .clovery-editor-overlay { justify-content: center; align-items: center; padding: 24px; box-sizing: border-box; }
+    .clovery-editor-box { max-width: 620px; margin-top: 0; flex: none; width: 100%; height: min(740px, calc(100vh - 64px));
+      border-radius: 28px !important; box-shadow: 0 20px 60px rgba(0,0,0,0.24) !important; }
+    .clovery-paywall-overlay { align-items: center !important; justify-content: center !important; padding: 24px; box-sizing: border-box; }
+    .clovery-paywall-card { max-width: 480px !important; border-radius: 28px !important;
+      box-shadow: 0 24px 64px rgba(0,0,0,0.32) !important; }
+  }
 
 </style>
 </head>
@@ -96,534 +126,8 @@
 <script src="vendor/react.production.min.js"></script>
 <script src="vendor/react-dom.production.min.js"></script>
 <script src="vendor/babel.min.js"></script>
-<script type="text/babel">
-
-
-
-// iOS.jsx — Simplified iOS 26 (Liquid Glass) device frame
-// Based on the iOS 26 UI Kit + Figma status bar spec. No assets, no deps.
-// Exports: IOSDevice, IOSStatusBar, IOSNavBar, IOSGlassPill, IOSList, IOSListRow, IOSKeyboard
-
-// ─────────────────────────────────────────────────────────────
-// Status bar
-// ─────────────────────────────────────────────────────────────
-function IOSStatusBar({ dark = false, time = '9:41' }) {
-  const c = dark ? '#fff' : '#000';
-  return (
-    <div style={{
-      display: 'flex', gap: 154, alignItems: 'center', justifyContent: 'center',
-      padding: '21px 24px 19px', boxSizing: 'border-box',
-      position: 'relative', zIndex: 20, width: '100%',
-    }}>
-      <div style={{ flex: 1, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', paddingTop: 1.5 }}>
-        <span style={{
-          fontFamily: '-apple-system, "SF Pro", system-ui', fontWeight: 590,
-          fontSize: 17, lineHeight: '22px', color: c,
-        }}>{time}</span>
-      </div>
-      <div style={{ flex: 1, height: 22, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 7, paddingTop: 1, paddingRight: 1 }}>
-        <svg width="19" height="12" viewBox="0 0 19 12">
-          <rect x="0" y="7.5" width="3.2" height="4.5" rx="0.7" fill={c}/>
-          <rect x="4.8" y="5" width="3.2" height="7" rx="0.7" fill={c}/>
-          <rect x="9.6" y="2.5" width="3.2" height="9.5" rx="0.7" fill={c}/>
-          <rect x="14.4" y="0" width="3.2" height="12" rx="0.7" fill={c}/>
-        </svg>
-        <svg width="17" height="12" viewBox="0 0 17 12">
-          <path d="M8.5 3.2C10.8 3.2 12.9 4.1 14.4 5.6L15.5 4.5C13.7 2.7 11.2 1.5 8.5 1.5C5.8 1.5 3.3 2.7 1.5 4.5L2.6 5.6C4.1 4.1 6.2 3.2 8.5 3.2Z" fill={c}/>
-          <path d="M8.5 6.8C9.9 6.8 11.1 7.3 12 8.2L13.1 7.1C11.8 5.9 10.2 5.1 8.5 5.1C6.8 5.1 5.2 5.9 3.9 7.1L5 8.2C5.9 7.3 7.1 6.8 8.5 6.8Z" fill={c}/>
-          <circle cx="8.5" cy="10.5" r="1.5" fill={c}/>
-        </svg>
-        <svg width="27" height="13" viewBox="0 0 27 13">
-          <rect x="0.5" y="0.5" width="23" height="12" rx="3.5" stroke={c} strokeOpacity="0.35" fill="none"/>
-          <rect x="2" y="2" width="20" height="9" rx="2" fill={c}/>
-          <path d="M25 4.5V8.5C25.8 8.2 26.5 7.2 26.5 6.5C26.5 5.8 25.8 4.8 25 4.5Z" fill={c} fillOpacity="0.4"/>
-        </svg>
-      </div>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────
-// Liquid glass pill — blur + tint + shine
-// ─────────────────────────────────────────────────────────────
-function IOSGlassPill({ children, dark = false, style = {} }) {
-  return (
-    <div style={{
-      height: 44, minWidth: 44, borderRadius: 9999,
-      position: 'relative', overflow: 'hidden',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      boxShadow: dark
-        ? '0 2px 6px rgba(0,0,0,0.35), 0 6px 16px rgba(0,0,0,0.2)'
-        : '0 1px 3px rgba(0,0,0,0.07), 0 3px 10px rgba(0,0,0,0.06)',
-      ...style,
-    }}>
-      {/* blur + tint */}
-      <div style={{
-        position: 'absolute', inset: 0, borderRadius: 9999,
-        backdropFilter: 'blur(12px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(12px) saturate(180%)',
-        background: dark ? 'rgba(120,120,128,0.28)' : 'rgba(255,255,255,0.5)',
-      }} />
-      {/* shine */}
-      <div style={{
-        position: 'absolute', inset: 0, borderRadius: 9999,
-        boxShadow: dark
-          ? 'inset 1.5px 1.5px 1px rgba(255,255,255,0.15), inset -1px -1px 1px rgba(255,255,255,0.08)'
-          : 'inset 1.5px 1.5px 1px rgba(255,255,255,0.7), inset -1px -1px 1px rgba(255,255,255,0.4)',
-        border: dark ? '0.5px solid rgba(255,255,255,0.15)' : '0.5px solid rgba(0,0,0,0.06)',
-      }} />
-      <div style={{ position: 'relative', zIndex: 1, display: 'flex', alignItems: 'center', padding: '0 4px' }}>
-        {children}
-      </div>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────
-// Navigation bar — glass pills + large title
-// ─────────────────────────────────────────────────────────────
-function IOSNavBar({ title = 'Title', dark = false, trailingIcon = true }) {
-  const muted = dark ? 'rgba(255,255,255,0.6)' : '#404040';
-  const text = dark ? '#fff' : '#000';
-  const pillIcon = (content) => (
-    <IOSGlassPill dark={dark}>
-      <div style={{ width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-        {content}
-      </div>
-    </IOSGlassPill>
-  );
-  return (
-    <div style={{
-      display: 'flex', flexDirection: 'column', gap: 10,
-      paddingTop: 62, paddingBottom: 10, position: 'relative', zIndex: 5,
-    }}>
-      <div style={{
-        display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-        padding: '0 16px',
-      }}>
-        {/* back chevron */}
-        {pillIcon(
-          <svg width="12" height="20" viewBox="0 0 12 20" fill="none" style={{ marginLeft: -1 }}>
-            <path d="M10 2L2 10l8 8" stroke={muted} strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"/>
-          </svg>
-        )}
-        {/* trailing ellipsis */}
-        {trailingIcon && pillIcon(
-          <svg width="22" height="6" viewBox="0 0 22 6">
-            <circle cx="3" cy="3" r="2.5" fill={muted}/>
-            <circle cx="11" cy="3" r="2.5" fill={muted}/>
-            <circle cx="19" cy="3" r="2.5" fill={muted}/>
-          </svg>
-        )}
-      </div>
-      {/* large title */}
-      <div style={{
-        padding: '0 16px',
-        fontFamily: '-apple-system, system-ui',
-        fontSize: 34, fontWeight: 700, lineHeight: '41px',
-        color: text, letterSpacing: 0.4,
-      }}>{title}</div>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────
-// Grouped list (inset card, r:26) + row (52px)
-// ─────────────────────────────────────────────────────────────
-function IOSListRow({ title, detail, icon, chevron = true, isLast = false, dark = false }) {
-  const text = dark ? '#fff' : '#000';
-  const sec = dark ? 'rgba(235,235,245,0.6)' : 'rgba(60,60,67,0.6)';
-  const ter = dark ? 'rgba(235,235,245,0.3)' : 'rgba(60,60,67,0.3)';
-  const sep = dark ? 'rgba(84,84,88,0.65)' : 'rgba(60,60,67,0.12)';
-  return (
-    <div style={{
-      display: 'flex', alignItems: 'center', minHeight: 52,
-      padding: '0 16px', position: 'relative',
-      fontFamily: '-apple-system, system-ui', fontSize: 17,
-      letterSpacing: -0.43,
-    }}>
-      {icon && (
-        <div style={{
-          width: 30, height: 30, borderRadius: 7, background: icon,
-          marginRight: 12, flexShrink: 0,
-        }} />
-      )}
-      <div style={{ flex: 1, color: text }}>{title}</div>
-      {detail && <span style={{ color: sec, marginRight: 6 }}>{detail}</span>}
-      {chevron && (
-        <svg width="8" height="14" viewBox="0 0 8 14" style={{ flexShrink: 0 }}>
-          <path d="M1 1l6 6-6 6" stroke={ter} strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-        </svg>
-      )}
-      {!isLast && (
-        <div style={{
-          position: 'absolute', bottom: 0, right: 0,
-          left: icon ? 58 : 16, height: 0.5, background: sep,
-        }} />
-      )}
-    </div>
-  );
-}
-
-function IOSList({ header, children, dark = false }) {
-  const hc = dark ? 'rgba(235,235,245,0.6)' : 'rgba(60,60,67,0.6)';
-  const bg = dark ? '#1C1C1E' : '#fff';
-  return (
-    <div>
-      {header && (
-        <div style={{
-          fontFamily: '-apple-system, system-ui', fontSize: 13,
-          color: hc, textTransform: 'uppercase',
-          padding: '8px 36px 6px', letterSpacing: -0.08,
-        }}>{header}</div>
-      )}
-      <div style={{
-        background: bg, borderRadius: 26,
-        margin: '0 16px', overflow: 'hidden',
-      }}>{children}</div>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────
-// Device frame
-// ─────────────────────────────────────────────────────────────
-function IOSDevice({
-  children, width = 402, height = 874, dark = false,
-  title, keyboard = false, statusBarBg,
-}) {
-  return (
-    <div style={{
-      width, height, borderRadius: 48, overflow: 'hidden',
-      position: 'relative', background: dark ? '#000' : '#F2F2F7',
-      boxShadow: '0 40px 80px rgba(0,0,0,0.18), 0 0 0 1px rgba(0,0,0,0.12)',
-      fontFamily: '-apple-system, system-ui, sans-serif',
-      WebkitFontSmoothing: 'antialiased',
-    }}>
-      {/* dynamic island */}
-      <div style={{
-        position: 'absolute', top: 11, left: '50%', transform: 'translateX(-50%)',
-        width: 126, height: 37, borderRadius: 24, background: '#000', zIndex: 50,
-      }} />
-      {/* status bar (absolute) — frosted glass so content scrolls behind it */}
-      <div style={{
-        position: 'absolute', top: 0, left: 0, right: 0, zIndex: 10,
-        backdropFilter: 'blur(24px) saturate(1.8)',
-        WebkitBackdropFilter: 'blur(24px) saturate(1.8)',
-        background: statusBarBg
-          ? `${statusBarBg}D9`
-          : dark ? 'rgba(0,0,0,0.55)' : 'rgba(250,250,246,0.82)',
-      }}>
-        <IOSStatusBar dark={dark} />
-      </div>
-      {/* nav + content */}
-      <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-        {title !== undefined && <IOSNavBar title={title} dark={dark} />}
-        <div style={{ flex: 1, overflow: 'auto' }}>{children}</div>
-        {keyboard && <IOSKeyboard dark={dark} />}
-      </div>
-      {/* home indicator — always on top */}
-      <div style={{
-        position: 'absolute', bottom: 0, left: 0, right: 0, zIndex: 60,
-        height: 34, display: 'flex', justifyContent: 'center', alignItems: 'flex-end',
-        paddingBottom: 8, pointerEvents: 'none',
-      }}>
-        <div style={{
-          width: 139, height: 5, borderRadius: 100,
-          background: dark ? 'rgba(255,255,255,0.7)' : 'rgba(0,0,0,0.25)',
-        }} />
-      </div>
-    </div>
-  );
-}
-
-// ─────────────────────────────────────────────────────────────
-// Keyboard — iOS 26 liquid glass
-// ─────────────────────────────────────────────────────────────
-function IOSKeyboard({ dark = false }) {
-  const glyph = dark ? 'rgba(255,255,255,0.7)' : '#595959';
-  const sugg = dark ? 'rgba(255,255,255,0.6)' : '#333';
-  const keyBg = dark ? 'rgba(255,255,255,0.22)' : 'rgba(255,255,255,0.85)';
-
-  // special-key icons
-  const icons = {
-    shift: <svg width="19" height="17" viewBox="0 0 19 17"><path d="M9.5 1L1 9.5h4.5V16h8V9.5H18L9.5 1z" fill={glyph}/></svg>,
-    del: <svg width="23" height="17" viewBox="0 0 23 17"><path d="M7 1h13a2 2 0 012 2v11a2 2 0 01-2 2H7l-6-7.5L7 1z" fill="none" stroke={glyph} strokeWidth="1.6" strokeLinejoin="round"/><path d="M10 5l7 7M17 5l-7 7" stroke={glyph} strokeWidth="1.6" strokeLinecap="round"/></svg>,
-    ret: <svg width="20" height="14" viewBox="0 0 20 14"><path d="M18 1v6H4m0 0l4-4M4 7l4 4" fill="none" stroke="#fff" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round"/></svg>,
-  };
-
-  const key = (content, { w, flex, ret, fs = 25, k } = {}) => (
-    <div key={k} style={{
-      height: 42, borderRadius: 8.5,
-      flex: flex ? 1 : undefined, width: w, minWidth: 0,
-      background: ret ? '#08f' : keyBg,
-      boxShadow: '0 1px 0 rgba(0,0,0,0.075)',
-      display: 'flex', alignItems: 'center', justifyContent: 'center',
-      fontFamily: '-apple-system, "SF Compact", system-ui',
-      fontSize: fs, fontWeight: 458, color: ret ? '#fff' : glyph,
-    }}>{content}</div>
-  );
-
-  const row = (keys, pad = 0) => (
-    <div style={{ display: 'flex', gap: 6.5, justifyContent: 'center', padding: `0 ${pad}px` }}>
-      {keys.map(l => key(l, { flex: true, k: l }))}
-    </div>
-  );
-
-  return (
-    <div style={{
-      position: 'relative', zIndex: 15, borderRadius: 27, overflow: 'hidden',
-      padding: '11px 0 2px',
-      display: 'flex', flexDirection: 'column', alignItems: 'center',
-      boxShadow: dark
-        ? '0 -2px 20px rgba(0,0,0,0.09)'
-        : '0 -1px 6px rgba(0,0,0,0.018), 0 -3px 20px rgba(0,0,0,0.012)',
-    }}>
-      {/* liquid glass bg — same recipe as nav pills */}
-      <div style={{
-        position: 'absolute', inset: 0, borderRadius: 27,
-        backdropFilter: 'blur(12px) saturate(180%)',
-        WebkitBackdropFilter: 'blur(12px) saturate(180%)',
-        background: dark ? 'rgba(120,120,128,0.14)' : 'rgba(255,255,255,0.25)',
-      }} />
-      <div style={{
-        position: 'absolute', inset: 0, borderRadius: 27,
-        boxShadow: dark
-          ? 'inset 1.5px 1.5px 1px rgba(255,255,255,0.15)'
-          : 'inset 1.5px 1.5px 1px rgba(255,255,255,0.7), inset -1px -1px 1px rgba(255,255,255,0.4)',
-        border: dark ? '0.5px solid rgba(255,255,255,0.15)' : '0.5px solid rgba(0,0,0,0.06)',
-        pointerEvents: 'none',
-      }} />
-
-      {/* autocorrect bar */}
-      <div style={{
-        display: 'flex', gap: 20, alignItems: 'center',
-        padding: '8px 22px 13px', width: '100%', boxSizing: 'border-box',
-        position: 'relative',
-      }}>
-        {['"The"', 'the', 'to'].map((w, i) => (
-          <React.Fragment key={i}>
-            {i > 0 && <div style={{ width: 1, height: 25, background: '#ccc', opacity: 0.3 }} />}
-            <div style={{
-              flex: 1, textAlign: 'center',
-              fontFamily: '-apple-system, system-ui', fontSize: 17,
-              color: sugg, letterSpacing: -0.43, lineHeight: '22px',
-            }}>{w}</div>
-          </React.Fragment>
-        ))}
-      </div>
-
-      {/* key layout */}
-      <div style={{
-        display: 'flex', flexDirection: 'column', gap: 13,
-        padding: '0 6.5px', width: '100%', boxSizing: 'border-box',
-        position: 'relative',
-      }}>
-        {row(['q','w','e','r','t','y','u','i','o','p'])}
-        {row(['a','s','d','f','g','h','j','k','l'], 20)}
-        <div style={{ display: 'flex', gap: 14.25, alignItems: 'center' }}>
-          {key(icons.shift, { w: 45, k: 'shift' })}
-          <div style={{ display: 'flex', gap: 6.5, flex: 1 }}>
-            {['z','x','c','v','b','n','m'].map(l => key(l, { flex: true, k: l }))}
-          </div>
-          {key(icons.del, { w: 45, k: 'del' })}
-        </div>
-        <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-          {key('ABC', { w: 92.25, fs: 18, k: 'abc' })}
-          {key('', { flex: true, k: 'space' })}
-          {key(icons.ret, { w: 92.25, ret: true, k: 'ret' })}
-        </div>
-      </div>
-
-      {/* bottom spacer (emoji+mic area, icons omitted) */}
-      <div style={{ height: 56, width: '100%', position: 'relative' }} />
-    </div>
-  );
-}
-
-Object.assign(window, {
-  IOSDevice, IOSStatusBar, IOSNavBar, IOSGlassPill, IOSList, IOSListRow, IOSKeyboard,
-});
-
-</script>
 
 <script type="text/babel">
-
-
-
-// tweaks-panel.jsx
-// Reusable Tweaks shell + form-control helpers.
-//
-// Owns the host protocol (listens for __activate_edit_mode / __deactivate_edit_mode,
-// posts __edit_mode_available / __edit_mode_set_keys / __edit_mode_dismissed) so
-// individual prototypes don't re-roll it. Ships a consistent set of controls so you
-// don't hand-draw <input type="range">, segmented radios, steppers, etc.
-//
-// Usage (in an HTML file that loads React + Babel):
-//
-//   const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
-//     "primaryColor": "#D97757",
-//     "palette": ["#D97757", "#29261b", "#f6f4ef"],
-//     "fontSize": 16,
-//     "density": "regular",
-//     "dark": false
-//   }/*EDITMODE-END*/;
-//
-//   function App() {
-//     const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
-//     return (
-//       <div style={{ fontSize: t.fontSize, color: t.primaryColor }}>
-//         Hello
-//         <TweaksPanel>
-//           <TweakSection label="Typography" />
-//           <TweakSlider label="Font size" value={t.fontSize} min={10} max={32} unit="px"
-//                        onChange={(v) => setTweak('fontSize', v)} />
-//           <TweakRadio  label="Density" value={t.density}
-//                        options={['compact', 'regular', 'comfy']}
-//                        onChange={(v) => setTweak('density', v)} />
-//           <TweakSection label="Theme" />
-//           <TweakColor  label="Primary" value={t.primaryColor}
-//                        options={['#D97757', '#2A6FDB', '#1F8A5B', '#7A5AE0']}
-//                        onChange={(v) => setTweak('primaryColor', v)} />
-//           <TweakColor  label="Palette" value={t.palette}
-//                        options={[['#D97757', '#29261b', '#f6f4ef'],
-//                                  ['#475569', '#0f172a', '#f1f5f9']]}
-//                        onChange={(v) => setTweak('palette', v)} />
-//           <TweakToggle label="Dark mode" value={t.dark}
-//                        onChange={(v) => setTweak('dark', v)} />
-//         </TweaksPanel>
-//       </div>
-//     );
-//   }
-//
-// ─────────────────────────────────────────────────────────────────────────────
-
-const __TWEAKS_STYLE = `
-  .twk-panel{position:fixed;right:16px;bottom:16px;z-index:2147483646;width:280px;
-    max-height:calc(100vh - 32px);display:flex;flex-direction:column;
-    transform:scale(var(--dc-inv-zoom,1));transform-origin:bottom right;
-    background:rgba(250,249,247,.78);color:#29261b;
-    -webkit-backdrop-filter:blur(24px) saturate(160%);backdrop-filter:blur(24px) saturate(160%);
-    border:.5px solid rgba(255,255,255,.6);border-radius:14px;
-    box-shadow:0 1px 0 rgba(255,255,255,.5) inset,0 12px 40px rgba(0,0,0,.18);
-    font:11.5px/1.4 ui-sans-serif,system-ui,-apple-system,sans-serif;overflow:hidden}
-  .twk-hd{display:flex;align-items:center;justify-content:space-between;
-    padding:10px 8px 10px 14px;cursor:move;user-select:none}
-  .twk-hd b{font-size:12px;font-weight:600;letter-spacing:.01em}
-  .twk-x{appearance:none;border:0;background:transparent;color:rgba(41,38,27,.55);
-    width:22px;height:22px;border-radius:6px;cursor:default;font-size:13px;line-height:1}
-  .twk-x:hover{background:rgba(0,0,0,.06);color:#29261b}
-  .twk-body{padding:2px 14px 14px;display:flex;flex-direction:column;gap:10px;
-    overflow-y:auto;overflow-x:hidden;min-height:0;
-    scrollbar-width:thin;scrollbar-color:rgba(0,0,0,.15) transparent}
-  .twk-body::-webkit-scrollbar{width:8px}
-  .twk-body::-webkit-scrollbar-track{background:transparent;margin:2px}
-  .twk-body::-webkit-scrollbar-thumb{background:rgba(0,0,0,.15);border-radius:4px;
-    border:2px solid transparent;background-clip:content-box}
-  .twk-body::-webkit-scrollbar-thumb:hover{background:rgba(0,0,0,.25);
-    border:2px solid transparent;background-clip:content-box}
-  .twk-row{display:flex;flex-direction:column;gap:5px}
-  .twk-row-h{flex-direction:row;align-items:center;justify-content:space-between;gap:10px}
-  .twk-lbl{display:flex;justify-content:space-between;align-items:baseline;
-    color:rgba(41,38,27,.72)}
-  .twk-lbl>span:first-child{font-weight:500}
-  .twk-val{color:rgba(41,38,27,.5);font-variant-numeric:tabular-nums}
-
-  .twk-sect{font-size:10px;font-weight:600;letter-spacing:.06em;text-transform:uppercase;
-    color:rgba(41,38,27,.45);padding:10px 0 0}
-  .twk-sect:first-child{padding-top:0}
-
-  .twk-field{appearance:none;box-sizing:border-box;width:100%;min-width:0;height:26px;padding:0 8px;
-    border:.5px solid rgba(0,0,0,.1);border-radius:7px;
-    background:rgba(255,255,255,.6);color:inherit;font:inherit;outline:none}
-  .twk-field:focus{border-color:rgba(0,0,0,.25);background:rgba(255,255,255,.85)}
-  select.twk-field{padding-right:22px;
-    background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'><path fill='rgba(0,0,0,.5)' d='M0 0h10L5 6z'/></svg>");
-    background-repeat:no-repeat;background-position:right 8px center}
-
-  .twk-slider{appearance:none;-webkit-appearance:none;width:100%;height:4px;margin:6px 0;
-    border-radius:999px;background:rgba(0,0,0,.12);outline:none}
-  .twk-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
-    width:14px;height:14px;border-radius:50%;background:#fff;
-    border:.5px solid rgba(0,0,0,.12);box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:default}
-  .twk-slider::-moz-range-thumb{width:14px;height:14px;border-radius:50%;
-    background:#fff;border:.5px solid rgba(0,0,0,.12);box-shadow:0 1px 3px rgba(0,0,0,.2);cursor:default}
-
-  .twk-seg{position:relative;display:flex;padding:2px;border-radius:8px;
-    background:rgba(0,0,0,.06);user-select:none}
-  .twk-seg-thumb{position:absolute;top:2px;bottom:2px;border-radius:6px;
-    background:rgba(255,255,255,.9);box-shadow:0 1px 2px rgba(0,0,0,.12);
-    transition:left .15s cubic-bezier(.3,.7,.4,1),width .15s}
-  .twk-seg.dragging .twk-seg-thumb{transition:none}
-  .twk-seg button{appearance:none;position:relative;z-index:1;flex:1;border:0;
-    background:transparent;color:inherit;font:inherit;font-weight:500;min-height:22px;
-    border-radius:6px;cursor:default;padding:4px 6px;line-height:1.2;
-    overflow-wrap:anywhere}
-
-  .twk-toggle{position:relative;width:32px;height:18px;border:0;border-radius:999px;
-    background:rgba(0,0,0,.15);transition:background .15s;cursor:default;padding:0}
-  .twk-toggle[data-on="1"]{background:#34c759}
-  .twk-toggle i{position:absolute;top:2px;left:2px;width:14px;height:14px;border-radius:50%;
-    background:#fff;box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .15s}
-  .twk-toggle[data-on="1"] i{transform:translateX(14px)}
-
-  /* Cute chunky slider for the board's item-resize toolbar — round
-     pastel thumb in the board theme's own pill color, not a generic OS slider. */
-  .brd-slider{appearance:none;-webkit-appearance:none;width:100%;height:8px;
-    margin:0;border-radius:999px;background:rgba(0,0,0,.08);outline:none;touch-action:none}
-  .brd-slider::-webkit-slider-runnable-track{height:8px;border-radius:999px}
-  .brd-slider::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;
-    width:24px;height:24px;border-radius:50%;background:var(--fill,#C8A040);
-    border:3px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.22);cursor:default}
-  .brd-slider::-moz-range-thumb{width:24px;height:24px;border-radius:50%;
-    background:var(--fill,#C8A040);border:3px solid #fff;
-    box-shadow:0 2px 6px rgba(0,0,0,.22);cursor:default}
-  .brd-slider::-moz-range-track{height:8px;border-radius:999px;background:rgba(0,0,0,.08)}
-
-  .twk-num{display:flex;align-items:center;box-sizing:border-box;min-width:0;height:26px;padding:0 0 0 8px;
-    border:.5px solid rgba(0,0,0,.1);border-radius:7px;background:rgba(255,255,255,.6)}
-  .twk-num-lbl{font-weight:500;color:rgba(41,38,27,.6);cursor:ew-resize;
-    user-select:none;padding-right:8px}
-  .twk-num input{flex:1;min-width:0;height:100%;border:0;background:transparent;
-    font:inherit;font-variant-numeric:tabular-nums;text-align:right;padding:0 8px 0 0;
-    outline:none;color:inherit;-moz-appearance:textfield}
-  .twk-num input::-webkit-inner-spin-button,.twk-num input::-webkit-outer-spin-button{
-    -webkit-appearance:none;margin:0}
-  .twk-num-unit{padding-right:8px;color:rgba(41,38,27,.45)}
-
-  .twk-btn{appearance:none;height:26px;padding:0 12px;border:0;border-radius:7px;
-    background:rgba(0,0,0,.78);color:#fff;font:inherit;font-weight:500;cursor:default}
-  .twk-btn:hover{background:rgba(0,0,0,.88)}
-  .twk-btn.secondary{background:rgba(0,0,0,.06);color:inherit}
-  .twk-btn.secondary:hover{background:rgba(0,0,0,.1)}
-
-  .twk-swatch{appearance:none;-webkit-appearance:none;width:56px;height:22px;
-    border:.5px solid rgba(0,0,0,.1);border-radius:6px;padding:0;cursor:default;
-    background:transparent;flex-shrink:0}
-  .twk-swatch::-webkit-color-swatch-wrapper{padding:0}
-  .twk-swatch::-webkit-color-swatch{border:0;border-radius:5.5px}
-  .twk-swatch::-moz-color-swatch{border:0;border-radius:5.5px}
-
-  .twk-chips{display:flex;gap:6px}
-  .twk-chip{position:relative;appearance:none;flex:1;min-width:0;height:46px;
-    padding:0;border:0;border-radius:6px;overflow:hidden;cursor:default;
-    box-shadow:0 0 0 .5px rgba(0,0,0,.12),0 1px 2px rgba(0,0,0,.06);
-    transition:transform .12s cubic-bezier(.3,.7,.4,1),box-shadow .12s}
-  .twk-chip:hover{transform:translateY(-1px);
-    box-shadow:0 0 0 .5px rgba(0,0,0,.18),0 4px 10px rgba(0,0,0,.12)}
-  .twk-chip[data-on="1"]{box-shadow:0 0 0 1.5px rgba(0,0,0,.85),
-    0 2px 6px rgba(0,0,0,.15)}
-  .twk-chip>span{position:absolute;top:0;bottom:0;right:0;width:34%;
-    display:flex;flex-direction:column;box-shadow:-1px 0 0 rgba(0,0,0,.1)}
-  .twk-chip>span>i{flex:1;box-shadow:0 -1px 0 rgba(0,0,0,.1)}
-  .twk-chip>span>i:first-child{box-shadow:none}
-  .twk-chip svg{position:absolute;top:6px;left:6px;width:13px;height:13px;
-    filter:drop-shadow(0 1px 1px rgba(0,0,0,.3))}
-`;
-
-// ── useTweaks ───────────────────────────────────────────────────────────────
-// Single source of truth for tweak values. setTweak persists via the host
-// (__edit_mode_set_keys → host rewrites the EDITMODE block on disk).
 function useTweaks(defaults) {
   const [values, setValues] = React.useState(() => {
     try {
@@ -640,365 +144,11 @@ function useTweaks(defaults) {
       try { localStorage.setItem('clovery_tweak', JSON.stringify(next)); } catch(e) {}
       return next;
     });
-    window.parent.postMessage({ type: '__edit_mode_set_keys', edits }, '*');
     window.dispatchEvent(new CustomEvent('tweakchange', { detail: edits }));
   }, []);
   return [values, setTweak];
 }
-
-// ── TweaksPanel ─────────────────────────────────────────────────────────────
-// Floating shell. Registers the protocol listener BEFORE announcing
-// availability — if the announce ran first, the host's activate could land
-// before our handler exists and the toolbar toggle would silently no-op.
-// The close button posts __edit_mode_dismissed so the host's toolbar toggle
-// flips off in lockstep; the host echoes __deactivate_edit_mode back which
-// is what actually hides the panel.
-function TweaksPanel({ title = 'Tweaks', children }) {
-  const [open, setOpen] = React.useState(false);
-  const dragRef = React.useRef(null);
-  const offsetRef = React.useRef({ x: 16, y: 16 });
-  const PAD = 16;
-
-  const clampToViewport = React.useCallback(() => {
-    const panel = dragRef.current;
-    if (!panel) return;
-    const w = panel.offsetWidth, h = panel.offsetHeight;
-    const maxRight = Math.max(PAD, window.innerWidth - w - PAD);
-    const maxBottom = Math.max(PAD, window.innerHeight - h - PAD);
-    offsetRef.current = {
-      x: Math.min(maxRight, Math.max(PAD, offsetRef.current.x)),
-      y: Math.min(maxBottom, Math.max(PAD, offsetRef.current.y)),
-    };
-    panel.style.right = offsetRef.current.x + 'px';
-    panel.style.bottom = offsetRef.current.y + 'px';
-  }, []);
-
-  React.useEffect(() => {
-    if (!open) return;
-    clampToViewport();
-    if (typeof ResizeObserver === 'undefined') {
-      window.addEventListener('resize', clampToViewport);
-      return () => window.removeEventListener('resize', clampToViewport);
-    }
-    const ro = new ResizeObserver(clampToViewport);
-    ro.observe(document.documentElement);
-    return () => ro.disconnect();
-  }, [open, clampToViewport]);
-
-  React.useEffect(() => {
-    const onMsg = (e) => {
-      const t = e?.data?.type;
-      if (t === '__activate_edit_mode') setOpen(true);
-      else if (t === '__deactivate_edit_mode') setOpen(false);
-    };
-    window.addEventListener('message', onMsg);
-    window.parent.postMessage({ type: '__edit_mode_available' }, '*');
-    return () => window.removeEventListener('message', onMsg);
-  }, []);
-
-  const dismiss = () => {
-    setOpen(false);
-    window.parent.postMessage({ type: '__edit_mode_dismissed' }, '*');
-  };
-
-  const onDragStart = (e) => {
-    const panel = dragRef.current;
-    if (!panel) return;
-    const r = panel.getBoundingClientRect();
-    const sx = e.clientX, sy = e.clientY;
-    const startRight = window.innerWidth - r.right;
-    const startBottom = window.innerHeight - r.bottom;
-    const move = (ev) => {
-      offsetRef.current = {
-        x: startRight - (ev.clientX - sx),
-        y: startBottom - (ev.clientY - sy),
-      };
-      clampToViewport();
-    };
-    const up = () => {
-      window.removeEventListener('mousemove', move);
-      window.removeEventListener('mouseup', up);
-    };
-    window.addEventListener('mousemove', move);
-    window.addEventListener('mouseup', up);
-  };
-
-  if (!open) return null;
-  return (
-    <>
-      <style>{__TWEAKS_STYLE}</style>
-      <div ref={dragRef} className="twk-panel" data-omelette-chrome=""
-           style={{ right: offsetRef.current.x, bottom: offsetRef.current.y }}>
-        <div className="twk-hd" onMouseDown={onDragStart}>
-          <b>{title}</b>
-          <button className="twk-x" aria-label="Close tweaks"
-                  onMouseDown={(e) => e.stopPropagation()}
-                  onClick={dismiss}>✕</button>
-        </div>
-        <div className="twk-body">
-          {children}
-        </div>
-      </div>
-    </>
-  );
-}
-
-// ── Layout helpers ──────────────────────────────────────────────────────────
-
-function TweakSection({ label, children }) {
-  return (
-    <>
-      <div className="twk-sect">{label}</div>
-      {children}
-    </>
-  );
-}
-
-function TweakRow({ label, value, children, inline = false }) {
-  return (
-    <div className={inline ? 'twk-row twk-row-h' : 'twk-row'}>
-      <div className="twk-lbl">
-        <span>{label}</span>
-        {value != null && <span className="twk-val">{value}</span>}
-      </div>
-      {children}
-    </div>
-  );
-}
-
-// ── Controls ────────────────────────────────────────────────────────────────
-
-function TweakSlider({ label, value, min = 0, max = 100, step = 1, unit = '', onChange }) {
-  return (
-    <TweakRow label={label} value={`${value}${unit}`}>
-      <input type="range" className="twk-slider" min={min} max={max} step={step}
-             value={value} onChange={(e) => onChange(Number(e.target.value))} />
-    </TweakRow>
-  );
-}
-
-function TweakToggle({ label, value, onChange }) {
-  return (
-    <div className="twk-row twk-row-h">
-      <div className="twk-lbl"><span>{label}</span></div>
-      <button type="button" className="twk-toggle" data-on={value ? '1' : '0'}
-              role="switch" aria-checked={!!value}
-              onClick={() => onChange(!value)}><i /></button>
-    </div>
-  );
-}
-
-function TweakRadio({ label, value, options, onChange }) {
-  const trackRef = React.useRef(null);
-  const [dragging, setDragging] = React.useState(false);
-  // The active value is read by pointer-move handlers attached for the lifetime
-  // of a drag — ref it so a stale closure doesn't fire onChange for every move.
-  const valueRef = React.useRef(value);
-  valueRef.current = value;
-
-  // Segments wrap mid-word once per-segment width runs out. The track is
-  // ~248px (280 panel − 28 body pad − 4 seg pad), each button loses 12px
-  // to its own padding, and 11.5px system-ui averages ~6.3px/char — so 2
-  // options fit ~16 chars each, 3 fit ~10. Past that (or >3 options), fall
-  // back to a dropdown rather than wrap.
-  const labelLen = (o) => String(typeof o === 'object' ? o.label : o).length;
-  const maxLen = options.reduce((m, o) => Math.max(m, labelLen(o)), 0);
-  const fitsAsSegments = maxLen <= ({ 2: 16, 3: 10 }[options.length] ?? 0);
-  if (!fitsAsSegments) {
-    // <select> emits strings — map back to the original option value so the
-    // fallback stays type-preserving (numbers, booleans) like the segment path.
-    const resolve = (s) => {
-      const m = options.find((o) => String(typeof o === 'object' ? o.value : o) === s);
-      return m === undefined ? s : typeof m === 'object' ? m.value : m;
-    };
-    return <TweakSelect label={label} value={value} options={options}
-                        onChange={(s) => onChange(resolve(s))} />;
-  }
-  const opts = options.map((o) => (typeof o === 'object' ? o : { value: o, label: o }));
-  const idx = Math.max(0, opts.findIndex((o) => o.value === value));
-  const n = opts.length;
-
-  const segAt = (clientX) => {
-    const r = trackRef.current.getBoundingClientRect();
-    const inner = r.width - 4;
-    const i = Math.floor(((clientX - r.left - 2) / inner) * n);
-    return opts[Math.max(0, Math.min(n - 1, i))].value;
-  };
-
-  const onPointerDown = (e) => {
-    setDragging(true);
-    const v0 = segAt(e.clientX);
-    if (v0 !== valueRef.current) onChange(v0);
-    const move = (ev) => {
-      if (!trackRef.current) return;
-      const v = segAt(ev.clientX);
-      if (v !== valueRef.current) onChange(v);
-    };
-    const up = () => {
-      setDragging(false);
-      window.removeEventListener('pointermove', move);
-      window.removeEventListener('pointerup', up);
-    };
-    window.addEventListener('pointermove', move);
-    window.addEventListener('pointerup', up);
-  };
-
-  return (
-    <TweakRow label={label}>
-      <div ref={trackRef} role="radiogroup" onPointerDown={onPointerDown}
-           className={dragging ? 'twk-seg dragging' : 'twk-seg'}>
-        <div className="twk-seg-thumb"
-             style={{ left: `calc(2px + ${idx} * (100% - 4px) / ${n})`,
-                      width: `calc((100% - 4px) / ${n})` }} />
-        {opts.map((o) => (
-          <button key={o.value} type="button" role="radio" aria-checked={o.value === value}>
-            {o.label}
-          </button>
-        ))}
-      </div>
-    </TweakRow>
-  );
-}
-
-function TweakSelect({ label, value, options, onChange }) {
-  return (
-    <TweakRow label={label}>
-      <select className="twk-field" value={value} onChange={(e) => onChange(e.target.value)}>
-        {options.map((o) => {
-          const v = typeof o === 'object' ? o.value : o;
-          const l = typeof o === 'object' ? o.label : o;
-          return <option key={v} value={v}>{l}</option>;
-        })}
-      </select>
-    </TweakRow>
-  );
-}
-
-function TweakText({ label, value, placeholder, onChange }) {
-  return (
-    <TweakRow label={label}>
-      <input className="twk-field" type="text" value={value} placeholder={placeholder}
-             onChange={(e) => onChange(e.target.value)} />
-    </TweakRow>
-  );
-}
-
-function TweakNumber({ label, value, min, max, step = 1, unit = '', onChange }) {
-  const clamp = (n) => {
-    if (min != null && n < min) return min;
-    if (max != null && n > max) return max;
-    return n;
-  };
-  const startRef = React.useRef({ x: 0, val: 0 });
-  const onScrubStart = (e) => {
-    e.preventDefault();
-    startRef.current = { x: e.clientX, val: value };
-    const decimals = (String(step).split('.')[1] || '').length;
-    const move = (ev) => {
-      const dx = ev.clientX - startRef.current.x;
-      const raw = startRef.current.val + dx * step;
-      const snapped = Math.round(raw / step) * step;
-      onChange(clamp(Number(snapped.toFixed(decimals))));
-    };
-    const up = () => {
-      window.removeEventListener('pointermove', move);
-      window.removeEventListener('pointerup', up);
-    };
-    window.addEventListener('pointermove', move);
-    window.addEventListener('pointerup', up);
-  };
-  return (
-    <div className="twk-num">
-      <span className="twk-num-lbl" onPointerDown={onScrubStart}>{label}</span>
-      <input type="number" value={value} min={min} max={max} step={step}
-             onChange={(e) => onChange(clamp(Number(e.target.value)))} />
-      {unit && <span className="twk-num-unit">{unit}</span>}
-    </div>
-  );
-}
-
-// Relative-luminance contrast pick — checkmarks drawn over a swatch need to
-// read on both #111 and #fafafa without per-option configuration. Hex input
-// only (#rgb / #rrggbb); named or rgb()/hsl() colors fall through to "light".
-function __twkIsLight(hex) {
-  const h = String(hex).replace('#', '');
-  const x = h.length === 3 ? h.replace(/./g, (c) => c + c) : h.padEnd(6, '0');
-  const n = parseInt(x.slice(0, 6), 16);
-  if (Number.isNaN(n)) return true;
-  const r = (n >> 16) & 255, g = (n >> 8) & 255, b = n & 255;
-  return r * 299 + g * 587 + b * 114 > 148000;
-}
-
-const __TwkCheck = ({ light }) => (
-  <svg viewBox="0 0 14 14" aria-hidden="true">
-    <path d="M3 7.2 5.8 10 11 4.2" fill="none" strokeWidth="2.2"
-          strokeLinecap="round" strokeLinejoin="round"
-          stroke={light ? 'rgba(0,0,0,.78)' : '#fff'} />
-  </svg>
-);
-
-// TweakColor — curated color/palette picker. Each option is either a single
-// hex string or an array of 1-5 hex strings; the card adapts — a lone color
-// renders solid, a palette renders colors[0] as the hero (left ~2/3) with the
-// rest stacked in a sharp column on the right. onChange emits the
-// option in the shape it was passed (string stays string, array stays array).
-// Without options it falls back to the native color input for back-compat.
-function TweakColor({ label, value, options, onChange }) {
-  if (!options || !options.length) {
-    return (
-      <div className="twk-row twk-row-h">
-        <div className="twk-lbl"><span>{label}</span></div>
-        <input type="color" className="twk-swatch" value={value}
-               onChange={(e) => onChange(e.target.value)} />
-      </div>
-    );
-  }
-  // Native <input type=color> emits lowercase hex per the HTML spec, so
-  // compare case-insensitively. String() guards JSON.stringify(undefined),
-  // which returns the primitive undefined (no .toLowerCase).
-  const key = (o) => String(JSON.stringify(o)).toLowerCase();
-  const cur = key(value);
-  return (
-    <TweakRow label={label}>
-      <div className="twk-chips" role="radiogroup">
-        {options.map((o, i) => {
-          const colors = Array.isArray(o) ? o : [o];
-          const [hero, ...rest] = colors;
-          const sup = rest.slice(0, 4);
-          const on = key(o) === cur;
-          return (
-            <button key={i} type="button" className="twk-chip" role="radio"
-                    aria-checked={on} data-on={on ? '1' : '0'}
-                    aria-label={colors.join(', ')} title={colors.join(' · ')}
-                    style={{ background: hero }}
-                    onClick={() => onChange(o)}>
-              {sup.length > 0 && (
-                <span>
-                  {sup.map((c, j) => <i key={j} style={{ background: c }} />)}
-                </span>
-              )}
-              {on && <__TwkCheck light={__twkIsLight(hero)} />}
-            </button>
-          );
-        })}
-      </div>
-    </TweakRow>
-  );
-}
-
-function TweakButton({ label, onClick, secondary = false }) {
-  return (
-    <button type="button" className={secondary ? 'twk-btn secondary' : 'twk-btn'}
-            onClick={onClick}>{label}</button>
-  );
-}
-
-Object.assign(window, {
-  useTweaks, TweaksPanel, TweakSection, TweakRow,
-  TweakSlider, TweakToggle, TweakRadio, TweakSelect,
-  TweakText, TweakNumber, TweakColor, TweakButton,
-});
-
+Object.assign(window, { useTweaks });
 </script>
 
 <script type="text/babel">
@@ -1755,7 +905,7 @@ const I18N = {
     homeDisplayLabel:'Home Diary', homeDisplayToday:'Today', homeDisplayAll:'All',
     stickerBox:'Sticker box', on:'On', off:'Off',
     appearance:'Appearance', themeLabel:'Theme', langLabel:'Language', fontLabel:'Font', fontHand:'Handwritten', fontSystem:'System', fontSerif:'Serif',
-    sendStar:'Leave a review ✦', version:'Clovery · v1.0.2',
+    sendStar:'Leave a review ✦', version:'Clovery · v1.0.3',
     replayWelcome:'Sign out',
     todaysPrompt:"Today's prompt",
     luckyPrompt:"What's your lucky little thing today?",
@@ -1849,7 +999,7 @@ const I18N = {
     homeDisplayLabel:'主页日记', homeDisplayToday:'今天', homeDisplayAll:'全部',
     stickerBox:'贴纸盒', on:'开启', off:'关闭',
     appearance:'外观', themeLabel:'主题', langLabel:'语言', fontLabel:'字体', fontHand:'手写体', fontSystem:'系统默认', fontSerif:'宋体',
-    sendStar:'好评支持嗯呐 ✦', version:'小幸运 · v1.0.2',
+    sendStar:'好评支持嗯呐 ✦', version:'小幸运 · v1.0.3',
     replayWelcome:'退出登录',
     todaysPrompt:'今天的提示',
     luckyPrompt:'今天最幸运的小事是什么？',
@@ -1943,7 +1093,7 @@ const I18N = {
     homeDisplayLabel:'ホーム日記', homeDisplayToday:'今日', homeDisplayAll:'全て',
     stickerBox:'スタンプ', on:'オン', off:'オフ',
     appearance:'外観', themeLabel:'テーマ', langLabel:'言語', fontLabel:'フォント', fontHand:'手書き', fontSystem:'システム', fontSerif:'明朝体',
-    sendStar:'レビューを書く ✦', version:'Clovery · v1.0.2',
+    sendStar:'レビューを書く ✦', version:'Clovery · v1.0.3',
     replayWelcome:'サインアウト',
     todaysPrompt:'今日のプロンプト',
     luckyPrompt:'今日一番ラッキーだったことは？',
@@ -2037,7 +1187,7 @@ const I18N = {
     homeDisplayLabel:'홈 일기', homeDisplayToday:'오늘', homeDisplayAll:'전체',
     stickerBox:'스티커함', on:'켜짐', off:'꺼짐',
     appearance:'외관', themeLabel:'테마', langLabel:'언어', fontLabel:'글꼴', fontHand:'손글씨', fontSystem:'시스템', fontSerif:'명조',
-    sendStar:'리뷰 남기기 ✦', version:'Clovery · v1.0.2',
+    sendStar:'리뷰 남기기 ✦', version:'Clovery · v1.0.3',
     replayWelcome:'로그아웃',
     todaysPrompt:'오늘의 질문',
     luckyPrompt:'오늘 가장 행운이었던 작은 일은?',
@@ -2111,37 +1261,20 @@ let TODAY = (() => {
   const _d = new Date();
   return `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`;
 })();
-// Refresh TODAY when app returns from background (fixes stale date bug)
-document.addEventListener('visibilitychange', () => {
-  if (document.visibilityState === 'visible') {
-    const _d = new Date();
-    const newToday = `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`;
-    if (newToday !== TODAY) {
-      TODAY = newToday;
-      window.location.reload();
-    }
+// Refresh TODAY on foreground, window focus, or midnight rollover
+const __refreshTodayIfNeeded = () => {
+  const _d = new Date();
+  const newToday = `${_d.getFullYear()}-${String(_d.getMonth()+1).padStart(2,'0')}-${String(_d.getDate()).padStart(2,'0')}`;
+  if (newToday !== TODAY) {
+    TODAY = newToday;
+    window.location.reload();
   }
+};
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState === 'visible') __refreshTodayIfNeeded();
 });
-const MOCK_ENTRIES = [
-  { id:'e1',  date:'2026-05-25', lucky:'The subway pulled in right as I walked up — and there was a seat', mood:'happy',    text:"8am train, open seat. The universe delivered.", tags:['commute'] },
-  { id:'e2',  date:'2026-05-24', lucky:'Walked past a florist and caught a breath of gardenias', mood:'moved',    text:"Summer really is here.\nThat one second of scent felt like a small gift.", tags:['walks','flowers'], hasPhoto:true },
-  { id:'e3',  date:'2026-05-23', lucky:'Found the silver earring I lost last year', mood:'lucky',    text:'Right in the couch crack. Spent a whole year looking.', tags:['found again'] },
-  { id:'e4',  date:'2026-05-22', lucky:'A coworker surprised me with a matcha latte out of nowhere', mood:'happy',    text:'The matcha was good. The thought was better.', tags:['friends'] },
-  { id:'e5',  date:'2026-05-21', lucky:'Caught a full rainbow on the walk home', mood:'moved',    text:'Stopped on the pedestrian bridge and just stood there for a while.', tags:['sky'], hasPhoto:true },
-  { id:'e6',  date:'2026-05-20', lucky:'The corner store started stocking strawberry mochi', mood:'happy',    text:'', tags:['snacks'] },
-  { id:'e7',  date:'2026-05-19', lucky:"Mom's care package arrived today", mood:'lucky',    text:'Two jars of her pickles tucked inside.', tags:['home'] },
-  { id:'e8',  date:'2026-05-18', lucky:'The mint on the balcony put out new leaves overnight', mood:'calm',    text:'', tags:['plants'] },
-  { id:'e9',  date:'2026-05-17', lucky:"Finally sent off the report I'd been dreading all week", mood:'happy',    text:'Cooked a real dinner to celebrate.', tags:['work'] },
-  { id:'e10', date:'2026-05-16', lucky:'The orange café cat actually meowed at me for the first time', mood:'lucky',    text:'He ignores everyone. Today he meowed.', tags:['cats'], hasPhoto:true },
-  { id:'e11', date:'2026-05-15', lucky:'The moon was impossibly round on my evening walk', mood:'calm',    text:'', tags:['walks'] },
-  { id:'e12', date:'2026-05-14', lucky:'Unexpected good news sitting quietly in my inbox', mood:'lucky',    text:'Keeping it to myself a little longer.', tags:['surprises'] },
-  { id:'e13', date:'2026-05-12', lucky:"Found a book I'd wanted forever at the used bookstore", mood:'happy',    text:'', tags:['books'] },
-  { id:'e14', date:'2026-05-10', lucky:'Stepped outside at exactly the moment the rain stopped', mood:'calm',    text:'', tags:['weather'] },
-  { id:'e15', date:'2026-05-08', lucky:'Fresh-baked croissants at the bakery downstairs', mood:'happy',    text:'', tags:['snacks'] },
-];
-
-const STREAK = 12;
-const TOTAL_LUCKY = MOCK_ENTRIES.length;
+window.addEventListener('focus', __refreshTodayIfNeeded);
+setInterval(__refreshTodayIfNeeded, 60000);
 
 // ── Welcome letter from Irene — pre-seeded for first-time users ──
 const WELCOME_ENTRY = {
@@ -2521,7 +1654,7 @@ function TabBar({tab, setTab, theme, lang}) {
     {id:'settings',label:i.tabMe,     icon:'user'},
   ];
   return (
-    <div style={{
+    <div className="clovery-tabbar-bar" style={{
       position:'absolute', left:0, right:0, bottom:0,
       paddingBottom:'calc(var(--sab) + 10px)', paddingTop:10, paddingLeft:8, paddingRight:8,
       background: tab==='lucky'
@@ -2532,25 +1665,27 @@ function TabBar({tab, setTab, theme, lang}) {
       backdropFilter: 'none',
       WebkitBackdropFilter: 'none',
       transition:'background 400ms',
-      display:'flex', zIndex:100,
+      display:'flex', justifyContent:'center', zIndex:100,
     }}>
-      {tabs.map(t => {
-        const active = tab === t.id;
-        return (
-          <SpringTap key={t.id} onClick={() => setTab(t.id)} sfx="tab" style={{flex:1, padding:'6px 4px'}}>
-            <div style={{display:'flex', flexDirection:'column', alignItems:'center', gap:3}}>
-              <div style={{height:22, display:'flex', alignItems:'center'}}>
-                {t.icon==='clover'
-                  ? <Clover size={20} animation={active?'breathe':'none'}/>
-                  : <Icon name={t.icon} size={20} color={active?theme.accent:theme.inkMuted} stroke={active?2:1.6}/>}
+      <div className="clovery-tabbar-inner">
+        {tabs.map(t => {
+          const active = tab === t.id;
+          return (
+            <SpringTap key={t.id} onClick={() => setTab(t.id)} sfx="tab" style={{flex:1, padding:'6px 4px'}}>
+              <div style={{display:'flex', flexDirection:'column', alignItems:'center', gap:3}}>
+                <div style={{height:22, display:'flex', alignItems:'center'}}>
+                  {t.icon==='clover'
+                    ? <Clover size={20} animation={active?'breathe':'none'}/>
+                    : <Icon name={t.icon} size={20} color={active?theme.accent:theme.inkMuted} stroke={active?2:1.6}/>}
+                </div>
+                <div style={{fontSize:15, fontWeight:active?600:500, color:active?theme.accent:theme.inkMuted, letterSpacing:0.1}}>
+                  {t.label}
+                </div>
               </div>
-              <div style={{fontSize:15, fontWeight:active?600:500, color:active?theme.accent:theme.inkMuted, letterSpacing:0.1}}>
-                {t.label}
-              </div>
-            </div>
-          </SpringTap>
-        );
-      })}
+            </SpringTap>
+          );
+        })}
+      </div>
     </div>
   );
 }
@@ -2664,6 +1799,20 @@ function HomeScreen({entries, onWrite, onOpenEntry, onSwitchTab, theme, lang, ho
   const realStreak = computeStreak(entries);
   const realTotal  = entries.filter(e => !e.isWelcome).length;
 
+  const [cardSize, setCardSize] = React.useState(() => {
+    const w = typeof window !== 'undefined' ? window.innerWidth : 390;
+    const h = typeof window !== 'undefined' ? window.innerHeight : 844;
+    return w >= 700 ? Math.min(380, Math.round(h * 0.42)) : Math.min(310, Math.max(240, w - 72));
+  });
+  React.useEffect(() => {
+    const onResize = () => {
+      const w = window.innerWidth, h = window.innerHeight;
+      setCardSize(w >= 700 ? Math.min(380, Math.round(h * 0.42)) : Math.min(310, Math.max(240, w - 72)));
+    };
+    window.addEventListener('resize', onResize);
+    return () => window.removeEventListener('resize', onResize);
+  }, []);
+
   // ── Irene click-bubble ──────────────────────────────────────
   const [ireneBubble, setIreneBubble] = React.useState(null);
   const bubbleKey    = React.useRef(0);
@@ -2738,7 +1887,7 @@ function HomeScreen({entries, onWrite, onOpenEntry, onSwitchTab, theme, lang, ho
         </div>
       </div>
       <div style={{animation:'fadeSlideUp 500ms cubic-bezier(0.16,1,0.3,1) 80ms both'}}>
-        <CloverCard size={310} theme={theme} todayEntries={displayEntries} lang={lang}
+        <CloverCard size={cardSize} theme={theme} todayEntries={displayEntries} lang={lang}
           onTap={onWrite} allMode={homeDisplayMode === 'all'}/>
       </div>
       <SpringTap onClick={() => onSwitchTab && onSwitchTab('calendar')} style={{
@@ -2873,6 +2022,7 @@ function CalendarScreen({entries, onOpenEntry, onWrite, onSearch, theme, lang, t
     }}>
       {/* Status bar cover — prevents content overlapping iPhone status bar */}
       <div style={{position:'sticky', top:0, zIndex:20, height:'var(--sat)', background:theme.bg, pointerEvents:'none'}}/>
+      <div className="clovery-page">
       {/* Header */}
       <div style={{padding:'4px 24px 0'}}>
         <div style={{display:'flex', alignItems:'center', justifyContent:'space-between', marginBottom:6}}>
@@ -3089,6 +2239,7 @@ function CalendarScreen({entries, onOpenEntry, onWrite, onSearch, theme, lang, t
               })()}
             </div>
         }
+      </div>
       </div>
     </div>
   );
@@ -3646,25 +2797,29 @@ function FormationCard({ formation, onClose, onOpenEntry, theme, lang }) {
     requestAnimationFrame(() => requestAnimationFrame(() => setOpen(true)));
   }, []);
   const close = () => { setOpen(false); setTimeout(onClose, 320); };
+  React.useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') close(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   const { entries: fEntries, formationIdx, filter } = formation;
   const cloverNum = formationIdx + 1;
 
   return (
-    <>
+    <div className="clovery-paywall-overlay" style={{position:'fixed', inset:0, zIndex:8000}}>
       {/* Backdrop */}
       <div onClick={close} style={{
-        position:'fixed', inset:0, zIndex:8000,
+        position:'absolute', inset:0,
         background:'rgba(20,25,20,0.45)',
         backdropFilter:'blur(6px)', WebkitBackdropFilter:'blur(6px)',
         opacity: open ? 1 : 0,
         transition:'opacity 320ms',
       }}/>
       {/* Sheet */}
-      <div style={{
-        position:'fixed', left:0, right:0, bottom:0, zIndex:8100,
+      <div className="clovery-paywall-card" style={{
+        position:'relative',
         background: theme.paper || theme.bg,
-        borderRadius:'28px 28px 0 0',
         boxShadow:'0 -8px 48px rgba(0,0,0,0.18)',
         transform: open ? 'translateY(0)' : 'translateY(100%)',
         transition:'transform 380ms cubic-bezier(0.16,1,0.3,1)',
@@ -3773,7 +2928,7 @@ function FormationCard({ formation, onClose, onOpenEntry, theme, lang }) {
           })}
         </div>
       </div>
-    </>
+    </div>
   );
 }
 
@@ -3838,17 +2993,19 @@ function LuckyScreen({entries, onOpenEntry, onFormationTap, theme, lang}) {
         transition:'background 300ms',
         pointerEvents: view==='field' ? 'none' : 'auto',
       }}>
-        {/* Subtitle label first */}
-        <div style={{fontSize:15, color:theme.inkSoft, letterSpacing:0.4, fontWeight:500, marginBottom:4}}>
+        <div className="clovery-page">
+          {/* Subtitle label first */}
+          <div style={{fontSize:15, color:theme.inkSoft, letterSpacing:0.4, fontWeight:500, marginBottom:4}}>
 {i.luckyCollection}
-        </div>
-        {/* Big title + toggle on same row */}
-        <div style={{display:'flex', alignItems:'center', justifyContent:'space-between'}}>
-          <div style={{fontSize:34, fontWeight:700, color:theme.ink, letterSpacing:-0.8, lineHeight:1}}>
-            {i.luckyTitle}
           </div>
-          <div style={{pointerEvents:'auto'}}>
-            <ViewToggle view={view} setView={setView} theme={theme} i={i}/>
+          {/* Big title + toggle on same row */}
+          <div style={{display:'flex', alignItems:'center', justifyContent:'space-between'}}>
+            <div style={{fontSize:34, fontWeight:700, color:theme.ink, letterSpacing:-0.8, lineHeight:1}}>
+              {i.luckyTitle}
+            </div>
+            <div style={{pointerEvents:'auto'}}>
+              <ViewToggle view={view} setView={setView} theme={theme} i={i}/>
+            </div>
           </div>
         </div>
       </div>
@@ -3856,7 +3013,9 @@ function LuckyScreen({entries, onOpenEntry, onFormationTap, theme, lang}) {
       {/* ── GROWING VIEW ── */}
       {view === 'grow' && (
         <div style={{position:'absolute', top:'calc(var(--sat) + 92px)', left:0, right:0, bottom:78}}>
-          <GrowingCloverView entries={entries} onOpenEntry={onOpenEntry} theme={theme} lang={lang}/>
+          <div className="clovery-page" style={{height:'100%', position:'relative'}}>
+            <GrowingCloverView entries={entries} onOpenEntry={onOpenEntry} theme={theme} lang={lang}/>
+          </div>
         </div>
       )}
 
@@ -3883,7 +3042,7 @@ function Stat({label, value, theme}) {
 // ═══════════════════════════════════════════════════════════
 // SETTINGS SCREEN
 // ═══════════════════════════════════════════════════════════
-function SettingsScreen({entries, theme, onReset, lang, onLangChange, palette, onPaletteChange, dark, onDarkChange, darkAuto, onDarkAutoChange, fontHand, onFontHandChange, onSheet, name, reminderTime, dailyOn, setDailyOn, weeklyOn, setWeeklyOn, homeDisplayMode, onHomeDisplayChange}) {
+function SettingsScreen({entries, theme, lang, onLangChange, palette, onPaletteChange, dark, onDarkChange, darkAuto, onDarkAutoChange, fontHand, onFontHandChange, onSheet, name, reminderTime, dailyOn, setDailyOn, weeklyOn, setWeeklyOn, homeDisplayMode, onHomeDisplayChange, syncStatus, onSyncNow}) {
   const i = I18N[lang||'en'];
   const uniqueTagCount = React.useMemo(() =>
     new Set((entries||[]).flatMap(e => e.tags||[])).size,
@@ -3898,6 +3057,29 @@ function SettingsScreen({entries, theme, onReset, lang, onLangChange, palette, o
   const [fontOpen,  setFontOpen]  = React.useState(false);
   const [migrationExport, setMigrationExport] = React.useState({status:'idle'});
   const isSystemFont = fontHand === 'System';
+
+  const syncDetailText = React.useMemo(() => {
+    const s = syncStatus?.state || 'idle';
+    const zh = lang === 'zh', ja = lang === 'ja', ko = lang === 'ko';
+    if (s === 'syncing') return zh ? '同步中…' : ja ? '同期中…' : ko ? '동기화 중…' : 'Syncing…';
+    if (s === 'noAccount') return zh ? '未登录 iCloud' : ja ? 'iCloud未サインイン' : ko ? 'iCloud 로그인 필요' : 'Not signed in';
+    if (s === 'restricted' || s === 'temporarilyUnavailable') {
+      return zh ? 'iCloud 暂不可用' : ja ? 'iCloud利用不可' : ko ? 'iCloud 사용 불가' : 'Unavailable';
+    }
+    if (s === 'error') return zh ? '同步异常 · 点击重试' : ja ? '同期エラー · 再試行' : ko ? '동기화 오류 · 재시도' : 'Sync error · Retry';
+    if (s === 'synced') {
+      const count = syncStatus?.entryCount ?? 0;
+      const d = syncStatus?.syncedAt ? new Date(syncStatus.syncedAt) : null;
+      const hm = d && !Number.isNaN(d.getTime())
+        ? `${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`
+        : '';
+      if (zh) return hm ? `已同步 ${count} 条 · ${hm}` : `已同步 ${count} 条`;
+      if (ja) return hm ? `同期済み (${count}件) · ${hm}` : `同期済み (${count}件)`;
+      if (ko) return hm ? `동기화됨 (${count}) · ${hm}` : `동기화됨 (${count})`;
+      return hm ? `Synced ${count} · ${hm}` : `Synced ${count}`;
+    }
+    return zh ? '点击立即同步' : ja ? 'タップして同期' : ko ? '탭하여 동기화' : 'Tap to sync';
+  }, [syncStatus, lang]);
 
   React.useEffect(() => {
     window.__cloveryMigrationExportResult = result => {
@@ -3922,6 +3104,7 @@ function SettingsScreen({entries, theme, onReset, lang, onLangChange, palette, o
   return (
     <div style={{paddingBottom:110, position:'relative'}}>
       <div style={{position:'sticky', top:0, zIndex:20, height:'var(--sat)', background:theme.bg, pointerEvents:'none'}}/>
+      <div className="clovery-page">
       <div style={{padding:'12px 24px 0', paddingTop:20}}>
 
         <div style={{fontSize:32, fontWeight:600, color:theme.ink, lineHeight:1.1, letterSpacing:-0.5}}>
@@ -4120,6 +3303,14 @@ function SettingsScreen({entries, theme, onReset, lang, onLangChange, palette, o
       {/* More */}
       <SettingGroup title="" theme={theme}>
         <SettingRow
+          label={i.icloudSync}
+          detail={syncDetailText}
+          theme={theme}
+          onTap={() => {
+            Haptic.impact('light');
+            onSyncNow?.();
+          }}/>
+        <SettingRow
           label={lang==='zh'?'为迁移导出数据':lang==='ja'?'移行用データを書き出す':lang==='ko'?'마이그레이션 데이터 내보내기':'Export data for migration'}
           detail={migrationExport.status==='working' ? (lang==='zh'?'导出中…':'Exporting…') : null}
           theme={theme}
@@ -4150,6 +3341,7 @@ function SettingsScreen({entries, theme, onReset, lang, onLangChange, palette, o
         <div style={{fontSize:17, color:theme.inkMuted}}>{i.version}</div>
       </div>
 
+      </div>
     </div>
   );
 }
@@ -4252,7 +3444,7 @@ function LanguagePicker({lang, onSelect, onClose, theme}) {
 }
 
 Object.assign(window, {
-  I18N, TODAY, MOCK_ENTRIES, STREAK, TOTAL_LUCKY,
+  I18N, TODAY,
   formatDate, weekdayName, relativeDay,
   StaggerItem, useCountUp, Toggle,
   TabBar, HomeScreen, CalendarScreen, LuckyScreen, SettingsScreen,
@@ -4300,402 +3492,7 @@ function EntryCard({entry, theme, onClick, lang}) {
   );
 }
 
-// ══════════════════════════════════════════════════════════
-// AUTH FLOW  (Welcome → Sign Up / Login / Forgot Password)
-// ══════════════════════════════════════════════════════════
 
-// Animated screen-change wrapper — remounts on key change
-function AuthScreenPane({ children }) {
-  const [show, setShow] = React.useState(false);
-  React.useEffect(() => {
-    const t = setTimeout(() => setShow(true), 16);
-    return () => clearTimeout(t);
-  }, []);
-  return (
-    <div style={{
-      position:'absolute', inset:0, display:'flex', flexDirection:'column',
-      opacity: show ? 1 : 0,
-      transform: show ? 'translateY(0)' : 'translateY(22px)',
-      transition: 'opacity 340ms cubic-bezier(0,0,0.2,1), transform 420ms cubic-bezier(0.16,1,0.3,1)',
-    }}>
-      {children}
-    </div>
-  );
-}
-
-// Shared text input for auth forms
-function AuthInput({ theme, type='text', value, onChange, placeholder, autoComplete }) {
-  const [focused, setFocused] = React.useState(false);
-  const [showPw, setShowPw]   = React.useState(false);
-  const isPw = type === 'password';
-  return (
-    <div style={{
-      display:'flex', alignItems:'center',
-      background: theme.paper,
-      border:`1.5px solid ${focused ? theme.accent : theme.divider}`,
-      borderRadius:14, padding:'0 16px', marginBottom:12,
-      transition:'border-color 200ms, box-shadow 200ms',
-      boxShadow: focused ? `0 0 0 3.5px ${theme.accent}1A` : 'none',
-    }}>
-      <input
-        type={isPw ? (showPw?'text':'password') : type}
-        value={value}
-        onChange={e => onChange(e.target.value)}
-        placeholder={placeholder}
-        autoComplete={autoComplete}
-        onFocus={()=>setFocused(true)}
-        onBlur={()=>setFocused(false)}
-        style={{
-          flex:1, background:'none', border:'none', outline:'none',
-          fontSize:16, color:theme.ink, padding:'15px 0',
-          fontFamily:'-apple-system,BlinkMacSystemFont,"SF Pro Text",system-ui,sans-serif',
-        }}
-      />
-      {isPw && (
-        <button type="button" onClick={()=>setShowPw(v=>!v)} style={{
-          background:'none', border:'none', cursor:'pointer', padding:'0 0 0 8px',
-          color:theme.inkMuted, fontSize:16, fontWeight:500, letterSpacing:0.2,
-        }}>
-          {showPw ? 'Hide' : 'Show'}
-        </button>
-      )}
-    </div>
-  );
-}
-
-// Back arrow button shared across auth screens
-function AuthBack({ onBack, theme, label }) {
-  return (
-    <SpringTap onClick={onBack} sfx="back" style={{
-      display:'inline-flex', alignItems:'center', gap:6, padding:'8px 0',
-      color:theme.inkSoft, fontSize:17,
-    }}>
-      <Icon name="back" size={18} color={theme.inkSoft} stroke={2.2}/>
-      {label && <span>{label}</span>}
-    </SpringTap>
-  );
-}
-
-// ── Welcome pane ────────────────────────────────────────────
-function AuthWelcome({ onGetStarted, onLogin, theme, lang }) {
-  const i = I18N[lang||'en'];
-  return (
-    <div style={{height:'100%', display:'flex', flexDirection:'column', overflow:'hidden'}}>
-      {/* large decorative clover background */}
-      <div style={{
-        position:'absolute', right:-60, top:-40,
-        opacity: theme._dark ? 0.06 : 0.055, pointerEvents:'none',
-      }}>
-        <Clover size={280} color={theme.accent} stem={false}/>
-      </div>
-      <div style={{
-        position:'absolute', left:-70, bottom:80,
-        opacity: theme._dark ? 0.04 : 0.04, pointerEvents:'none',
-      }}>
-        <Clover size={200} color={theme.accent} stem={false}/>
-      </div>
-
-      {/* Main content */}
-      <div style={{flex:1, display:'flex', flexDirection:'column', justifyContent:'center', padding:'0 36px'}}>
-        {/* Logo + name */}
-        <div style={{marginBottom:32, animation:'fadeSlideUp 500ms cubic-bezier(0.16,1,0.3,1) both'}}>
-          <Clover size={76} animation="float" color={theme.accent}/>
-          <div style={{
-            fontSize:44, fontWeight:800, color:theme.ink,
-            letterSpacing:-1.5, lineHeight:1, marginTop:16, marginBottom:10,
-            fontFamily:'-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif',
-          }}>
-            Clovery
-          </div>
-          <div style={{
-            fontSize:18, color:theme.inkSoft, lineHeight:1.5,
-            whiteSpace:'pre-line', fontWeight:400,
-          }}>
-            {i.authSlogan||'Notice the little\nlucky things.'}
-          </div>
-        </div>
-      </div>
-
-      {/* Buttons */}
-      <div style={{padding:'0 28px 60px', animation:'fadeSlideUp 500ms 120ms cubic-bezier(0.16,1,0.3,1) both'}}>
-        <SpringTap onClick={onGetStarted} style={{
-          background:theme.accent, color:'#fff',
-          padding:'18px 24px', borderRadius:9999,
-          textAlign:'center', fontSize:17, fontWeight:700,
-          marginBottom:14,
-          boxShadow:`0 4px 20px ${theme.accent}44`,
-        }}>
-          {i.authGetStarted||'Get started'}
-        </SpringTap>
-        <SpringTap onClick={onLogin} style={{
-          background:'transparent', color:theme.accentDark,
-          padding:'14px 24px', borderRadius:9999,
-          textAlign:'center', fontSize:17, fontWeight:500,
-        }}>
-          {i.authHaveAccount||'I already have an account'}
-        </SpringTap>
-      </div>
-    </div>
-  );
-}
-
-// ── Sign Up pane ────────────────────────────────────────────
-function AuthSignUp({ onBack, onLogin, onDone, theme, lang }) {
-  const i = I18N[lang||'en'];
-  const [name,     setName]     = React.useState('');
-  const [email,    setEmail]    = React.useState('');
-  const [password, setPassword] = React.useState('');
-  const [loading,  setLoading]  = React.useState(false);
-  const [done,     setDone]     = React.useState(false);
-
-  const canSubmit = name.trim().length > 0 && email.includes('@') && password.length >= 6;
-
-  const handleSubmit = () => {
-    if (!canSubmit || loading) return;
-    setLoading(true);
-    setTimeout(() => { setDone(true); setTimeout(onDone, 650); }, 850);
-  };
-
-  return (
-    <div style={{height:'100%', display:'flex', flexDirection:'column', padding:'0 28px'}}>
-      <div style={{paddingTop:56, paddingBottom:4}}>
-        <AuthBack onBack={onBack} theme={theme}/>
-      </div>
-
-      <div style={{marginBottom:28, animation:'fadeSlideUp 380ms cubic-bezier(0.16,1,0.3,1) both'}}>
-        <div style={{fontSize:40, fontWeight:800, color:theme.ink, lineHeight:1.1,
-                     letterSpacing:-1, whiteSpace:'pre-line',
-                     fontFamily:'-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif'}}>
-          {i.authCreateTitle||'Create your\naccount.'}
-        </div>
-      </div>
-
-      <div style={{flex:1, overflowY:'auto'}} className="no-scrollbar">
-        {/* Small clover accent */}
-        <div style={{marginBottom:18, opacity:0.55}}>
-          <Clover size={22} stem={false} color={theme.accent}/>
-        </div>
-        <AuthInput theme={theme} value={name} onChange={setName}
-          placeholder={i.authNamePh||'What should we call you?'} autoComplete="name"/>
-        <AuthInput theme={theme} type="email" value={email} onChange={setEmail}
-          placeholder={i.authEmailPh||'you@example.com'} autoComplete="email"/>
-        <AuthInput theme={theme} type="password" value={password} onChange={setPassword}
-          placeholder={i.authPasswordPh||'8+ characters'} autoComplete="new-password"/>
-      </div>
-
-      <div style={{paddingBottom:52, paddingTop:12}}>
-        <SpringTap onClick={handleSubmit} style={{
-          background: done ? theme.accentDark : canSubmit ? theme.accent : theme.accentSoft,
-          color: canSubmit ? '#fff' : theme.inkMuted,
-          padding:'18px 24px', borderRadius:9999,
-          textAlign:'center', fontSize:17, fontWeight:700,
-          marginBottom:18,
-          transition:'background 300ms, transform 180ms',
-          boxShadow: canSubmit ? `0 4px 20px ${theme.accent}38` : 'none',
-        }}>
-          {done ? '✦' : loading ? '…' : (i.authSignUpCta||'Create account')}
-        </SpringTap>
-        <div style={{textAlign:'center', fontSize:16, color:theme.inkSoft}}>
-          {i.authHaveShort||'Already have an account?'}{' '}
-          <SpringTap onClick={onLogin} style={{display:'inline', color:theme.accent, fontWeight:600}}>
-            {i.authSignInLink||'Sign in'}
-          </SpringTap>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ── Login pane ──────────────────────────────────────────────
-function AuthLogin({ onBack, onSignUp, onForgot, onDone, theme, lang }) {
-  const i = I18N[lang||'en'];
-  const [email,    setEmail]    = React.useState('');
-  const [password, setPassword] = React.useState('');
-  const [loading,  setLoading]  = React.useState(false);
-  const [done,     setDone]     = React.useState(false);
-
-  const canSubmit = email.includes('@') && password.length >= 1;
-
-  const handleSubmit = () => {
-    if (!canSubmit || loading) return;
-    setLoading(true);
-    setTimeout(() => { setDone(true); setTimeout(onDone, 650); }, 850);
-  };
-
-  return (
-    <div style={{height:'100%', display:'flex', flexDirection:'column', padding:'0 28px'}}>
-      <div style={{paddingTop:56, paddingBottom:4}}>
-        <AuthBack onBack={onBack} theme={theme}/>
-      </div>
-
-      <div style={{marginBottom:28, animation:'fadeSlideUp 380ms cubic-bezier(0.16,1,0.3,1) both'}}>
-        <div style={{fontSize:40, fontWeight:800, color:theme.ink, lineHeight:1.1,
-                     letterSpacing:-1, whiteSpace:'pre-line',
-                     fontFamily:'-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif'}}>
-          {i.authWelcomeBack||'Welcome\nback.'}
-        </div>
-      </div>
-
-      <div style={{flex:1, overflowY:'auto'}} className="no-scrollbar">
-        <div style={{marginBottom:18, opacity:0.55}}>
-          <Clover size={22} stem={false} color={theme.accent}/>
-        </div>
-        <AuthInput theme={theme} type="email" value={email} onChange={setEmail}
-          placeholder={i.authEmailPh||'you@example.com'} autoComplete="email"/>
-        <AuthInput theme={theme} type="password" value={password} onChange={setPassword}
-          placeholder={i.authPasswordPh||'8+ characters'} autoComplete="current-password"/>
-        <div style={{textAlign:'right', marginTop:-4, marginBottom:20}}>
-          <SpringTap onClick={onForgot} style={{
-            display:'inline', fontSize:17, color:theme.inkSoft, fontWeight:500,
-          }}>
-            {i.authForgotPw||'Forgot password?'}
-          </SpringTap>
-        </div>
-      </div>
-
-      <div style={{paddingBottom:52, paddingTop:12}}>
-        <SpringTap onClick={handleSubmit} style={{
-          background: done ? theme.accentDark : canSubmit ? theme.accent : theme.accentSoft,
-          color: canSubmit ? '#fff' : theme.inkMuted,
-          padding:'18px 24px', borderRadius:9999,
-          textAlign:'center', fontSize:17, fontWeight:700,
-          marginBottom:18,
-          transition:'background 300ms',
-          boxShadow: canSubmit ? `0 4px 20px ${theme.accent}38` : 'none',
-        }}>
-          {done ? '✦' : loading ? '…' : (i.authLoginCta||'Sign in')}
-        </SpringTap>
-        <div style={{textAlign:'center', fontSize:16, color:theme.inkSoft}}>
-          {i.authNoAccount||"Don't have an account?"}{' '}
-          <SpringTap onClick={onSignUp} style={{display:'inline', color:theme.accent, fontWeight:600}}>
-            {i.authSignUpLink||'Sign up'}
-          </SpringTap>
-        </div>
-      </div>
-    </div>
-  );
-}
-
-// ── Forgot password pane ────────────────────────────────────
-function AuthForgot({ onBack, theme, lang }) {
-  const i = I18N[lang||'en'];
-  const [email,   setEmail]   = React.useState('');
-  const [loading, setLoading] = React.useState(false);
-  const [sent,    setSent]    = React.useState(false);
-
-  const canSubmit = email.includes('@');
-
-  const handleSubmit = () => {
-    if (!canSubmit || loading) return;
-    setLoading(true);
-    setTimeout(() => { setLoading(false); setSent(true); }, 900);
-  };
-
-  return (
-    <div style={{height:'100%', display:'flex', flexDirection:'column', padding:'0 28px'}}>
-      <div style={{paddingTop:56, paddingBottom:4}}>
-        <AuthBack onBack={onBack} theme={theme}/>
-      </div>
-
-      <div style={{marginBottom:20, animation:'fadeSlideUp 380ms cubic-bezier(0.16,1,0.3,1) both'}}>
-        <div style={{fontSize:40, fontWeight:800, color:theme.ink, lineHeight:1.1,
-                     letterSpacing:-1, whiteSpace:'pre-line',
-                     fontFamily:'-apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif'}}>
-          {i.authForgotTitle||'Reset\npassword.'}
-        </div>
-        <div style={{fontSize:17, color:theme.inkSoft, marginTop:12, lineHeight:1.5}}>
-          {i.authForgotBody||"Enter your email and we'll send you a reset link."}
-        </div>
-      </div>
-
-      <div style={{flex:1}}>
-        <div style={{marginBottom:18, opacity:0.55}}>
-          <Clover size={22} stem={false} color={theme.accent}/>
-        </div>
-        {!sent ? (
-          <>
-            <AuthInput theme={theme} type="email" value={email} onChange={setEmail}
-              placeholder={i.authEmailPh||'you@example.com'} autoComplete="email"/>
-            <SpringTap onClick={handleSubmit} style={{
-              background: canSubmit ? theme.accent : theme.accentSoft,
-              color: canSubmit ? '#fff' : theme.inkMuted,
-              padding:'18px 24px', borderRadius:9999,
-              textAlign:'center', fontSize:17, fontWeight:700, marginTop:8,
-              transition:'background 300ms',
-              boxShadow: canSubmit ? `0 4px 20px ${theme.accent}38` : 'none',
-            }}>
-              {loading ? '…' : (i.authForgotCta||'Send reset link')}
-            </SpringTap>
-          </>
-        ) : (
-          <div style={{
-            padding:'24px', borderRadius:18,
-            background:theme.accentSoft,
-            animation:'pop 350ms cubic-bezier(0.34,1.56,0.64,1) both',
-          }}>
-            <div style={{fontSize:28, marginBottom:10}}>📬</div>
-            <div style={{fontSize:16, fontWeight:600, color:theme.accentDark, lineHeight:1.4}}>
-              {i.authForgotSent||'Check your inbox ✦'}
-            </div>
-            <SpringTap onClick={onBack} style={{
-              display:'inline-block', marginTop:14,
-              fontSize:16, color:theme.accentDark, fontWeight:500,
-            }}>
-              {i.authForgotBack||'Back to sign in'}
-            </SpringTap>
-          </div>
-        )}
-      </div>
-    </div>
-  );
-}
-
-// ── Main AuthFlow orchestrator ──────────────────────────────
-// onDone(authed: boolean) — true when user signed in/up, false for guest
-function AuthFlow({ onDone, startAt = 'welcome', theme, lang }) {
-  const [screen,  setScreen]  = React.useState(startAt);
-  const [transKey, setTransKey] = React.useState(0);
-  const [visible,  setVisible]  = React.useState(false);
-  const [leaving,  setLeaving]  = React.useState(false);
-
-  React.useEffect(() => {
-    requestAnimationFrame(() => requestAnimationFrame(() => setVisible(true)));
-  }, []);
-
-  const finish = (authed = false) => {
-    setLeaving(true);
-    setTimeout(() => onDone(authed), 520);
-  };
-
-  const go = (to) => { setScreen(to); setTransKey(k => k + 1); };
-
-  return (
-    <div style={{
-      position:'absolute', inset:0, zIndex:200,
-      background:theme.bg, overflow:'hidden',
-      opacity:    leaving ? 0 : visible ? 1 : 0,
-      transform:  leaving ? 'scale(1.05)' : 'scale(1)',
-      transition: leaving
-        ? 'opacity 500ms cubic-bezier(0.4,0,1,1), transform 500ms ease'
-        : 'opacity 380ms ease',
-    }}>
-      {/* Subtle ambient clovers */}
-      <FloatingCloverBG count={4} color={theme.accent} opacity={theme._dark?0.07:0.04}/>
-      {/* Screen with animated transition */}
-      <AuthScreenPane key={transKey}>
-        {screen==='welcome' && <AuthWelcome
-          onGetStarted={() => finish(false)}
-          onLogin={() => go('login')}
-          theme={theme} lang={lang}/>}
-        {screen==='signup'  && <AuthSignUp  onBack={() => go('welcome')} onLogin={() => go('login')} onDone={() => finish(true)} theme={theme} lang={lang}/>}
-        {screen==='login'   && <AuthLogin   onBack={() => go('welcome')} onSignUp={() => go('signup')} onForgot={() => go('forgot')} onDone={() => finish(true)} theme={theme} lang={lang}/>}
-        {screen==='forgot'  && <AuthForgot  onBack={() => go('login')} theme={theme} lang={lang}/>}
-      </AuthScreenPane>
-    </div>
-  );
-}
-
-// ─── Mini Date Picker (used inside EntryEditor) ────────────
 function MiniDatePicker({ value, onChange, onClose, theme, lang }) {
   const i = I18N[lang||'en'];
   const init = value.split('-').map(Number);
@@ -4894,6 +3691,11 @@ function EntryEditor({onClose, onSave, theme, lang, editEntry, initialDate, allE
   }, []);
 
   const close    = () => { setOpen(false); setTimeout(onClose, 320); };
+  React.useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') close(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
   const canSave  = (luckyRef.current?.value || lucky).trim().length > 0;
 
   const goNext = () => {
@@ -4980,6 +3782,7 @@ function EntryEditor({onClose, onSave, theme, lang, editEntry, initialDate, allE
       id:        editEntry?.id        || 'new-' + Date.now(),
       date:      entryDate,
       createdAt: editEntry?.createdAt || Date.now(),
+      updatedAt: Date.now(),
       lucky:     lucky.trim(),
       mood:      'lucky',
       tags:      finalTags,
@@ -5000,15 +3803,15 @@ function EntryEditor({onClose, onSave, theme, lang, editEntry, initialDate, allE
   };
 
   return (
-    <div ref={editorContainerRef} style={{position:'absolute',inset:0,zIndex:300,display:'flex',flexDirection:'column'}}>
+    <div ref={editorContainerRef} className="clovery-editor-overlay" style={{position:'absolute',inset:0,zIndex:300}}>
       <div onClick={close} style={{
         position:'absolute', inset:0,
         background:'rgba(20,30,20,0.35)', backdropFilter:'blur(6px)', WebkitBackdropFilter:'blur(6px)',
         opacity: open?1:0, transition:'opacity 320ms',
       }}/>
-      <div style={{
-        marginTop:72, flex:1, position:'relative',
-        background:theme.bg, borderRadius:'30px 30px 0 0',
+      <div className="clovery-editor-box" style={{
+        position:'relative',
+        background:theme.bg,
         transform: open?'translateY(0)':'translateY(100%)',
         transition:'transform 380ms cubic-bezier(0.16,1,0.3,1)',
         boxShadow:'0 -10px 40px rgba(0,0,0,0.18)',
@@ -5409,6 +4212,11 @@ function SearchOverlay({onClose, entries, onOpenEntry, theme, lang}) {
   const [q, setQ]             = React.useState('');
   const [closing, setClosing] = React.useState(false);
   const close = () => { setClosing(true); setTimeout(onClose, 220); };
+  React.useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') close(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   const results = (q.trim()
     ? entries.filter(e =>
@@ -5427,7 +4235,7 @@ function SearchOverlay({onClose, entries, onOpenEntry, theme, lang}) {
       opacity: closing?0:1, transition:'opacity 220ms',
       display:'flex', flexDirection:'column',
     }}>
-      <div style={{paddingTop:'calc(var(--sat) + 10px)', paddingLeft:16, paddingRight:16, paddingBottom:14, display:'flex', gap:10, alignItems:'center', boxSizing:'border-box', width:'100%'}}>
+      <div className="clovery-page" style={{paddingTop:'calc(var(--sat) + 10px)', paddingLeft:16, paddingRight:16, paddingBottom:14, display:'flex', gap:10, alignItems:'center', boxSizing:'border-box', width:'100%'}}>
         {/* Back button */}
         <SpringTap onClick={close} style={{
           width:40, height:40, borderRadius:20, flexShrink:0,
@@ -5474,7 +4282,7 @@ function SearchOverlay({onClose, entries, onOpenEntry, theme, lang}) {
         </div>
       )}
 
-      <div style={{flex:1, overflowY:'auto', padding:'0 16px 60px'}} className="no-scrollbar">
+      <div style={{flex:1, overflowY:'auto', padding:'0 16px 60px'}} className="no-scrollbar clovery-page">
         {q && (
           <div style={{padding:'0 8px 12px', fontSize:16, color:theme.inkMuted}}>
             {i.matches(results.length)}
@@ -5493,7 +4301,7 @@ function SearchOverlay({onClose, entries, onOpenEntry, theme, lang}) {
                 filter: theme._dark ? 'brightness(0) invert(1)' : 'none',
                 opacity: theme._dark ? 0.7 : 1,
               }}/>
-              <div style={{fontSize:18, color:theme.inkSoft, fontFamily:'Gaegu, cursive', marginTop:6}}>
+              <div style={{fontSize:18, color:theme.inkSoft, marginTop:6}}>
                 {lang==='zh' ? '嗯呐找不到呢… (•᷄⌓•᷅)' : lang==='ja' ? '見つからないよ… (•᷄⌓•᷅)' : lang==='ko' ? '못 찾겠어요… (•᷄⌓•᷅)' : "Can't find anything… (•᷄⌓•᷅)"}
               </div>
               <div style={{fontSize:14, color:theme.inkMut || theme.inkMuted, marginTop:2}}>
@@ -5519,6 +4327,11 @@ function EntryDetail({entry, entries, onClose, theme, lang, onEdit, onDelete, on
     requestAnimationFrame(() => requestAnimationFrame(() => setOpen(true)));
   }, []);
   const close = () => { setOpen(false); setTimeout(onClose, 320); };
+  React.useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') close(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
 
   const handleDelete = (id) => {
@@ -5577,7 +4390,7 @@ function EntryDetail({entry, entries, onClose, theme, lang, onEdit, onDelete, on
       }}>
 
         {/* Top bar: add entry for this day + share + close */}
-        <div style={{
+        <div className="clovery-page" style={{
           display:'flex', alignItems:'center', justifyContent:'space-between',
           padding:'calc(var(--sat) + 8px) 20px 4px', flexShrink:0,
         }}>
@@ -5608,7 +4421,7 @@ function EntryDetail({entry, entries, onClose, theme, lang, onEdit, onDelete, on
         </div>
 
         {/* Scrollable diary content */}
-        <div style={{flex:1, overflowY:'auto', padding:'14px 28px 60px'}} className="no-scrollbar">
+        <div style={{flex:1, overflowY:'auto', padding:'14px 28px 60px'}} className="no-scrollbar clovery-page">
 
           {/* ── Date header (KEEP EXACTLY) ── */}
           <div style={{textAlign:'center', marginBottom:24}}>
@@ -5690,8 +4503,7 @@ function EntryDetail({entry, entries, onClose, theme, lang, onEdit, onDelete, on
                         display:'flex', alignItems:'center', gap:6,
                         fontSize:16, color:accentClr,
                         letterSpacing:1.6, fontWeight:700,
-                        fontFamily:'Gaegu, cursive',
-                      }}>
+                                              }}>
                         <img src={ENVELOPE_SRC} style={{width:16, height:16, objectFit:'contain', flexShrink:0, filter: isDark ? 'brightness(0) invert(1)' : 'none'}}/>
                         {letterLabel}
                       </div>
@@ -5745,8 +4557,7 @@ function EntryDetail({entry, entries, onClose, theme, lang, onEdit, onDelete, on
                             <div style={{
                               textAlign:'center', marginTop:5,
                               fontSize:15, color:'#999',
-                              fontFamily:'Gaegu, cursive',
-                            }}>{lang==='zh'?'嗯呐':'ena'} ♡</div>
+                                                          }}>{lang==='zh'?'嗯呐':'ena'} ♡</div>
                           </div>
                           );
                         })()}
@@ -5756,15 +4567,13 @@ function EntryDetail({entry, entries, onClose, theme, lang, onEdit, onDelete, on
                           <div style={{
                             fontSize:17, fontWeight:700,
                             color: accentClr,
-                            fontFamily:'Gaegu, cursive',
-                            marginBottom:8, lineHeight:1.3,
+                                                        marginBottom:8, lineHeight:1.3,
                           }}>
                             {greeting}
                           </div>
                           <div style={{
                             fontSize:17, color: bodyClr,
-                            fontFamily:'Gaegu, cursive',
-                            lineHeight:1.6, opacity:0.85,
+                                                        lineHeight:1.6, opacity:0.85,
                           }}>
                             {dLucky}
                           </div>
@@ -5776,8 +4585,7 @@ function EntryDetail({entry, entries, onClose, theme, lang, onEdit, onDelete, on
                         <div style={{
                           fontSize:16, color: bodyClr,
                           lineHeight:1.95,
-                          fontFamily:'Gaegu, cursive',
-                          whiteSpace:'pre-line',
+                                                    whiteSpace:'pre-line',
                           borderTop:`1px dashed ${dashedClr}`,
                           paddingTop:16,
                         }}>
@@ -5793,14 +4601,14 @@ function EntryDetail({entry, entries, onClose, theme, lang, onEdit, onDelete, on
                         textAlign:'right',
                       }}>
                         <div style={{
-                          fontSize:16, fontFamily:'Gaegu, cursive',
+                          fontSize:16,
                           color: accentClr, fontWeight:700,
                         }}>
                           {lang==='zh'?'来自. 嗯呐 🍀':'From. ena 🍀'}
                         </div>
                         <div style={{
                           fontSize:16, color:theme.inkMuted,
-                          marginTop:3, fontFamily:'Gaegu, cursive',
+                          marginTop:3,
                         }}>
                           {signOff}
                         </div>
@@ -5845,7 +4653,7 @@ function EntryDetail({entry, entries, onClose, theme, lang, onEdit, onDelete, on
                       }}>
                         <div style={{
                           fontSize:13, color:theme.accentDark,
-                          fontFamily:'Gaegu, cursive', letterSpacing:0.4, fontWeight:600,
+                          letterSpacing:0.4, fontWeight:600,
                         }}>
                           ✦ {eTime || i.todaysLuck}
                         </div>
@@ -5873,7 +4681,7 @@ function EntryDetail({entry, entries, onClose, theme, lang, onEdit, onDelete, on
                       {/* Lucky headline */}
                       <div style={{
                         fontSize:19, color:theme.ink, lineHeight:'28px',
-                        fontFamily:'Gaegu, cursive', whiteSpace:'pre-line',
+                        whiteSpace:'pre-line',
                       }}>
                         {wrapKaomoji(dL)}
                       </div>
@@ -5882,8 +4690,7 @@ function EntryDetail({entry, entries, onClose, theme, lang, onEdit, onDelete, on
                         <div style={{
                           fontSize:16, color:theme.inkSoft, lineHeight:1.8,
                           whiteSpace:'pre-line', marginTop:8,
-                          fontFamily:'Gaegu, cursive',
-                          borderTop:`1px solid ${dividerClr}`, paddingTop:8,
+                                                    borderTop:`1px solid ${dividerClr}`, paddingTop:8,
                         }}>
                           {wrapKaomoji(dT)}
                         </div>
@@ -5907,8 +4714,7 @@ function EntryDetail({entry, entries, onClose, theme, lang, onEdit, onDelete, on
                               padding:'3px 10px', borderRadius:9999,
                               background:theme.accentSoft, fontSize:13,
                               color:theme.accentDark, fontWeight:600,
-                              fontFamily:'Gaegu, cursive',
-                            }}>#{t}</span>
+                                                          }}>#{t}</span>
                           ))}
                         </div>
                       )}
@@ -5926,7 +4732,7 @@ function EntryDetail({entry, entries, onClose, theme, lang, onEdit, onDelete, on
       {/* Floating board button — always rendered, hidden behind sheet (zIndex:350 > 50) */}
       {!entry.isWelcome && (
         <div style={{
-          position:'absolute', bottom:'calc(var(--sab) + 24px)', right:20, zIndex:50,
+          position:'absolute', bottom:'calc(var(--sab) + 24px)', right:'max(20px, calc(50% - 320px))', zIndex:50,
           opacity: open && !shareOpen ? 1 : 0,
           transform: open && !shareOpen ? 'translateY(0)' : 'translateY(20px)',
           transition: 'opacity 280ms, transform 280ms cubic-bezier(0.16,1,0.3,1)',
@@ -6035,15 +4841,24 @@ function Sheet({onClose, theme, title, children, tallness, full, slideFrom}) {
     requestAnimationFrame(() => requestAnimationFrame(() => setOpen(true)));
   }, []);
   const close = () => { setOpen(false); setTimeout(onClose, 320); };
+  React.useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') close(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
   const fromRight = full && slideFrom === 'right';
   return (
-    <div style={{position:'absolute', inset:0, zIndex:350, display:'flex', flexDirection:'column'}}>
+    <div className="clovery-sheet-overlay" style={{position:'absolute', inset:0, zIndex:350}}>
       {!full && <div onClick={close} style={{
         position:'absolute', inset:0,
         background:'rgba(20,30,20,0.32)', backdropFilter:'blur(5px)', WebkitBackdropFilter:'blur(5px)',
         opacity:open?1:0, transition:'opacity 300ms',
       }}/>}
-      <div style={{
+      {full && <div onClick={close} style={{
+        position:'absolute', inset:0, background:'rgba(15,20,16,0.28)',
+        opacity:open?1:0, transition:'opacity 300ms',
+      }}/>}
+      <div className={full ? 'clovery-sheet-box-full' : 'clovery-sheet-box-modal'} style={{
         position:'absolute',
         ...(fromRight
           ? {top:0, bottom:0, right:0, left:0, height:'100%', borderRadius:0}
@@ -6293,9 +5108,21 @@ function TagsSheet({entries, onClose, onUpdateEntries, theme, lang, tagOrder: ta
   const confirmRename = () => {
     const clean = editValue.trim().replace(/^#+/, '').trim();
     if (!clean || clean === editingTag) { cancelEdit(); return; }
-    onUpdateEntries(prev => prev.map(e => ({
-      ...e, tags: (e.tags||[]).map(t => t === editingTag ? clean : t),
-    })));
+    const now = Date.now();
+    const changedEntries = [];
+    onUpdateEntries(prev => prev.map(e => {
+      if (!(e.tags||[]).includes(editingTag)) return e;
+      const next = {
+        ...e,
+        tags: (e.tags||[]).map(t => t === editingTag ? clean : t),
+        updatedAt: now,
+      };
+      if (!next.isWelcome) changedEntries.push(next);
+      return next;
+    }));
+    if (changedEntries.length > 0) {
+      try { window.webkit?.messageHandlers?.cloudkit?.postMessage({action:'pushBatch', entries: JSON.stringify(changedEntries)}); } catch(e) {}
+    }
     if (tagOrder) saveOrder(tagOrder.map(t => t === editingTag ? clean : t));
     cancelEdit();
   };
@@ -6304,9 +5131,21 @@ function TagsSheet({entries, onClose, onUpdateEntries, theme, lang, tagOrder: ta
   const handleDelete = (tag) => {
     if (confirmDeleteTag === tag) {
       Haptic.notification('warning');
-      onUpdateEntries(prev => prev.map(e => ({
-        ...e, tags: (e.tags||[]).filter(t => t !== tag),
-      })));
+      const now = Date.now();
+      const changedEntries = [];
+      onUpdateEntries(prev => prev.map(e => {
+        if (!(e.tags||[]).includes(tag)) return e;
+        const next = {
+          ...e,
+          tags: (e.tags||[]).filter(t => t !== tag),
+          updatedAt: now,
+        };
+        if (!next.isWelcome) changedEntries.push(next);
+        return next;
+      }));
+      if (changedEntries.length > 0) {
+        try { window.webkit?.messageHandlers?.cloudkit?.postMessage({action:'pushBatch', entries: JSON.stringify(changedEntries)}); } catch(e) {}
+      }
       if (tagOrder) saveOrder(tagOrder.filter(t => t !== tag));
       setConfirmDeleteTag(null);
     } else {
@@ -6544,7 +5383,7 @@ function ReviewSheet({onClose, theme, lang}) {
 }
 
 Object.assign(window, {
-  EntryCard, AuthFlow, EntryEditor, SearchOverlay, EntryDetail,
+  EntryCard, EntryEditor, SearchOverlay, EntryDetail,
   Sheet, ProfileSheet, TagsSheet, TimePickerSheet, ReviewSheet,
 });
 
@@ -6567,18 +5406,22 @@ function MilestoneCelebrationSheet({ milestone, lang, theme, onClose }) {
   }, []);
 
   const close = () => { setOpen(false); setTimeout(onClose, 340); };
+  React.useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') close(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
 
   return (
-    <div style={{
+    <div className="clovery-paywall-overlay" style={{
       position:'absolute', inset:0, zIndex:480,
       background: open ? 'rgba(0,0,0,0.32)' : 'rgba(0,0,0,0)',
       transition:'background 340ms',
-      display:'flex', alignItems:'flex-end',
     }} onClick={close}>
-      <div onClick={e => e.stopPropagation()} style={{
-        width:'100%', background:theme.bg,
-        borderRadius:'28px 28px 0 0',
+      <div className="clovery-paywall-card" onClick={e => e.stopPropagation()} style={{
+        background:theme.bg,
         padding:'10px 30px 58px',
+        boxSizing:'border-box',
         transform: open ? 'translateY(0)' : 'translateY(100%)',
         transition:'transform 440ms cubic-bezier(0.16,1,0.3,1)',
         boxShadow:'0 -8px 40px rgba(0,0,0,0.14)',
@@ -6638,68 +5481,6 @@ function MilestoneCelebrationSheet({ milestone, lang, theme, onClose }) {
   );
 }
 
-// ── Sync nudge — shown after first real entry when in guest mode ──
-function SyncNudgeSheet({ onSignUp, onLogin, onDismiss, theme, lang }) {
-  const i = I18N[lang||'en'];
-  const [open, setOpen] = React.useState(false);
-  React.useEffect(() => {
-    requestAnimationFrame(() => requestAnimationFrame(() => setOpen(true)));
-  }, []);
-  const dismiss = () => { setOpen(false); setTimeout(onDismiss, 300); };
-  return (
-    <div style={{
-      position:'absolute', inset:0, zIndex:400,
-      background: open ? 'rgba(0,0,0,0.28)' : 'rgba(0,0,0,0)',
-      transition: 'background 300ms',
-      display:'flex', alignItems:'flex-end',
-    }} onClick={dismiss}>
-      <div onClick={e => e.stopPropagation()} style={{
-        width:'100%', background:theme.bg,
-        borderRadius:'26px 26px 0 0',
-        padding:'10px 28px 52px',
-        transform: open ? 'translateY(0)' : 'translateY(100%)',
-        transition: 'transform 400ms cubic-bezier(0.16,1,0.3,1)',
-      }}>
-        {/* drag handle */}
-        <div style={{width:40, height:4, borderRadius:2, background:theme.divider, margin:'8px auto 24px'}}/>
-        <div style={{textAlign:'center', marginBottom:8}}>
-          <Clover size={48} animation="float" color={theme.accent}/>
-        </div>
-        <div style={{fontSize:22, fontWeight:700, color:theme.ink, textAlign:'center', marginBottom:10, letterSpacing:-0.3}}>
-          {i.syncNudgeTitle||'Back up your luck ☁️'}
-        </div>
-        <div style={{fontSize:16, color:theme.inkSoft, lineHeight:1.6, textAlign:'center', marginBottom:28, padding:'0 8px'}}>
-          {i.syncNudgeBody||'Create a free account to keep your diary safe and sync across your devices.'}
-        </div>
-        <SpringTap onClick={onSignUp} style={{
-          display:'block', background:theme.accent, color:'#fff',
-          padding:'17px 24px', borderRadius:9999,
-          textAlign:'center', fontSize:16, fontWeight:700,
-          marginBottom:10,
-          boxShadow:`0 4px 18px ${theme.accent}44`,
-        }}>
-          {i.syncNudgeCta||'Create account'}
-        </SpringTap>
-        <SpringTap onClick={onLogin} style={{
-          display:'block',
-          padding:'13px 24px', borderRadius:9999,
-          textAlign:'center', fontSize:16, fontWeight:500,
-          color:theme.accentDark, marginBottom:4,
-        }}>
-          {i.authHaveAccount||'I already have an account'}
-        </SpringTap>
-        <SpringTap onClick={dismiss} style={{
-          display:'block',
-          padding:'10px', textAlign:'center',
-          fontSize:17, color:theme.inkMuted,
-        }}>
-          {i.syncNudgeLater||'Maybe later'}
-        </SpringTap>
-      </div>
-    </div>
-  );
-}
-// =====================================================
 
 const DEFAULTS = /*EDITMODE-BEGIN*/{"palette":"clover","dark":false,"darkAuto":true,"fontHand":"Gaegu","bgPattern":"none"}/*EDITMODE-END*/;
 
@@ -6903,8 +5684,7 @@ function WelcomeLetterFlow({ theme, lang, onClose, onName, startStep = 0, onlyFi
                 border:`2px solid ${theme.accent}`,
                 background: isDark ? '#1E2C1C' : '#F5FAF4',
                 color: inkColor, fontSize:19, outline:'none',
-                fontFamily:'Gaegu, cursive',
-                marginBottom:18, textAlign:'center',
+                                marginBottom:18, textAlign:'center',
                 WebkitAppearance:'none',
               }}
             />
@@ -7090,7 +5870,7 @@ function WelcomeLetterFlow({ theme, lang, onClose, onName, startStep = 0, onlyFi
             <div style={{flex:1, overflowY:'auto', padding:'20px 22px 8px'}} className="no-scrollbar">
               {/* Greeting */}
               <div style={{
-                fontSize:15, color:inkColor, fontFamily:'Gaegu, cursive',
+                fontSize:15, color:inkColor,
                 marginBottom:12, opacity:0.8, lineHeight:1.5,
                 animation:'letterRise 380ms 60ms both',
               }}>
@@ -7099,7 +5879,7 @@ function WelcomeLetterFlow({ theme, lang, onClose, onName, startStep = 0, onlyFi
               {/* Body */}
               <div style={{
                 fontSize:16.5, color:inkColor, lineHeight:1.95,
-                fontFamily:'Gaegu, cursive', whiteSpace:'pre-line',
+                whiteSpace:'pre-line',
                 animation:'letterRise 480ms 120ms both',
               }}>
                 {letter.content}
@@ -7116,7 +5896,7 @@ function WelcomeLetterFlow({ theme, lang, onClose, onName, startStep = 0, onlyFi
                     {zh?'写信人':'From'}
                   </div>
                   <div style={{fontSize:17, fontWeight:700, color:theme.accent,
-                    fontFamily:'Gaegu, cursive'}}>
+                    }}>
                     {zh?'爱你的嗯呐 ✦':ja?'enaより ✦':ko?'ena가 ✦':'With love, ena ✦'}
                   </div>
                 </div>
@@ -7693,6 +6473,11 @@ function BoardPaywall({ theme, lang, onClose, onPurchase, onRestore, purchasing,
   const [open, setOpen] = React.useState(false);
   React.useEffect(() => { requestAnimationFrame(() => requestAnimationFrame(() => setOpen(true))); }, []);
   const close = () => { setOpen(false); setTimeout(onClose, 320); };
+  React.useEffect(() => {
+    const onKey = (e) => { if (e.key === 'Escape') close(); };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
   const isDark = theme._dark;
   const zh = lang === 'zh';
 
@@ -7701,7 +6486,7 @@ function BoardPaywall({ theme, lang, onClose, onPurchase, onRestore, purchasing,
     : ['Drag diary, photos & stickers','5 theme colors to choose from','Custom layout your personal board','Lifetime access, one-time purchase'];
 
   return (
-    <div style={{position:'fixed', inset:0, zIndex:900, display:'flex', alignItems:'flex-end'}}>
+    <div className="clovery-paywall-overlay" style={{position:'fixed', inset:0, zIndex:900}}>
       {/* Backdrop */}
       <div onClick={close} style={{
         position:'absolute', inset:0, background:'rgba(0,0,0,0.45)',
@@ -7709,9 +6494,9 @@ function BoardPaywall({ theme, lang, onClose, onPurchase, onRestore, purchasing,
         opacity:open?1:0, transition:'opacity 300ms'
       }}/>
       {/* Card */}
-      <div style={{
-        position:'relative', width:'100%', background:theme.bg,
-        borderRadius:'28px 28px 0 0', overflow:'hidden',
+      <div className="clovery-paywall-card" style={{
+        position:'relative', background:theme.bg,
+        overflow:'hidden',
         boxShadow:'0 -8px 48px rgba(0,0,0,0.22)',
         transform:open?'translateY(0)':'translateY(100%)',
         transition:'transform 380ms cubic-bezier(0.16,1,0.3,1)',
@@ -7904,13 +6689,26 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
     window._boardPriceResult = (price) => {
       if (price) setBoardPrice(price);
     };
+    window._boardTrialCount = (nativeCount) => {
+      const parsed = Number(nativeCount);
+      if (!Number.isNaN(parsed) && parsed >= 0) {
+        const bounded = Math.min(parsed, BOARD_TRIAL_MAX);
+        setBoardTrialCount(bounded);
+        try { localStorage.setItem('clovery_board_trial_count', String(bounded)); } catch(e) {}
+      }
+    };
     window.webkit?.messageHandlers?.checkBoardUnlocked?.postMessage({});
     window.webkit?.messageHandlers?.fetchBoardPrice?.postMessage({});
+    try {
+      const localCnt = Math.min(parseInt(localStorage.getItem('clovery_board_trial_count') || '0', 10) || 0, BOARD_TRIAL_MAX);
+      window.webkit?.messageHandlers?.boardTrial?.postMessage({ action: 'sync', localCount: localCnt });
+    } catch(e) {}
     return () => {
       window._boardUnlockStatus = null;
       window._boardPurchaseResult = null;
       window._boardRestoreResult = null;
       window._boardPriceResult = null;
+      window._boardTrialCount = null;
     };
   }, []);
 
@@ -7928,8 +6726,9 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
 
   // ── Confirm trial use → increment count → execute pending action ──
   const confirmTrial = () => {
-    const next = boardTrialCount + 1;
+    const next = Math.min(boardTrialCount + 1, BOARD_TRIAL_MAX);
     try { localStorage.setItem('clovery_board_trial_count', String(next)); } catch(e) {}
+    try { window.webkit?.messageHandlers?.boardTrial?.postMessage({ action: 'increment', localCount: next }); } catch(e) {}
     setBoardTrialCount(next);
     setTrialConfirmOpen(false);
     const action = pendingAction;
@@ -7955,10 +6754,23 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
   const [isDraggingBoard, setIsDraggingBoard] = React.useState(false);
 
   React.useLayoutEffect(() => {
-    if (boardRef.current) {
-      const w = boardRef.current.offsetWidth;
+    const el = boardRef.current;
+    if (!el) return;
+    const update = () => {
+      const w = el.offsetWidth;
       if (w > 0) setBoardScale(w / 810);
+    };
+    update();
+    let ro = null;
+    if (typeof ResizeObserver !== 'undefined') {
+      ro = new ResizeObserver(update);
+      ro.observe(el);
     }
+    window.addEventListener('resize', update);
+    return () => {
+      if (ro) ro.disconnect();
+      window.removeEventListener('resize', update);
+    };
   }, []);
 
   // ── Data ──
@@ -8382,7 +7194,7 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
       <div style={{display:'flex', flexDirection:'column', height:'100%', overflow:'hidden'}}>
 
         {/* ── Interactive board ── */}
-        <div style={{flex:'1 1 auto', position:'relative', display:'flex', alignItems:'center',
+        <div style={{flex:'1 1 auto', minHeight:0, overflow:'hidden', position:'relative', display:'flex', alignItems:'center',
           justifyContent:'center', padding:'4px 14px',
           background: isDark?'rgba(0,0,0,0.18)':'rgba(0,0,0,0.04)'}}>
 
@@ -8401,7 +7213,7 @@ function ShareCardSheet({ entries, theme, lang, onClose }) {
           <div ref={boardRef} style={{
               position:'relative',
               width:'100%',
-              maxWidth:'calc((100vh - var(--sat) - 354px) * 0.75)',
+              maxWidth:'min(480px, calc((100vh - var(--sat) - 354px) * 0.75))',
               aspectRatio:'3 / 4',
               flexShrink:0,
             }}>
@@ -9007,21 +7819,118 @@ function PhotoImg({ src, style, ...props }) {
 // (deletes are never pushed — see deleteEntry), so a later sync would
 // otherwise add them right back. Filter anything in this tombstone list out
 // of incoming cloud data before merging.
-function getDeletedIds() {
-  try { return new Set(JSON.parse(localStorage.getItem('clovery_deleted_ids') || '[]')); }
-  catch(e) { return new Set(); }
+function getDeletedMap() {
+  let map = {};
+  try {
+    const rawMap = localStorage.getItem('clovery_deleted_map');
+    if (rawMap) {
+      const parsed = JSON.parse(rawMap);
+      if (parsed && typeof parsed === 'object' && !Array.isArray(parsed)) {
+        map = { ...parsed };
+      }
+    }
+  } catch(e) {}
+  try {
+    const rawIds = JSON.parse(localStorage.getItem('clovery_deleted_ids') || '[]');
+    if (Array.isArray(rawIds)) {
+      let migrated = false;
+      const fallbackTs = Date.now();
+      for (const id of rawIds) {
+        if (typeof id === 'string' && id && map[id] == null) {
+          map[id] = fallbackTs;
+          migrated = true;
+        }
+      }
+      if (migrated) {
+        localStorage.setItem('clovery_deleted_map', JSON.stringify(map));
+      }
+    }
+  } catch(e) {}
+  return map;
 }
 
-function mergeEntries(local, cloud) {
-  if (!Array.isArray(cloud) || cloud.length === 0) return local;
-  const deletedIds = getDeletedIds();
-  if (deletedIds.size > 0) cloud = cloud.filter(e => !e || !deletedIds.has(e.id));
-  if (cloud.length === 0) return local;
-  if (!Array.isArray(local) || local.length === 0) return cloud;
-  // Local data is always the source of truth.
-  // Cloud only ADDS entries that don't exist locally — never overwrites.
+function saveDeletedMap(map) {
+  const clean = {};
+  for (const [k, v] of Object.entries(map || {})) {
+    if (k) clean[k] = Number(v) || Date.now();
+  }
+  try {
+    localStorage.setItem('clovery_deleted_map', JSON.stringify(clean));
+    localStorage.setItem('clovery_deleted_ids', JSON.stringify(Object.keys(clean)));
+  } catch(e) {}
+  return clean;
+}
+
+function mergeDeletedMap(incoming) {
+  let parsed = incoming;
+  if (typeof incoming === 'string') {
+    try { parsed = JSON.parse(incoming); } catch(e) { parsed = null; }
+  }
+  const current = getDeletedMap();
+  if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return current;
+  let changed = false;
+  for (const [id, ts] of Object.entries(parsed)) {
+    if (!id) continue;
+    const incomingTs = Number(ts) || 0;
+    const prevTs = Number(current[id] || 0);
+    if (current[id] == null || incomingTs > prevTs) {
+      current[id] = incomingTs || Date.now();
+      changed = true;
+    }
+  }
+  return changed ? saveDeletedMap(current) : current;
+}
+
+function getDeletedIds() {
+  return new Set(Object.keys(getDeletedMap()));
+}
+
+function mergeEntries(local, cloud, options = {}) {
+  const source = options.source || 'cloudkit';
+  const deletedMap = { ...(options.deletedMap || getDeletedMap()) };
+  let deletedMapDirty = false;
+  const incoming = Array.isArray(cloud) ? cloud : [];
+  const activeCloud = [];
+
+  for (const e of incoming) {
+    if (!e || !e.id) continue;
+    if (e.isDeleted) {
+      const delTs = Number(e.deletedAt || e.updatedAt || Date.now());
+      if (deletedMap[e.id] == null || delTs > Number(deletedMap[e.id] || 0)) {
+        deletedMap[e.id] = delTs;
+        deletedMapDirty = true;
+      }
+      continue;
+    }
+    const cloudTs = Number(e.updatedAt || e.createdAt || 0);
+    const localDelTs = deletedMap[e.id];
+    if (localDelTs != null && Number(localDelTs) >= cloudTs) {
+      continue;
+    }
+    activeCloud.push(e);
+  }
+  if (deletedMapDirty) {
+    saveDeletedMap(deletedMap);
+  }
+
+  const baseLocal = Array.isArray(local) ? local : [];
   const localMap = new Map();
-  for (const e of local) { if (e && e.id) localMap.set(e.id, e); }
+  let changed = false;
+  for (const e of baseLocal) {
+    if (!e || !e.id) continue;
+    const localTs = Number(e.updatedAt || e.createdAt || 0);
+    const delTs = deletedMap[e.id];
+    if (delTs != null && Number(delTs) >= localTs) {
+      changed = true;
+      continue;
+    }
+    localMap.set(e.id, e);
+  }
+
+  if (activeCloud.length === 0) {
+    return changed ? Array.from(localMap.values()) : baseLocal;
+  }
+
   // Two devices can independently write the same diary (same date + same
   // text) before they've had a chance to sync — each gets its own id, so a
   // plain id-based merge would add it twice. Index existing entries by
@@ -9034,15 +7943,24 @@ function mergeEntries(local, cloud) {
   };
   const byContent = new Map();
   for (const e of localMap.values()) { if (e && !e.isWelcome) byContent.set(contentKey(e), e.id); }
-  let changed = false;
-  for (const e of cloud) {
+
+  for (const e of activeCloud) {
     if (!e || !e.id) continue;
     if (localMap.has(e.id)) {
-      // Entry exists locally — never overwrite, but fill in photos if the
-      // local copy is missing them and the incoming copy has some (recovers
-      // from partial data loss without ever discarding existing photos).
       const localEntry = localMap.get(e.id);
-      if ((!localEntry.photos || localEntry.photos.length === 0) &&
+      const localTs = Number(localEntry.updatedAt || localEntry.createdAt || 0);
+      const cloudTs = Number(e.updatedAt || e.createdAt || 0);
+      if (cloudTs > localTs) {
+        const nextEntry = { ...localEntry, ...e };
+        if (source === 'kv' && (!Array.isArray(e.photos) || e.photos.length === 0) &&
+            Array.isArray(localEntry.photos) && localEntry.photos.length > 0) {
+          nextEntry.photos = localEntry.photos;
+        } else if (Array.isArray(e.photos) && e.photos.length === 0) {
+          delete nextEntry.photos;
+        }
+        localMap.set(e.id, nextEntry);
+        changed = true;
+      } else if ((!localEntry.photos || localEntry.photos.length === 0) &&
           Array.isArray(e.photos) && e.photos.length > 0) {
         localMap.set(e.id, { ...localEntry, photos: e.photos });
         changed = true;
@@ -9067,7 +7985,7 @@ function mergeEntries(local, cloud) {
     byContent.set(contentKey(e), e.id);
     changed = true;
   }
-  return changed ? Array.from(localMap.values()) : local;
+  return changed ? Array.from(localMap.values()) : baseLocal;
 }
 
 
@@ -9291,24 +8209,56 @@ function App() {
     return () => clearTimeout(id);
   }, []);
 
-  // One-time migration: push every existing entry up to CloudKit so older
-  // installs (from before photo sync existed) get backfilled. Waits until
-  // the photo-file migration above has finished (entries must hold filename
-  // refs, not legacy base64, before CloudKit can read them off disk).
-  const ckMigratedRef = React.useRef(false);
-  React.useEffect(() => {
-    if (ckMigratedRef.current) return;
-    if (localStorage.getItem('clovery_ck_migrated')) { ckMigratedRef.current = true; return; }
-    const stillLegacy = entries.some(e => Array.isArray(e.photos) && e.photos.some(isLegacyPhoto));
-    if (stillLegacy) return;
-    ckMigratedRef.current = true;
-    try { localStorage.setItem('clovery_ck_migrated', '1'); } catch(e) {}
-    for (const e of entries) {
-      if (e && !e.isWelcome) {
-        try { window.webkit?.messageHandlers?.cloudkit?.postMessage({action:'push', entry: JSON.stringify(e)}); } catch(err) {}
+  const [syncStatus, setSyncStatus] = React.useState({ state: 'idle', entryCount: 0, syncedAt: null, error: null });
+  const appActionsRef = React.useRef({});
+
+  const pushMissingToCloudKit = React.useCallback((mergedList, cloudList) => {
+    if (!Array.isArray(mergedList)) return;
+    if (mergedList.some(e => Array.isArray(e.photos) && e.photos.some(isLegacyPhoto))) return;
+    const cloudById = new Map();
+    for (const c of (cloudList || [])) {
+      if (c && c.id) cloudById.set(c.id, c);
+    }
+    const toPush = [];
+    for (const item of mergedList) {
+      if (!item || item.isWelcome) continue;
+      const c = cloudById.get(item.id);
+      const localTs = Number(item.updatedAt || item.createdAt || 0);
+      const cloudTs = Number(c?.updatedAt || c?.createdAt || 0);
+      if (!c || (!c.isDeleted && localTs > cloudTs)) {
+        toPush.push(item);
       }
     }
-  }, [entries]);
+    if (toPush.length > 0) {
+      try {
+        window.webkit?.messageHandlers?.cloudkit?.postMessage({
+          action: 'pushBatch',
+          entries: JSON.stringify(toPush),
+        });
+      } catch(e) {}
+    }
+    const curDeleted = getDeletedMap();
+    for (const [delId, delAt] of Object.entries(curDeleted)) {
+      const c = cloudById.get(delId);
+      const cloudTs = Number(c?.updatedAt || c?.createdAt || 0);
+      if (c && !c.isDeleted && Number(delAt || 0) >= cloudTs) {
+        try {
+          window.webkit?.messageHandlers?.cloudkit?.postMessage({
+            action: 'delete',
+            id: delId,
+            deletedAt: Number(delAt || Date.now()),
+          });
+        } catch(e) {}
+      }
+    }
+  }, []);
+
+  const triggerManualSync = React.useCallback(() => {
+    setSyncStatus(prev => ({ ...prev, state: 'syncing', error: null }));
+    try {
+      window.webkit?.messageHandlers?.cloudkit?.postMessage({ action: 'pull' });
+    } catch(e) {}
+  }, []);
 
   // Pull from CloudKit whenever the app comes back to the foreground, so
   // entries written elsewhere while this device was backgrounded show up
@@ -9347,51 +8297,121 @@ function App() {
           // backup (recovery if localStorage is ever wiped). Never sent to
           // iCloud KV store (photos would blow past the 1MB cap).
           full_entries: JSON.stringify(entries),
+          deleted_map: JSON.stringify(getDeletedMap()),
           lastModified: Date.now(),
         };
         if (profileName) msg.clovery_name = profileName;
         try {
           const tw = JSON.parse(localStorage.getItem('clovery_tweak')||'{}');
-          msg.widget_font = tw.fontHand || 'Gaegu';
-          msg.widget_palette = tw.palette || 'clover';
-          msg.widget_lang = localStorage.getItem('clovery_lang') || 'zh';
+          msg.widget_font = tw.fontHand || t.fontHand || 'Gaegu';
+          msg.widget_palette = tw.palette || t.palette || 'clover';
+          msg.widget_lang = localStorage.getItem('clovery_lang') || lang || 'zh';
+          msg.widget_dark = !!effectiveDark;
+          msg.clovery_tweak = JSON.stringify(tw);
         } catch(e) {}
         window.webkit.messageHandlers.icloud.postMessage(msg);
       }
     } catch(e) {}
-  }, [entries, profileName, t.fontHand, t.palette, lang]);
+  }, [entries, profileName, t.fontHand, t.palette, effectiveDark, lang]);
 
-  // iCloud: register callback so Swift can push remote changes into React state
+  // iCloud / CloudKit / Watch / DeepLink: register callbacks so Swift can push remote changes into React state
   React.useEffect(() => {
-    // Check for data that was injected before React mounted (startup sync)
+    const applyRemoteData = (data) => {
+      if (!data) return;
+      try {
+        const source = data.source || 'kv';
+        let dMap = getDeletedMap();
+        if (data.deleted_map) {
+          dMap = mergeDeletedMap(data.deleted_map);
+        }
+        const cloud = data.entries ? JSON.parse(data.entries) : [];
+        const baseLocal = entriesRef.current || [];
+        const nextEntries = mergeEntries(baseLocal, cloud, { source, deletedMap: dMap });
+        if (nextEntries !== baseLocal) {
+          entriesRef.current = nextEntries;
+          setEntries(nextEntries);
+          try { localStorage.setItem('clovery_entries', JSON.stringify(nextEntries)); } catch(e) {}
+          photoGC(allPhotoFilenames(nextEntries));
+        }
+        if (source === 'cloudkit') {
+          pushMissingToCloudKit(nextEntries, cloud);
+        }
+        if (data.clovery_name && typeof data.clovery_name === 'string' && data.clovery_name !== 'Sam') {
+          setProfileName(prev => prev || data.clovery_name);
+        }
+        if (data.clovery_lang && ['zh','en','ja','ko'].includes(data.clovery_lang) && !localStorage.getItem('clovery_lang')) {
+          setLang(data.clovery_lang);
+        }
+        if (data.clovery_tweak && !localStorage.getItem('clovery_tweak')) {
+          try {
+            const tw = JSON.parse(data.clovery_tweak);
+            if (tw && typeof tw === 'object') setTweak(tw);
+          } catch(e) {}
+        }
+      } catch(e) {}
+    };
+
+    const importWatchList = (watchList) => {
+      if (!Array.isArray(watchList) || watchList.length === 0) return;
+      try {
+        const dMap = getDeletedMap();
+        const normalized = watchList.filter(e => e && e.id && e.lucky && dMap[e.id] == null);
+        if (normalized.length === 0) return;
+        const baseLocal = entriesRef.current || [];
+        const nextEntries = mergeEntries(baseLocal, normalized, { source: 'watch', deletedMap: dMap });
+        if (nextEntries !== baseLocal) {
+          entriesRef.current = nextEntries;
+          setEntries(nextEntries);
+          try { localStorage.setItem('clovery_entries', JSON.stringify(nextEntries)); } catch(e) {}
+          try {
+            window.webkit?.messageHandlers?.cloudkit?.postMessage({
+              action: 'pushBatch',
+              entries: JSON.stringify(normalized),
+            });
+          } catch(e) {}
+        }
+      } catch(e) {}
+    };
+
     try {
       const pending = localStorage.getItem('clovery_icloud_pending');
       if (pending) {
         localStorage.removeItem('clovery_icloud_pending');
-        const data = JSON.parse(pending);
-        if (data.entries) {
-          const cloud = JSON.parse(data.entries);
-          setEntries(local => mergeEntries(local, cloud));
-        }
-        if (data.clovery_name && typeof data.clovery_name === 'string' && data.clovery_name !== 'Sam') {
-          setProfileName(prev => prev || data.clovery_name);
-        }
+        applyRemoteData(JSON.parse(pending));
       }
     } catch(e) {}
-    // Register live-sync callback for changes arriving while app is open
-    window.__clovery_applyICloud = (data) => {
-      if (!data) return;
-      try {
-        if (data.entries) {
-          const cloud = JSON.parse(data.entries);
-          setEntries(local => mergeEntries(local, cloud));
-        }
-        if (data.clovery_name && typeof data.clovery_name === 'string' && data.clovery_name !== 'Sam') {
-          setProfileName(prev => prev || data.clovery_name);
-        }
-      } catch(e) {}
+
+    try {
+      const pendingWatch = localStorage.getItem('clovery_watch_pending');
+      if (pendingWatch) {
+        localStorage.removeItem('clovery_watch_pending');
+        importWatchList(JSON.parse(pendingWatch));
+      }
+    } catch(e) {}
+
+    window.__clovery_applyICloud = applyRemoteData;
+    window.__cloveryCloudKitStatus = (status) => {
+      if (status && typeof status === 'object') setSyncStatus(status);
     };
-    return () => { delete window.__clovery_applyICloud; };
+    window.__cloveryImportWatchEntries = importWatchList;
+    window.__cloveryHandleDeepLink = (route) => {
+      appActionsRef.current.handleDeepLink?.(route);
+    };
+
+    try {
+      const pendingLink = localStorage.getItem('clovery_deeplink_pending');
+      if (pendingLink) {
+        localStorage.removeItem('clovery_deeplink_pending');
+        appActionsRef.current.handleDeepLink?.(pendingLink);
+      }
+    } catch(e) {}
+
+    return () => {
+      delete window.__clovery_applyICloud;
+      delete window.__cloveryCloudKitStatus;
+      delete window.__cloveryImportWatchEntries;
+      delete window.__cloveryHandleDeepLink;
+    };
   }, []);
 
   const [editorOpen,setEditorOpen]= React.useState(false);
@@ -9399,7 +8419,6 @@ function App() {
   const [editEntry, setEditEntry] = React.useState(null);
   const [searchOpen,setSearchOpen]= React.useState(false);
   const [selected,  setSelected]  = React.useState(null);
-  const [onboarded, setOnboarded] = React.useState(true); // always local guest mode
   const [confetti,  setConfetti]  = React.useState(false);
   const [milestoneCelebration, setMilestoneCelebration] = React.useState(null); // null | number
   const [settingsSheet, setSettingsSheet] = React.useState(null);
@@ -9500,20 +8519,46 @@ function App() {
   };
 
   const deleteEntry = (id) => {
+    const deletedAt = Date.now();
     setEntries(prev => {
       const next = prev.filter(e => e.id !== id);
       photoGC(allPhotoFilenames(next));
       return next;
     });
-    // Record the deletion locally so a later CloudKit/iCloud sync doesn't
-    // bring the entry back (its CloudKit record is intentionally never
-    // deleted — see CloudKitSync.swift — so without this it would resurface).
+    // Record the deletion locally as a timestamped tombstone and propagate
+    // to CloudKit so other devices also remove the entry.
     try {
-      const deleted = getDeletedIds();
-      deleted.add(id);
-      localStorage.setItem('clovery_deleted_ids', JSON.stringify([...deleted]));
+      const map = getDeletedMap();
+      map[id] = deletedAt;
+      saveDeletedMap(map);
+    } catch(e) {}
+    try {
+      window.webkit?.messageHandlers?.cloudkit?.postMessage({
+        action: 'delete',
+        id,
+        deletedAt,
+      });
     } catch(e) {}
     setSelected(null);
+  };
+
+  appActionsRef.current.handleDeepLink = (route) => {
+    setSearchOpen(false);
+    setSelected(null);
+    setSettingsSheet(null);
+    setActiveFormation(null);
+    if (route === 'write') {
+      setTab('home');
+      openEditor();
+    } else if (route === 'lucky') {
+      switchTab('lucky');
+    } else if (route === 'calendar') {
+      switchTab('calendar');
+    } else if (route === 'settings') {
+      switchTab('settings');
+    } else if (route === 'home') {
+      switchTab('home');
+    }
   };
 
   const screenContent = (
@@ -9523,7 +8568,7 @@ function App() {
       {tab==='lucky'    && <LuckyScreen    entries={entries} onOpenEntry={setSelected} onFormationTap={handleFormationTap} theme={theme} lang={lang}/>}
       {tab==='settings' && <SettingsScreen
         entries={entries}
-        theme={theme} onReset={() => setOnboarded(false)}
+        theme={theme}
         lang={lang} onLangChange={setLang}
         palette={t.palette} onPaletteChange={v => setTweak('palette', v)}
         dark={effectiveDark} onDarkChange={v => setTweak('dark', v)}
@@ -9532,14 +8577,15 @@ function App() {
         onSheet={setSettingsSheet} name={profileName} reminderTime={reminderTime}
         dailyOn={dailyOn}   setDailyOn={setDailyOn}
         weeklyOn={weeklyOn} setWeeklyOn={setWeeklyOn}
-        homeDisplayMode={homeDisplayMode} onHomeDisplayChange={updateHomeDisplayMode}/>}
+        homeDisplayMode={homeDisplayMode} onHomeDisplayChange={updateHomeDisplayMode}
+        syncStatus={syncStatus} onSyncNow={triggerManualSync}/>}
     </ScreenFade>
   );
 
   return (
     <>
       <Stage>
-          <div className="clover-app" style={{position:'fixed', inset:0, background:theme.bg, overflow:'hidden'}}>
+          <div className="clover-app" data-clovery-dark={effectiveDark ? '1' : '0'} style={{position:'fixed', inset:0, background:theme.bg, overflow:'hidden'}}>
             {t.bgPattern==='clovers' && <FloatingCloverBG count={6} color={theme.accent} opacity={t.dark?0.08:0.05}/>}
             {t.bgPattern==='dots' && (
               <div style={{position:'absolute',inset:0,pointerEvents:'none',
@@ -9625,51 +8671,7 @@ function App() {
             )}
           </div>
       </Stage>
-
-      <TweaksPanel title="Tweaks">
-        <TweakSection label="Theme"/>
-        <PaletteSwatches t={t} setTweak={setTweak}/>
-        <TweakToggle label="Night mode" value={effectiveDark} onChange={v => setTweak('dark', v)}/>
-        <TweakSection label="Typography"/>
-        <TweakRadio label="Font" value={t.fontHand} options={['Gaegu','System','Caveat','Kalam']} onChange={v => setTweak('fontHand', v)}/>
-        <TweakSection label="Paper"/>
-        <TweakRadio label="Pattern" value={t.bgPattern} options={['clovers','dots','paper','none']} onChange={v => setTweak('bgPattern', v)}/>
-        <TweakSection label="Language"/>
-        <TweakRadio label="Lang" value={lang} options={['en','zh','ja','ko']} onChange={setLang}/>
-        <TweakSection label="Delight"/>
-        <TweakButton label="Toss some luck" onClick={() => { setConfetti(true); setTimeout(() => setConfetti(false), 2800); }}/>
-        <TweakButton label="Replay welcome" onClick={() => setOnboarded(false)}/>
-        <TweakButton label="Load demo data" onClick={() => { setEntries(MOCK_ENTRIES); localStorage.removeItem('clovery_entries'); }}/>
-        <TweakButton label="Test milestone" onClick={() => setMilestoneCelebration(Math.ceil((realEntryCount||4)/4))}/>
-        <TweakButton label="Reset to new user" onClick={() => { localStorage.clear(); window.location.reload(); }}/>
-      </TweaksPanel>
     </>
-  );
-}
-
-function PaletteSwatches({t, setTweak}) {
-  return (
-    <div style={{padding:'0 14px 8px', display:'flex', gap:8}}>
-      {Object.entries(PALETTES).map(([key,p]) => {
-        const active = t.palette === key;
-        return (
-          <div key={key} onClick={() => setTweak('palette', key)} title={p.name} style={{
-            flex:1, cursor:'pointer', borderRadius:12, padding:6,
-            background: active?'rgba(255,255,255,0.1)':'transparent',
-            border:`1.5px solid ${active?'rgba(255,255,255,0.7)':'rgba(255,255,255,0.12)'}`,
-            display:'flex', flexDirection:'column', alignItems:'center', gap:4,
-            transition:'all 200ms',
-          }}>
-            <div style={{display:'flex', gap:2}}>
-              <div style={{width:14,height:22,borderRadius:'7px 0 0 7px',background:p.accent}}/>
-              <div style={{width:8,height:22,background:p.paper}}/>
-              <div style={{width:8,height:22,borderRadius:'0 7px 7px 0',background:p.accentSoft}}/>
-            </div>
-            <div style={{fontSize:14, color:'#fff', opacity:active?1:0.7}}>{p.name}</div>
-          </div>
-        );
-      })}
-    </div>
   );
 }
 

@@ -10,13 +10,21 @@
 	<key>NSPrivacyTrackingDomains</key>
 	<array/>
 
-	<!-- All diary entries are stored locally on device only.
-	     No user data is collected, transmitted, or shared. -->
+	<!-- All diary entries stay on device / in the user's own iCloud private database.
+	     No user data is collected, transmitted to third parties, or shared. -->
 	<key>NSPrivacyCollectedDataTypes</key>
 	<array/>
 
-	<!-- No APIs from Apple's required-reasons list are used directly -->
 	<key>NSPrivacyAccessedAPITypes</key>
-	<array/>
+	<array>
+		<dict>
+			<key>NSPrivacyAccessedAPIType</key>
+			<string>NSPrivacyAccessedAPICategoryUserDefaults</string>
+			<key>NSPrivacyAccessedAPITypeReasons</key>
+			<array>
+				<string>CA92.1</string>
+			</array>
+		</dict>
+	</array>
 </dict>
 </plist>

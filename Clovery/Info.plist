@@ -2,6 +2,17 @@
 <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
 <plist version="1.0">
 <dict>
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.clovery.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>clovery</string>
+			</array>
+		</dict>
+	</array>
 	<key>CloverySourceCommit</key>
 	<string>$(CLOVERY_SOURCE_COMMIT)</string>
 	<key>UIBackgroundModes</key>

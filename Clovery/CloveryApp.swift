@@ -1,3 +1,4 @@
+import CloudKit
 import SwiftUI
 import UIKit
 
@@ -10,10 +11,15 @@ struct CloveryApp: App {
         WindowGroup {
             ContentView()
                 .ignoresSafeArea()
+                .onOpenURL { url in
+                    WebViewCoordinatorBridge.shared.handleDeepLink(url)
+                }
         }
         .onChange(of: scenePhase) { phase in
             if phase == .active {
                 WebViewCoordinatorBridge.shared.refreshBoardEntitlement()
+                WebViewCoordinatorBridge.shared.refreshICloudSync()
+                WebViewCoordinatorBridge.shared.flushPendingWatchEntries()
             }
         }
     }
@@ -23,6 +29,8 @@ struct CloveryApp: App {
 // moment another device writes a new diary entry, instead of only catching
 // up on next launch.
 class AppDelegate: NSObject, UIApplicationDelegate {
+    private var accountObserver: NSObjectProtocol?
+
     func application(
         _ application: UIApplication,
         didFinishLaunchingWithOptions launchOptions: [UIApplication.LaunchOptionsKey: Any]? = nil
@@ -30,8 +38,23 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         guard ProcessInfo.processInfo.environment["XCTestConfigurationFilePath"] == nil else {
             return true
         }
+        WatchSessionManager.shared.onPendingEntriesAvailable = { entries in
+            Task { @MainActor in
+                WebViewCoordinatorBridge.shared.deliverWatchEntries(entries)
+            }
+        }
+        WatchSessionManager.shared.activate()
         application.registerForRemoteNotifications()
         CloudKitSync.shared.setupSubscriptionIfNeeded()
+        accountObserver = NotificationCenter.default.addObserver(
+            forName: CloudKitSync.accountDidChangeNotification,
+            object: nil,
+            queue: .main
+        ) { _ in
+            Task { @MainActor in
+                WebViewCoordinatorBridge.shared.refreshICloudSync()
+            }
+        }
         return true
     }
 
@@ -47,6 +70,10 @@ class AppDelegate: NSObject, UIApplicationDelegate {
         didReceiveRemoteNotification userInfo: [AnyHashable: Any],
         fetchCompletionHandler completionHandler: @escaping (UIBackgroundFetchResult) -> Void
     ) {
+        guard CKNotification(fromRemoteNotificationDictionary: userInfo) != nil else {
+            completionHandler(.noData)
+            return
+        }
         WebViewCoordinatorBridge.shared.handleRemoteCloudKitNotification {
             completionHandler(.newData)
         }

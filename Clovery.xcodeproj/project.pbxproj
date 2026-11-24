@@ -16,7 +16,6 @@
 		AABB00000000000000000018 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000010 /* InfoPlist.strings */; };
 		AABB0000000000000000001A /* vendor in Resources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000019 /* vendor */; };
 		AABB0000000000000000001B /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000001C /* PrivacyInfo.xcprivacy */; };
-		AABB0000000000000000001E /* app.compiled.js in Resources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000001D /* app.compiled.js */; };
 		AABB0000000000000000001F /* BoardStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000020 /* BoardStore.swift */; };
 		AABB00000000000000000060 /* CloudKitSync.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000061 /* CloudKitSync.swift */; };
 		AABB00000000000000000064 /* NativeBridgeModels.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000062 /* NativeBridgeModels.swift */; };
@@ -31,7 +30,22 @@
 		AABB00000000000000000075 /* BoardEntitlementReporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000076 /* BoardEntitlementReporter.swift */; };
 		FCECDFE02FE92C7C0067AF51 /* WidgetKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFDF2FE92C7C0067AF51 /* WidgetKit.framework */; };
 		FCECDFE22FE92C7C0067AF51 /* SwiftUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = FCECDFE12FE92C7C0067AF51 /* SwiftUI.framework */; };
+		AABB00000000000000000077 /* KeychainTrialStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB00000000000000000078 /* KeychainTrialStore.swift */; };
+		AABB00000000000000000079 /* WatchSessionManager.swift in Sources */ = {isa = PBXBuildFile; fileRef = AABB0000000000000000007A /* WatchSessionManager.swift */; };
 		FCECDFEF2FE92C7D0067AF51 /* CloveryWidgetExtension.appex in Embed Foundation Extensions */ = {isa = PBXBuildFile; fileRef = FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		FCECDFF62FE92CA80067AF51 /* Gaegu-Light.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FCECDFF72FE92CA80067AF51 /* Gaegu-Light.ttf */; };
+		FCECDFF82FE92CA80067AF51 /* Gaegu-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FCECDFF92FE92CA80067AF51 /* Gaegu-Regular.ttf */; };
+		FCECDFFA2FE92CA80067AF51 /* Gaegu-Bold.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FCECDFFB2FE92CA80067AF51 /* Gaegu-Bold.ttf */; };
+		FCECDFFC2FE92CA80067AF51 /* Yomogi-Regular.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FCECDFFD2FE92CA80067AF51 /* Yomogi-Regular.ttf */; };
+		FCECDFFE2FE92CA80067AF51 /* YueLiangHai-ZiYouShu-2.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FCECDFFF2FE92CA80067AF51 /* YueLiangHai-ZiYouShu-2.ttf */; };
+		FCED00002FE92CA80067AF51 /* NaiChaTi-2.ttf in Resources */ = {isa = PBXBuildFile; fileRef = FCED00012FE92CA80067AF51 /* NaiChaTi-2.ttf */; };
+		AAWD00000000000000000011 /* CloveryWatch.app in Embed Watch Content */ = {isa = PBXBuildFile; fileRef = AAWD00000000000000000006 /* CloveryWatch.app */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		AAWD00000000000000000012 /* CloveryWatchApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAWD00000000000000000007 /* CloveryWatchApp.swift */; };
+		AAWD00000000000000000013 /* WatchSessionStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAWD00000000000000000008 /* WatchSessionStore.swift */; };
+		AAWD00000000000000000014 /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = AAWD00000000000000000009 /* ContentView.swift */; };
+		AAWD00000000000000000015 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = AAWD0000000000000000000B /* Assets.xcassets */; };
+		AAWD00000000000000000017 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = AAWD0000000000000000000F /* PrivacyInfo.xcprivacy */; };
+		AAWD00000000000000000016 /* WatchConnectivity.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = AAWD0000000000000000000C /* WatchConnectivity.framework */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -49,6 +63,13 @@
 			remoteGlobalIDString = FCECDFDC2FE92C7C0067AF51;
 			remoteInfo = CloveryWidgetExtension;
 		};
+		AAWD0000000000000000000A /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = AABB00000000000000000001 /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = AAWD00000000000000000031;
+			remoteInfo = CloveryWatch;
+		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -61,6 +82,17 @@
 				FCECDFEF2FE92C7D0067AF51 /* CloveryWidgetExtension.appex in Embed Foundation Extensions */,
 			);
 			name = "Embed Foundation Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AAWD00000000000000000024 /* Embed Watch Content */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "$(CONTENTS_FOLDER_PATH)/Watch";
+			dstSubfolderSpec = 16;
+			files = (
+				AAWD00000000000000000011 /* CloveryWatch.app in Embed Watch Content */,
+			);
+			name = "Embed Watch Content";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -76,7 +108,6 @@
 		AABB0000000000000000000F /* zh-Hans */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = "zh-Hans"; path = "zh-Hans.lproj/InfoPlist.strings"; sourceTree = "<group>"; };
 		AABB00000000000000000019 /* vendor */ = {isa = PBXFileReference; lastKnownFileType = folder; path = vendor; sourceTree = "<group>"; };
 		AABB0000000000000000001C /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		AABB0000000000000000001D /* app.compiled.js */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.javascript; path = app.compiled.js; sourceTree = "<group>"; };
 		AABB00000000000000000020 /* BoardStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = BoardStore.swift; sourceTree = "<group>"; };
 		AABB00000000000000000061 /* CloudKitSync.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloudKitSync.swift; sourceTree = "<group>"; };
 		AABB00000000000000000062 /* NativeBridgeModels.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = NativeBridgeModels.swift; sourceTree = "<group>"; };
@@ -96,6 +127,22 @@
 		FCECDFDF2FE92C7C0067AF51 /* WidgetKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WidgetKit.framework; path = System/Library/Frameworks/WidgetKit.framework; sourceTree = SDKROOT; };
 		FCECDFE12FE92C7C0067AF51 /* SwiftUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SwiftUI.framework; path = System/Library/Frameworks/SwiftUI.framework; sourceTree = SDKROOT; };
 		FCECDFF52FE92CA80067AF51 /* CloveryWidgetExtension.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = CloveryWidgetExtension.entitlements; sourceTree = "<group>"; };
+		AABB00000000000000000078 /* KeychainTrialStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = KeychainTrialStore.swift; sourceTree = "<group>"; };
+		AABB0000000000000000007A /* WatchSessionManager.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSessionManager.swift; sourceTree = "<group>"; };
+		FCECDFF72FE92CA80067AF51 /* Gaegu-Light.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Gaegu-Light.ttf"; path = "Clovery/fonts/Gaegu-Light.ttf"; sourceTree = "<group>"; };
+		FCECDFF92FE92CA80067AF51 /* Gaegu-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Gaegu-Regular.ttf"; path = "Clovery/fonts/Gaegu-Regular.ttf"; sourceTree = "<group>"; };
+		FCECDFFB2FE92CA80067AF51 /* Gaegu-Bold.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Gaegu-Bold.ttf"; path = "Clovery/fonts/Gaegu-Bold.ttf"; sourceTree = "<group>"; };
+		FCECDFFD2FE92CA80067AF51 /* Yomogi-Regular.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "Yomogi-Regular.ttf"; path = "Clovery/fonts/Yomogi-Regular.ttf"; sourceTree = "<group>"; };
+		FCECDFFF2FE92CA80067AF51 /* YueLiangHai-ZiYouShu-2.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "YueLiangHai-ZiYouShu-2.ttf"; path = "Clovery/fonts/YueLiangHai-ZiYouShu-2.ttf"; sourceTree = "<group>"; };
+		FCED00012FE92CA80067AF51 /* NaiChaTi-2.ttf */ = {isa = PBXFileReference; lastKnownFileType = file; name = "NaiChaTi-2.ttf"; path = "Clovery/fonts/NaiChaTi-2.ttf"; sourceTree = "<group>"; };
+		AAWD00000000000000000006 /* CloveryWatch.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = CloveryWatch.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		AAWD00000000000000000007 /* CloveryWatchApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CloveryWatchApp.swift; sourceTree = "<group>"; };
+		AAWD00000000000000000008 /* WatchSessionStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = WatchSessionStore.swift; sourceTree = "<group>"; };
+		AAWD00000000000000000009 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+		AAWD0000000000000000000B /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		AAWD0000000000000000000E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		AAWD0000000000000000000F /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; lastKnownFileType = text.xml; path = PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
+		AAWD0000000000000000000C /* WatchConnectivity.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = WatchConnectivity.framework; path = System/Library/Frameworks/WatchConnectivity.framework; sourceTree = SDKROOT; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -137,6 +184,14 @@
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		AAWD00000000000000000022 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AAWD00000000000000000016 /* WatchConnectivity.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
@@ -145,8 +200,10 @@
 			children = (
 				FCECDFF52FE92CA80067AF51 /* CloveryWidgetExtension.entitlements */,
 				AABB00000000000000000003 /* Clovery */,
+				AAWD00000000000000000003 /* CloveryWatch */,
 				AACC00000000000000000002 /* CloveryTests */,
 				FCECDFE32FE92C7C0067AF51 /* CloveryWidget */,
+				FCED00022FE92CA80067AF51 /* WidgetFonts */,
 				FCECDFDE2FE92C7C0067AF51 /* Frameworks */,
 				AABB00000000000000000004 /* Products */,
 			);
@@ -172,9 +229,10 @@
 				AABB0000000000000000006A /* MigrationBundleExporter.swift */,
 				AABB0000000000000000006D /* PhotoLibrarySaver.swift */,
 				AABB0000000000000000006F /* ImageExportService.swift */,
+				AABB00000000000000000078 /* KeychainTrialStore.swift */,
+				AABB0000000000000000007A /* WatchSessionManager.swift */,
 				AABB0000000000000000000B /* Assets.xcassets */,
 				AABB0000000000000000000C /* Clover Diary.html */,
-				AABB0000000000000000001D /* app.compiled.js */,
 				AABB00000000000000000005 /* fonts */,
 				AABB00000000000000000019 /* vendor */,
 				AABB0000000000000000001C /* PrivacyInfo.xcprivacy */,
@@ -188,6 +246,7 @@
 			children = (
 				AABB00000000000000000006 /* Clovery.app */,
 				FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */,
+				AAWD00000000000000000006 /* CloveryWatch.app */,
 				AACC00000000000000000001 /* CloveryTests.xctest */,
 			);
 			name = Products;
@@ -198,8 +257,35 @@
 			children = (
 				FCECDFDF2FE92C7C0067AF51 /* WidgetKit.framework */,
 				FCECDFE12FE92C7C0067AF51 /* SwiftUI.framework */,
+				AAWD0000000000000000000C /* WatchConnectivity.framework */,
 			);
 			name = Frameworks;
+			sourceTree = "<group>";
+		};
+		AAWD00000000000000000003 /* CloveryWatch */ = {
+			isa = PBXGroup;
+			children = (
+				AAWD0000000000000000000E /* Info.plist */,
+				AAWD00000000000000000007 /* CloveryWatchApp.swift */,
+				AAWD00000000000000000008 /* WatchSessionStore.swift */,
+				AAWD00000000000000000009 /* ContentView.swift */,
+				AAWD0000000000000000000B /* Assets.xcassets */,
+				AAWD0000000000000000000F /* PrivacyInfo.xcprivacy */,
+			);
+			path = CloveryWatch;
+			sourceTree = "<group>";
+		};
+		FCED00022FE92CA80067AF51 /* WidgetFonts */ = {
+			isa = PBXGroup;
+			children = (
+				FCECDFF72FE92CA80067AF51 /* Gaegu-Light.ttf */,
+				FCECDFF92FE92CA80067AF51 /* Gaegu-Regular.ttf */,
+				FCECDFFB2FE92CA80067AF51 /* Gaegu-Bold.ttf */,
+				FCECDFFD2FE92CA80067AF51 /* Yomogi-Regular.ttf */,
+				FCECDFFF2FE92CA80067AF51 /* YueLiangHai-ZiYouShu-2.ttf */,
+				FCED00012FE92CA80067AF51 /* NaiChaTi-2.ttf */,
+			);
+			name = WidgetFonts;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -234,11 +320,13 @@
 				AABB00000000000000000022 /* Frameworks */,
 				AABB00000000000000000023 /* Resources */,
 				FCECDFF02FE92C7D0067AF51 /* Embed Foundation Extensions */,
+				AAWD00000000000000000024 /* Embed Watch Content */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 				FCECDFEE2FE92C7D0067AF51 /* PBXTargetDependency */,
+				AAWD0000000000000000000D /* PBXTargetDependency */,
 			);
 			name = Clovery;
 			productName = Clovery;
@@ -267,6 +355,23 @@
 			productReference = FCECDFDD2FE92C7C0067AF51 /* CloveryWidgetExtension.appex */;
 			productType = "com.apple.product-type.app-extension";
 		};
+		AAWD00000000000000000031 /* CloveryWatch */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AAWD00000000000000000052 /* Build configuration list for PBXNativeTarget "CloveryWatch" */;
+			buildPhases = (
+				AAWD00000000000000000021 /* Sources */,
+				AAWD00000000000000000022 /* Frameworks */,
+				AAWD00000000000000000023 /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = CloveryWatch;
+			productName = CloveryWatch;
+			productReference = AAWD00000000000000000006 /* CloveryWatch.app */;
+			productType = "com.apple.product-type.application";
+		};
 /* End PBXNativeTarget section */
 
 /* Begin PBXProject section */
@@ -287,6 +392,9 @@
 					FCECDFDC2FE92C7C0067AF51 = {
 						CreatedOnToolsVersion = 26.4.1;
 					};
+					AAWD00000000000000000031 = {
+						CreatedOnToolsVersion = 26.4.1;
+					};
 				};
 			};
 			buildConfigurationList = AABB00000000000000000051 /* Build configuration list for PBXProject "Clovery" */;
@@ -305,6 +413,7 @@
 			targets = (
 				AABB00000000000000000031 /* Clovery */,
 				FCECDFDC2FE92C7C0067AF51 /* CloveryWidgetExtension */,
+				AAWD00000000000000000031 /* CloveryWatch */,
 				AACC00000000000000000003 /* CloveryTests */,
 			);
 		};
@@ -325,7 +434,6 @@
 				AABB00000000000000000073 /* Clovery.storekit in Resources */,
 				AABB00000000000000000014 /* Assets.xcassets in Resources */,
 				AABB00000000000000000015 /* Clover Diary.html in Resources */,
-				AABB0000000000000000001E /* app.compiled.js in Resources */,
 				AABB00000000000000000016 /* fonts in Resources */,
 				AABB0000000000000000001A /* vendor in Resources */,
 				AABB0000000000000000001B /* PrivacyInfo.xcprivacy in Resources */,
@@ -337,6 +445,21 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				FCECDFF62FE92CA80067AF51 /* Gaegu-Light.ttf in Resources */,
+				FCECDFF82FE92CA80067AF51 /* Gaegu-Regular.ttf in Resources */,
+				FCECDFFA2FE92CA80067AF51 /* Gaegu-Bold.ttf in Resources */,
+				FCECDFFC2FE92CA80067AF51 /* Yomogi-Regular.ttf in Resources */,
+				FCECDFFE2FE92CA80067AF51 /* YueLiangHai-ZiYouShu-2.ttf in Resources */,
+				FCED00002FE92CA80067AF51 /* NaiChaTi-2.ttf in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AAWD00000000000000000023 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AAWD00000000000000000015 /* Assets.xcassets in Resources */,
+				AAWD00000000000000000017 /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -368,6 +491,8 @@
 				AABB0000000000000000006C /* MigrationBundleExporter.swift in Sources */,
 				AABB0000000000000000006E /* PhotoLibrarySaver.swift in Sources */,
 				AABB00000000000000000070 /* ImageExportService.swift in Sources */,
+				AABB00000000000000000077 /* KeychainTrialStore.swift in Sources */,
+				AABB00000000000000000079 /* WatchSessionManager.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -375,6 +500,16 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		AAWD00000000000000000021 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AAWD00000000000000000012 /* CloveryWatchApp.swift in Sources */,
+				AAWD00000000000000000013 /* WatchSessionStore.swift in Sources */,
+				AAWD00000000000000000014 /* ContentView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -390,6 +525,11 @@
 			isa = PBXTargetDependency;
 			target = FCECDFDC2FE92C7C0067AF51 /* CloveryWidgetExtension */;
 			targetProxy = FCECDFED2FE92C7D0067AF51 /* PBXContainerItemProxy */;
+		};
+		AAWD0000000000000000000D /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = AAWD00000000000000000031 /* CloveryWatch */;
+			targetProxy = AAWD0000000000000000000A /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
 
@@ -419,7 +559,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Clovery.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Clovery";
 			};
 			name = Debug;
@@ -438,7 +578,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SWIFT_EMIT_LOC_STRINGS = NO;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Clovery.app/$(BUNDLE_EXECUTABLE_FOLDER_PATH)/Clovery";
 			};
 			name = Release;
@@ -583,6 +723,8 @@
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Clovery accesses your photo library to add photos to diary entries.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIRequiresFullScreen = NO;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -594,11 +736,11 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Debug;
 		};
@@ -622,6 +764,8 @@
 				INFOPLIST_KEY_NSPhotoLibraryUsageDescription = "Clovery accesses your photo library to add photos to diary entries.";
 				INFOPLIST_KEY_UIApplicationSceneManifest_Generation = YES;
 				INFOPLIST_KEY_UILaunchScreen_Generation = YES;
+				INFOPLIST_KEY_UIRequiresFullScreen = NO;
+				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPad = "UIInterfaceOrientationPortrait UIInterfaceOrientationPortraitUpsideDown UIInterfaceOrientationLandscapeLeft UIInterfaceOrientationLandscapeRight";
 				INFOPLIST_KEY_UISupportedInterfaceOrientations_iPhone = UIInterfaceOrientationPortrait;
 				LD_RUNPATH_SEARCH_PATHS = (
 					"$(inherited)",
@@ -633,11 +777,11 @@
 				PROVISIONING_PROFILE_SPECIFIER = "";
 				SUPPORTED_PLATFORMS = "iphoneos iphonesimulator";
 				SUPPORTS_MACCATALYST = NO;
-				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = NO;
+				SUPPORTS_MAC_DESIGNED_FOR_IPHONE_IPAD = YES;
 				SUPPORTS_XR_DESIGNED_FOR_IPHONE_IPAD = NO;
 				SWIFT_EMIT_LOC_STRINGS = YES;
 				SWIFT_VERSION = 5.0;
-				TARGETED_DEVICE_FAMILY = 1;
+				TARGETED_DEVICE_FAMILY = "1,2";
 			};
 			name = Release;
 		};
@@ -714,6 +858,66 @@
 			};
 			name = Release;
 		};
+		AAWD00000000000000000043 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 14;
+				DEVELOPMENT_TEAM = M92TBSSR2R;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = CloveryWatch/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Clovery;
+				INFOPLIST_KEY_WKApplication = YES;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.clovery.app;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.3;
+				PRODUCT_BUNDLE_IDENTIFIER = com.clovery.app.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Debug;
+		};
+		AAWD00000000000000000044 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				CODE_SIGN_STYLE = Automatic;
+				CURRENT_PROJECT_VERSION = 14;
+				DEVELOPMENT_TEAM = M92TBSSR2R;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = CloveryWatch/Info.plist;
+				INFOPLIST_KEY_CFBundleDisplayName = Clovery;
+				INFOPLIST_KEY_WKApplication = YES;
+				INFOPLIST_KEY_WKCompanionAppBundleIdentifier = com.clovery.app;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				MARKETING_VERSION = 1.0.3;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				PRODUCT_BUNDLE_IDENTIFIER = com.clovery.app.watchkitapp;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = watchos;
+				SKIP_INSTALL = YES;
+				SWIFT_EMIT_LOC_STRINGS = YES;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = 4;
+				VALIDATE_PRODUCT = YES;
+				WATCHOS_DEPLOYMENT_TARGET = 10.0;
+			};
+			name = Release;
+		};
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
@@ -749,6 +953,15 @@
 			buildConfigurations = (
 				FCECDFF12FE92C7D0067AF51 /* Debug */,
 				FCECDFF22FE92C7D0067AF51 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		AAWD00000000000000000052 /* Build configuration list for PBXNativeTarget "CloveryWatch" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				AAWD00000000000000000043 /* Debug */,
+				AAWD00000000000000000044 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
